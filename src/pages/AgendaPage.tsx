@@ -485,6 +485,42 @@ export default function AgendaPage() {
         )}
       </div>
 
+      {/* Performance Indicators */}
+      <div className="grid grid-cols-2 gap-3">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <Card className="border-info/20">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-info/10 flex items-center justify-center">
+                <Handshake className="h-5 w-5 text-info" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Visitas</p>
+                <p className="text-lg font-bold">
+                  <motion.span key={indicators.visitasCriadas} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{indicators.visitasCriadas}</motion.span>
+                  {' '}criadas / <motion.span key={indicators.visitasConcluidas} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-info">{indicators.visitasConcluidas}</motion.span> concluídas
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
+          <Card className="border-warning/20">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
+                <UserPlus className="h-5 w-5 text-warning" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Prospecções</p>
+                <p className="text-lg font-bold">
+                  <motion.span key={indicators.prospecoesCriadas} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{indicators.prospecoesCriadas}</motion.span>
+                  {' '}criadas / <motion.span key={indicators.prospecoesConcluidas} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-warning">{indicators.prospecoesConcluidas}</motion.span> concluídas
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
       {/* Controls */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="flex items-center gap-2">
@@ -528,6 +564,45 @@ export default function AgendaPage() {
               <SelectItem value="prospecção">Prospecção</SelectItem>
             </SelectContent>
           </Select>
+          {/* Date Range Filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn('h-9 gap-1.5', (dateRange.from || dateRange.to) && 'border-primary text-primary')}>
+                <CalendarRange className="h-3.5 w-3.5" />
+                {dateRange.from && dateRange.to
+                  ? `${format(dateRange.from, 'dd/MM')} — ${format(dateRange.to, 'dd/MM')}`
+                  : dateRange.from
+                  ? `A partir de ${format(dateRange.from, 'dd/MM')}`
+                  : 'Período'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-3" align="start">
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Data inicial</p>
+                  <Calendar
+                    mode="single"
+                    selected={dateRange.from}
+                    onSelect={(d) => setDateRange(prev => ({ ...prev, from: d || undefined }))}
+                    className="p-2 pointer-events-auto"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Data final</p>
+                  <Calendar
+                    mode="single"
+                    selected={dateRange.to}
+                    onSelect={(d) => setDateRange(prev => ({ ...prev, to: d || undefined }))}
+                    disabled={(d) => dateRange.from ? d < dateRange.from : false}
+                    className="p-2 pointer-events-auto"
+                  />
+                </div>
+                {(dateRange.from || dateRange.to) && (
+                  <Button variant="ghost" size="sm" className="w-full" onClick={() => setDateRange({})}>Limpar período</Button>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
