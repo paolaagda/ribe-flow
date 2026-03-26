@@ -37,6 +37,7 @@ export default function AgendaPage() {
   const { partners, getPartnerById } = usePartners();
   const { addNotification } = useNotifications();
   const { visits, setVisits } = useVisits();
+  const { getActiveItems } = useSystemData();
   const [view, setView] = useState<ViewMode>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showForm, setShowForm] = useState(false);
