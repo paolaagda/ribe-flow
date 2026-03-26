@@ -51,8 +51,21 @@ export interface VisitComment {
 
 export type VisitPeriod = 'manhã' | 'tarde';
 
-export const RESCHEDULE_REASONS = ['Cliente não disponível', 'Conflito de agenda', 'Replanejamento'] as const;
-export const CANCEL_REASONS = ['Cliente recusou', 'Sem interesse', 'Problema interno'] as const;
+export const RESCHEDULE_REASONS = [
+  'Cliente solicitou nova data',
+  'Conflito de agenda interna',
+  'Cliente indisponível no horário',
+  'Replanejamento estratégico',
+  'Problemas operacionais',
+] as const;
+
+export const CANCEL_REASONS = [
+  'Cliente não tem interesse',
+  'Cliente não respondeu',
+  'Dados incorretos ou inválidos',
+  'Problema interno',
+  'Parceiro descredenciado',
+] as const;
 
 export interface Visit {
   id: string;
@@ -75,6 +88,7 @@ export interface Visit {
   prospectEmail?: string;
   rescheduleReason?: string;
   cancelReason?: string;
+  statusChangedAt?: string;
   comments: VisitComment[];
   prospectPartner?: string;
   prospectCnpj?: string;

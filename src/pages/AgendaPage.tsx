@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { mockUsers, getUserById, BANKS, PRODUCTS, Visit, VisitStatus, VisitType, VisitPeriod, VisitComment, statusBgClasses, getPartnerById as getPartnerByIdGlobal, RESCHEDULE_REASONS, CANCEL_REASONS } from '@/data/mock-data';
+import { mockUsers, getUserById, BANKS, PRODUCTS, Visit, VisitStatus, VisitType, VisitPeriod, VisitComment, statusBgClasses, getPartnerById as getPartnerByIdGlobal } from '@/data/mock-data';
 import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,6 +21,7 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInte
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import AgendaDetailModal from '@/components/AgendaDetailModal';
+import JustificationModal from '@/components/agenda/JustificationModal';
 import { usePermission } from '@/hooks/usePermission';
 import { ShieldOff } from 'lucide-react';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
@@ -47,6 +48,9 @@ export default function AgendaPage() {
   const [showDetail, setShowDetail] = useState(false);
   const [editingVisit, setEditingVisit] = useState<Visit | null>(null);
   const [hasDragged, setHasDragged] = useState(false);
+  const [pendingDrop, setPendingDrop] = useState<{ visitId: string; newDate: string; day: Date } | null>(null);
+  const [pendingFormStatus, setPendingFormStatus] = useState<'Reagendada' | 'Cancelada' | null>(null);
+  const [showJustificationModal, setShowJustificationModal] = useState(false);
 
   // Form state
   const [formStep, setFormStep] = useState(0);
@@ -129,12 +133,44 @@ export default function AgendaPage() {
     const newDate = format(day, 'yyyy-MM-dd');
     const visit = visits.find(v => v.id === draggedVisitId);
     if (!visit || visit.date === newDate) { setDraggedVisitId(null); return; }
-    setVisits(prev => prev.map(v =>
-      v.id === draggedVisitId ? { ...v, date: newDate, status: 'Reagendada' as VisitStatus } : v
-    ));
-    const label = visit.type === 'visita' ? 'Visita' : 'Prospecção';
-    toast({ title: `${label} reagendada!`, description: `Reagendada para ${format(day, "dd 'de' MMMM", { locale: ptBR })}` });
+    // Intercept: open justification modal for reschedule
+    setPendingDrop({ visitId: draggedVisitId, newDate, day });
+    setPendingFormStatus('Reagendada');
+    setShowJustificationModal(true);
     setDraggedVisitId(null);
+  };
+
+  const handleJustificationConfirm = (reason: string) => {
+    if (pendingDrop) {
+      // Drag-and-drop reschedule
+      setVisits(prev => prev.map(v =>
+        v.id === pendingDrop.visitId ? {
+          ...v,
+          date: pendingDrop.newDate,
+          status: 'Reagendada' as VisitStatus,
+          rescheduleReason: reason,
+          statusChangedAt: new Date().toISOString(),
+        } : v
+      ));
+      const visit = visits.find(v => v.id === pendingDrop.visitId);
+      const label = visit?.type === 'visita' ? 'Visita' : 'Prospecção';
+      toast({ title: 'Reagendamento registrado com sucesso', description: `${label} reagendada para ${format(pendingDrop.day, "dd 'de' MMMM", { locale: ptBR })}` });
+      setPendingDrop(null);
+    } else if (pendingFormStatus) {
+      // Form status change
+      const reasonField = pendingFormStatus === 'Reagendada' ? 'rescheduleReason' : 'cancelReason';
+      setFormData(prev => ({ ...prev, status: pendingFormStatus as VisitStatus, [reasonField]: reason }));
+      const msg = pendingFormStatus === 'Reagendada' ? 'Reagendamento registrado com sucesso' : 'Cancelamento registrado com sucesso';
+      toast({ title: msg });
+    }
+    setPendingFormStatus(null);
+    setShowJustificationModal(false);
+  };
+
+  const handleJustificationCancel = () => {
+    setPendingDrop(null);
+    setPendingFormStatus(null);
+    setShowJustificationModal(false);
   };
 
   const handleDragEnd = () => { setDraggedVisitId(null); setDragOverDay(null); };
@@ -217,6 +253,7 @@ export default function AgendaPage() {
           prospectEmail: formData.prospectEmail || undefined,
           rescheduleReason: formData.rescheduleReason || undefined,
           cancelReason: formData.cancelReason || undefined,
+          statusChangedAt: (formData.status === 'Reagendada' || formData.status === 'Cancelada') ? new Date().toISOString() : v.statusChangedAt,
           prospectPartner: formData.prospectPartner,
           prospectCnpj: formData.prospectCnpj,
           prospectAddress: formData.prospectAddress,
@@ -756,7 +793,15 @@ export default function AgendaPage() {
                 <>
                   <div className="space-y-2">
                     <Label>Status</Label>
-                    <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v as VisitStatus, rescheduleReason: '', cancelReason: ''})}>
+                    <Select value={formData.status} onValueChange={(v) => {
+                      const newStatus = v as VisitStatus;
+                      if (newStatus === 'Reagendada' || newStatus === 'Cancelada') {
+                        setPendingFormStatus(newStatus);
+                        setShowJustificationModal(true);
+                      } else {
+                        setFormData({...formData, status: newStatus, rescheduleReason: '', cancelReason: ''});
+                      }
+                    }}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Planejada">Planejada</SelectItem>
@@ -767,46 +812,28 @@ export default function AgendaPage() {
                     </Select>
                   </div>
 
-                  {/* Reschedule reason */}
+                  {/* Display selected reason */}
                   <AnimatePresence>
-                    {formData.status === 'Reagendada' && (
+                    {formData.status === 'Reagendada' && formData.rescheduleReason && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="space-y-2 overflow-hidden"
+                        className="p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-sm overflow-hidden"
                       >
-                        <Label>Motivo do reagendamento *</Label>
-                        <Select value={formData.rescheduleReason} onValueChange={v => setFormData({...formData, rescheduleReason: v})}>
-                          <SelectTrigger className={cn(!formData.rescheduleReason && 'text-muted-foreground')}>
-                            <SelectValue placeholder="Selecione o motivo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {RESCHEDULE_REASONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <p className="text-xs font-medium text-warning">Motivo do reagendamento</p>
+                        <p className="text-sm">{formData.rescheduleReason}</p>
                       </motion.div>
                     )}
-                  </AnimatePresence>
-
-                  {/* Cancel reason */}
-                  <AnimatePresence>
-                    {formData.status === 'Cancelada' && (
+                    {formData.status === 'Cancelada' && formData.cancelReason && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="space-y-2 overflow-hidden"
+                        className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-sm overflow-hidden"
                       >
-                        <Label>Motivo do cancelamento *</Label>
-                        <Select value={formData.cancelReason} onValueChange={v => setFormData({...formData, cancelReason: v})}>
-                          <SelectTrigger className={cn(!formData.cancelReason && 'text-muted-foreground')}>
-                            <SelectValue placeholder="Selecione o motivo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {CANCEL_REASONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <p className="text-xs font-medium text-destructive">Motivo do cancelamento</p>
+                        <p className="text-sm">{formData.cancelReason}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -877,6 +904,14 @@ export default function AgendaPage() {
         onLeaveVisit={handleLeaveVisit}
         onAddComment={handleAddComment}
         onToggleTask={handleToggleTask}
+      />
+
+      {/* Justification Modal */}
+      <JustificationModal
+        open={showJustificationModal}
+        onOpenChange={(open) => { if (!open) handleJustificationCancel(); }}
+        targetStatus={pendingFormStatus || 'Reagendada'}
+        onConfirm={handleJustificationConfirm}
       />
     </PageTransition>
   );
