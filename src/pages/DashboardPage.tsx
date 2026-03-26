@@ -21,7 +21,7 @@ export default function DashboardPage() {
 
   const kpis = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
-    const userIds = viewMode === 'team' ? getVisibleUserIds() : [user?.id];
+    const userIds = viewMode === 'team' ? getVisibleUserIds : [user?.id];
     const filtered = visits.filter(v => userIds.includes(v.userId));
     const todayVisits = filtered.filter(v => v.date === today);
     const completed = todayVisits.filter(v => v.status === 'Concluída').length;
