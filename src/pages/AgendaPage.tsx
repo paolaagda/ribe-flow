@@ -31,7 +31,7 @@ type ViewMode = 'day' | 'week' | 'month';
 
 export default function AgendaPage() {
   const { canRead, canWrite } = usePermission();
-  const { user, role } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const { partners, getPartnerById } = usePartners();
   const { addNotification } = useNotifications();
@@ -92,8 +92,8 @@ export default function AgendaPage() {
 
   // Visibility filter: comercial only sees visits they participate in
   const visibleVisits = useMemo(() => {
-    if (!user || !role) return visits;
-    if (role === 'comercial') {
+    if (!user || !profile) return visits;
+    if (profile === 'nao_gestor') {
       return visits.filter(v =>
         v.userId === user.id ||
         v.createdBy === user.id ||
@@ -101,7 +101,7 @@ export default function AgendaPage() {
       );
     }
     return visits;
-  }, [visits, user, role]);
+  }, [visits, user, profile]);
 
   const filteredVisits = useMemo(() => {
     return visibleVisits.filter(v => {
@@ -225,7 +225,7 @@ export default function AgendaPage() {
     }
     const invitedUsers = formData.invitedUserIds.map(uid => ({ userId: uid, status: 'pending' as const }));
 
-    if (user && role !== 'comercial' && formData.type === 'visita' && formData.partnerId) {
+    if (user && profile === 'gestor' && formData.type === 'visita' && formData.partnerId) {
       const partner = getPartnerById(formData.partnerId);
       if (partner && !formData.invitedUserIds.includes(partner.responsibleUserId) && partner.responsibleUserId !== user.id) {
         invitedUsers.push({ userId: partner.responsibleUserId, status: 'pending' });
