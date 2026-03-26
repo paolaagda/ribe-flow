@@ -2,17 +2,19 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { AppProfile } from '@/data/mock-data';
+import { AppProfile, CompanyCargo, cargoLabels, allCargos } from '@/data/mock-data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Moon, Sun, Handshake } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
 export default function LoginPage() {
   const [isGestor, setIsGestor] = useState(false);
+  const [cargo, setCargo] = useState<CompanyCargo>('comercial');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -22,7 +24,7 @@ export default function LoginPage() {
     setLoading(true);
     const appProfile: AppProfile = isGestor ? 'gestor' : 'nao_gestor';
     setTimeout(() => {
-      login('comercial', appProfile);
+      login(cargo, appProfile);
       navigate('/dashboard');
     }, 800);
   };
