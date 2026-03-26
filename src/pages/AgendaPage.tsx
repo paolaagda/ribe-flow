@@ -61,6 +61,7 @@ export default function AgendaPage() {
   const [pendingFormStatus, setPendingFormStatus] = useState<'Reagendada' | 'Cancelada' | null>(null);
   const [showJustificationModal, setShowJustificationModal] = useState(false);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [showTodayPanel, setShowTodayPanel] = useState(false);
 
   // Form state
   const [formStep, setFormStep] = useState(0);
