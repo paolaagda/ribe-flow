@@ -738,6 +738,25 @@ export default function AgendaPage() {
                             <span>• {vUser?.name} • {v.type}</span>
                           </div>
                         </div>
+                        <TooltipProvider delayDuration={200}>
+                          <div className="flex -space-x-1.5 shrink-0">
+                            {getParticipants(v).slice(0, 4).map(p => (
+                              <Tooltip key={p.id}>
+                                <TooltipTrigger asChild>
+                                  <Avatar className="h-6 w-6 border-2 border-background">
+                                    <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">{p.name.charAt(0)}</AvatarFallback>
+                                  </Avatar>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
+                              </Tooltip>
+                            ))}
+                            {getParticipants(v).length > 4 && (
+                              <Avatar className="h-6 w-6 border-2 border-background">
+                                <AvatarFallback className="text-[9px] bg-muted text-muted-foreground">+{getParticipants(v).length - 4}</AvatarFallback>
+                              </Avatar>
+                            )}
+                          </div>
+                        </TooltipProvider>
                         <div className="flex items-center gap-1.5">
                           {v.potentialValue && (
                             <Badge variant="outline" className={cn('text-[9px]', v.potentialValue >= 1000000 ? 'bg-warning/10 text-warning border-warning/20' : '')}>
