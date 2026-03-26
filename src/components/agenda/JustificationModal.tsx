@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { RESCHEDULE_REASONS, CANCEL_REASONS, VisitStatus } from '@/data/mock-data';
+import { useSystemData } from '@/hooks/useSystemData';
 import { AlertTriangle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -18,8 +18,9 @@ interface JustificationModalProps {
 export default function JustificationModal({ open, onOpenChange, targetStatus, onConfirm }: JustificationModalProps) {
   const [reason, setReason] = useState('');
 
+  const { getActiveItems } = useSystemData();
   const isReschedule = targetStatus === 'Reagendada';
-  const reasons = isReschedule ? RESCHEDULE_REASONS : CANCEL_REASONS;
+  const reasons = getActiveItems(isReschedule ? 'rescheduleReasons' : 'cancelReasons');
   const title = isReschedule ? 'Selecione o motivo do reagendamento' : 'Selecione o motivo do cancelamento';
   const Icon = isReschedule ? AlertTriangle : XCircle;
   const accentClass = isReschedule ? 'text-warning' : 'text-destructive';

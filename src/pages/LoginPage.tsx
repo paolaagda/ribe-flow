@@ -2,26 +2,16 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { CompanyCargo, AppProfile } from '@/data/mock-data';
+import { AppProfile } from '@/data/mock-data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
-import { Loader2, Moon, Sun, Handshake, Briefcase, Users, Megaphone, TrendingUp, ClipboardList } from 'lucide-react';
+import { Loader2, Moon, Sun, Handshake } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
-const cargos: { value: CompanyCargo; label: string; icon: React.ElementType }[] = [
-  { value: 'diretor', label: 'Diretor', icon: Briefcase },
-  { value: 'gerente', label: 'Gerente', icon: Users },
-  { value: 'ascom', label: 'ASCOM', icon: Megaphone },
-  { value: 'comercial', label: 'Comercial', icon: TrendingUp },
-  { value: 'cadastro', label: 'Cadastro', icon: ClipboardList },
-];
-
 export default function LoginPage() {
-  const [selectedCargo, setSelectedCargo] = useState<CompanyCargo>('comercial');
   const [isGestor, setIsGestor] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -32,7 +22,7 @@ export default function LoginPage() {
     setLoading(true);
     const appProfile: AppProfile = isGestor ? 'gestor' : 'nao_gestor';
     setTimeout(() => {
-      login(selectedCargo, appProfile);
+      login('comercial', appProfile);
       navigate('/dashboard');
     }, 800);
   };
@@ -85,31 +75,6 @@ export default function LoginPage() {
                 <Label htmlFor="password">Senha</Label>
                 <Input id="password" type="password" placeholder="••••••••" defaultValue="12345678" />
               </div>
-            </div>
-
-            {/* Cargo Selector (Empresa) */}
-            <div className="space-y-3">
-              <Label className="text-muted-foreground text-xs uppercase tracking-wider">Cargo na empresa</Label>
-              <RadioGroup value={selectedCargo} onValueChange={(v) => setSelectedCargo(v as CompanyCargo)} className="grid grid-cols-2 gap-2">
-                {cargos.map((cargo) => {
-                  const Icon = cargo.icon;
-                  return (
-                    <Label
-                      key={cargo.value}
-                      htmlFor={cargo.value}
-                      className={`flex items-center gap-2.5 rounded-xl border-2 p-3 cursor-pointer transition-all duration-200 hover:border-primary/50 ${
-                        selectedCargo === cargo.value
-                          ? 'border-primary bg-primary/5 shadow-sm'
-                          : 'border-border'
-                      }`}
-                    >
-                      <RadioGroupItem value={cargo.value} id={cargo.value} className="sr-only" />
-                      <Icon className={`h-4 w-4 shrink-0 transition-colors ${selectedCargo === cargo.value ? 'text-primary' : 'text-muted-foreground'}`} />
-                      <span className="text-sm font-medium">{cargo.label}</span>
-                    </Label>
-                  );
-                })}
-              </RadioGroup>
             </div>
 
             {/* Profile Toggle (App) */}
