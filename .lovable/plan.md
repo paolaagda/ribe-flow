@@ -1,82 +1,99 @@
 
 
-# Justificativa Obrigatoria para Reagendamento e Cancelamento
+# Hierarquia Dupla (App vs Empresa) e Clareza Parceiro/Prospecção
 
 ## Resumo
 
-Criar um sistema global de justificativas padronizadas para mudancas de status criticas (Reagendada/Cancelada), com modal reutilizavel, validacao em todos os fluxos, persistencia local e exibicao no historico.
+Separar o conceito atual de `role` (que mistura cargo e permissao) em duas camadas independentes: **perfil do app** (gestor/nao_gestor) para permissoes e **cargo da empresa** (informativo). Adicionar novos cargos. Reforcar a distincao visual entre parceiro e prospecção na agenda.
 
-## O que muda
+## Estado Atual
 
-### 1. Atualizar listas de justificativas (mock-data.ts)
+- `UserRole` = gestor | diretor | gerente | ascom | comercial — usado para TUDO (permissoes, visibilidade, cargo)
+- Permissoes mapeadas por role com 5 perfis diferentes
+- Visibilidade filtrada por `role === 'comercial'` em varios lugares
+- Agenda ja diferencia visita vs prospecção com campos distintos
 
-Substituir as constantes `RESCHEDULE_REASONS` e `CANCEL_REASONS` existentes (linha 54-55) pelas novas listas do PRD:
+## Mudancas
 
-- **Reagendamento**: Cliente solicitou nova data, Conflito de agenda interna, Cliente indisponivel no horario, Replanejamento estrategico, Problemas operacionais
-- **Cancelamento**: Cliente nao tem interesse, Cliente nao respondeu, Dados incorretos ou invalidos, Problema interno, Parceiro descredenciado
+### 1. Modelo de Dados (mock-data.ts)
 
-Adicionar campo `statusChangedAt?: string` ao tipo `Visit` para registrar a data da alteracao.
+- Criar `AppProfile = 'gestor' | 'nao_gestor'`
+- Criar `CompanyCargo = 'diretor' | 'gerente' | 'ascom' | 'comercial' | 'cadastro' | 'parceiro' | 'loja'`
+- Manter `UserRole` como alias para `CompanyCargo` (compatibilidade)
+- Adicionar campo `profile: AppProfile` ao tipo `User`
+- Atualizar mockUsers com `profile` para cada usuario (u1 Carlos = gestor, u9 Lucas = gestor, demais = nao_gestor)
+- Adicionar mock users para novos cargos (cadastro, parceiro, loja — ao menos 1 de cada)
 
-### 2. Criar modal global de justificativa (novo componente)
+### 2. Permissoes (permissions.ts)
 
-`src/components/agenda/JustificationModal.tsx`
+- Simplificar `defaultPermissions` para 2 perfis: `gestor` (tudo write) e `nao_gestor` (acessos limitados)
+- Permissoes mapeadas por `AppProfile` em vez de `UserRole`
 
-- Recebe: `open`, `onOpenChange`, `targetStatus` ("Reagendada" | "Cancelada"), `onConfirm(reason: string)`
-- Titulo dinamico conforme status
-- Select com opcoes fixas (sem texto livre, sem "Outro")
-- Botao Confirmar desabilitado ate selecao
-- Botao Cancelar fecha sem alterar nada
-- Animacao via framer-motion (consistente com o resto do app)
+### 3. Hook de Permissao (usePermission.ts)
 
-### 3. Interceptar drag and drop (AgendaPage.tsx)
+- Ler `user.profile` em vez de `role` para determinar permissoes
 
-Alterar `handleDrop` (linha 125-138): em vez de aplicar imediatamente o status "Reagendada", abrir o modal de justificativa. So aplicar a mudanca apos confirmacao com a justificativa selecionada. Guardar temporariamente o visitId e nova data em estado local.
+### 4. AuthContext (AuthContext.tsx)
 
-### 4. Interceptar mudanca de status no formulario de edicao (AgendaPage.tsx)
+- Expor `profile` alem de `role` (cargo)
+- Login busca usuario por cargo selecionado (manter comportamento)
 
-Quando o usuario muda o status para Reagendada/Cancelada no formulario de edicao, abrir o modal automaticamente. A justificativa ja existe no form mas sera forcada via modal com as novas opcoes.
+### 5. Login (LoginPage.tsx)
 
-### 5. Interceptar status no detalhe da agenda (AgendaDetailModal.tsx)
+- Manter seletor de cargo (empresa) com novos cargos
+- Adicionar toggle ou indicador de perfil do app (gestor/nao_gestor)
+- Mostrar claramente as duas camadas
 
-Se houver acoes de mudanca de status direta no modal de detalhe, interceptar para abrir o modal de justificativa.
+### 6. Visibilidade Global
 
-### 6. Persistencia
+Substituir todas as checagens `role === 'comercial'` e similares por logica baseada em `profile`:
 
-Ao confirmar, salvar no objeto Visit:
-- `status` atualizado
-- `rescheduleReason` ou `cancelReason` com a justificativa
-- `statusChangedAt` com `new Date().toISOString()`
+- **AgendaPage.tsx**: `profile === 'nao_gestor'` → ve so suas visitas
+- **ParceirosPage.tsx**: `profile === 'nao_gestor'` → ve so seus parceiros
+- **DashboardPage.tsx**: `profile === 'gestor'` → ve tudo / equipe
+- **useTeamFilter.ts**: usar `profile` para decidir visibilidade
+- **NotificationContext.tsx**: ajustar geracao de notificacoes mock
 
-### 7. Exibicao da justificativa
+### 7. UsersTab (settings/UsersTab.tsx)
 
-**AgendaDetailModal.tsx**: Exibir badge/destaque visual com o motivo quando status for Reagendada ou Cancelada.
+- Separar edicao de cargo (empresa) e perfil (app)
+- Atualizar roleColors e roleLabels com novos cargos
+- Permissoes editaveis por perfil (gestor/nao_gestor) em vez de por cargo
+- Manter estrutura de equipes
 
-**PartnerTimeline.tsx**: Incluir o motivo na descricao do evento: "Visita reagendada - motivo: {justificativa}".
+### 8. Distincao Visual Parceiro vs Prospecção (AgendaPage.tsx)
 
-**PartnerVisitHistory.tsx**: Exibir justificativa no historico de visitas do parceiro.
+- Adicionar tag/badge visual nos cards da agenda: "Visita" (azul) vs "Prospecção" (laranja)
+- No calendario mensal: icone diferente para prospecção
+- Na lista diaria/semanal: badge colorida diferenciando tipo
 
-### 8. Feedback (toast)
+### 9. Preparacao para Conversao (futuro, sem implementar)
 
-Apos confirmacao no modal:
-- "Reagendamento registrado com sucesso"
-- "Cancelamento registrado com sucesso"
+- Adicionar campo opcional `convertedToPartnerId?: string` no tipo Visit (apenas no tipo, sem logica)
 
-## Detalhes tecnicos
-
-- Modal usa `Dialog` do radix + `Select` do shadcn (componentes ja existentes)
-- Estado do modal controlado por `useState` no AgendaPage e passado para sub-componentes
-- Para drag-and-drop: estado pendente `pendingDrop: { visitId, newDate } | null` que dispara o modal
-- Tipo Visit extendido com `statusChangedAt?: string`
-- Nenhuma API ou backend necessario
-
-## Arquivos modificados
+## Arquivos Modificados
 
 | Arquivo | Acao |
 |---|---|
-| `src/data/mock-data.ts` | Atualizar RESCHEDULE_REASONS, CANCEL_REASONS, tipo Visit |
-| `src/components/agenda/JustificationModal.tsx` | Novo componente |
-| `src/pages/AgendaPage.tsx` | Interceptar drag-drop e form status changes |
-| `src/components/AgendaDetailModal.tsx` | Exibir justificativa, interceptar status change |
-| `src/components/partners/PartnerTimeline.tsx` | Exibir motivo na timeline |
-| `src/components/partners/PartnerVisitHistory.tsx` | Exibir motivo no historico |
+| `src/data/mock-data.ts` | Novos tipos, campo profile, novos mock users |
+| `src/data/permissions.ts` | Simplificar para gestor/nao_gestor |
+| `src/hooks/usePermission.ts` | Usar profile |
+| `src/contexts/AuthContext.tsx` | Expor profile |
+| `src/pages/LoginPage.tsx` | Novos cargos, indicador de perfil |
+| `src/pages/AgendaPage.tsx` | Visibilidade por profile, badges visuais |
+| `src/pages/ParceirosPage.tsx` | Visibilidade por profile |
+| `src/pages/DashboardPage.tsx` | Visibilidade por profile |
+| `src/pages/AnalisesPage.tsx` | Filtro por profile |
+| `src/pages/CampanhasPage.tsx` | Filtro por profile |
+| `src/hooks/useTeamFilter.ts` | Logica por profile |
+| `src/contexts/NotificationContext.tsx` | Ajustar mock |
+| `src/components/settings/UsersTab.tsx` | Dois campos (cargo+perfil), novas labels |
+| `src/components/home/HeroSection.tsx` | Visibilidade por profile |
+
+## Detalhes Tecnicos
+
+- `AppProfile` controla permissoes; `CompanyCargo` e informativo
+- localStorage key muda para `ribercred_permissions_v2` (2 perfis em vez de 5)
+- Nenhum backend necessario
+- Evolucao sem quebra: campos existentes mantidos, novos adicionados
 
