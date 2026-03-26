@@ -476,6 +476,15 @@ export default function AgendaPage() {
 
   return (
     <PageTransition className="space-y-6">
+      <HeroSection />
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={indicators.visitasCriadas + indicators.prospecoesCriadas} color="text-info" delay={0.1} />
+        <AnimatedKpiCard icon={CheckCircle} label="Concluídas" value={indicators.visitasConcluidas + indicators.prospecoesConcluidas} color="text-success" delay={0.15} />
+        <AnimatedKpiCard icon={Handshake} label="Visitas" value={indicators.visitasCriadas} color="text-info" delay={0.2} />
+        <AnimatedKpiCard icon={UserPlus} label="Prospecções" value={indicators.prospecoesCriadas} color="text-warning" delay={0.25} />
+      </div>
+
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-wrap">
           <div>
