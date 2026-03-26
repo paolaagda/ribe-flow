@@ -5,12 +5,8 @@ import { Users, User, CheckCircle, Clock, TrendingUp, CalendarDays } from 'lucid
 import { useAuth } from '@/contexts/AuthContext';
 import { useVisits } from '@/hooks/useVisits';
 import { useTeamFilter } from '@/hooks/useTeamFilter';
-import HeroSection from '@/components/home/HeroSection';
-import TodayAgenda from '@/components/home/TodayAgenda';
-import VisitMap from '@/components/home/VisitMap';
 import CampaignProgress from '@/components/home/CampaignProgress';
 import StatusChart from '@/components/home/StatusChart';
-import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 
 export default function DashboardPage() {
   const { profile, user } = useAuth();
