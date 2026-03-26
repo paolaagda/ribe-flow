@@ -686,7 +686,7 @@ export default function AgendaPage() {
                   }}>
                     <SelectTrigger><SelectValue placeholder="Selecione o parceiro" /></SelectTrigger>
                     <SelectContent>
-                      {(role === 'comercial' && user
+                      {(profile === 'nao_gestor' && user
                         ? partners.filter(p => p.responsibleUserId === user.id)
                         : partners
                       ).map(p => (
