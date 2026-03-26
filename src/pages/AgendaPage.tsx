@@ -479,18 +479,30 @@ export default function AgendaPage() {
             <h1 className="text-2xl font-bold">Agenda</h1>
             <p className="text-muted-foreground text-sm">Gerencie suas agendas</p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 rounded-md bg-info/10 px-2.5 py-1.5 text-xs font-semibold">
-              <Handshake className="h-3.5 w-3.5 text-info" />
-              <span>{indicators.visitasCriadas}/{indicators.visitasConcluidas}</span>
-              <span className="text-muted-foreground font-normal">visitas</span>
+          <TooltipProvider delayDuration={300}>
+            <div className="flex items-center gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1.5 rounded-md bg-info/10 px-2.5 py-1.5 text-xs font-semibold cursor-default">
+                    <Handshake className="h-3.5 w-3.5 text-info" />
+                    <span>{indicators.visitasConcluidas}✓ de {indicators.visitasCriadas}</span>
+                    <span className="text-muted-foreground font-normal">visitas</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>{indicators.visitasConcluidas} concluídas de {indicators.visitasCriadas} criadas</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1.5 rounded-md bg-warning/10 px-2.5 py-1.5 text-xs font-semibold cursor-default">
+                    <UserPlus className="h-3.5 w-3.5 text-warning" />
+                    <span>{indicators.prospecoesConcluidas}✓ de {indicators.prospecoesCriadas}</span>
+                    <span className="text-muted-foreground font-normal">prospecções</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>{indicators.prospecoesConcluidas} concluídas de {indicators.prospecoesCriadas} criadas</TooltipContent>
+              </Tooltip>
             </div>
-            <div className="flex items-center gap-1.5 rounded-md bg-warning/10 px-2.5 py-1.5 text-xs font-semibold">
-              <UserPlus className="h-3.5 w-3.5 text-warning" />
-              <span>{indicators.prospecoesCriadas}/{indicators.prospecoesConcluidas}</span>
-              <span className="text-muted-foreground font-normal">prospecções</span>
-            </div>
-          </div>
+          </TooltipProvider>
         </div>
         {canWrite('agenda.create') && (
           <Button onClick={() => setShowForm(true)}>
@@ -633,34 +645,41 @@ export default function AgendaPage() {
                             )}
                           >
                             {v.type === 'visita' ? <Handshake className="h-2.5 w-2.5 shrink-0 text-info" /> : <UserPlus className="h-2.5 w-2.5 shrink-0 text-warning" />}
-                            <span className="truncate flex-1">{partner?.name?.split(' ')[0]}</span>
-                            <TooltipProvider delayDuration={200}>
-                              <div className="flex -space-x-1 shrink-0">
-                                {getParticipants(v).slice(0, 2).map(p => (
-                                  <Tooltip key={p.id}>
-                                    <TooltipTrigger asChild>
-                                      <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">{p.name.charAt(0)}</div>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
-                                  </Tooltip>
-                                ))}
-                                {getParticipants(v).length > 2 && (
-                                  <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">+{getParticipants(v).length - 2}</div>
-                                )}
-                              </div>
-                            </TooltipProvider>
+                            <span className="truncate flex-1">{(partner?.name || v.prospectPartner || 'Sem nome')?.split(' ')[0]}</span>
+                            {(() => {
+                              const participants = getParticipants(v);
+                              return (
+                                <TooltipProvider delayDuration={200}>
+                                  <div className="flex -space-x-1 shrink-0">
+                                    {participants.slice(0, 2).map(p => (
+                                      <Tooltip key={p.id}>
+                                        <TooltipTrigger asChild>
+                                          <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">{p.name.charAt(0)}</div>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
+                                      </Tooltip>
+                                    ))}
+                                    {participants.length > 2 && (
+                                      <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">+{participants.length - 2}</div>
+                                    )}
+                                  </div>
+                                </TooltipProvider>
+                              );
+                            })()}
                             {myInvite && (
                               <span className="flex gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
-                                <button
-                                  className="h-3.5 w-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600"
-                                  onClick={() => handleAcceptVisitInvite(v.id)}
-                                >
-                                  <Check className="h-2 w-2" />
-                                </button>
-                                <button
-                                  className="h-3.5 w-3.5 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground"
-                                  onClick={() => handleRejectVisitInvite(v.id)}
-                                >
+                                 <button
+                                   aria-label="Aceitar convite"
+                                   className="h-3.5 w-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600"
+                                   onClick={() => handleAcceptVisitInvite(v.id)}
+                                 >
+                                   <Check className="h-2 w-2" />
+                                 </button>
+                                 <button
+                                   aria-label="Recusar convite"
+                                   className="h-3.5 w-3.5 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground"
+                                   onClick={() => handleRejectVisitInvite(v.id)}
+                                 >
                                   <X className="h-2 w-2" />
                                 </button>
                               </span>
@@ -707,34 +726,39 @@ export default function AgendaPage() {
                           {v.status}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{partner?.name}</p>
+                          <p className="text-sm font-medium truncate">{partner?.name || v.prospectPartner || 'Sem nome'}</p>
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                             <Badge variant="outline" className={cn('text-[9px] px-1 py-0 gap-0.5', v.type === 'visita' ? 'bg-info/10 text-info border-info/20' : 'bg-warning/10 text-warning border-warning/20')}>
                               {v.type === 'visita' ? <><Handshake className="h-2.5 w-2.5" />Visita</> : <><UserPlus className="h-2.5 w-2.5" />Prospecção</>}
                             </Badge>
                             {v.time ? <span>{v.time}</span> : <span className="flex items-center gap-0.5"><ClockIcon className="h-3 w-3" /> Sem horário</span>}
-                            <span>• {vUser?.name} • {v.type}</span>
+                            <span>• {vUser?.name}</span>
                           </div>
                         </div>
-                        <TooltipProvider delayDuration={200}>
-                          <div className="flex -space-x-1.5 shrink-0">
-                            {getParticipants(v).slice(0, 4).map(p => (
-                              <Tooltip key={p.id}>
-                                <TooltipTrigger asChild>
+                        {(() => {
+                          const participants = getParticipants(v);
+                          return (
+                            <TooltipProvider delayDuration={200}>
+                              <div className="flex -space-x-1.5 shrink-0">
+                                {participants.slice(0, 4).map(p => (
+                                  <Tooltip key={p.id}>
+                                    <TooltipTrigger asChild>
+                                      <Avatar className="h-6 w-6 border-2 border-background">
+                                        <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">{p.name.charAt(0)}</AvatarFallback>
+                                      </Avatar>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
+                                  </Tooltip>
+                                ))}
+                                {participants.length > 4 && (
                                   <Avatar className="h-6 w-6 border-2 border-background">
-                                    <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">{p.name.charAt(0)}</AvatarFallback>
+                                    <AvatarFallback className="text-[9px] bg-muted text-muted-foreground">+{participants.length - 4}</AvatarFallback>
                                   </Avatar>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
-                              </Tooltip>
-                            ))}
-                            {getParticipants(v).length > 4 && (
-                              <Avatar className="h-6 w-6 border-2 border-background">
-                                <AvatarFallback className="text-[9px] bg-muted text-muted-foreground">+{getParticipants(v).length - 4}</AvatarFallback>
-                              </Avatar>
-                            )}
-                          </div>
-                        </TooltipProvider>
+                                )}
+                              </div>
+                            </TooltipProvider>
+                          );
+                        })()}
                         <div className="flex items-center gap-1.5">
                           {v.potentialValue && (
                             <Badge variant="outline" className={cn('text-[9px]', v.potentialValue >= 1000000 ? 'bg-warning/10 text-warning border-warning/20' : '')}>
