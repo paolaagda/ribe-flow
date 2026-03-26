@@ -11,9 +11,11 @@ interface AnimatedKpiCardProps {
   color?: string;
   suffix?: string;
   delay?: number;
+  onClick?: () => void;
+  active?: boolean;
 }
 
-export default function AnimatedKpiCard({ icon: Icon, label, value, color = 'text-primary', suffix, delay = 0 }: AnimatedKpiCardProps) {
+export default function AnimatedKpiCard({ icon: Icon, label, value, color = 'text-primary', suffix, delay = 0, onClick, active }: AnimatedKpiCardProps) {
   const [displayValue, setDisplayValue] = useState(0);
   const numericValue = typeof value === 'number' ? value : null;
 
