@@ -177,22 +177,6 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
                 {partner.structures.map(s => <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>)}
               </div>
             </div>
-            {stats.banks.length > 0 && (
-              <div>
-                <p className="text-xs font-medium mb-1.5">Bancos trabalhados</p>
-                <div className="flex flex-wrap gap-1">
-                  {stats.banks.map(b => <Badge key={b} variant="outline" className="text-[10px]">{b}</Badge>)}
-                </div>
-              </div>
-            )}
-            {stats.products.length > 0 && (
-              <div>
-                <p className="text-xs font-medium mb-1.5">Produtos</p>
-                <div className="flex flex-wrap gap-1">
-                  {stats.products.map(p => <Badge key={p} variant="outline" className="text-[10px]">{p}</Badge>)}
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
 
