@@ -1,54 +1,41 @@
 
 
-# Correcao de Dados de Parceiro + Evolucao de Analises e Dashboard
+# Criar Notificacoes, Agendas e Convites para Hoje
 
 ## Resumo
 
-Tres frentes: (1) remover bancos/produtos do card do parceiro (pertencem a agenda, nao ao parceiro), (2) evoluir a pagina de Analises com graficos interativos e filtros, (3) melhorar o Dashboard com mais interatividade visual.
+Enriquecer os dados mock para que o dia de hoje tenha agendas com convidados, notificacoes de convite pendentes e variedade de status — garantindo que o usuario veja dados ao abrir o app.
 
 ## Mudancas
 
-### 1. Remover bancos/produtos do card do parceiro
+### 1. Visitas de hoje com convidados (`src/data/mock-data.ts`)
 
-**`src/components/partners/PartnerDetailView.tsx`**
+As 5 visitas fixas de hoje (vt1–vt5) atualmente tem `invitedUsers: []`. Adicionar convidados reais:
 
-- Remover linhas 180-195 (secoes "Bancos trabalhados" e "Produtos") do card de informacoes do parceiro
-- Manter `stats.banks` e `stats.products` no calculo (usados nos graficos/historico) — apenas remover a exibicao no card principal
-- Os bancos/produtos continuam visiveis no historico de visitas (`PartnerVisitHistory`) e nos graficos (`PartnerCharts`), onde pertencem contextualmente
+- **vt1** (Credito Facil, u4): convidar u2 (accepted), u3 (pending)
+- **vt2** (Express, u4): convidar u5 (pending), u9 (accepted)
+- **vt3** (Casa Emprestimo, u5): convidar u4 (pending)
+- **vt5** (Mega Financeira, u4): convidar u7 (accepted), u6 (pending)
 
-### 2. Evolucao da pagina de Analises (`src/pages/AnalisesPage.tsx`)
+### 2. Notificacoes de hoje (`src/contexts/NotificationContext.tsx`)
 
-Reescrever com melhorias:
+Atualmente gera 4 notificacoes mock (2 pending, 1 accepted, 1 rejected). Ajustar para incluir convites vinculados as visitas de hoje:
 
-- **KPI cards animados**: Total, Concluidas, Visitas, Prospecoes com `motion` e `tabular-nums`
-- **Grafico de tendencia mensal**: manter LineChart mas adicionar `Legend`, cursor interativo, tooltip estilizado com cores do tema
-- **Distribuicao por status**: PieChart com `innerRadius` (donut), legenda lateral com percentuais
-- **Performance individual**: BarChart empilhado (total vs concluidas) com tooltip detalhado mostrando taxa de conversao
-- **Novo grafico — Criado vs Concluido por mes**: BarChart comparativo lado a lado
-- **Novo grafico — Top parceiros visitados**: BarChart horizontal dos 5 parceiros mais visitados
-- **Filtro de periodo personalizado**: alem de semana/mes/ano, adicionar date range com `Popover` + `Calendar` (mesmo padrao usado na agenda)
-- **Responsividade**: `grid-cols-1 md:grid-cols-2` para graficos, cards empilhados em mobile
-- **Usar `useVisits()` hook** em vez de `mockVisits` diretamente (consistencia com dados reativos)
+- Convite pendente para vt1 (hoje 09:00, Credito Facil) — de u4
+- Convite pendente para vt2 (hoje 10:30, Express) — de u4
+- Convite pendente para vt3 (hoje 11:00, Casa Emprestimo) — de u5
+- Manter 1 convite aceito (amanha) e 1 rejeitado (passado) para variedade no historico
 
-### 3. Evolucao do Dashboard (`src/pages/DashboardPage.tsx`)
+Usar `visitId` correspondente aos IDs reais (vt1, vt2, vt3) para consistencia.
 
-Melhorias sem remover componentes existentes:
+### 3. Garantir inicializacao
 
-- **Novo card de resumo rapido**: row de 4 mini-KPIs entre o Hero e o toggle de gestor (Visitas hoje, Concluidas, Pendentes, Taxa de conversao) com `motion` de entrada
-- **Interatividade no StatusChart**: ja tem hover/tooltip — manter como esta
-- **Interatividade no VisitMap**: ja tem tooltips — manter como esta
-- **Melhor transicao entre modos**: adicionar `AnimatePresence` com `mode="wait"` ao trocar personal/team para transicao suave dos dados
-
-### 4. Componentes compartilhados
-
-**Novo `src/components/shared/AnimatedKpiCard.tsx`**: card reutilizavel com icone, valor animado (contagem), label e cor. Usado em Analises e Dashboard.
+O `ensureInitialized` so gera mocks se `allNotifications.length === 0` e perfil `nao_gestor`. Manter essa logica — os mocks serao gerados no primeiro acesso. Se o localStorage ja tiver dados antigos, o usuario pode limpar historico para resetar.
 
 ## Arquivos
 
 | Arquivo | Acao |
 |---|---|
-| `src/components/partners/PartnerDetailView.tsx` | Remover secoes bancos/produtos do card |
-| `src/pages/AnalisesPage.tsx` | Reescrever com graficos interativos, novos graficos, date range |
-| `src/pages/DashboardPage.tsx` | Adicionar mini-KPIs, AnimatePresence no toggle |
-| `src/components/shared/AnimatedKpiCard.tsx` | Novo componente reutilizavel |
+| `src/data/mock-data.ts` | Adicionar invitedUsers nas visitas vt1-vt5 |
+| `src/contexts/NotificationContext.tsx` | Atualizar mocks para convites de hoje com visitIds reais |
 
