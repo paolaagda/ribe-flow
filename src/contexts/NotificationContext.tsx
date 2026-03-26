@@ -134,12 +134,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const ensureInitialized = useCallback(() => {
     if (initializedRef.current) return;
-    if (allNotifications.length === 0 && user?.profile === 'nao_gestor') {
+    if (user && allNotifications.filter(n => n.toUserId === user.id).length === 0) {
       const mocks = generateMockNotifications(user.id);
-      setAllNotifications(mocks);
+      setAllNotifications(prev => [...prev, ...mocks]);
     }
     initializedRef.current = true;
-  }, [allNotifications.length, user]);
+  }, [allNotifications, user]);
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
   const pendingInvites = useMemo(() => notifications.filter(n => n.type === 'invite' && n.status === 'pending'), [notifications]);
