@@ -1,49 +1,67 @@
 
 
-# Expansao de Convites na Agenda para Todos os Cargos
+# Avatares nos Cards da Agenda + Indicadores de Performance + Filtro por Periodo
 
 ## Resumo
 
-Atualmente o campo "Convidados" no formulario da agenda filtra apenas usuarios com `role === 'comercial'`. A mudanca e simples: expandir para todos os usuarios ativos do sistema, agrupados por cargo, com exibicao do cargo ao lado do nome.
-
-## Estado Atual
-
-- Linha 423 de AgendaPage: `const commercials = mockUsers.filter(u => u.role === 'comercial' && u.active)`
-- Linhas 773-786: lista de checkboxes mostrando apenas comerciais
-- AgendaDetailModal ja exibe participantes com avatar e status
-- Notificacoes ja sao enviadas para cada convidado
+Tres adições na pagina de agenda: (1) avatares dos participantes nos cards, (2) cards de indicadores visita/prospecção no topo, (3) filtro de periodo personalizado com date range.
 
 ## Mudancas
 
-### 1. AgendaPage.tsx — Expandir lista de convidados
+### 1. Avatares nos cards da agenda (`AgendaPage.tsx`)
 
-**Linha 423**: Renomear `commercials` para `invitableUsers` e remover filtro por cargo:
+**Calendario mensal (cards pequenos ~linha 528-562):**
+- Apos o nome do parceiro, adicionar mini-avatares (max 2-3) dos participantes (userId + invitedUsers aceitos)
+- Usar circulos de 14px com inicial do nome
+- Se > 2, mostrar "+N"
+- Tooltip com nome + cargo no hover
+
+**Lista semanal/diaria (cards maiores ~linha 596-622):**
+- Adicionar stack horizontal de avatares (Avatar component, h-6 w-6, overlap -ml-1.5)
+- Mostrar ate 4 avatares + "+N" badge
+- Tooltip com nome + cargo
+- Posicionar apos as badges existentes (valor, medio)
+
+### 2. Cards de indicadores no topo (`AgendaPage.tsx`)
+
+Adicionar entre o header e os controles (apos linha 448, antes de linha 450):
+
+Dois cards lado a lado (grid-cols-2):
+- **Card Visitas**: icone Handshake, "X criadas / Y concluidas" — filtra `filteredVisits` por `type === 'visita'`
+- **Card Prospecções**: icone UserPlus, "X criadas / Y concluidas" — filtra por `type === 'prospecção'`
+
+Concluidas = `status === 'Concluída'`
+
+Os indicadores devem reagir a todos os filtros aplicados (status, tipo, usuario, e o novo filtro de periodo).
+
+### 3. Filtro por periodo personalizado (`AgendaPage.tsx`)
+
+Novo estado:
 ```ts
-const invitableUsers = mockUsers.filter(u => u.active);
+const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
 ```
 
-**Linhas 769-791**: Substituir a lista simples por lista agrupada por cargo:
-- Agrupar usuarios por `role` (usando `cargoLabels` para rotulo)
-- Exibir nome do cargo como separador
-- Mostrar cargo ao lado do nome em texto menor
-- Excluir o usuario logado da lista
-- Manter campo de busca por nome
+Adicionar na barra de filtros (junto aos selects existentes):
+- Popover com dois campos de data (inicio/fim) usando Calendar component
+- Botao "Limpar" para resetar
+- Placeholder "Periodo personalizado"
 
-### 2. AgendaDetailModal.tsx — Exibir cargo dos participantes
+Integrar no `filteredVisits`:
+- Se dateRange.from/to definidos, filtrar visitas dentro do intervalo
+- Os indicadores e a lista reagem automaticamente
 
-Na secao de participantes (linha 214+), adicionar o cargo do usuario ao lado do nome:
-```
-Avatar | Nome | Cargo (badge) | Status
-```
+### 4. Imports necessarios
 
-### 3. Nenhuma mudanca em notificacoes
-
-O sistema de notificacoes ja envia convites para qualquer userId — nao tem filtro por cargo. Nada a alterar.
+- `Avatar`, `AvatarFallback` de `@/components/ui/avatar`
+- `Tooltip`, `TooltipTrigger`, `TooltipContent`, `TooltipProvider` de `@/components/ui/tooltip`
+- `Popover`, `PopoverTrigger`, `PopoverContent` de `@/components/ui/popover`
+- `Calendar` de `@/components/ui/calendar`
 
 ## Arquivos
 
 | Arquivo | Acao |
 |---|---|
-| `src/pages/AgendaPage.tsx` | Expandir filtro de usuarios, agrupar por cargo, campo de busca |
-| `src/components/AgendaDetailModal.tsx` | Exibir cargo dos participantes |
+| `src/pages/AgendaPage.tsx` | Adicionar avatares nos cards, cards de indicadores, filtro de periodo |
+
+Nenhum arquivo novo necessario — tudo dentro de AgendaPage usando componentes UI existentes.
 
