@@ -58,7 +58,7 @@ function generateMockNotifications(userId: string): AppNotification[] {
   const today = format(now, 'yyyy-MM-dd');
   const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
 
-  const gestorUser = mockUsers.find(u => u.role === 'gestor');
+  const gestorUser = mockUsers.find(u => u.profile === 'gestor');
   const gerenteUser = mockUsers.find(u => u.role === 'gerente');
   if (!gestorUser || !gerenteUser) return [];
 
@@ -124,7 +124,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const ensureInitialized = useCallback(() => {
     if (initializedRef.current) return;
-    if (allNotifications.length === 0 && user?.role === 'comercial') {
+    if (allNotifications.length === 0 && user?.profile === 'nao_gestor') {
       const mocks = generateMockNotifications(user.id);
       setAllNotifications(mocks);
     }

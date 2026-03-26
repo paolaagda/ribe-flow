@@ -2,25 +2,29 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserRole } from '@/data/mock-data';
+import { CompanyCargo, AppProfile } from '@/data/mock-data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Loader2, Moon, Sun, Handshake, Crown, Briefcase, Users, Megaphone, TrendingUp } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Loader2, Moon, Sun, Handshake, Briefcase, Users, Megaphone, TrendingUp, ClipboardList, Store, Building } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
-const roles: { value: UserRole; label: string; icon: React.ElementType }[] = [
-  { value: 'gestor', label: 'Gestor', icon: Crown },
+const cargos: { value: CompanyCargo; label: string; icon: React.ElementType }[] = [
   { value: 'diretor', label: 'Diretor', icon: Briefcase },
   { value: 'gerente', label: 'Gerente', icon: Users },
   { value: 'ascom', label: 'ASCOM', icon: Megaphone },
   { value: 'comercial', label: 'Comercial', icon: TrendingUp },
+  { value: 'cadastro', label: 'Cadastro', icon: ClipboardList },
+  { value: 'parceiro', label: 'Parceiro', icon: Store },
+  { value: 'loja', label: 'Loja', icon: Building },
 ];
 
 export default function LoginPage() {
-  const [selectedRole, setSelectedRole] = useState<UserRole>('comercial');
+  const [selectedCargo, setSelectedCargo] = useState<CompanyCargo>('comercial');
+  const [isGestor, setIsGestor] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -28,8 +32,9 @@ export default function LoginPage() {
 
   const handleLogin = () => {
     setLoading(true);
+    const appProfile: AppProfile = isGestor ? 'gestor' : 'nao_gestor';
     setTimeout(() => {
-      login(selectedRole);
+      login(selectedCargo, appProfile);
       navigate('/dashboard');
     }, 800);
   };
@@ -84,29 +89,44 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Role Selector */}
+            {/* Cargo Selector (Empresa) */}
             <div className="space-y-3">
-              <Label className="text-muted-foreground text-xs uppercase tracking-wider">Perfil de acesso</Label>
-              <RadioGroup value={selectedRole} onValueChange={(v) => setSelectedRole(v as UserRole)} className="grid grid-cols-2 gap-2">
-                {roles.map((role) => {
-                  const Icon = role.icon;
+              <Label className="text-muted-foreground text-xs uppercase tracking-wider">Cargo na empresa</Label>
+              <RadioGroup value={selectedCargo} onValueChange={(v) => setSelectedCargo(v as CompanyCargo)} className="grid grid-cols-2 gap-2">
+                {cargos.map((cargo) => {
+                  const Icon = cargo.icon;
                   return (
                     <Label
-                      key={role.value}
-                      htmlFor={role.value}
+                      key={cargo.value}
+                      htmlFor={cargo.value}
                       className={`flex items-center gap-2.5 rounded-xl border-2 p-3 cursor-pointer transition-all duration-200 hover:border-primary/50 ${
-                        selectedRole === role.value
+                        selectedCargo === cargo.value
                           ? 'border-primary bg-primary/5 shadow-sm'
                           : 'border-border'
                       }`}
                     >
-                      <RadioGroupItem value={role.value} id={role.value} className="sr-only" />
-                      <Icon className={`h-4 w-4 shrink-0 transition-colors ${selectedRole === role.value ? 'text-primary' : 'text-muted-foreground'}`} />
-                      <span className="text-sm font-medium">{role.label}</span>
+                      <RadioGroupItem value={cargo.value} id={cargo.value} className="sr-only" />
+                      <Icon className={`h-4 w-4 shrink-0 transition-colors ${selectedCargo === cargo.value ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <span className="text-sm font-medium">{cargo.label}</span>
                     </Label>
                   );
                 })}
               </RadioGroup>
+            </div>
+
+            {/* Profile Toggle (App) */}
+            <div className="flex items-center justify-between rounded-xl border-2 border-border p-3">
+              <div className="space-y-0.5">
+                <Label className="text-sm font-medium">Perfil do App</Label>
+                <p className="text-xs text-muted-foreground">
+                  {isGestor ? 'Acesso completo ao sistema' : 'Acesso limitado aos seus dados'}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Não Gestor</span>
+                <Switch checked={isGestor} onCheckedChange={setIsGestor} />
+                <span className={`text-xs font-medium ${isGestor ? 'text-primary' : 'text-muted-foreground'}`}>Gestor</span>
+              </div>
             </div>
 
             {/* Login Button */}

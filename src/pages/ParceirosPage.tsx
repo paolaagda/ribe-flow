@@ -15,16 +15,16 @@ export default function ParceirosPage() {
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { canRead } = usePermission();
-  const { user, role } = useAuth();
+  const { user, profile } = useAuth();
   const { partners } = usePartners();
 
   // Filter partners by role: comercial only sees their own partners
   const visiblePartners = useMemo(() => {
-    if (role === 'comercial' && user) {
+    if (profile === 'nao_gestor' && user) {
       return partners.filter(p => p.responsibleUserId === user.id);
     }
     return partners;
-  }, [role, user, partners]);
+  }, [profile, user, partners]);
 
   const filtered = useMemo(() => {
     if (!search) return visiblePartners;
@@ -53,7 +53,7 @@ export default function ParceirosPage() {
       <div>
         <h1 className="text-2xl font-bold">Parceiros</h1>
         <p className="text-muted-foreground text-sm">
-          {role === 'comercial' ? 'Seus parceiros vinculados' : 'Gerencie lojas e parceiros'}
+          {profile === 'nao_gestor' ? 'Seus parceiros vinculados' : 'Gerencie lojas e parceiros'}
         </p>
       </div>
 

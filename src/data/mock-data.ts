@@ -1,5 +1,9 @@
 // ============ TYPES ============
-export type UserRole = 'gestor' | 'diretor' | 'gerente' | 'ascom' | 'comercial';
+export type AppProfile = 'gestor' | 'nao_gestor';
+export type CompanyCargo = 'diretor' | 'gerente' | 'ascom' | 'comercial' | 'cadastro' | 'parceiro' | 'loja';
+
+// Keep UserRole as alias for backward compatibility
+export type UserRole = CompanyCargo;
 
 export interface User {
   id: string;
@@ -8,6 +12,7 @@ export interface User {
   avatar: string;
   bio: string;
   role: UserRole;
+  profile: AppProfile;
   active: boolean;
 }
 
@@ -95,19 +100,56 @@ export interface Visit {
   prospectAddress?: string;
   prospectPhone?: string;
   prospectContact?: string;
+  convertedToPartnerId?: string;
 }
+
+// ============ CARGO LABELS & COLORS ============
+export const cargoLabels: Record<CompanyCargo, string> = {
+  diretor: 'Diretor',
+  gerente: 'Gerente',
+  ascom: 'ASCOM',
+  comercial: 'Comercial',
+  cadastro: 'Cadastro',
+  parceiro: 'Parceiro',
+  loja: 'Loja',
+};
+
+export const cargoColors: Record<CompanyCargo, string> = {
+  diretor: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
+  gerente: 'bg-info/10 text-info',
+  ascom: 'bg-warning/10 text-warning',
+  comercial: 'bg-success/10 text-success',
+  cadastro: 'bg-sky-500/10 text-sky-600 dark:text-sky-400',
+  parceiro: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  loja: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+};
+
+export const profileLabels: Record<AppProfile, string> = {
+  gestor: 'Gestor',
+  nao_gestor: 'Não Gestor',
+};
+
+export const profileColors: Record<AppProfile, string> = {
+  gestor: 'bg-primary/10 text-primary',
+  nao_gestor: 'bg-muted text-muted-foreground',
+};
+
+export const allCargos: CompanyCargo[] = ['diretor', 'gerente', 'ascom', 'comercial', 'cadastro', 'parceiro', 'loja'];
 
 // ============ MOCK USERS ============
 export const mockUsers: User[] = [
-  { id: 'u1', name: 'Carlos Silva', email: 'carlos@ribercred.com', avatar: '', bio: 'Gestor geral da equipe comercial', role: 'gestor', active: true },
-  { id: 'u9', name: 'Lucas Ribeiro', email: 'lucas@ribercred.com', avatar: '', bio: 'Diretor comercial — estratégia e expansão', role: 'diretor', active: true },
-  { id: 'u2', name: 'Ana Oliveira', email: 'ana@ribercred.com', avatar: '', bio: 'Gerente regional Sul', role: 'gerente', active: true },
-  { id: 'u3', name: 'Pedro Santos', email: 'pedro@ribercred.com', avatar: '', bio: 'Assessor de comunicação', role: 'ascom', active: true },
-  { id: 'u4', name: 'Maria Souza', email: 'maria@ribercred.com', avatar: '', bio: 'Comercial sênior — 5 anos de experiência', role: 'comercial', active: true },
-  { id: 'u5', name: 'João Costa', email: 'joao@ribercred.com', avatar: '', bio: 'Comercial pleno', role: 'comercial', active: true },
-  { id: 'u6', name: 'Fernanda Lima', email: 'fernanda@ribercred.com', avatar: '', bio: 'Comercial júnior', role: 'comercial', active: true },
-  { id: 'u7', name: 'Ricardo Alves', email: 'ricardo@ribercred.com', avatar: '', bio: 'Gerente regional Norte', role: 'gerente', active: true },
-  { id: 'u8', name: 'Juliana Mendes', email: 'juliana@ribercred.com', avatar: '', bio: 'Comercial pleno — foco INSS', role: 'comercial', active: false },
+  { id: 'u1', name: 'Carlos Silva', email: 'carlos@ribercred.com', avatar: '', bio: 'Gestor geral da equipe comercial', role: 'diretor', profile: 'gestor', active: true },
+  { id: 'u9', name: 'Lucas Ribeiro', email: 'lucas@ribercred.com', avatar: '', bio: 'Diretor comercial — estratégia e expansão', role: 'diretor', profile: 'gestor', active: true },
+  { id: 'u2', name: 'Ana Oliveira', email: 'ana@ribercred.com', avatar: '', bio: 'Gerente regional Sul', role: 'gerente', profile: 'nao_gestor', active: true },
+  { id: 'u3', name: 'Pedro Santos', email: 'pedro@ribercred.com', avatar: '', bio: 'Assessor de comunicação', role: 'ascom', profile: 'nao_gestor', active: true },
+  { id: 'u4', name: 'Maria Souza', email: 'maria@ribercred.com', avatar: '', bio: 'Comercial sênior — 5 anos de experiência', role: 'comercial', profile: 'nao_gestor', active: true },
+  { id: 'u5', name: 'João Costa', email: 'joao@ribercred.com', avatar: '', bio: 'Comercial pleno', role: 'comercial', profile: 'nao_gestor', active: true },
+  { id: 'u6', name: 'Fernanda Lima', email: 'fernanda@ribercred.com', avatar: '', bio: 'Comercial júnior', role: 'comercial', profile: 'nao_gestor', active: true },
+  { id: 'u7', name: 'Ricardo Alves', email: 'ricardo@ribercred.com', avatar: '', bio: 'Gerente regional Norte', role: 'gerente', profile: 'nao_gestor', active: true },
+  { id: 'u8', name: 'Juliana Mendes', email: 'juliana@ribercred.com', avatar: '', bio: 'Comercial pleno — foco INSS', role: 'comercial', profile: 'nao_gestor', active: false },
+  { id: 'u10', name: 'Tatiana Freitas', email: 'tatiana@ribercred.com', avatar: '', bio: 'Responsável por credenciamento bancário', role: 'cadastro', profile: 'nao_gestor', active: true },
+  { id: 'u11', name: 'Roberto Dias', email: 'roberto@creditofacil.com', avatar: '', bio: 'Parceiro — Loja Crédito Fácil', role: 'parceiro', profile: 'nao_gestor', active: true },
+  { id: 'u12', name: 'Carla Vieira', email: 'carla@megafinanceira.com', avatar: '', bio: 'Loja — Mega Financeira filial centro', role: 'loja', profile: 'nao_gestor', active: true },
 ];
 
 // ============ MOCK PARTNERS ============

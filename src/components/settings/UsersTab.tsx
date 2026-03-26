@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
-import { User, UserRole } from '@/data/mock-data';
+import { User, UserRole, AppProfile, CompanyCargo, cargoLabels, cargoColors, profileLabels, profileColors, allCargos } from '@/data/mock-data';
 import { useUsersData } from '@/hooks/useUsersData';
 import { PermissionLevel, defaultPermissions, groupedPermissions } from '@/data/permissions';
 import { usePermission } from '@/hooks/usePermission';
@@ -25,39 +25,17 @@ import { Team, initialTeams } from '@/data/teams';
 import { Edit, Lock, Trash2, RefreshCw, Search, Shield, Eye, EyeOff, Pencil, Save, Plus, Users2, ChevronRight, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const roleColors: Record<UserRole, string> = {
-  gestor: 'bg-primary/10 text-primary',
-  diretor: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
-  gerente: 'bg-info/10 text-info',
-  ascom: 'bg-warning/10 text-warning',
-  comercial: 'bg-success/10 text-success',
-};
-
-const roleLabels: Record<UserRole, string> = {
-  gestor: 'Gestor',
-  diretor: 'Diretor',
-  gerente: 'Gerente',
-  ascom: 'ASCOM',
-  comercial: 'Comercial',
-};
-
-const permissionLevelLabels: Record<PermissionLevel, { label: string; icon: React.ReactNode; color: string }> = {
-  none: { label: 'Sem acesso', icon: <EyeOff className="h-3.5 w-3.5" />, color: 'text-destructive' },
-  read: { label: 'Somente leitura', icon: <Eye className="h-3.5 w-3.5" />, color: 'text-warning' },
-  write: { label: 'Leitura e edição', icon: <Pencil className="h-3.5 w-3.5" />, color: 'text-success' },
-};
-
-const allRoles: UserRole[] = ['gestor', 'diretor', 'gerente', 'ascom', 'comercial'];
+const allProfiles: AppProfile[] = ['gestor', 'nao_gestor'];
 
 export default function UsersTab() {
   const { toast } = useToast();
-  const { role } = useAuth();
+  const { profile } = useAuth();
   const [search, setSearch] = useState('');
   const { users, setUsers } = useUsersData();
   const [editUser, setEditUser] = useState<User | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', email: '', role: '' as UserRole, bio: '' });
-  const [permissions, setPermissions] = useLocalStorage<Record<UserRole, Record<string, PermissionLevel>>>(
-    'ribercred_permissions',
+  const [editForm, setEditForm] = useState({ name: '', email: '', role: '' as UserRole, profile: 'nao_gestor' as AppProfile, bio: '' });
+  const [permissions, setPermissions] = useLocalStorage<Record<AppProfile, Record<string, PermissionLevel>>>(
+    'ribercred_permissions_v2',
     defaultPermissions
   );
   const [hasChanges, setHasChanges] = useState(false);
@@ -71,7 +49,7 @@ export default function UsersTab() {
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [deletingTeamId, setDeletingTeamId] = useState<string | null>(null);
 
-  const isGestor = role === 'gestor' || role === 'diretor';
+  const isGestor = profile === 'gestor';
   const { canRead, canWrite } = usePermission();
   const grouped = groupedPermissions();
 
@@ -81,7 +59,7 @@ export default function UsersTab() {
 
   const handleEdit = (user: User) => {
     setEditUser(user);
-    setEditForm({ name: user.name, email: user.email, role: user.role, bio: user.bio });
+    setEditForm({ name: user.name, email: user.email, role: user.role, profile: user.profile, bio: user.bio });
   };
 
   const handleSave = () => {
@@ -112,10 +90,10 @@ export default function UsersTab() {
     toast({ title: `Senha de ${name} resetada (simulado)` });
   };
 
-  const handlePermissionChange = (userRole: UserRole, key: string, level: PermissionLevel) => {
+  const handlePermissionChange = (appProfile: AppProfile, key: string, level: PermissionLevel) => {
     setPermissions(prev => ({
       ...prev,
-      [userRole]: { ...prev[userRole], [key]: level },
+      [appProfile]: { ...prev[appProfile], [key]: level },
     }));
     setHasChanges(true);
   };
@@ -125,13 +103,13 @@ export default function UsersTab() {
     toast({ title: 'Permissões salvas com sucesso!' });
   };
 
-  const handleResetPermissions = (userRole: UserRole) => {
+  const handleResetPermissions = (appProfile: AppProfile) => {
     setPermissions(prev => ({
       ...prev,
-      [userRole]: { ...defaultPermissions[userRole] },
+      [appProfile]: { ...defaultPermissions[appProfile] },
     }));
     setHasChanges(true);
-    toast({ title: `Permissões de ${roleLabels[userRole]} restauradas ao padrão` });
+    toast({ title: `Permissões de ${profileLabels[appProfile]} restauradas ao padrão` });
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,8 +181,8 @@ export default function UsersTab() {
                       </div>
                       <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                     </div>
-                    <Badge className={cn('text-[10px] capitalize', roleColors[user.role])} variant="secondary">
-                      {roleLabels[user.role]}
+                    <Badge className={cn('text-[10px] capitalize', cargoColors[user.role])} variant="secondary">
+                      {cargoLabels[user.role]}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">{user.bio}</p>
@@ -274,14 +252,14 @@ export default function UsersTab() {
             </div>
 
             <Accordion type="single" collapsible defaultValue="gestor" className="space-y-2">
-              {allRoles.map(r => (
+              {allProfiles.map(r => (
                 <AccordionItem key={r} value={r} className="border rounded-lg px-4">
                   <AccordionTrigger className="hover:no-underline">
                     <div className="flex items-center gap-3">
-                      <Badge className={cn('text-xs capitalize', roleColors[r])} variant="secondary">
-                        {roleLabels[r]}
+                      <Badge className={cn('text-xs capitalize', profileColors[r])} variant="secondary">
+                        {profileLabels[r]}
                       </Badge>
-                      <span className="text-sm font-medium">{roleLabels[r]}</span>
+                      <span className="text-sm font-medium">{profileLabels[r]}</span>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
@@ -316,9 +294,15 @@ export default function UsersTab() {
                                       onValueChange={(v) => handlePermissionChange(r, item.key, v as PermissionLevel)}
                                     >
                                       <SelectTrigger className="h-8 w-[48px] ml-auto flex items-center justify-center">
-                                        <span className={permissionLevelLabels[permissions[r]?.[item.key] || 'none'].color}>
-                                          {permissionLevelLabels[permissions[r]?.[item.key] || 'none'].icon}
-                                        </span>
+                                        {(() => {
+                                          const level = permissions[r]?.[item.key] || 'none';
+                                          const icons: Record<PermissionLevel, React.ReactNode> = {
+                                            none: <EyeOff className="h-3.5 w-3.5 text-destructive" />,
+                                            read: <Eye className="h-3.5 w-3.5 text-warning" />,
+                                            write: <Pencil className="h-3.5 w-3.5 text-success" />,
+                                          };
+                                          return <span>{icons[level]}</span>;
+                                        })()}
                                       </SelectTrigger>
                                       <SelectContent>
                                         <SelectItem value="none">
@@ -593,15 +577,23 @@ export default function UsersTab() {
               <Input value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} />
             </div>
             <div className="space-y-2">
-              <Label>Perfil</Label>
+              <Label>Cargo (empresa)</Label>
               <Select value={editForm.role} onValueChange={v => setEditForm({...editForm, role: v as UserRole})}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
+                  {allCargos.map(c => (
+                    <SelectItem key={c} value={c}>{cargoLabels[c]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Perfil do App</Label>
+              <Select value={editForm.profile} onValueChange={v => setEditForm({...editForm, profile: v as AppProfile})}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
                   <SelectItem value="gestor">Gestor</SelectItem>
-                  <SelectItem value="diretor">Diretor</SelectItem>
-                  <SelectItem value="gerente">Gerente</SelectItem>
-                  <SelectItem value="ascom">ASCOM</SelectItem>
-                  <SelectItem value="comercial">Comercial</SelectItem>
+                  <SelectItem value="nao_gestor">Não Gestor</SelectItem>
                 </SelectContent>
               </Select>
             </div>
