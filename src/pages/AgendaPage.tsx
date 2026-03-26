@@ -1,5 +1,8 @@
 import { useState, useMemo, useCallback } from 'react';
 import PageTransition from '@/components/PageTransition';
+import HeroSection from '@/components/home/HeroSection';
+import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
+import { CalendarDays, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
