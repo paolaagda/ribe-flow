@@ -115,9 +115,42 @@ export default function AgendaPage() {
       if (filterStatus !== 'all' && v.status !== filterStatus) return false;
       if (filterType !== 'all' && v.type !== filterType) return false;
       if (filterUser !== 'all' && v.userId !== filterUser) return false;
+      if (dateRange.from && dateRange.to) {
+        const vDate = parseISO(v.date);
+        if (!isWithinInterval(vDate, { start: dateRange.from, end: dateRange.to })) return false;
+      } else if (dateRange.from) {
+        const vDate = parseISO(v.date);
+        if (vDate < dateRange.from) return false;
+      }
       return true;
     });
-  }, [visibleVisits, filterStatus, filterType, filterUser]);
+  }, [visibleVisits, filterStatus, filterType, filterUser, dateRange]);
+
+  // Helper: get participants for a visit (owner + accepted invitees)
+  const getParticipants = useCallback((v: Visit) => {
+    const participants: { id: string; name: string; cargo: string }[] = [];
+    const owner = getUserById(v.userId);
+    if (owner) participants.push({ id: owner.id, name: owner.name, cargo: cargoLabels[owner.role] || owner.role });
+    v.invitedUsers?.forEach(iu => {
+      if (iu.status === 'accepted' && iu.userId !== v.userId) {
+        const u = getUserById(iu.userId);
+        if (u) participants.push({ id: u.id, name: u.name, cargo: cargoLabels[u.role] || u.role });
+      }
+    });
+    return participants;
+  }, []);
+
+  // Performance indicators
+  const indicators = useMemo(() => {
+    const visitas = filteredVisits.filter(v => v.type === 'visita');
+    const prospecoes = filteredVisits.filter(v => v.type === 'prospecção');
+    return {
+      visitasCriadas: visitas.length,
+      visitasConcluidas: visitas.filter(v => v.status === 'Concluída').length,
+      prospecoesCriadas: prospecoes.length,
+      prospecoesConcluidas: prospecoes.filter(v => v.status === 'Concluída').length,
+    };
+  }, [filteredVisits]);
 
   const handleDragStart = (e: React.DragEvent, visitId: string) => {
     setDraggedVisitId(visitId);
