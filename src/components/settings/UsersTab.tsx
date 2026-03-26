@@ -303,7 +303,6 @@ export default function UsersTab() {
                                           };
                                           return <span>{icons[level]}</span>;
                                         })()}
-                                        </span>
                                       </SelectTrigger>
                                       <SelectContent>
                                         <SelectItem value="none">
