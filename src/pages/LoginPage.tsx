@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
-import { Loader2, Moon, Sun, Handshake, Briefcase, Users, Megaphone, TrendingUp, ClipboardList, Store, Building } from 'lucide-react';
+import { Loader2, Moon, Sun, Handshake, Briefcase, Users, Megaphone, TrendingUp, ClipboardList } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
 const cargos: { value: CompanyCargo; label: string; icon: React.ElementType }[] = [
@@ -18,8 +18,6 @@ const cargos: { value: CompanyCargo; label: string; icon: React.ElementType }[] 
   { value: 'ascom', label: 'ASCOM', icon: Megaphone },
   { value: 'comercial', label: 'Comercial', icon: TrendingUp },
   { value: 'cadastro', label: 'Cadastro', icon: ClipboardList },
-  { value: 'parceiro', label: 'Parceiro', icon: Store },
-  { value: 'loja', label: 'Loja', icon: Building },
 ];
 
 export default function LoginPage() {

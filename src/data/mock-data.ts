@@ -1,6 +1,6 @@
 // ============ TYPES ============
 export type AppProfile = 'gestor' | 'nao_gestor';
-export type CompanyCargo = 'diretor' | 'gerente' | 'ascom' | 'comercial' | 'cadastro' | 'parceiro' | 'loja';
+export type CompanyCargo = 'diretor' | 'gerente' | 'ascom' | 'comercial' | 'cadastro';
 
 // Keep UserRole as alias for backward compatibility
 export type UserRole = CompanyCargo;
@@ -110,8 +110,6 @@ export const cargoLabels: Record<CompanyCargo, string> = {
   ascom: 'ASCOM',
   comercial: 'Comercial',
   cadastro: 'Cadastro',
-  parceiro: 'Parceiro',
-  loja: 'Loja',
 };
 
 export const cargoColors: Record<CompanyCargo, string> = {
@@ -120,8 +118,6 @@ export const cargoColors: Record<CompanyCargo, string> = {
   ascom: 'bg-warning/10 text-warning',
   comercial: 'bg-success/10 text-success',
   cadastro: 'bg-sky-500/10 text-sky-600 dark:text-sky-400',
-  parceiro: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-  loja: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
 };
 
 export const profileLabels: Record<AppProfile, string> = {
@@ -134,7 +130,7 @@ export const profileColors: Record<AppProfile, string> = {
   nao_gestor: 'bg-muted text-muted-foreground',
 };
 
-export const allCargos: CompanyCargo[] = ['diretor', 'gerente', 'ascom', 'comercial', 'cadastro', 'parceiro', 'loja'];
+export const allCargos: CompanyCargo[] = ['diretor', 'gerente', 'ascom', 'comercial', 'cadastro'];
 
 // ============ MOCK USERS ============
 export const mockUsers: User[] = [
@@ -148,8 +144,23 @@ export const mockUsers: User[] = [
   { id: 'u7', name: 'Ricardo Alves', email: 'ricardo@ribercred.com', avatar: '', bio: 'Gerente regional Norte', role: 'gerente', profile: 'nao_gestor', active: true },
   { id: 'u8', name: 'Juliana Mendes', email: 'juliana@ribercred.com', avatar: '', bio: 'Comercial pleno — foco INSS', role: 'comercial', profile: 'nao_gestor', active: false },
   { id: 'u10', name: 'Tatiana Freitas', email: 'tatiana@ribercred.com', avatar: '', bio: 'Responsável por credenciamento bancário', role: 'cadastro', profile: 'nao_gestor', active: true },
-  { id: 'u11', name: 'Roberto Dias', email: 'roberto@creditofacil.com', avatar: '', bio: 'Parceiro — Loja Crédito Fácil', role: 'parceiro', profile: 'nao_gestor', active: true },
-  { id: 'u12', name: 'Carla Vieira', email: 'carla@megafinanceira.com', avatar: '', bio: 'Loja — Mega Financeira filial centro', role: 'loja', profile: 'nao_gestor', active: true },
+];
+
+// ============ STORE (LOJA) ============
+export interface Store {
+  id: string;
+  partnerId: string;
+  name: string;
+  address: string;
+  phone: string;
+  contact: string;
+}
+
+export const mockStores: Store[] = [
+  { id: 's1', partnerId: 'p6', name: 'Mega Financeira — Filial Centro', address: 'Rua da Bahia, 200 — Belo Horizonte, MG', phone: '(31) 3000-2001', contact: 'Carla Vieira' },
+  { id: 's2', partnerId: 'p6', name: 'Mega Financeira — Filial Savassi', address: 'Av. Cristóvão Colombo, 500 — Belo Horizonte, MG', phone: '(31) 3000-2002', contact: 'Fernando Reis' },
+  { id: 's3', partnerId: 'p1', name: 'Crédito Fácil — Filial Pinheiros', address: 'Rua dos Pinheiros, 800 — São Paulo, SP', phone: '(11) 3000-2003', contact: 'Roberto Dias' },
+  { id: 's4', partnerId: 'p10', name: 'Sul Empréstimos — Filial Moinhos', address: 'Rua Padre Chagas, 150 — Porto Alegre, RS', phone: '(51) 3000-2004', contact: 'Daniel Moreira' },
 ];
 
 // ============ MOCK PARTNERS ============

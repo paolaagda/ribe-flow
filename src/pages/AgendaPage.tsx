@@ -16,7 +16,7 @@ import { usePartners } from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { getRandomMessage } from '@/data/notification-messages';
-import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, Sun, Moon, DollarSign, Clock as ClockIcon } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, Sun, Moon, DollarSign, Clock as ClockIcon, Handshake, UserPlus } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, addWeeks, subWeeks, isSameDay, isSameMonth, parseISO, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -539,7 +539,7 @@ export default function AgendaPage() {
                               draggedVisitId === v.id && 'opacity-50',
                             )}
                           >
-                            {v.period === 'manhã' ? <Sun className="h-2.5 w-2.5 shrink-0" /> : <Moon className="h-2.5 w-2.5 shrink-0" />}
+                            {v.type === 'visita' ? <Handshake className="h-2.5 w-2.5 shrink-0 text-info" /> : <UserPlus className="h-2.5 w-2.5 shrink-0 text-warning" />}
                             <span className="truncate flex-1">{partner?.name?.split(' ')[0]}</span>
                             {myInvite && (
                               <span className="flex gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
@@ -601,7 +601,9 @@ export default function AgendaPage() {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{partner?.name}</p>
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Badge variant="outline" className="text-[9px] px-1 py-0">{v.period === 'manhã' ? '☀ Manhã' : '🌙 Tarde'}</Badge>
+                            <Badge variant="outline" className={cn('text-[9px] px-1 py-0 gap-0.5', v.type === 'visita' ? 'bg-info/10 text-info border-info/20' : 'bg-warning/10 text-warning border-warning/20')}>
+                              {v.type === 'visita' ? <><Handshake className="h-2.5 w-2.5" />Visita</> : <><UserPlus className="h-2.5 w-2.5" />Prospecção</>}
+                            </Badge>
                             {v.time ? <span>{v.time}</span> : <span className="flex items-center gap-0.5"><ClockIcon className="h-3 w-3" /> Sem horário</span>}
                             <span>• {vUser?.name} • {v.type}</span>
                           </div>
