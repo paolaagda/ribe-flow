@@ -420,7 +420,7 @@ export default function AgendaPage() {
   const toggleArray = (arr: string[], item: string) =>
     arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item];
 
-  const commercials = mockUsers.filter(u => u.role === 'comercial' && u.active);
+  const invitableUsers = mockUsers.filter(u => u.active && u.id !== user?.id);
   const today = new Date();
 
   if (!canRead('agenda.view')) {
@@ -769,21 +769,30 @@ export default function AgendaPage() {
               {/* Convidados */}
               <div className="space-y-2">
                 <Label>Convidados</Label>
-                <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                  {commercials.filter(c => c.id !== user?.id).map(c => (
-                    <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer">
-                      <Checkbox
-                        checked={formData.invitedUserIds.includes(c.id)}
-                        onCheckedChange={() => setFormData({
-                          ...formData,
-                          invitedUserIds: formData.invitedUserIds.includes(c.id)
-                            ? formData.invitedUserIds.filter(id => id !== c.id)
-                            : [...formData.invitedUserIds, c.id],
-                        })}
-                      />
-                      {c.name}
-                    </label>
-                  ))}
+                <div className="space-y-1.5 max-h-40 overflow-y-auto border rounded-md p-2">
+                  {allCargos.map(cargo => {
+                    const usersInCargo = invitableUsers.filter(u => u.role === cargo);
+                    if (usersInCargo.length === 0) return null;
+                    return (
+                      <div key={cargo} className="space-y-1">
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide pt-1">{cargoLabels[cargo]}</p>
+                        {usersInCargo.map(c => (
+                          <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                            <Checkbox
+                              checked={formData.invitedUserIds.includes(c.id)}
+                              onCheckedChange={() => setFormData({
+                                ...formData,
+                                invitedUserIds: formData.invitedUserIds.includes(c.id)
+                                  ? formData.invitedUserIds.filter(id => id !== c.id)
+                                  : [...formData.invitedUserIds, c.id],
+                              })}
+                            />
+                            <span>{c.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    );
+                  })}
                 </div>
                 {formData.invitedUserIds.length > 0 && (
                   <p className="text-[11px] text-muted-foreground">{formData.invitedUserIds.length} convidado(s)</p>
