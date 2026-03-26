@@ -474,51 +474,29 @@ export default function AgendaPage() {
   return (
     <PageTransition className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Agenda</h1>
-          <p className="text-muted-foreground text-sm">Gerencie suas agendas</p>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold">Agenda</h1>
+            <p className="text-muted-foreground text-sm">Gerencie suas agendas</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 rounded-md bg-info/10 px-2.5 py-1.5 text-xs font-semibold">
+              <Handshake className="h-3.5 w-3.5 text-info" />
+              <span>{indicators.visitasCriadas}/{indicators.visitasConcluidas}</span>
+              <span className="text-muted-foreground font-normal">visitas</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-md bg-warning/10 px-2.5 py-1.5 text-xs font-semibold">
+              <UserPlus className="h-3.5 w-3.5 text-warning" />
+              <span>{indicators.prospecoesCriadas}/{indicators.prospecoesConcluidas}</span>
+              <span className="text-muted-foreground font-normal">prospecções</span>
+            </div>
+          </div>
         </div>
         {canWrite('agenda.create') && (
           <Button onClick={() => setShowForm(true)}>
             <Plus className="h-4 w-4 mr-1" /> Nova agenda
           </Button>
         )}
-      </div>
-
-      {/* Performance Indicators */}
-      <div className="grid grid-cols-2 gap-3">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <Card className="border-info/20">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-info/10 flex items-center justify-center">
-                <Handshake className="h-5 w-5 text-info" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground font-medium">Visitas</p>
-                <p className="text-lg font-bold">
-                  <motion.span key={indicators.visitasCriadas} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{indicators.visitasCriadas}</motion.span>
-                  {' '}criadas / <motion.span key={indicators.visitasConcluidas} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-info">{indicators.visitasConcluidas}</motion.span> concluídas
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
-          <Card className="border-warning/20">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
-                <UserPlus className="h-5 w-5 text-warning" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground font-medium">Prospecções</p>
-                <p className="text-lg font-bold">
-                  <motion.span key={indicators.prospecoesCriadas} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{indicators.prospecoesCriadas}</motion.span>
-                  {' '}criadas / <motion.span key={indicators.prospecoesConcluidas} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-warning">{indicators.prospecoesConcluidas}</motion.span> concluídas
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
       </div>
 
       {/* Controls */}
