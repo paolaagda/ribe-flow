@@ -37,15 +37,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <HeroSection />
-
-      {/* Mini-KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={kpis.today} color="text-info" delay={0.1} />
-        <AnimatedKpiCard icon={CheckCircle} label="Concluídas" value={kpis.completed} color="text-success" delay={0.15} />
-        <AnimatedKpiCard icon={Clock} label="Pendentes" value={kpis.pending} color="text-warning" delay={0.2} />
-        <AnimatedKpiCard icon={TrendingUp} label="Conversão" value={kpis.conversion} suffix="%" color="text-primary" delay={0.25} />
-      </div>
 
       {/* View toggle for gestors */}
       {isGestor && (
