@@ -57,10 +57,6 @@ export default function DashboardPage() {
           className="space-y-6"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <TodayAgenda viewMode={isGestor ? viewMode : 'personal'} />
-            <VisitMap viewMode={isGestor ? viewMode : 'personal'} />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <CampaignProgress />
             <StatusChart viewMode={isGestor ? viewMode : 'personal'} />
           </div>

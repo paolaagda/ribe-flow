@@ -482,11 +482,28 @@ export default function AgendaPage() {
       <HeroSection />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={indicators.visitasCriadas + indicators.prospecoesCriadas} color="text-info" delay={0.1} />
+        <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={indicators.visitasCriadas + indicators.prospecoesCriadas} color="text-info" delay={0.1} onClick={() => setShowTodayPanel(prev => !prev)} active={showTodayPanel} />
         <AnimatedKpiCard icon={CheckCircle} label="Concluídas" value={indicators.visitasConcluidas + indicators.prospecoesConcluidas} color="text-success" delay={0.15} />
         <AnimatedKpiCard icon={Handshake} label="Visitas" value={indicators.visitasCriadas} color="text-info" delay={0.2} />
         <AnimatedKpiCard icon={UserPlus} label="Prospecções" value={indicators.prospecoesCriadas} color="text-warning" delay={0.25} />
       </div>
+
+      <AnimatePresence>
+        {showTodayPanel && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              <TodayAgenda viewMode="personal" />
+              <VisitMap viewMode="personal" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-wrap">
