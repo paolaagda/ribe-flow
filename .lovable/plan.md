@@ -1,81 +1,54 @@
 
 
-# Revisao de Codigo — Melhorias, Correcoes e Sugestoes
+# Correcao de Dados de Parceiro + Evolucao de Analises e Dashboard
 
-## Problemas Encontrados
+## Resumo
 
-### 1. AgendaPage.tsx tem 1053 linhas — arquivo monolitico
-O arquivo concentra formulario (3 etapas), calendario mensal, lista semanal/diaria, filtros, drag-and-drop, modais, handlers de convite, comentarios e indicadores. Dificulta manutencao.
+Tres frentes: (1) remover bancos/produtos do card do parceiro (pertencem a agenda, nao ao parceiro), (2) evoluir a pagina de Analises com graficos interativos e filtros, (3) melhorar o Dashboard com mais interatividade visual.
 
-**Sugestao**: Extrair em componentes:
-- `AgendaForm.tsx` — dialog do formulario de 3 etapas (~linhas 756-1024)
-- `AgendaCalendarMonth.tsx` — grid mensal (~linhas 588-680)
-- `AgendaListView.tsx` — lista semanal/diaria (~linhas 681-753)
-- `AgendaFilters.tsx` — barra de filtros e controles (~linhas 502-584)
+## Mudancas
 
-### 2. Prospecao sem nome exibido no card mensal (bug visual)
-Linha 636: `{partner?.name?.split(' ')[0]}` — para prospecoes, `partner` e `null` (nao tem `partnerId`), entao nada aparece. Deveria usar `visit.prospectPartner` como fallback.
+### 1. Remover bancos/produtos do card do parceiro
 
-**Correcao**: `{(partner?.name || v.prospectPartner || 'Sem nome')?.split(' ')[0]}`
+**`src/components/partners/PartnerDetailView.tsx`**
 
-### 3. Prospecao sem nome na lista semanal/diaria (mesmo bug)
-Linha 710: `{partner?.name}` — mesmo problema. Deveria ter fallback para `v.prospectPartner`.
+- Remover linhas 180-195 (secoes "Bancos trabalhados" e "Produtos") do card de informacoes do parceiro
+- Manter `stats.banks` e `stats.products` no calculo (usados nos graficos/historico) — apenas remover a exibicao no card principal
+- Os bancos/produtos continuam visiveis no historico de visitas (`PartnerVisitHistory`) e nos graficos (`PartnerCharts`), onde pertencem contextualmente
 
-### 4. `getParticipants` chamado multiplas vezes por card sem memoizacao
-Linhas 639, 647, 648: `getParticipants(v)` e chamado 3 vezes no mesmo render do card mensal, e 3 vezes no card semanal (721, 731, 733). Deveria salvar em variavel local.
+### 2. Evolucao da pagina de Analises (`src/pages/AnalisesPage.tsx`)
 
-### 5. Login sempre loga como cargo "comercial" (hardcoded)
-Linha 25 de LoginPage: `login('comercial', appProfile)` — independente do toggle, o cargo e sempre `comercial`. O usuario nao consegue testar como diretor, gerente, etc.
+Reescrever com melhorias:
 
-**Sugestao**: Adicionar um seletor de cargo no login (ao menos para desenvolvimento/demo).
+- **KPI cards animados**: Total, Concluidas, Visitas, Prospecoes com `motion` e `tabular-nums`
+- **Grafico de tendencia mensal**: manter LineChart mas adicionar `Legend`, cursor interativo, tooltip estilizado com cores do tema
+- **Distribuicao por status**: PieChart com `innerRadius` (donut), legenda lateral com percentuais
+- **Performance individual**: BarChart empilhado (total vs concluidas) com tooltip detalhado mostrando taxa de conversao
+- **Novo grafico — Criado vs Concluido por mes**: BarChart comparativo lado a lado
+- **Novo grafico — Top parceiros visitados**: BarChart horizontal dos 5 parceiros mais visitados
+- **Filtro de periodo personalizado**: alem de semana/mes/ano, adicionar date range com `Popover` + `Calendar` (mesmo padrao usado na agenda)
+- **Responsividade**: `grid-cols-1 md:grid-cols-2` para graficos, cards empilhados em mobile
+- **Usar `useVisits()` hook** em vez de `mockVisits` diretamente (consistencia com dados reativos)
 
-### 6. Seguranca: autenticacao 100% mock com localStorage
-O `AuthContext` armazena usuario no `localStorage` sem nenhuma validacao. Qualquer pessoa pode manipular o perfil/role. Aceitavel para prototipo, mas deve ser documentado como limitacao.
+### 3. Evolucao do Dashboard (`src/pages/DashboardPage.tsx`)
 
-### 7. `useCallback` com deps vazias ignora mudancas
-Linha 130-141: `getParticipants` usa `getUserById` e `cargoLabels` que sao imports estaticos, entao deps `[]` e correto neste caso. OK.
+Melhorias sem remover componentes existentes:
 
-### 8. Tipo duplicado de info nos cards semanais
-Linha 716: `{v.type}` aparece como texto solto alem do badge de tipo (linha 712-713). Informacao duplicada — "Visita" aparece no badge E no texto "• Maria Souza • visita".
+- **Novo card de resumo rapido**: row de 4 mini-KPIs entre o Hero e o toggle de gestor (Visitas hoje, Concluidas, Pendentes, Taxa de conversao) com `motion` de entrada
+- **Interatividade no StatusChart**: ja tem hover/tooltip — manter como esta
+- **Interatividade no VisitMap**: ja tem tooltips — manter como esta
+- **Melhor transicao entre modos**: adicionar `AnimatePresence` com `mode="wait"` ao trocar personal/team para transicao suave dos dados
 
-**Correcao**: Remover `• {v.type}` da linha 716.
+### 4. Componentes compartilhados
 
-### 9. `setVisits` com deps incompletas nos useCallback
-Linhas 403-409: `handleAcceptVisitInvite` tem `[user, toast]` mas usa `setVisits` — porem `setVisits` e estavel (vem de hook), entao OK. Sem problema real.
+**Novo `src/components/shared/AnimatedKpiCard.tsx`**: card reutilizavel com icone, valor animado (contagem), label e cor. Usado em Analises e Dashboard.
 
-### 10. Formulario permite salvar prospecao com status "Reagendada" na criacao
-Ao criar nova agenda, o status default e "Planejada" e o seletor de status so aparece em edicao (linha 927: `editingVisit &&`). OK, sem problema.
+## Arquivos
 
-### 11. Indicadores mostram "criadas/concluidas" mas label pode confundir
-Os badges `{indicators.visitasCriadas}/{indicators.visitasConcluidas}` exibem "3/1 visitas". Nao fica claro o que e numerador e denominador.
-
-**Sugestao**: Tooltip explicando "X criadas / Y concluidas" ou formato "Y✓ de X".
-
-## Sugestoes de Melhoria
-
-### A. Mascaras de input
-Os campos CNPJ, telefone e CEP nao tem mascara. Adicionar formatacao automatica para melhor UX.
-
-### B. Validacao de email no formulario de prospecao
-O campo email e obrigatorio mas nao valida formato. Adicionar validacao basica.
-
-### C. Acessibilidade
-- Botoes de aceitar/rejeitar nos cards mensais (linhas 654-665) nao tem `aria-label`
-- Drag and drop nao tem alternativa keyboard-accessible
-
-### D. Empty states mais descritivos
-Quando nao ha visitas no periodo filtrado, o calendario mostra celulas vazias sem feedback. Adicionar mensagem "Nenhuma agenda encontrada" com sugestao de limpar filtros.
-
-## Plano de Implementacao
-
-| Prioridade | Arquivo | Acao |
-|---|---|---|
-| Alta | `AgendaPage.tsx` L636 | Fix: fallback nome prospecao no card mensal |
-| Alta | `AgendaPage.tsx` L710 | Fix: fallback nome prospecao na lista |
-| Alta | `AgendaPage.tsx` L716 | Fix: remover tipo duplicado no texto |
-| Media | `AgendaPage.tsx` L639+ | Otimizar: cachear getParticipants em variavel |
-| Media | `AgendaPage.tsx` | Refactor: extrair 4 componentes filhos |
-| Baixa | `AgendaPage.tsx` indicadores | UX: tooltip nos indicadores |
-| Baixa | `LoginPage.tsx` | Feature: seletor de cargo para demo |
-| Baixa | Formulario | UX: mascaras de CNPJ/telefone |
+| Arquivo | Acao |
+|---|---|
+| `src/components/partners/PartnerDetailView.tsx` | Remover secoes bancos/produtos do card |
+| `src/pages/AnalisesPage.tsx` | Reescrever com graficos interativos, novos graficos, date range |
+| `src/pages/DashboardPage.tsx` | Adicionar mini-KPIs, AnimatePresence no toggle |
+| `src/components/shared/AnimatedKpiCard.tsx` | Novo componente reutilizavel |
 
