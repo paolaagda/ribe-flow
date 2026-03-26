@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Users, User, CheckCircle, Clock, TrendingUp, CalendarDays } from 'lucide-react';
+import { Users, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVisits } from '@/hooks/useVisits';
 import { useTeamFilter } from '@/hooks/useTeamFilter';
