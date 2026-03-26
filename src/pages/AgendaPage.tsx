@@ -253,6 +253,7 @@ export default function AgendaPage() {
           prospectEmail: formData.prospectEmail || undefined,
           rescheduleReason: formData.rescheduleReason || undefined,
           cancelReason: formData.cancelReason || undefined,
+          statusChangedAt: (formData.status === 'Reagendada' || formData.status === 'Cancelada') ? new Date().toISOString() : v.statusChangedAt,
           prospectPartner: formData.prospectPartner,
           prospectCnpj: formData.prospectCnpj,
           prospectAddress: formData.prospectAddress,
@@ -903,6 +904,14 @@ export default function AgendaPage() {
         onLeaveVisit={handleLeaveVisit}
         onAddComment={handleAddComment}
         onToggleTask={handleToggleTask}
+      />
+
+      {/* Justification Modal */}
+      <JustificationModal
+        open={showJustificationModal}
+        onOpenChange={(open) => { if (!open) handleJustificationCancel(); }}
+        targetStatus={pendingFormStatus || 'Reagendada'}
+        onConfirm={handleJustificationConfirm}
       />
     </PageTransition>
   );

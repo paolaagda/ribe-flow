@@ -91,7 +91,7 @@ export default function PartnerVisitHistory({ visits }: Props) {
 
 function VisitItem({ visit }: { visit: Visit }) {
   const user = getUserById(visit.userId);
-  const hasDetails = visit.observations || visit.summary;
+  const hasDetails = visit.observations || visit.summary || visit.rescheduleReason || visit.cancelReason;
 
   return (
     <motion.div
@@ -117,6 +117,12 @@ function VisitItem({ visit }: { visit: Visit }) {
           {hasDetails && (
             <CollapsibleContent>
               <div className="mt-2 pt-2 border-t space-y-1">
+                {visit.status === 'Reagendada' && visit.rescheduleReason && (
+                  <p className="text-xs text-warning font-medium">Motivo do reagendamento: {visit.rescheduleReason}</p>
+                )}
+                {visit.status === 'Cancelada' && visit.cancelReason && (
+                  <p className="text-xs text-destructive font-medium">Motivo do cancelamento: {visit.cancelReason}</p>
+                )}
                 {visit.summary && <p className="text-xs text-foreground">{visit.summary}</p>}
                 {visit.observations && <p className="text-xs text-muted-foreground">{visit.observations}</p>}
                 {visit.banks.length > 0 && (

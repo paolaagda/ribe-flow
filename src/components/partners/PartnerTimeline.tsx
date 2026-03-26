@@ -60,7 +60,13 @@ export default function PartnerTimeline({ visits }: Props) {
                     <Badge variant="secondary" className="text-[10px] capitalize">{ev.type}</Badge>
                   </div>
                   <p className="text-sm mt-1">{user?.name}</p>
-                  {ev.summary && <p className="text-xs text-muted-foreground mt-0.5">{ev.summary}</p>}
+                  {ev.status === 'Reagendada' && ev.rescheduleReason && (
+                    <p className="text-xs text-warning mt-0.5">Visita reagendada — motivo: {ev.rescheduleReason}</p>
+                  )}
+                  {ev.status === 'Cancelada' && ev.cancelReason && (
+                    <p className="text-xs text-destructive mt-0.5">Visita cancelada — motivo: {ev.cancelReason}</p>
+                  )}
+                  {ev.summary && !(ev.status === 'Reagendada' && ev.rescheduleReason) && !(ev.status === 'Cancelada' && ev.cancelReason) && <p className="text-xs text-muted-foreground mt-0.5">{ev.summary}</p>}
                 </div>
               </div>
             );
