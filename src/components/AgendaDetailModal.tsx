@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Visit, getUserById, statusBgClasses } from '@/data/mock-data';
+import { Visit, getUserById, statusBgClasses, cargoLabels } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -230,6 +230,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
                           <TooltipContent><p>{badge.label}</p></TooltipContent>
                         </Tooltip>
                         <span className="text-sm flex-1">{invitedUser.name}</span>
+                        <Badge variant="secondary" className="text-[10px] capitalize">{cargoLabels[invitedUser.role]}</Badge>
                         <Badge variant="outline" className={cn('text-[10px]', badge.className)}>
                           {badge.label}
                         </Badge>
