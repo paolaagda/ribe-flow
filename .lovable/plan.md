@@ -1,99 +1,79 @@
 
 
-# Hierarquia Dupla (App vs Empresa) e Clareza Parceiro/Prospecção
+# Ajustes de Icones na Agenda + Estrutura Usuarios/Parceiros/Lojas
 
 ## Resumo
 
-Separar o conceito atual de `role` (que mistura cargo e permissao) em duas camadas independentes: **perfil do app** (gestor/nao_gestor) para permissoes e **cargo da empresa** (informativo). Adicionar novos cargos. Reforcar a distincao visual entre parceiro e prospecção na agenda.
-
-## Estado Atual
-
-- `UserRole` = gestor | diretor | gerente | ascom | comercial — usado para TUDO (permissoes, visibilidade, cargo)
-- Permissoes mapeadas por role com 5 perfis diferentes
-- Visibilidade filtrada por `role === 'comercial'` em varios lugares
-- Agenda ja diferencia visita vs prospecção com campos distintos
+Tres frentes: (1) trocar icones de periodo (Sun/Moon) por icones de tipo (Visita/Prospecao) na agenda, (2) remover "parceiro" e "loja" como cargos de usuario do sistema, (3) adicionar conceito de Loja vinculada a Parceiro.
 
 ## Mudancas
 
-### 1. Modelo de Dados (mock-data.ts)
+### 1. Icones na Agenda — Trocar periodo por tipo
 
-- Criar `AppProfile = 'gestor' | 'nao_gestor'`
-- Criar `CompanyCargo = 'diretor' | 'gerente' | 'ascom' | 'comercial' | 'cadastro' | 'parceiro' | 'loja'`
-- Manter `UserRole` como alias para `CompanyCargo` (compatibilidade)
-- Adicionar campo `profile: AppProfile` ao tipo `User`
-- Atualizar mockUsers com `profile` para cada usuario (u1 Carlos = gestor, u9 Lucas = gestor, demais = nao_gestor)
-- Adicionar mock users para novos cargos (cadastro, parceiro, loja — ao menos 1 de cada)
+**Onde aparece Sun/Moon hoje:**
+- Calendario mensal (linha 542 AgendaPage) — icone antes do nome
+- Lista semanal/diaria (linha 604 AgendaPage) — badge com emoji
+- Detalhe da agenda (linha 80 AgendaDetailModal) — icone no grid
+- Form de periodo no formulario (linhas 669-675 AgendaPage) — manter aqui, e so no select
+- TodayAgenda (home) — badge de tipo ja existe, sem Sun/Moon
 
-### 2. Permissoes (permissions.ts)
+**Acao:**
+- No calendario mensal: substituir `Sun`/`Moon` por `Handshake` (visita) / `UserPlus` (prospecao)
+- Na lista semanal/diaria: substituir badge `☀ Manha`/`🌙 Tarde` por badge colorida `Visita` (azul) / `Prospecao` (laranja) com icone
+- No detalhe (AgendaDetailModal): remover icone Sun/Moon do periodo, manter texto do periodo como badge simples; adicionar badge de tipo com icone
+- No form de periodo: manter Sun/Moon no select (faz sentido ali)
+- Na TodayAgenda: adicionar icone de tipo (Handshake/UserPlus) antes do nome
 
-- Simplificar `defaultPermissions` para 2 perfis: `gestor` (tudo write) e `nao_gestor` (acessos limitados)
-- Permissoes mapeadas por `AppProfile` em vez de `UserRole`
+### 2. Remover "parceiro" e "loja" como usuarios do sistema
 
-### 3. Hook de Permissao (usePermission.ts)
+**mock-data.ts:**
+- Remover u11 (Roberto, cargo parceiro) e u12 (Carla, cargo loja) do mockUsers
+- Remover `'parceiro'` e `'loja'` de `CompanyCargo` e `allCargos`
+- Remover entradas de `cargoLabels` e `cargoColors` para parceiro/loja
 
-- Ler `user.profile` em vez de `role` para determinar permissoes
+**LoginPage.tsx:**
+- Remover opcoes "Parceiro" e "Loja" do array `cargos`
 
-### 4. AuthContext (AuthContext.tsx)
+**UsersTab.tsx:**
+- Atualizar se referencia esses cargos
 
-- Expor `profile` alem de `role` (cargo)
-- Login busca usuario por cargo selecionado (manter comportamento)
+### 3. Estrutura de Lojas vinculadas a Parceiro
 
-### 5. Login (LoginPage.tsx)
+**mock-data.ts:**
+- Criar interface `Store` com: `id`, `partnerId`, `name`, `address`, `phone`, `contact`
+- Criar `mockStores` com 2-3 lojas vinculadas a parceiros existentes (ex: Mega Financeira com 2 filiais)
 
-- Manter seletor de cargo (empresa) com novos cargos
-- Adicionar toggle ou indicador de perfil do app (gestor/nao_gestor)
-- Mostrar claramente as duas camadas
+**Partner:**
+- Nao precisa mudar o tipo Partner (a relacao e feita pelo `partnerId` na Store)
 
-### 6. Visibilidade Global
+**hooks/useStores.ts (novo):**
+- Hook simples com useLocalStorage para stores
+- Funcao `getStoresByPartnerId`
 
-Substituir todas as checagens `role === 'comercial'` e similares por logica baseada em `profile`:
+**Exibicao:**
+- No `PartnerDetailView.tsx`: adicionar secao "Lojas" listando as lojas do parceiro
 
-- **AgendaPage.tsx**: `profile === 'nao_gestor'` → ve so suas visitas
-- **ParceirosPage.tsx**: `profile === 'nao_gestor'` → ve so seus parceiros
-- **DashboardPage.tsx**: `profile === 'gestor'` → ve tudo / equipe
-- **useTeamFilter.ts**: usar `profile` para decidir visibilidade
-- **NotificationContext.tsx**: ajustar geracao de notificacoes mock
+### 4. Vinculo comercial → parceiro
 
-### 7. UsersTab (settings/UsersTab.tsx)
+- Ja existe: `Partner.responsibleUserId` — campo ja presente e populado
+- Nenhuma mudanca necessaria, apenas confirmar que esta sendo usado corretamente nos filtros de visibilidade (ja esta)
 
-- Separar edicao de cargo (empresa) e perfil (app)
-- Atualizar roleColors e roleLabels com novos cargos
-- Permissoes editaveis por perfil (gestor/nao_gestor) em vez de por cargo
-- Manter estrutura de equipes
+### 5. Estrutura de equipe
 
-### 8. Distincao Visual Parceiro vs Prospecção (AgendaPage.tsx)
-
-- Adicionar tag/badge visual nos cards da agenda: "Visita" (azul) vs "Prospecção" (laranja)
-- No calendario mensal: icone diferente para prospecção
-- Na lista diaria/semanal: badge colorida diferenciando tipo
-
-### 9. Preparacao para Conversao (futuro, sem implementar)
-
-- Adicionar campo opcional `convertedToPartnerId?: string` no tipo Visit (apenas no tipo, sem logica)
+- Ja existe em `teams.ts` com diretor, gerente, ascom, comercial — nenhuma mudanca necessaria
+- Cadastro (u10) precisa ser adicionavel a equipes: adicionar campo opcional `cadastroIds: string[]` ao tipo Team
 
 ## Arquivos Modificados
 
 | Arquivo | Acao |
 |---|---|
-| `src/data/mock-data.ts` | Novos tipos, campo profile, novos mock users |
-| `src/data/permissions.ts` | Simplificar para gestor/nao_gestor |
-| `src/hooks/usePermission.ts` | Usar profile |
-| `src/contexts/AuthContext.tsx` | Expor profile |
-| `src/pages/LoginPage.tsx` | Novos cargos, indicador de perfil |
-| `src/pages/AgendaPage.tsx` | Visibilidade por profile, badges visuais |
-| `src/pages/ParceirosPage.tsx` | Visibilidade por profile |
-| `src/pages/DashboardPage.tsx` | Visibilidade por profile |
-| `src/pages/AnalisesPage.tsx` | Filtro por profile |
-| `src/pages/CampanhasPage.tsx` | Filtro por profile |
-| `src/hooks/useTeamFilter.ts` | Logica por profile |
-| `src/contexts/NotificationContext.tsx` | Ajustar mock |
-| `src/components/settings/UsersTab.tsx` | Dois campos (cargo+perfil), novas labels |
-| `src/components/home/HeroSection.tsx` | Visibilidade por profile |
-
-## Detalhes Tecnicos
-
-- `AppProfile` controla permissoes; `CompanyCargo` e informativo
-- localStorage key muda para `ribercred_permissions_v2` (2 perfis em vez de 5)
-- Nenhum backend necessario
-- Evolucao sem quebra: campos existentes mantidos, novos adicionados
+| `src/data/mock-data.ts` | Remover cargos parceiro/loja, remover u11/u12, adicionar Store interface e mockStores, adicionar cadastroIds ao Team |
+| `src/data/teams.ts` | Adicionar `cadastroIds` ao tipo Team |
+| `src/pages/AgendaPage.tsx` | Trocar Sun/Moon por Handshake/UserPlus no calendario e lista |
+| `src/components/AgendaDetailModal.tsx` | Remover icone Sun/Moon do periodo, adicionar badge de tipo |
+| `src/components/home/TodayAgenda.tsx` | Adicionar icone de tipo antes do nome |
+| `src/pages/LoginPage.tsx` | Remover opcoes parceiro e loja |
+| `src/hooks/useStores.ts` | Novo hook para lojas |
+| `src/components/partners/PartnerDetailView.tsx` | Adicionar secao de lojas do parceiro |
+| `src/components/settings/UsersTab.tsx` | Remover cargos parceiro/loja das opcoes |
 
