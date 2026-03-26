@@ -17,8 +17,8 @@ import { usePartners } from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { getRandomMessage } from '@/data/notification-messages';
-import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, DollarSign, Clock as ClockIcon, Handshake, UserPlus } from 'lucide-react';
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, addWeeks, subWeeks, isSameDay, isSameMonth, parseISO, isValid } from 'date-fns';
+import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, DollarSign, Clock as ClockIcon, Handshake, UserPlus, CalendarRange } from 'lucide-react';
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, addWeeks, subWeeks, isSameDay, isSameMonth, parseISO, isValid, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import AgendaDetailModal from '@/components/AgendaDetailModal';
@@ -27,6 +27,10 @@ import { usePermission } from '@/hooks/usePermission';
 import { ShieldOff } from 'lucide-react';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 
 type ViewMode = 'day' | 'week' | 'month';
 
@@ -53,6 +57,7 @@ export default function AgendaPage() {
   const [pendingDrop, setPendingDrop] = useState<{ visitId: string; newDate: string; day: Date } | null>(null);
   const [pendingFormStatus, setPendingFormStatus] = useState<'Reagendada' | 'Cancelada' | null>(null);
   const [showJustificationModal, setShowJustificationModal] = useState(false);
+  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
 
   // Form state
   const [formStep, setFormStep] = useState(0);
@@ -110,9 +115,42 @@ export default function AgendaPage() {
       if (filterStatus !== 'all' && v.status !== filterStatus) return false;
       if (filterType !== 'all' && v.type !== filterType) return false;
       if (filterUser !== 'all' && v.userId !== filterUser) return false;
+      if (dateRange.from && dateRange.to) {
+        const vDate = parseISO(v.date);
+        if (!isWithinInterval(vDate, { start: dateRange.from, end: dateRange.to })) return false;
+      } else if (dateRange.from) {
+        const vDate = parseISO(v.date);
+        if (vDate < dateRange.from) return false;
+      }
       return true;
     });
-  }, [visibleVisits, filterStatus, filterType, filterUser]);
+  }, [visibleVisits, filterStatus, filterType, filterUser, dateRange]);
+
+  // Helper: get participants for a visit (owner + accepted invitees)
+  const getParticipants = useCallback((v: Visit) => {
+    const participants: { id: string; name: string; cargo: string }[] = [];
+    const owner = getUserById(v.userId);
+    if (owner) participants.push({ id: owner.id, name: owner.name, cargo: cargoLabels[owner.role] || owner.role });
+    v.invitedUsers?.forEach(iu => {
+      if (iu.status === 'accepted' && iu.userId !== v.userId) {
+        const u = getUserById(iu.userId);
+        if (u) participants.push({ id: u.id, name: u.name, cargo: cargoLabels[u.role] || u.role });
+      }
+    });
+    return participants;
+  }, []);
+
+  // Performance indicators
+  const indicators = useMemo(() => {
+    const visitas = filteredVisits.filter(v => v.type === 'visita');
+    const prospecoes = filteredVisits.filter(v => v.type === 'prospecção');
+    return {
+      visitasCriadas: visitas.length,
+      visitasConcluidas: visitas.filter(v => v.status === 'Concluída').length,
+      prospecoesCriadas: prospecoes.length,
+      prospecoesConcluidas: prospecoes.filter(v => v.status === 'Concluída').length,
+    };
+  }, [filteredVisits]);
 
   const handleDragStart = (e: React.DragEvent, visitId: string) => {
     setDraggedVisitId(visitId);
@@ -447,6 +485,42 @@ export default function AgendaPage() {
         )}
       </div>
 
+      {/* Performance Indicators */}
+      <div className="grid grid-cols-2 gap-3">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <Card className="border-info/20">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-info/10 flex items-center justify-center">
+                <Handshake className="h-5 w-5 text-info" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Visitas</p>
+                <p className="text-lg font-bold">
+                  <motion.span key={indicators.visitasCriadas} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{indicators.visitasCriadas}</motion.span>
+                  {' '}criadas / <motion.span key={indicators.visitasConcluidas} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-info">{indicators.visitasConcluidas}</motion.span> concluídas
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
+          <Card className="border-warning/20">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
+                <UserPlus className="h-5 w-5 text-warning" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Prospecções</p>
+                <p className="text-lg font-bold">
+                  <motion.span key={indicators.prospecoesCriadas} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{indicators.prospecoesCriadas}</motion.span>
+                  {' '}criadas / <motion.span key={indicators.prospecoesConcluidas} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-warning">{indicators.prospecoesConcluidas}</motion.span> concluídas
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
       {/* Controls */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="flex items-center gap-2">
@@ -490,6 +564,45 @@ export default function AgendaPage() {
               <SelectItem value="prospecção">Prospecção</SelectItem>
             </SelectContent>
           </Select>
+          {/* Date Range Filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn('h-9 gap-1.5', (dateRange.from || dateRange.to) && 'border-primary text-primary')}>
+                <CalendarRange className="h-3.5 w-3.5" />
+                {dateRange.from && dateRange.to
+                  ? `${format(dateRange.from, 'dd/MM')} — ${format(dateRange.to, 'dd/MM')}`
+                  : dateRange.from
+                  ? `A partir de ${format(dateRange.from, 'dd/MM')}`
+                  : 'Período'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-3" align="start">
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Data inicial</p>
+                  <Calendar
+                    mode="single"
+                    selected={dateRange.from}
+                    onSelect={(d) => setDateRange(prev => ({ ...prev, from: d || undefined }))}
+                    className="p-2 pointer-events-auto"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Data final</p>
+                  <Calendar
+                    mode="single"
+                    selected={dateRange.to}
+                    onSelect={(d) => setDateRange(prev => ({ ...prev, to: d || undefined }))}
+                    disabled={(d) => dateRange.from ? d < dateRange.from : false}
+                    className="p-2 pointer-events-auto"
+                  />
+                </div>
+                {(dateRange.from || dateRange.to) && (
+                  <Button variant="ghost" size="sm" className="w-full" onClick={() => setDateRange({})}>Limpar período</Button>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
@@ -543,6 +656,21 @@ export default function AgendaPage() {
                           >
                             {v.type === 'visita' ? <Handshake className="h-2.5 w-2.5 shrink-0 text-info" /> : <UserPlus className="h-2.5 w-2.5 shrink-0 text-warning" />}
                             <span className="truncate flex-1">{partner?.name?.split(' ')[0]}</span>
+                            <TooltipProvider delayDuration={200}>
+                              <div className="flex -space-x-1 shrink-0">
+                                {getParticipants(v).slice(0, 2).map(p => (
+                                  <Tooltip key={p.id}>
+                                    <TooltipTrigger asChild>
+                                      <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">{p.name.charAt(0)}</div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
+                                  </Tooltip>
+                                ))}
+                                {getParticipants(v).length > 2 && (
+                                  <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">+{getParticipants(v).length - 2}</div>
+                                )}
+                              </div>
+                            </TooltipProvider>
                             {myInvite && (
                               <span className="flex gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
                                 <button
@@ -610,6 +738,25 @@ export default function AgendaPage() {
                             <span>• {vUser?.name} • {v.type}</span>
                           </div>
                         </div>
+                        <TooltipProvider delayDuration={200}>
+                          <div className="flex -space-x-1.5 shrink-0">
+                            {getParticipants(v).slice(0, 4).map(p => (
+                              <Tooltip key={p.id}>
+                                <TooltipTrigger asChild>
+                                  <Avatar className="h-6 w-6 border-2 border-background">
+                                    <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">{p.name.charAt(0)}</AvatarFallback>
+                                  </Avatar>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
+                              </Tooltip>
+                            ))}
+                            {getParticipants(v).length > 4 && (
+                              <Avatar className="h-6 w-6 border-2 border-background">
+                                <AvatarFallback className="text-[9px] bg-muted text-muted-foreground">+{getParticipants(v).length - 4}</AvatarFallback>
+                              </Avatar>
+                            )}
+                          </div>
+                        </TooltipProvider>
                         <div className="flex items-center gap-1.5">
                           {v.potentialValue && (
                             <Badge variant="outline" className={cn('text-[9px]', v.potentialValue >= 1000000 ? 'bg-warning/10 text-warning border-warning/20' : '')}>
