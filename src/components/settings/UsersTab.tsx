@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
-import { User, UserRole } from '@/data/mock-data';
+import { User, UserRole, AppProfile, CompanyCargo, cargoLabels, cargoColors, profileLabels, profileColors, allCargos } from '@/data/mock-data';
 import { useUsersData } from '@/hooks/useUsersData';
 import { PermissionLevel, defaultPermissions, groupedPermissions } from '@/data/permissions';
 import { usePermission } from '@/hooks/usePermission';
@@ -25,29 +25,7 @@ import { Team, initialTeams } from '@/data/teams';
 import { Edit, Lock, Trash2, RefreshCw, Search, Shield, Eye, EyeOff, Pencil, Save, Plus, Users2, ChevronRight, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const roleColors: Record<UserRole, string> = {
-  gestor: 'bg-primary/10 text-primary',
-  diretor: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
-  gerente: 'bg-info/10 text-info',
-  ascom: 'bg-warning/10 text-warning',
-  comercial: 'bg-success/10 text-success',
-};
-
-const roleLabels: Record<UserRole, string> = {
-  gestor: 'Gestor',
-  diretor: 'Diretor',
-  gerente: 'Gerente',
-  ascom: 'ASCOM',
-  comercial: 'Comercial',
-};
-
-const permissionLevelLabels: Record<PermissionLevel, { label: string; icon: React.ReactNode; color: string }> = {
-  none: { label: 'Sem acesso', icon: <EyeOff className="h-3.5 w-3.5" />, color: 'text-destructive' },
-  read: { label: 'Somente leitura', icon: <Eye className="h-3.5 w-3.5" />, color: 'text-warning' },
-  write: { label: 'Leitura e edição', icon: <Pencil className="h-3.5 w-3.5" />, color: 'text-success' },
-};
-
-const allRoles: UserRole[] = ['gestor', 'diretor', 'gerente', 'ascom', 'comercial'];
+const allProfiles: AppProfile[] = ['gestor', 'nao_gestor'];
 
 export default function UsersTab() {
   const { toast } = useToast();
