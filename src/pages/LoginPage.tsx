@@ -79,6 +79,21 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {/* Cargo Selector */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Cargo</Label>
+              <Select value={cargo} onValueChange={(v) => setCargo(v as CompanyCargo)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {allCargos.map(c => (
+                    <SelectItem key={c} value={c}>{cargoLabels[c]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Profile Toggle (App) */}
             <div className="flex items-center justify-between rounded-xl border-2 border-border p-3">
               <div className="space-y-0.5">
