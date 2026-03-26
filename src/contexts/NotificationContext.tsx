@@ -58,50 +58,60 @@ function generateMockNotifications(userId: string): AppNotification[] {
   const today = format(now, 'yyyy-MM-dd');
   const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
 
-  const gestorUser = mockUsers.find(u => u.profile === 'gestor');
-  const gerenteUser = mockUsers.find(u => u.role === 'gerente');
-  if (!gestorUser || !gerenteUser) return [];
+  const u4 = mockUsers.find(u => u.id === 'u4')!;
+  const u5 = mockUsers.find(u => u.id === 'u5')!;
 
-  const p1 = mockPartners[0];
-  const p2 = mockPartners[1];
-  const p3 = mockPartners[2];
+  const p1 = mockPartners.find(p => p.id === 'p1')!; // Crédito Fácil
+  const p2 = mockPartners.find(p => p.id === 'p2')!; // Financeira Express
+  const p3 = mockPartners.find(p => p.id === 'p3')!; // Casa do Empréstimo
 
   return [
+    // 3 convites pendentes para HOJE vinculados a vt1, vt2, vt3
     {
-      id: 'notif-1', type: 'invite', visitId: 'v1',
-      fromUserId: gestorUser.id, toUserId: userId,
+      id: 'notif-1', type: 'invite', visitId: 'vt1',
+      fromUserId: u4.id, toUserId: userId,
       partnerId: p1.id, partnerName: p1.name,
-      date: tomorrowStr, time: '10:00',
+      date: today, time: '09:00',
       read: false, status: 'pending',
       createdAt: new Date(now.getTime() - 30 * 60000).toISOString(),
-      message: getRandomMessage('invite_detail', { parceiro: p1.name, nome: gestorUser.name, data: format(tomorrow, "dd 'de' MMMM", { locale: ptBR }), hora: '10:00' }),
+      message: getRandomMessage('invite_detail', { parceiro: p1.name, nome: u4.name, data: 'hoje', hora: '09:00' }),
     },
     {
-      id: 'notif-2', type: 'invite', visitId: 'v2',
-      fromUserId: gerenteUser.id, toUserId: userId,
+      id: 'notif-2', type: 'invite', visitId: 'vt2',
+      fromUserId: u4.id, toUserId: userId,
       partnerId: p2.id, partnerName: p2.name,
-      date: today, time: '14:30',
+      date: today, time: '10:30',
       read: false, status: 'pending',
       createdAt: new Date(now.getTime() - 2 * 3600000).toISOString(),
-      message: getRandomMessage('invite_detail', { parceiro: p2.name, nome: gerenteUser.name, data: 'hoje', hora: '14:30' }),
+      message: getRandomMessage('invite_detail', { parceiro: p2.name, nome: u4.name, data: 'hoje', hora: '10:30' }),
     },
     {
-      id: 'notif-3', type: 'invite', visitId: 'v3',
-      fromUserId: gestorUser.id, toUserId: userId,
+      id: 'notif-3', type: 'invite', visitId: 'vt3',
+      fromUserId: u5.id, toUserId: userId,
       partnerId: p3.id, partnerName: p3.name,
-      date: format(new Date(now.getTime() + 3 * 86400000), 'yyyy-MM-dd'), time: '09:00',
+      date: today, time: '11:00',
+      read: false, status: 'pending',
+      createdAt: new Date(now.getTime() - 3 * 3600000).toISOString(),
+      message: getRandomMessage('invite_detail', { parceiro: p3.name, nome: u5.name, data: 'hoje', hora: '11:00' }),
+    },
+    // 1 aceito (amanhã) + 1 rejeitado (passado) para variedade
+    {
+      id: 'notif-4', type: 'invite', visitId: 'v3',
+      fromUserId: u4.id, toUserId: userId,
+      partnerId: p3.id, partnerName: p3.name,
+      date: tomorrowStr, time: '09:00',
       read: true, status: 'accepted',
       createdAt: new Date(now.getTime() - 24 * 3600000).toISOString(),
-      message: getRandomMessage('invite_detail', { parceiro: p3.name, nome: gestorUser.name, data: format(new Date(now.getTime() + 3 * 86400000), "dd 'de' MMMM", { locale: ptBR }), hora: '09:00' }),
+      message: getRandomMessage('invite_detail', { parceiro: p3.name, nome: u4.name, data: format(tomorrow, "dd 'de' MMMM", { locale: ptBR }), hora: '09:00' }),
     },
     {
-      id: 'notif-4', type: 'invite', visitId: 'v4',
-      fromUserId: gerenteUser.id, toUserId: userId,
+      id: 'notif-5', type: 'invite', visitId: 'v4',
+      fromUserId: u5.id, toUserId: userId,
       partnerId: p1.id, partnerName: p1.name,
       date: format(new Date(now.getTime() - 2 * 86400000), 'yyyy-MM-dd'), time: '11:00',
       read: true, status: 'rejected',
       createdAt: new Date(now.getTime() - 48 * 3600000).toISOString(),
-      message: getRandomMessage('invite_detail', { parceiro: p1.name, nome: gerenteUser.name, data: format(new Date(now.getTime() - 2 * 86400000), "dd 'de' MMMM", { locale: ptBR }), hora: '11:00' }),
+      message: getRandomMessage('invite_detail', { parceiro: p1.name, nome: u5.name, data: format(new Date(now.getTime() - 2 * 86400000), "dd 'de' MMMM", { locale: ptBR }), hora: '11:00' }),
     },
   ];
 }
