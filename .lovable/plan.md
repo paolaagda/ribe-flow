@@ -1,79 +1,74 @@
 
 
-# Ajustes de Icones na Agenda + Estrutura Usuarios/Parceiros/Lojas
+# Nova Aba "Dados do Sistema" + Simplificacao do Login
 
 ## Resumo
 
-Tres frentes: (1) trocar icones de periodo (Sun/Moon) por icones de tipo (Visita/Prospecao) na agenda, (2) remover "parceiro" e "loja" como cargos de usuario do sistema, (3) adicionar conceito de Loja vinculada a Parceiro.
+Criar uma aba "Dados do Sistema" em Configuracoes para gerenciar listas dinamicas (bancos, produtos, justificativas, tipos de loja, periodos) com ativar/inativar. Simplificar o login removendo o seletor de cargo. Remover icones Sun/Moon do formulario de periodo.
 
 ## Mudancas
 
-### 1. Icones na Agenda — Trocar periodo por tipo
+### 1. Hook de dados do sistema (novo: `src/hooks/useSystemData.ts`)
 
-**Onde aparece Sun/Moon hoje:**
-- Calendario mensal (linha 542 AgendaPage) — icone antes do nome
-- Lista semanal/diaria (linha 604 AgendaPage) — badge com emoji
-- Detalhe da agenda (linha 80 AgendaDetailModal) — icone no grid
-- Form de periodo no formulario (linhas 669-675 AgendaPage) — manter aqui, e so no select
-- TodayAgenda (home) — badge de tipo ja existe, sem Sun/Moon
+Hook com `useLocalStorage` que gerencia 6 categorias de itens configuráveis:
 
-**Acao:**
-- No calendario mensal: substituir `Sun`/`Moon` por `Handshake` (visita) / `UserPlus` (prospecao)
-- Na lista semanal/diaria: substituir badge `☀ Manha`/`🌙 Tarde` por badge colorida `Visita` (azul) / `Prospecao` (laranja) com icone
-- No detalhe (AgendaDetailModal): remover icone Sun/Moon do periodo, manter texto do periodo como badge simples; adicionar badge de tipo com icone
-- No form de periodo: manter Sun/Moon no select (faz sentido ali)
-- Na TodayAgenda: adicionar icone de tipo (Handshake/UserPlus) antes do nome
+```
+interface SystemItem { id: string; label: string; active: boolean }
+```
 
-### 2. Remover "parceiro" e "loja" como usuarios do sistema
+Categorias (inicializadas a partir dos dados mock existentes):
+- `banks` — de `BANKS`
+- `products` — de `PRODUCTS`
+- `rescheduleReasons` — de `RESCHEDULE_REASONS`
+- `cancelReasons` — de `CANCEL_REASONS`
+- `storeStructures` — de `STORE_STRUCTURES`
+- `periods` — de `VisitPeriod` (manhã, tarde)
 
-**mock-data.ts:**
-- Remover u11 (Roberto, cargo parceiro) e u12 (Carla, cargo loja) do mockUsers
-- Remover `'parceiro'` e `'loja'` de `CompanyCargo` e `allCargos`
-- Remover entradas de `cargoLabels` e `cargoColors` para parceiro/loja
+Funcoes: `addItem(category, label)`, `toggleItem(category, id)`, `getActiveItems(category)`
 
-**LoginPage.tsx:**
-- Remover opcoes "Parceiro" e "Loja" do array `cargos`
+### 2. Componente da aba (novo: `src/components/settings/SystemDataTab.tsx`)
 
-**UsersTab.tsx:**
-- Atualizar se referencia esses cargos
+- 6 secoes colapsáveis (Accordion), uma por categoria
+- Cada secao: lista de itens com nome + Switch ativo/inativo + botao "Adicionar"
+- Input inline para adicionar novo item
+- Toast de feedback ao adicionar/inativar
 
-### 3. Estrutura de Lojas vinculadas a Parceiro
+### 3. Registrar aba em ConfiguracoesPage.tsx
 
-**mock-data.ts:**
-- Criar interface `Store` com: `id`, `partnerId`, `name`, `address`, `phone`, `contact`
-- Criar `mockStores` com 2-3 lojas vinculadas a parceiros existentes (ex: Mega Financeira com 2 filiais)
+- Adicionar tab "Dados do Sistema" com icone `Database`
+- Novo `TabsContent` renderizando `SystemDataTab`
 
-**Partner:**
-- Nao precisa mudar o tipo Partner (a relacao e feita pelo `partnerId` na Store)
+### 4. Consumir dados dinamicos nos formularios
 
-**hooks/useStores.ts (novo):**
-- Hook simples com useLocalStorage para stores
-- Funcao `getStoresByPartnerId`
+**AgendaPage.tsx:**
+- Selects de bancos, produtos, periodo → usar `getActiveItems()` em vez das constantes
+- Remover icones Sun/Moon do select de periodo (manter apenas texto)
 
-**Exibicao:**
-- No `PartnerDetailView.tsx`: adicionar secao "Lojas" listando as lojas do parceiro
+**JustificationModal.tsx:**
+- Opcoes de justificativa → usar `getActiveItems('rescheduleReasons')` ou `getActiveItems('cancelReasons')`
 
-### 4. Vinculo comercial → parceiro
+**Formulario de parceiro (PartnersTab.tsx / PartnerDetailView.tsx):**
+- Estruturas de loja → usar `getActiveItems('storeStructures')`
 
-- Ja existe: `Partner.responsibleUserId` — campo ja presente e populado
-- Nenhuma mudanca necessaria, apenas confirmar que esta sendo usado corretamente nos filtros de visibilidade (ja esta)
+### 5. Simplificar login (LoginPage.tsx)
 
-### 5. Estrutura de equipe
+- Remover o seletor de cargo (RadioGroup com 5 opcoes)
+- Manter apenas o toggle Gestor/Nao Gestor
+- Login busca um usuario mock qualquer e aplica o perfil selecionado
+- Remover imports de `CompanyCargo` e icones de cargo
 
-- Ja existe em `teams.ts` com diretor, gerente, ascom, comercial — nenhuma mudanca necessaria
-- Cadastro (u10) precisa ser adicionavel a equipes: adicionar campo opcional `cadastroIds: string[]` ao tipo Team
+### 6. Remover icones Sun/Moon do periodo no formulario
 
-## Arquivos Modificados
+- No select de periodo (AgendaPage linha 672-677): remover `<Sun>` e `<Moon>`, manter apenas texto "Manhã" / "Tarde"
+
+## Arquivos
 
 | Arquivo | Acao |
 |---|---|
-| `src/data/mock-data.ts` | Remover cargos parceiro/loja, remover u11/u12, adicionar Store interface e mockStores, adicionar cadastroIds ao Team |
-| `src/data/teams.ts` | Adicionar `cadastroIds` ao tipo Team |
-| `src/pages/AgendaPage.tsx` | Trocar Sun/Moon por Handshake/UserPlus no calendario e lista |
-| `src/components/AgendaDetailModal.tsx` | Remover icone Sun/Moon do periodo, adicionar badge de tipo |
-| `src/components/home/TodayAgenda.tsx` | Adicionar icone de tipo antes do nome |
-| `src/pages/LoginPage.tsx` | Remover opcoes parceiro e loja |
-| `src/hooks/useStores.ts` | Novo hook para lojas |
-| `src/components/partners/PartnerDetailView.tsx` | Adicionar secao de lojas do parceiro |
-| `src/components/settings/UsersTab.tsx` | Remover cargos parceiro/loja das opcoes |
+| `src/hooks/useSystemData.ts` | Novo hook |
+| `src/components/settings/SystemDataTab.tsx` | Novo componente |
+| `src/pages/ConfiguracoesPage.tsx` | Adicionar aba |
+| `src/pages/AgendaPage.tsx` | Consumir dados dinamicos, remover Sun/Moon do periodo |
+| `src/components/agenda/JustificationModal.tsx` | Consumir justificativas dinamicas |
+| `src/pages/LoginPage.tsx` | Remover seletor de cargo, manter so toggle perfil |
 
