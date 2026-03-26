@@ -10,13 +10,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { mockUsers, getUserById, BANKS, PRODUCTS, Visit, VisitStatus, VisitType, VisitPeriod, VisitComment, statusBgClasses, getPartnerById as getPartnerByIdGlobal } from '@/data/mock-data';
+import { mockUsers, getUserById, Visit, VisitStatus, VisitType, VisitPeriod, VisitComment, statusBgClasses, getPartnerById as getPartnerByIdGlobal } from '@/data/mock-data';
+import { useSystemData } from '@/hooks/useSystemData';
 import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { getRandomMessage } from '@/data/notification-messages';
-import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, Sun, Moon, DollarSign, Clock as ClockIcon, Handshake, UserPlus } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, DollarSign, Clock as ClockIcon, Handshake, UserPlus } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, addWeeks, subWeeks, isSameDay, isSameMonth, parseISO, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -36,6 +37,7 @@ export default function AgendaPage() {
   const { partners, getPartnerById } = usePartners();
   const { addNotification } = useNotifications();
   const { visits, setVisits } = useVisits();
+  const { getActiveItems } = useSystemData();
   const [view, setView] = useState<ViewMode>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showForm, setShowForm] = useState(false);
@@ -669,12 +671,9 @@ export default function AgendaPage() {
                     <SelectValue placeholder="Selecione o período" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="manhã">
-                      <span className="flex items-center gap-2"><Sun className="h-4 w-4" /> Manhã</span>
-                    </SelectItem>
-                    <SelectItem value="tarde">
-                      <span className="flex items-center gap-2"><Moon className="h-4 w-4" /> Tarde</span>
-                    </SelectItem>
+                    {getActiveItems('periods').map(p => (
+                      <SelectItem key={p} value={p.toLowerCase() as VisitPeriod}>{p}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -849,7 +848,7 @@ export default function AgendaPage() {
               <div className="space-y-2">
                 <Label>Bancos</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  {BANKS.map(b => (
+                  {getActiveItems('banks').map(b => (
                     <label key={b} className="flex items-center gap-2 text-sm cursor-pointer">
                       <Checkbox checked={formData.banks.includes(b)} onCheckedChange={() => setFormData({...formData, banks: toggleArray(formData.banks, b)})} />
                       {b}
@@ -860,7 +859,7 @@ export default function AgendaPage() {
               <div className="space-y-2">
                 <Label>Produtos</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  {PRODUCTS.map(p => (
+                  {getActiveItems('products').map(p => (
                     <label key={p} className="flex items-center gap-2 text-sm cursor-pointer">
                       <Checkbox checked={formData.products.includes(p)} onCheckedChange={() => setFormData({...formData, products: toggleArray(formData.products, p)})} />
                       {p}

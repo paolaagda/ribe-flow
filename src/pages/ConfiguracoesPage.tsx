@@ -2,11 +2,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageTransition from '@/components/PageTransition';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePermission } from '@/hooks/usePermission';
-import { ShieldOff, Users, Trophy, Palette, Building2 } from 'lucide-react';
+import { ShieldOff, Users, Trophy, Palette, Building2, Database } from 'lucide-react';
 import UsersTab from '@/components/settings/UsersTab';
 import CampaignsTab from '@/components/settings/CampaignsTab';
 import PartnersTab from '@/components/settings/PartnersTab';
 import AppearanceTab from '@/components/settings/AppearanceTab';
+import SystemDataTab from '@/components/settings/SystemDataTab';
 
 export default function ConfiguracoesPage() {
   const { canRead } = usePermission();
@@ -42,6 +43,9 @@ export default function ConfiguracoesPage() {
           <TabsTrigger value="aparencia" className="gap-1.5">
             <Palette className="h-3.5 w-3.5" /> Aparência
           </TabsTrigger>
+          <TabsTrigger value="dados" className="gap-1.5">
+            <Database className="h-3.5 w-3.5" /> Dados do Sistema
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="usuarios">
@@ -72,6 +76,14 @@ export default function ConfiguracoesPage() {
           <Card>
             <CardContent className="p-4 md:p-6">
               <AppearanceTab />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="dados">
+          <Card>
+            <CardContent className="p-4 md:p-6">
+              <SystemDataTab />
             </CardContent>
           </Card>
         </TabsContent>
