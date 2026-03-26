@@ -250,21 +250,21 @@ function generateVisits(): Visit[] {
 
   visits.push(
     {
-      id: 'vt1', partnerId: 'p1', userId: 'u4', createdBy: 'u4', invitedUsers: [],
+      id: 'vt1', partnerId: 'p1', userId: 'u4', createdBy: 'u4', invitedUsers: [{ userId: 'u2', status: 'accepted' }, { userId: 'u3', status: 'pending' }],
       date: todayStr, time: '09:00', period: 'manhã', type: 'visita', medio: 'presencial', status: 'Concluída',
       structures: ['Help', 'Loja balcão'], banks: ['Riber Seguros', 'Itaú'], products: ['INSS', 'FGTS'],
       observations: 'Reunião produtiva, parceiro satisfeito.', summary: 'Alinhamento sobre metas do trimestre.',
       potentialValue: 1500000, comments: [],
     },
     {
-      id: 'vt2', partnerId: 'p2', userId: 'u4', createdBy: 'u4', invitedUsers: [],
+      id: 'vt2', partnerId: 'p2', userId: 'u4', createdBy: 'u4', invitedUsers: [{ userId: 'u5', status: 'pending' }, { userId: 'u9', status: 'accepted' }],
       date: todayStr, time: '10:30', period: 'manhã', type: 'prospecção', medio: 'remoto', status: 'Planejada',
       structures: ['Venda Online'], banks: ['Finanto', 'C6'], products: ['Veículos', 'CLT'],
       observations: '', summary: '',
       potentialValue: 2500000, prospectEmail: 'contato@express.com', comments: [],
     },
     {
-      id: 'vt3', partnerId: 'p3', userId: 'u5', createdBy: 'u5', invitedUsers: [],
+      id: 'vt3', partnerId: 'p3', userId: 'u5', createdBy: 'u5', invitedUsers: [{ userId: 'u4', status: 'pending' }],
       date: todayStr, time: '11:00', period: 'manhã', type: 'visita', medio: 'presencial', status: 'Planejada',
       structures: ['Loja balcão'], banks: ['Daycoval'], products: ['Imobiliário'],
       observations: '', summary: '',
@@ -278,7 +278,7 @@ function generateVisits(): Visit[] {
       rescheduleReason: 'Cliente não disponível', comments: [],
     },
     {
-      id: 'vt5', partnerId: 'p6', userId: 'u4', createdBy: 'u4', invitedUsers: [],
+      id: 'vt5', partnerId: 'p6', userId: 'u4', createdBy: 'u4', invitedUsers: [{ userId: 'u7', status: 'accepted' }, { userId: 'u6', status: 'pending' }],
       date: todayStr, time: '16:00', period: 'tarde', type: 'visita', medio: 'presencial', status: 'Planejada',
       structures: ['Venda Online', 'Help'], banks: ['Riber Seguros'], products: ['Seguros', 'CNC'],
       observations: '', summary: '',
