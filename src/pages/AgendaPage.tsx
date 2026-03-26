@@ -21,6 +21,7 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInte
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import AgendaDetailModal from '@/components/AgendaDetailModal';
+import JustificationModal from '@/components/agenda/JustificationModal';
 import { usePermission } from '@/hooks/usePermission';
 import { ShieldOff } from 'lucide-react';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
@@ -47,6 +48,9 @@ export default function AgendaPage() {
   const [showDetail, setShowDetail] = useState(false);
   const [editingVisit, setEditingVisit] = useState<Visit | null>(null);
   const [hasDragged, setHasDragged] = useState(false);
+  const [pendingDrop, setPendingDrop] = useState<{ visitId: string; newDate: string; day: Date } | null>(null);
+  const [pendingFormStatus, setPendingFormStatus] = useState<'Reagendada' | 'Cancelada' | null>(null);
+  const [showJustificationModal, setShowJustificationModal] = useState(false);
 
   // Form state
   const [formStep, setFormStep] = useState(0);
@@ -129,12 +133,44 @@ export default function AgendaPage() {
     const newDate = format(day, 'yyyy-MM-dd');
     const visit = visits.find(v => v.id === draggedVisitId);
     if (!visit || visit.date === newDate) { setDraggedVisitId(null); return; }
-    setVisits(prev => prev.map(v =>
-      v.id === draggedVisitId ? { ...v, date: newDate, status: 'Reagendada' as VisitStatus } : v
-    ));
-    const label = visit.type === 'visita' ? 'Visita' : 'Prospecção';
-    toast({ title: `${label} reagendada!`, description: `Reagendada para ${format(day, "dd 'de' MMMM", { locale: ptBR })}` });
+    // Intercept: open justification modal for reschedule
+    setPendingDrop({ visitId: draggedVisitId, newDate, day });
+    setPendingFormStatus('Reagendada');
+    setShowJustificationModal(true);
     setDraggedVisitId(null);
+  };
+
+  const handleJustificationConfirm = (reason: string) => {
+    if (pendingDrop) {
+      // Drag-and-drop reschedule
+      setVisits(prev => prev.map(v =>
+        v.id === pendingDrop.visitId ? {
+          ...v,
+          date: pendingDrop.newDate,
+          status: 'Reagendada' as VisitStatus,
+          rescheduleReason: reason,
+          statusChangedAt: new Date().toISOString(),
+        } : v
+      ));
+      const visit = visits.find(v => v.id === pendingDrop.visitId);
+      const label = visit?.type === 'visita' ? 'Visita' : 'Prospecção';
+      toast({ title: 'Reagendamento registrado com sucesso', description: `${label} reagendada para ${format(pendingDrop.day, "dd 'de' MMMM", { locale: ptBR })}` });
+      setPendingDrop(null);
+    } else if (pendingFormStatus) {
+      // Form status change
+      const reasonField = pendingFormStatus === 'Reagendada' ? 'rescheduleReason' : 'cancelReason';
+      setFormData(prev => ({ ...prev, status: pendingFormStatus as VisitStatus, [reasonField]: reason }));
+      const msg = pendingFormStatus === 'Reagendada' ? 'Reagendamento registrado com sucesso' : 'Cancelamento registrado com sucesso';
+      toast({ title: msg });
+    }
+    setPendingFormStatus(null);
+    setShowJustificationModal(false);
+  };
+
+  const handleJustificationCancel = () => {
+    setPendingDrop(null);
+    setPendingFormStatus(null);
+    setShowJustificationModal(false);
   };
 
   const handleDragEnd = () => { setDraggedVisitId(null); setDragOverDay(null); };
