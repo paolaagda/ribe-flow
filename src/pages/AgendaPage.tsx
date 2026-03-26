@@ -656,6 +656,21 @@ export default function AgendaPage() {
                           >
                             {v.type === 'visita' ? <Handshake className="h-2.5 w-2.5 shrink-0 text-info" /> : <UserPlus className="h-2.5 w-2.5 shrink-0 text-warning" />}
                             <span className="truncate flex-1">{partner?.name?.split(' ')[0]}</span>
+                            <TooltipProvider delayDuration={200}>
+                              <div className="flex -space-x-1 shrink-0">
+                                {getParticipants(v).slice(0, 2).map(p => (
+                                  <Tooltip key={p.id}>
+                                    <TooltipTrigger asChild>
+                                      <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">{p.name.charAt(0)}</div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
+                                  </Tooltip>
+                                ))}
+                                {getParticipants(v).length > 2 && (
+                                  <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">+{getParticipants(v).length - 2}</div>
+                                )}
+                              </div>
+                            </TooltipProvider>
                             {myInvite && (
                               <span className="flex gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
                                 <button
