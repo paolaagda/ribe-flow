@@ -25,6 +25,8 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInte
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import AgendaDetailModal from '@/components/AgendaDetailModal';
+import TodayAgenda from '@/components/home/TodayAgenda';
+import VisitMap from '@/components/home/VisitMap';
 import JustificationModal from '@/components/agenda/JustificationModal';
 import { usePermission } from '@/hooks/usePermission';
 import { ShieldOff } from 'lucide-react';
