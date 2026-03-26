@@ -10,8 +10,8 @@ import CampaignProgress from '@/components/home/CampaignProgress';
 import StatusChart from '@/components/home/StatusChart';
 
 export default function DashboardPage() {
-  const { user } = useAuth();
-  const isManager = user?.role === 'gestor' || user?.role === 'diretor' || user?.role === 'gerente';
+  const { profile } = useAuth();
+  const isGestor = profile === 'gestor';
   const [viewMode, setViewMode] = useState<'personal' | 'team'>('personal');
 
   return (
@@ -19,8 +19,8 @@ export default function DashboardPage() {
       {/* Hero */}
       <HeroSection />
 
-      {/* View toggle for managers */}
-      {isManager && (
+      {/* View toggle for gestors */}
+      {isGestor && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -49,10 +49,10 @@ export default function DashboardPage() {
       {/* Agenda + Map */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <TodayAgenda viewMode={isManager ? viewMode : 'personal'} />
+          <TodayAgenda viewMode={isGestor ? viewMode : 'personal'} />
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-          <VisitMap viewMode={isManager ? viewMode : 'personal'} />
+          <VisitMap viewMode={isGestor ? viewMode : 'personal'} />
         </motion.div>
       </div>
 
@@ -62,7 +62,7 @@ export default function DashboardPage() {
           <CampaignProgress />
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-          <StatusChart viewMode={isManager ? viewMode : 'personal'} />
+          <StatusChart viewMode={isGestor ? viewMode : 'personal'} />
         </motion.div>
       </div>
     </div>

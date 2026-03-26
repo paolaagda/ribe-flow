@@ -41,7 +41,7 @@ export default function HeroSection() {
   const today = new Date().toISOString().split('T')[0];
 
   const stats = useMemo(() => {
-    const isCommercial = user?.role === 'comercial';
+    const isCommercial = user?.profile === 'nao_gestor';
     const todayVisits = mockVisits.filter(v =>
       v.date === today && (!isCommercial || v.userId === user?.id)
     );
