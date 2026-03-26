@@ -19,6 +19,8 @@ import PartnerVisitHistory from './PartnerVisitHistory';
 import PartnerTimeline from './PartnerTimeline';
 import PartnerCharts from './PartnerCharts';
 import PartnerInsights from './PartnerInsights';
+import { useStores } from '@/hooks/useStores';
+import { Store } from 'lucide-react';
 
 interface Props {
   partnerId: string;
@@ -34,6 +36,7 @@ const potentialConfig = {
 export default function PartnerDetailView({ partnerId, onBack }: Props) {
   const { getPartnerById } = usePartners();
   const { visits } = useVisits();
+  const { getStoresByPartnerId } = useStores();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
@@ -218,6 +221,39 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
 
       {/* Timeline */}
       <PartnerTimeline visits={partnerVisits} />
+
+      {/* Stores */}
+      {(() => {
+        const partnerStores = getStoresByPartnerId(partnerId);
+        if (partnerStores.length === 0) return null;
+        return (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Store className="h-4 w-4 text-primary" />
+                Lojas ({partnerStores.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {partnerStores.map(s => (
+                <div key={s.id} className="flex items-start gap-3 p-3 rounded-lg border">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Store className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{s.name}</p>
+                    <p className="text-xs text-muted-foreground">{s.address}</p>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                      <span>{s.phone}</span>
+                      <span>• {s.contact}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Visit History */}
       <PartnerVisitHistory visits={partnerVisits} />

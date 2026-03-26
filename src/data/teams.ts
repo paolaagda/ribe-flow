@@ -9,6 +9,7 @@ export interface Team {
   managerId: string;
   ascomIds: string[];
   commercialIds: string[];
+  cadastroIds?: string[];
 }
 
 export const initialTeams: Team[] = [
@@ -45,6 +46,7 @@ export function getTeamMembers(team: Team): string[] {
     team.managerId,
     ...team.ascomIds,
     ...team.commercialIds,
+    ...(team.cadastroIds || []),
   ];
 }
 

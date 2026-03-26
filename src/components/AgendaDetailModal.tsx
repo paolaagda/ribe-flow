@@ -9,7 +9,7 @@ import { usePartners } from '@/hooks/usePartners';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, Sun, Moon, DollarSign, AlertTriangle } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus } from 'lucide-react';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
@@ -77,7 +77,6 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
               <span>{format(parseISO(visit.date), "dd 'de' MMMM, yyyy", { locale: ptBR })}</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              {visit.period === 'manhã' ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
               <Badge variant="outline" className="text-[10px] capitalize">{visit.period}</Badge>
               {visit.time ? (
                 <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{visit.time}</span>
@@ -90,7 +89,10 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
               <span>{visitUser?.name}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs capitalize">{typeLabel}</Badge>
+              <Badge variant="secondary" className={cn('text-xs capitalize gap-1', visit.type === 'visita' ? 'bg-info/10 text-info' : 'bg-warning/10 text-warning')}>
+                {visit.type === 'visita' ? <Handshake className="h-3 w-3" /> : <UserPlus className="h-3 w-3" />}
+                {typeLabel}
+              </Badge>
               <Badge variant="outline" className="text-xs capitalize">{visit.medio}</Badge>
             </div>
           </div>
