@@ -1,16 +1,12 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Users, User, CheckCircle, Clock, TrendingUp, CalendarDays } from 'lucide-react';
+import { Users, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVisits } from '@/hooks/useVisits';
 import { useTeamFilter } from '@/hooks/useTeamFilter';
-import HeroSection from '@/components/home/HeroSection';
-import TodayAgenda from '@/components/home/TodayAgenda';
-import VisitMap from '@/components/home/VisitMap';
 import CampaignProgress from '@/components/home/CampaignProgress';
 import StatusChart from '@/components/home/StatusChart';
-import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 
 export default function DashboardPage() {
   const { profile, user } = useAuth();
@@ -60,10 +56,6 @@ export default function DashboardPage() {
           transition={{ duration: 0.25 }}
           className="space-y-6"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <TodayAgenda viewMode={isGestor ? viewMode : 'personal'} />
-            <VisitMap viewMode={isGestor ? viewMode : 'personal'} />
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <CampaignProgress />
             <StatusChart viewMode={isGestor ? viewMode : 'personal'} />
