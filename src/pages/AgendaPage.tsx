@@ -792,7 +792,15 @@ export default function AgendaPage() {
                 <>
                   <div className="space-y-2">
                     <Label>Status</Label>
-                    <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v as VisitStatus, rescheduleReason: '', cancelReason: ''})}>
+                    <Select value={formData.status} onValueChange={(v) => {
+                      const newStatus = v as VisitStatus;
+                      if (newStatus === 'Reagendada' || newStatus === 'Cancelada') {
+                        setPendingFormStatus(newStatus);
+                        setShowJustificationModal(true);
+                      } else {
+                        setFormData({...formData, status: newStatus, rescheduleReason: '', cancelReason: ''});
+                      }
+                    }}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Planejada">Planejada</SelectItem>
@@ -803,46 +811,28 @@ export default function AgendaPage() {
                     </Select>
                   </div>
 
-                  {/* Reschedule reason */}
+                  {/* Display selected reason */}
                   <AnimatePresence>
-                    {formData.status === 'Reagendada' && (
+                    {formData.status === 'Reagendada' && formData.rescheduleReason && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="space-y-2 overflow-hidden"
+                        className="p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-sm overflow-hidden"
                       >
-                        <Label>Motivo do reagendamento *</Label>
-                        <Select value={formData.rescheduleReason} onValueChange={v => setFormData({...formData, rescheduleReason: v})}>
-                          <SelectTrigger className={cn(!formData.rescheduleReason && 'text-muted-foreground')}>
-                            <SelectValue placeholder="Selecione o motivo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {RESCHEDULE_REASONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <p className="text-xs font-medium text-warning">Motivo do reagendamento</p>
+                        <p className="text-sm">{formData.rescheduleReason}</p>
                       </motion.div>
                     )}
-                  </AnimatePresence>
-
-                  {/* Cancel reason */}
-                  <AnimatePresence>
-                    {formData.status === 'Cancelada' && (
+                    {formData.status === 'Cancelada' && formData.cancelReason && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="space-y-2 overflow-hidden"
+                        className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-sm overflow-hidden"
                       >
-                        <Label>Motivo do cancelamento *</Label>
-                        <Select value={formData.cancelReason} onValueChange={v => setFormData({...formData, cancelReason: v})}>
-                          <SelectTrigger className={cn(!formData.cancelReason && 'text-muted-foreground')}>
-                            <SelectValue placeholder="Selecione o motivo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {CANCEL_REASONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <p className="text-xs font-medium text-destructive">Motivo do cancelamento</p>
+                        <p className="text-sm">{formData.cancelReason}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
