@@ -1,27 +1,24 @@
 
 
-# Melhorar Disposicao dos KPI Cards Visitas/Prospecoes
+# Filtros Compactos e Calendário em Português
 
-## Resumo
+## Mudanças
 
-Alterar os cards de Visitas e Prospecoes para mostrar o numero de concluidos em destaque (fonte grande) e o de criados em fonte menor ao lado, com layout mais claro — similar a imagem de referencia.
+### 1. `src/pages/AgendaPage.tsx` — Compactar filtros
 
-## Mudancas
+- Reduzir largura dos SelectTriggers: `w-28` → `w-24`, `w-32` → `w-28`
+- Reduzir altura: `h-9` → `h-8`
+- Reduzir fonte dos triggers: adicionar `text-xs`
+- Compactar gap entre filtros: `gap-2` → `gap-1.5`
 
-### 1. `src/components/shared/AnimatedKpiCard.tsx`
+### 2. `src/pages/AgendaPage.tsx` — Calendário do Período em português
 
-- Adicionar prop opcional `secondaryValue?: number | string` — exibido ao lado do valor principal em fonte menor e cor muted
-- Quando `secondaryValue` esta presente, renderizar: `<span class="text-2xl font-bold">{value}</span><span class="text-sm text-muted-foreground">✓ de </span><span class="text-base text-muted-foreground">{secondaryValue}</span>`
-
-### 2. `src/pages/AgendaPage.tsx`
-
-- Card Visitas: `value={indicators.visitasConcluidas}` + `secondaryValue={indicators.visitasCriadas}`
-- Card Prospecoes: `value={indicators.prospecoesConcluidas}` + `secondaryValue={indicators.prospecoesCriadas}`
+- Passar `locale={ptBR}` nos dois `<Calendar>` dentro do Popover de Período (linhas 581-596)
+- O `ptBR` já está importado no arquivo
 
 ## Arquivos
 
-| Arquivo | Acao |
+| Arquivo | Ação |
 |---|---|
-| `src/components/shared/AnimatedKpiCard.tsx` | Adicionar prop `secondaryValue` com renderizacao |
-| `src/pages/AgendaPage.tsx` | Passar `value` e `secondaryValue` separados |
+| `src/pages/AgendaPage.tsx` | Compactar filtros + adicionar locale ptBR nos calendários do período |
 
