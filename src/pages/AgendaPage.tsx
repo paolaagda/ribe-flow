@@ -484,8 +484,8 @@ export default function AgendaPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={indicators.visitasCriadas + indicators.prospecoesCriadas} color="text-info" delay={0.1} onClick={() => setShowTodayPanel(prev => !prev)} active={showTodayPanel} />
         <AnimatedKpiCard icon={CheckCircle} label="Concluídas" value={indicators.visitasConcluidas + indicators.prospecoesConcluidas} color="text-success" delay={0.15} />
-        <AnimatedKpiCard icon={Handshake} label="Visitas" value={indicators.visitasCriadas} color="text-info" delay={0.2} />
-        <AnimatedKpiCard icon={UserPlus} label="Prospecções" value={indicators.prospecoesCriadas} color="text-warning" delay={0.25} />
+        <AnimatedKpiCard icon={Handshake} label="Visitas" value={`${indicators.visitasConcluidas}✓ de ${indicators.visitasCriadas}`} color="text-info" delay={0.2} />
+        <AnimatedKpiCard icon={UserPlus} label="Prospecções" value={`${indicators.prospecoesConcluidas}✓ de ${indicators.prospecoesCriadas}`} color="text-warning" delay={0.25} />
       </div>
 
       <AnimatePresence>
@@ -511,30 +511,6 @@ export default function AgendaPage() {
             <h1 className="text-2xl font-bold">Agenda</h1>
             <p className="text-muted-foreground text-sm">Gerencie suas agendas</p>
           </div>
-          <TooltipProvider delayDuration={300}>
-            <div className="flex items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1.5 rounded-md bg-info/10 px-2.5 py-1.5 text-xs font-semibold cursor-default">
-                    <Handshake className="h-3.5 w-3.5 text-info" />
-                    <span>{indicators.visitasConcluidas}✓ de {indicators.visitasCriadas}</span>
-                    <span className="text-muted-foreground font-normal">visitas</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>{indicators.visitasConcluidas} concluídas de {indicators.visitasCriadas} criadas</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1.5 rounded-md bg-warning/10 px-2.5 py-1.5 text-xs font-semibold cursor-default">
-                    <UserPlus className="h-3.5 w-3.5 text-warning" />
-                    <span>{indicators.prospecoesConcluidas}✓ de {indicators.prospecoesCriadas}</span>
-                    <span className="text-muted-foreground font-normal">prospecções</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>{indicators.prospecoesConcluidas} concluídas de {indicators.prospecoesCriadas} criadas</TooltipContent>
-              </Tooltip>
-            </div>
-          </TooltipProvider>
         </div>
         {canWrite('agenda.create') && (
           <Button onClick={() => setShowForm(true)}>
