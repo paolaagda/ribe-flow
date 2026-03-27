@@ -125,6 +125,8 @@ export interface ScoreBreakdown {
   label: string;
   points: number;
   type: 'earn' | 'penalty' | 'achievement';
+  date?: string;
+  time?: string;
 }
 
 export function getUserScoreBreakdown(campaign: Campaign, userId: string): ScoreBreakdown[] {
