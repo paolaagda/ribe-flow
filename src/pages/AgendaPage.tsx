@@ -511,30 +511,6 @@ export default function AgendaPage() {
             <h1 className="text-2xl font-bold">Agenda</h1>
             <p className="text-muted-foreground text-sm">Gerencie suas agendas</p>
           </div>
-          <TooltipProvider delayDuration={300}>
-            <div className="flex items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1.5 rounded-md bg-info/10 px-2.5 py-1.5 text-xs font-semibold cursor-default">
-                    <Handshake className="h-3.5 w-3.5 text-info" />
-                    <span>{indicators.visitasConcluidas}✓ de {indicators.visitasCriadas}</span>
-                    <span className="text-muted-foreground font-normal">visitas</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>{indicators.visitasConcluidas} concluídas de {indicators.visitasCriadas} criadas</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1.5 rounded-md bg-warning/10 px-2.5 py-1.5 text-xs font-semibold cursor-default">
-                    <UserPlus className="h-3.5 w-3.5 text-warning" />
-                    <span>{indicators.prospecoesConcluidas}✓ de {indicators.prospecoesCriadas}</span>
-                    <span className="text-muted-foreground font-normal">prospecções</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>{indicators.prospecoesConcluidas} concluídas de {indicators.prospecoesCriadas} criadas</TooltipContent>
-              </Tooltip>
-            </div>
-          </TooltipProvider>
         </div>
         {canWrite('agenda.create') && (
           <Button onClick={() => setShowForm(true)}>
