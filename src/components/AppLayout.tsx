@@ -34,10 +34,9 @@ import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard, permKey: 'dashboard.metrics' },
+  { title: 'Campanhas', url: '/campanhas', icon: Trophy, permKey: 'campaigns.view' },
   { title: 'Agenda', url: '/agenda', icon: CalendarDays, permKey: 'agenda.view' },
   { title: 'Análises', url: '/analises', icon: BarChart3, permKey: 'analysis.reports' },
-  { title: 'Campanhas', url: '/campanhas', icon: Trophy, permKey: 'campaigns.view' },
   { title: 'Parceiros', url: '/parceiros', icon: Building2, permKey: 'partners.list' },
   { title: 'Configurações', url: '/configuracoes', icon: Settings, permKey: 'settings.view' },
 ];
