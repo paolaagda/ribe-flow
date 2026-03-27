@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { NavLink as RouterNavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard,
   CalendarDays,
   BarChart3,
   Building2,
