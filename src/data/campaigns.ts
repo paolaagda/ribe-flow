@@ -125,6 +125,8 @@ export interface ScoreBreakdown {
   label: string;
   points: number;
   type: 'earn' | 'penalty' | 'achievement';
+  date?: string;
+  time?: string;
 }
 
 export function getUserScoreBreakdown(campaign: Campaign, userId: string): ScoreBreakdown[] {
@@ -134,18 +136,61 @@ export function getUserScoreBreakdown(campaign: Campaign, userId: string): Score
   const prospections = getCompletedProspectionsForUser(userId, campaign.startDate, campaign.endDate);
   const cancellations = getCancelledVisitsForUser(userId, campaign.startDate, campaign.endDate);
 
-  const items: ScoreBreakdown[] = [];
+  // Generate mock dates within campaign period
+  const start = new Date(campaign.startDate);
+  const end = new Date(campaign.endDate);
+  const now = new Date();
+  const maxDate = end < now ? end : now;
+  const range = maxDate.getTime() - start.getTime();
 
-  if (visits > 0) items.push({ label: `${visits} visita(s) × ${config.pointsPerVisit}pt`, points: visits * config.pointsPerVisit, type: 'earn' });
-  if (prospections > 0) items.push({ label: `${prospections} prospecção(ões) × ${config.pointsPerProspection}pt`, points: prospections * config.pointsPerProspection, type: 'earn' });
-  if (cancellations > 0) items.push({ label: `${cancellations} cancelamento(s) × ${config.pointsPerCancellation}pt`, points: cancellations * config.pointsPerCancellation, type: 'penalty' });
-  if (visits >= 1) items.push({ label: 'Primeira visita', points: config.achievements.firstVisitReward, type: 'achievement' });
-  if (prospections >= 1) items.push({ label: 'Primeira prospecção', points: config.achievements.firstProspectionReward, type: 'achievement' });
-  if (visits >= config.achievements.visitMilestone) items.push({ label: `Meta ${config.achievements.visitMilestone} visitas`, points: config.achievements.visitReward, type: 'achievement' });
-  if (prospections >= config.achievements.prospectionMilestone) items.push({ label: `Meta ${config.achievements.prospectionMilestone} prospecções`, points: config.achievements.prospectionReward, type: 'achievement' });
-  if (participant && visits >= participant.visitGoal && prospections >= participant.prospectionGoal) {
-    items.push({ label: '100% meta geral', points: config.achievements.fullGoalReward, type: 'achievement' });
+  function mockDateTime(seed: number): { date: string; time: string } {
+    const offset = Math.abs(Math.sin(seed * 9301 + 49297) * 233280) % 1;
+    const d = new Date(start.getTime() + offset * range);
+    const hours = 8 + Math.floor((offset * 1000) % 10);
+    const mins = Math.floor((offset * 10000) % 60);
+    return {
+      date: d.toLocaleDateString('pt-BR'),
+      time: `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`,
+    };
   }
+
+  const items: ScoreBreakdown[] = [];
+  let seed = userId.charCodeAt(0) + userId.charCodeAt(1);
+
+  // Individual visit entries
+  for (let i = 0; i < visits; i++) {
+    const dt = mockDateTime(seed++);
+    items.push({ label: `Visita concluída (+${config.pointsPerVisit}pt)`, points: config.pointsPerVisit, type: 'earn', ...dt });
+  }
+  for (let i = 0; i < prospections; i++) {
+    const dt = mockDateTime(seed++);
+    items.push({ label: `Prospecção concluída (+${config.pointsPerProspection}pt)`, points: config.pointsPerProspection, type: 'earn', ...dt });
+  }
+  for (let i = 0; i < cancellations; i++) {
+    const dt = mockDateTime(seed++);
+    items.push({ label: `Cancelamento (${config.pointsPerCancellation}pt)`, points: config.pointsPerCancellation, type: 'penalty', ...dt });
+  }
+
+  // Achievement entries
+  if (visits >= 1) { const dt = mockDateTime(seed++); items.push({ label: 'Conquista: Primeira visita', points: config.achievements.firstVisitReward, type: 'achievement', ...dt }); }
+  if (prospections >= 1) { const dt = mockDateTime(seed++); items.push({ label: 'Conquista: Primeira prospecção', points: config.achievements.firstProspectionReward, type: 'achievement', ...dt }); }
+  if (visits >= config.achievements.visitMilestone) { const dt = mockDateTime(seed++); items.push({ label: `Conquista: Meta ${config.achievements.visitMilestone} visitas`, points: config.achievements.visitReward, type: 'achievement', ...dt }); }
+  if (prospections >= config.achievements.prospectionMilestone) { const dt = mockDateTime(seed++); items.push({ label: `Conquista: Meta ${config.achievements.prospectionMilestone} prospecções`, points: config.achievements.prospectionReward, type: 'achievement', ...dt }); }
+  if (participant && visits >= participant.visitGoal && prospections >= participant.prospectionGoal) {
+    const dt = mockDateTime(seed++);
+    items.push({ label: 'Conquista: 100% meta geral', points: config.achievements.fullGoalReward, type: 'achievement', ...dt });
+  }
+
+  // Sort by date descending
+  items.sort((a, b) => {
+    if (!a.date || !b.date) return 0;
+    const [da, ma, ya] = a.date.split('/').map(Number);
+    const [db, mb, yb] = b.date.split('/').map(Number);
+    const dateA = new Date(ya, ma - 1, da);
+    const dateB = new Date(yb, mb - 1, db);
+    if (dateA.getTime() !== dateB.getTime()) return dateB.getTime() - dateA.getTime();
+    return (b.time || '').localeCompare(a.time || '');
+  });
 
   return items;
 }
