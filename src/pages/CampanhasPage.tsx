@@ -321,59 +321,59 @@ export default function CampanhasPage() {
         </div>
       )}
 
-      {/* 5. Streak + Podium (2 columns) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <Card className="h-full">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className={cn('w-14 h-14 rounded-full flex items-center justify-center', streak > 0 ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
-                <Flame className="h-7 w-7" />
-              </div>
-              <div>
-                <p className="text-3xl font-bold">{streak}</p>
-                <p className="text-xs text-muted-foreground">{streak === 1 ? 'dia' : 'dias'} consecutivos</p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+      {/* 5. Streak */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+        <Card className="border-l-4 border-l-success">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-success/10 text-success flex items-center justify-center">
+              <Flame className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{streak} {streak === 1 ? 'dia' : 'dias'}</p>
+              <p className="text-xs text-muted-foreground">Streak de atividades consecutivas</p>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
-        {canRead('gamification.ranking') && podium.length >= 3 && (
-          <Card className="overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/5">
-            <CardContent className="p-4">
-              <p className="text-xs font-semibold mb-3 flex items-center gap-1"><Trophy className="h-3.5 w-3.5" /> Pódio</p>
-              <div className="flex items-end justify-center gap-4">
-                {podiumOrder.map((item, idx) => {
-                  const pos = podium.indexOf(item) + 1;
-                  const isFirst = pos === 1;
-                  return (
-                    <motion.div
-                      key={item.user.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.3 + idx * 0.15, type: 'spring', bounce: 0.3 }}
-                      className="flex flex-col items-center gap-1"
-                    >
-                      <Medal className={cn('h-5 w-5', medalColors[pos])} />
-                      <Avatar className={cn(isFirst ? 'h-12 w-12' : 'h-10 w-10', 'border-2 border-border')}>
-                        <AvatarFallback className={cn('text-xs font-bold', isFirst ? 'bg-yellow-500/15 text-yellow-700 dark:text-yellow-400' : 'bg-primary/10 text-primary')}>
-                          {item.user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <p className="text-[10px] font-medium">{item.user.name.split(' ')[0]}</p>
-                      <Badge variant={isFirst ? 'default' : 'secondary'} className="text-[10px]">{item.score}pts</Badge>
-                      <div className={cn('w-14 rounded-t-lg bg-gradient-to-t border-x border-t', podiumColors[pos], isFirst ? 'h-16' : pos === 2 ? 'h-10' : 'h-7')}>
-                        <div className="flex items-center justify-center h-full">
-                          <span className="font-bold text-muted-foreground text-sm">{pos}º</span>
-                        </div>
+      {/* 5b. Podium */}
+      {canRead('gamification.ranking') && podium.length >= 3 && (
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-sm font-semibold mb-6 flex items-center gap-2"><Trophy className="h-4 w-4" /> Pódio</p>
+            <div className="flex items-end justify-center gap-8">
+              {podiumOrder.map((item, idx) => {
+                const pos = podium.indexOf(item) + 1;
+                const isFirst = pos === 1;
+                const avatarColors = ['', 'bg-success/15 text-success border-success/30', 'bg-muted text-muted-foreground border-border', 'bg-warning/15 text-warning border-warning/30'];
+                return (
+                  <motion.div
+                    key={item.user.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.3 + idx * 0.15, type: 'spring', bounce: 0.3 }}
+                    className="flex flex-col items-center gap-1.5"
+                  >
+                    <Medal className={cn('h-5 w-5', medalColors[pos])} />
+                    <Avatar className={cn(isFirst ? 'h-14 w-14' : 'h-11 w-11', 'border-2', avatarColors[pos])}>
+                      <AvatarFallback className={cn('text-sm font-bold', avatarColors[pos])}>
+                        {item.user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <p className="text-xs font-medium">{item.user.name.split(' ')[0]}</p>
+                    <Badge variant={isFirst ? 'default' : 'secondary'} className="text-[11px]">{item.score} pts</Badge>
+                    <div className={cn('w-16 rounded-t-lg bg-gradient-to-t border-x border-t', podiumColors[pos], isFirst ? 'h-20' : pos === 2 ? 'h-12' : 'h-8')}>
+                      <div className="flex items-center justify-center h-full">
+                        <span className="font-bold text-muted-foreground">{pos}º</span>
                       </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 6. You vs Average */}
       {myStats && ranking.length > 0 && (
