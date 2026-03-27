@@ -9,17 +9,136 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { usePermission } from '@/hooks/usePermission';
 import { mockUsers, getUserById } from '@/data/mock-data';
 import {
-  Campaign, CampaignParticipant, initialCampaigns, getCampaignStatus, campaignStatusColors,
+  Campaign, CampaignParticipant, GamificationConfig, defaultGamification,
+  initialCampaigns, getCampaignStatus, campaignStatusColors,
   getCompletedVisitsForUser, getCompletedProspectionsForUser,
 } from '@/data/campaigns';
-import { Plus, Edit, Trash2, Trophy } from 'lucide-react';
+import { Plus, Edit, Trash2, Trophy, Gamepad2 } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+
+interface CampaignFormData {
+  name: string;
+  startDate: string;
+  endDate: string;
+  selectedUsers: string[];
+  goals: Record<string, { visitGoal: number; prospectionGoal: number }>;
+  gamification: GamificationConfig;
+}
+
+function GamificationSection({ gamification, onChange }: { gamification: GamificationConfig; onChange: (g: GamificationConfig) => void }) {
+  return (
+    <div className="space-y-4 pt-2">
+      <div className="flex items-center gap-2">
+        <Gamepad2 className="h-4 w-4 text-primary" />
+        <Label className="text-sm font-semibold">Gamificação</Label>
+      </div>
+      <Separator />
+
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-muted-foreground">Pontuação por atividade</p>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Visita concluída</Label>
+            <Input
+              type="number"
+              step="0.5"
+              className="h-8"
+              value={gamification.pointsPerVisit}
+              onChange={e => onChange({ ...gamification, pointsPerVisit: Number(e.target.value) })}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Prospecção concluída</Label>
+            <Input
+              type="number"
+              step="0.5"
+              className="h-8"
+              value={gamification.pointsPerProspection}
+              onChange={e => onChange({ ...gamification, pointsPerProspection: Number(e.target.value) })}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Cancelamento</Label>
+            <Input
+              type="number"
+              step="0.5"
+              className="h-8"
+              value={gamification.pointsPerCancellation}
+              onChange={e => onChange({ ...gamification, pointsPerCancellation: Number(e.target.value) })}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-muted-foreground">Conquistas</p>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2 p-3 rounded-lg border border-border bg-muted/20">
+            <p className="text-xs font-semibold">Visitas</p>
+            <div className="space-y-1">
+              <Label className="text-xs">Meta (quantidade)</Label>
+              <Input
+                type="number"
+                className="h-8"
+                value={gamification.achievements.visitMilestone}
+                onChange={e => onChange({
+                  ...gamification,
+                  achievements: { ...gamification.achievements, visitMilestone: Number(e.target.value) },
+                })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Pontos recompensa</Label>
+              <Input
+                type="number"
+                className="h-8"
+                value={gamification.achievements.visitReward}
+                onChange={e => onChange({
+                  ...gamification,
+                  achievements: { ...gamification.achievements, visitReward: Number(e.target.value) },
+                })}
+              />
+            </div>
+          </div>
+          <div className="space-y-2 p-3 rounded-lg border border-border bg-muted/20">
+            <p className="text-xs font-semibold">Prospecções</p>
+            <div className="space-y-1">
+              <Label className="text-xs">Meta (quantidade)</Label>
+              <Input
+                type="number"
+                className="h-8"
+                value={gamification.achievements.prospectionMilestone}
+                onChange={e => onChange({
+                  ...gamification,
+                  achievements: { ...gamification.achievements, prospectionMilestone: Number(e.target.value) },
+                })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Pontos recompensa</Label>
+              <Input
+                type="number"
+                className="h-8"
+                value={gamification.achievements.prospectionReward}
+                onChange={e => onChange({
+                  ...gamification,
+                  achievements: { ...gamification.achievements, prospectionReward: Number(e.target.value) },
+                })}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function CampaignsTab() {
   const { toast } = useToast();
@@ -29,19 +148,20 @@ export default function CampaignsTab() {
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
   const [deletingCampaignId, setDeletingCampaignId] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CampaignFormData>({
     name: '',
     startDate: '',
     endDate: '',
-    selectedUsers: [] as string[],
-    goals: {} as Record<string, { visitGoal: number; prospectionGoal: number }>,
+    selectedUsers: [],
+    goals: {},
+    gamification: { ...defaultGamification },
   });
 
   const commercials = mockUsers.filter(u => u.role === 'comercial');
 
   const openCreate = () => {
     setEditingCampaign(null);
-    setFormData({ name: '', startDate: '', endDate: '', selectedUsers: [], goals: {} });
+    setFormData({ name: '', startDate: '', endDate: '', selectedUsers: [], goals: {}, gamification: { ...defaultGamification } });
     setShowForm(true);
   };
 
@@ -55,6 +175,7 @@ export default function CampaignsTab() {
       endDate: c.endDate,
       selectedUsers: c.participants.map(p => p.userId),
       goals,
+      gamification: c.gamification ? { ...c.gamification, achievements: { ...c.gamification.achievements } } : { ...defaultGamification },
     });
     setShowForm(true);
   };
@@ -75,7 +196,14 @@ export default function CampaignsTab() {
       prospectionGoal: formData.goals[uid]?.prospectionGoal || 8,
     }));
     if (editingCampaign) {
-      setCampaigns(prev => prev.map(c => c.id === editingCampaign.id ? { ...c, name: formData.name, startDate: formData.startDate, endDate: formData.endDate, participants } : c));
+      setCampaigns(prev => prev.map(c => c.id === editingCampaign.id ? {
+        ...c,
+        name: formData.name,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        participants,
+        gamification: formData.gamification,
+      } : c));
       toast({ title: 'Campanha atualizada!' });
     } else {
       const newCampaign: Campaign = {
@@ -84,6 +212,7 @@ export default function CampaignsTab() {
         startDate: formData.startDate,
         endDate: formData.endDate,
         participants,
+        gamification: formData.gamification,
       };
       setCampaigns(prev => [...prev, newCampaign]);
       toast({ title: 'Campanha criada!' });
@@ -158,6 +287,15 @@ export default function CampaignsTab() {
                     </div>
                     <Progress value={progress} className="h-1.5" />
                   </div>
+
+                  {camp.gamification && (
+                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                      <Gamepad2 className="h-3 w-3" />
+                      <span>V:{camp.gamification.pointsPerVisit}pt</span>
+                      <span>P:{camp.gamification.pointsPerProspection}pt</span>
+                      <span>C:{camp.gamification.pointsPerCancellation}pt</span>
+                    </div>
+                  )}
 
                   <div className="flex gap-1">
                     <>
@@ -255,6 +393,12 @@ export default function CampaignsTab() {
                 })}
               </div>
             </div>
+
+            {/* Gamification section */}
+            <GamificationSection
+              gamification={formData.gamification}
+              onChange={g => setFormData({ ...formData, gamification: g })}
+            />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
