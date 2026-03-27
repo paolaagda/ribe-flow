@@ -6,7 +6,10 @@ import { Progress } from '@/components/ui/progress';
 import { Trophy, Target, Medal } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { initialCampaigns, getCampaignStatus, getCompletedVisitsForUser, getCompletedProspectionsForUser } from '@/data/campaigns';
+import {
+  initialCampaigns, getCampaignStatus, getCompletedVisitsForUser,
+  getCompletedProspectionsForUser, calculateUserScore, getGamificationConfig,
+} from '@/data/campaigns';
 import { mockUsers } from '@/data/mock-data';
 import type { Campaign } from '@/data/campaigns';
 
@@ -34,10 +37,10 @@ export default function CampaignProgress() {
     return activeCampaign.participants
       .map(p => {
         const u = mockUsers.find(mu => mu.id === p.userId);
-        const completed = getCompletedVisitsForUser(p.userId, activeCampaign.startDate, activeCampaign.endDate);
-        return { userId: p.userId, name: u?.name || '?', completed, goal: p.visitGoal };
+        const score = calculateUserScore(activeCampaign, p.userId);
+        return { userId: p.userId, name: u?.name || '?', score, goal: p.visitGoal };
       })
-      .sort((a, b) => b.completed - a.completed)
+      .sort((a, b) => b.score - a.score)
       .slice(0, 3);
   }, [activeCampaign]);
 
@@ -46,9 +49,9 @@ export default function CampaignProgress() {
     const sorted = activeCampaign.participants
       .map(p => ({
         userId: p.userId,
-        completed: getCompletedVisitsForUser(p.userId, activeCampaign.startDate, activeCampaign.endDate),
+        score: calculateUserScore(activeCampaign, p.userId),
       }))
-      .sort((a, b) => b.completed - a.completed);
+      .sort((a, b) => b.score - a.score);
     const idx = sorted.findIndex(s => s.userId === user.id);
     return idx >= 0 ? idx + 1 : null;
   }, [activeCampaign, user]);
@@ -104,7 +107,7 @@ export default function CampaignProgress() {
           </div>
         )}
 
-        {/* Mini ranking */}
+        {/* Mini ranking by score */}
         <div className="space-y-2 pt-2 border-t border-border">
           <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
             <Medal className="h-3 w-3" /> Top 3
@@ -125,7 +128,7 @@ export default function CampaignProgress() {
                 {i + 1}
               </span>
               <span className="truncate flex-1">{r.name}</span>
-              <span className="text-xs tabular-nums text-muted-foreground">{r.completed}/{r.goal}</span>
+              <span className="text-xs tabular-nums text-muted-foreground">{r.score} pts</span>
             </motion.div>
           ))}
           {userPosition && userPosition > 3 && (

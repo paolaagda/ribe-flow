@@ -15,30 +15,13 @@ import { mockVisits, mockUsers, getUserById } from '@/data/mock-data';
 import {
   Campaign, initialCampaigns, getCampaignStatus, campaignStatusColors,
   getCompletedVisitsForUser, getCompletedProspectionsForUser,
+  getCancelledVisitsForUser, calculateUserScore, getGamificationConfig,
 } from '@/data/campaigns';
-import { Trophy, Flame, Medal, Star, AlertTriangle, TrendingUp, ShieldOff, Award, ChevronLeft, Eye } from 'lucide-react';
+import { Trophy, Flame, Medal, Star, AlertTriangle, TrendingUp, ShieldOff, Award, ChevronLeft, Eye, Ban, Gamepad2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-
-// ============ BADGE DEFINITIONS ============
-interface BadgeItem {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  check: (visits: number, prospections: number) => boolean;
-}
-
-const badgeDefinitions: BadgeItem[] = [
-  { id: 'first_visit', name: 'Primeira Visita', description: 'Completou a primeira visita', icon: <Star className="h-5 w-5" />, check: (v) => v >= 1 },
-  { id: '10_visits', name: '10 Visitas', description: 'Completou 10 visitas', icon: <Trophy className="h-5 w-5" />, check: (v) => v >= 10 },
-  { id: '25_visits', name: '25 Visitas', description: 'Completou 25 visitas', icon: <Medal className="h-5 w-5" />, check: (v) => v >= 25 },
-  { id: 'first_prosp', name: 'Primeira Prospecção', description: 'Completou a primeira prospecção', icon: <Star className="h-5 w-5" />, check: (_, p) => p >= 1 },
-  { id: 'meta_hit', name: 'Meta Atingida', description: 'Atingiu 100% de uma meta', icon: <TrendingUp className="h-5 w-5" />, check: (v) => v >= 15 },
-  { id: 'full_100', name: '100% Concluído', description: 'Concluiu todas as metas da campanha', icon: <Award className="h-5 w-5" />, check: (v, p) => v >= 20 && p >= 10 },
-];
 
 const podiumColors = [
   '',
@@ -60,16 +43,28 @@ export default function CampanhasPage() {
 
   const chartColors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
-  // Global ranking
+  // Active campaign
+  const activeCampaign = useMemo(() => campaigns.find(c => getCampaignStatus(c) === 'Ativa'), [campaigns]);
+  const activeConfig = useMemo(() => activeCampaign ? getGamificationConfig(activeCampaign) : null, [activeCampaign]);
+
+  // Global ranking using campaign score
   const allCommercials = useMemo(() => mockUsers.filter(u => u.role === 'comercial' && u.active), []);
 
   const ranking = useMemo(() => {
     return allCommercials.map(u => {
-      const visits = mockVisits.filter(v => v.userId === u.id && v.status === 'Concluída' && v.type === 'visita').length;
-      const prospections = mockVisits.filter(v => v.userId === u.id && v.status === 'Concluída' && v.type === 'prospecção').length;
-      return { user: u, visits, prospections, score: visits + prospections };
+      const visits = activeCampaign
+        ? getCompletedVisitsForUser(u.id, activeCampaign.startDate, activeCampaign.endDate)
+        : mockVisits.filter(v => v.userId === u.id && v.status === 'Concluída' && v.type === 'visita').length;
+      const prospections = activeCampaign
+        ? getCompletedProspectionsForUser(u.id, activeCampaign.startDate, activeCampaign.endDate)
+        : mockVisits.filter(v => v.userId === u.id && v.status === 'Concluída' && v.type === 'prospecção').length;
+      const cancellations = activeCampaign
+        ? getCancelledVisitsForUser(u.id, activeCampaign.startDate, activeCampaign.endDate)
+        : 0;
+      const score = activeCampaign ? calculateUserScore(activeCampaign, u.id) : visits + prospections;
+      return { user: u, visits, prospections, cancellations, score };
     }).sort((a, b) => b.score - a.score);
-  }, [allCommercials]);
+  }, [allCommercials, activeCampaign]);
 
   // Streak
   const streak = useMemo(() => {
@@ -93,12 +88,25 @@ export default function CampanhasPage() {
     return ranking.find(r => r.user.id === user.id) || null;
   }, [user, ranking]);
 
-  // Badge checking
+  // Campaign-based badge checking
+  const campaignBadges = useMemo(() => {
+    if (!activeCampaign || !activeConfig) return [];
+    const badges = [
+      { id: 'first_visit', name: 'Primeira Visita', description: 'Completou a primeira visita', icon: <Star className="h-5 w-5" />, check: (v: number) => v >= 1 },
+      { id: 'visit_milestone', name: `${activeConfig.achievements.visitMilestone} Visitas`, description: `Completou ${activeConfig.achievements.visitMilestone} visitas (+${activeConfig.achievements.visitReward}pts)`, icon: <Trophy className="h-5 w-5" />, check: (v: number) => v >= activeConfig.achievements.visitMilestone },
+      { id: 'first_prosp', name: 'Primeira Prospecção', description: 'Completou a primeira prospecção', icon: <Star className="h-5 w-5" />, check: (_v: number, p: number) => p >= 1 },
+      { id: 'prosp_milestone', name: `${activeConfig.achievements.prospectionMilestone} Prospecções`, description: `Completou ${activeConfig.achievements.prospectionMilestone} prospecções (+${activeConfig.achievements.prospectionReward}pts)`, icon: <Medal className="h-5 w-5" />, check: (_v: number, p: number) => p >= activeConfig.achievements.prospectionMilestone },
+      { id: 'meta_hit', name: 'Meta Atingida', description: 'Atingiu 100% de uma meta', icon: <TrendingUp className="h-5 w-5" />, check: (v: number) => v >= activeConfig.achievements.visitMilestone },
+      { id: 'full_100', name: '100% Concluído', description: 'Concluiu todas as metas da campanha', icon: <Award className="h-5 w-5" />, check: (v: number, p: number) => v >= activeConfig.achievements.visitMilestone && p >= activeConfig.achievements.prospectionMilestone },
+    ];
+    return badges;
+  }, [activeCampaign, activeConfig]);
+
   useEffect(() => {
-    if (!user || !myStats) return;
+    if (!user || !myStats || campaignBadges.length === 0) return;
     const current = unlockedBadges[user.id] || [];
     const newBadges: string[] = [];
-    badgeDefinitions.forEach(b => {
+    campaignBadges.forEach(b => {
       if (!current.includes(b.id) && b.check(myStats.visits, myStats.prospections)) {
         newBadges.push(b.id);
       }
@@ -106,14 +114,14 @@ export default function CampanhasPage() {
     if (newBadges.length > 0) {
       setUnlockedBadges(prev => ({ ...prev, [user.id]: [...current, ...newBadges] }));
       newBadges.forEach(bid => {
-        const badge = badgeDefinitions.find(b => b.id === bid);
+        const badge = campaignBadges.find(b => b.id === bid);
         if (badge) {
           toast({ title: `🏆 Nova conquista: ${badge.name}!`, description: badge.description });
         }
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [myStats, user?.id, toast]);
+  }, [myStats, user?.id, toast, campaignBadges]);
 
   // Confetti
   useEffect(() => {
@@ -136,10 +144,17 @@ export default function CampanhasPage() {
       if (participant) {
         const visits = getCompletedVisitsForUser(user.id, camp.startDate, camp.endDate);
         const remaining = participant.visitGoal - visits;
-        if (remaining > 0) items.push({ text: `Faltam ${remaining} visitas para sua meta em \"${camp.name}\"`, icon: <AlertTriangle className="h-4 w-4 text-warning" /> });
+        if (remaining > 0) items.push({ text: `Faltam ${remaining} visitas para sua meta em "${camp.name}"`, icon: <AlertTriangle className="h-4 w-4 text-warning" /> });
         const endDate = new Date(camp.endDate);
         const daysLeft = Math.ceil((endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-        if (daysLeft <= 7 && daysLeft > 0) items.push({ text: `Campanha \"${camp.name}\" termina em ${daysLeft} dias`, icon: <AlertTriangle className="h-4 w-4 text-destructive" /> });
+        if (daysLeft <= 7 && daysLeft > 0) items.push({ text: `Campanha "${camp.name}" termina em ${daysLeft} dias`, icon: <AlertTriangle className="h-4 w-4 text-destructive" /> });
+      }
+      // Cancellation alert
+      const cancellations = getCancelledVisitsForUser(user.id, camp.startDate, camp.endDate);
+      if (cancellations > 0) {
+        const config = getGamificationConfig(camp);
+        const penalty = Math.abs(cancellations * config.pointsPerCancellation);
+        items.push({ text: `${cancellations} cancelamento(s) = -${penalty} pts em "${camp.name}"`, icon: <Ban className="h-4 w-4 text-destructive" /> });
       }
     });
     if (ranking.length > 0) {
@@ -155,9 +170,6 @@ export default function CampanhasPage() {
   const podium = ranking.slice(0, 3);
   const podiumOrder = podium.length >= 3 ? [podium[1], podium[0], podium[2]] : podium;
 
-  // Active campaign
-  const activeCampaign = useMemo(() => campaigns.find(c => getCampaignStatus(c) === 'Ativa'), [campaigns]);
-
   if (!canRead('campaigns.view')) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-muted-foreground gap-3">
@@ -172,13 +184,16 @@ export default function CampanhasPage() {
   if (selectedCampaign) {
     const camp = selectedCampaign;
     const status = getCampaignStatus(camp);
+    const config = getGamificationConfig(camp);
     const participantData = camp.participants
       .filter(p => filterUser === 'all' || p.userId === filterUser)
       .map(p => {
         const u = getUserById(p.userId);
         const visits = getCompletedVisitsForUser(p.userId, camp.startDate, camp.endDate);
         const prospections = getCompletedProspectionsForUser(p.userId, camp.startDate, camp.endDate);
-        return { ...p, user: u, visits, prospections };
+        const cancellations = getCancelledVisitsForUser(p.userId, camp.startDate, camp.endDate);
+        const score = calculateUserScore(camp, p.userId);
+        return { ...p, user: u, visits, prospections, cancellations, score };
       });
 
     const totalVisitGoal = participantData.reduce((s, p) => s + p.visitGoal, 0);
@@ -201,6 +216,38 @@ export default function CampanhasPage() {
           </div>
           <Badge className={cn('ml-2', campaignStatusColors[status])} variant="outline">{status}</Badge>
         </div>
+
+        {/* Gamification rules */}
+        <Card className="border-l-4 border-l-primary">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Gamepad2 className="h-4 w-4 text-primary" />
+              <p className="text-sm font-semibold">Regras de pontuação</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+              <div className="p-2 rounded-lg bg-success/10 text-center">
+                <p className="font-bold text-lg text-success">+{config.pointsPerVisit}</p>
+                <p className="text-muted-foreground">por visita</p>
+              </div>
+              <div className="p-2 rounded-lg bg-info/10 text-center">
+                <p className="font-bold text-lg text-info">+{config.pointsPerProspection}</p>
+                <p className="text-muted-foreground">por prospecção</p>
+              </div>
+              <div className="p-2 rounded-lg bg-destructive/10 text-center">
+                <p className="font-bold text-lg text-destructive">{config.pointsPerCancellation}</p>
+                <p className="text-muted-foreground">por cancelamento</p>
+              </div>
+              <div className="p-2 rounded-lg bg-primary/10 text-center">
+                <p className="font-bold text-lg text-primary">+{config.achievements.visitReward}</p>
+                <p className="text-muted-foreground">{config.achievements.visitMilestone} visitas</p>
+              </div>
+              <div className="p-2 rounded-lg bg-primary/10 text-center">
+                <p className="font-bold text-lg text-primary">+{config.achievements.prospectionReward}</p>
+                <p className="text-muted-foreground">{config.achievements.prospectionMilestone} prosp.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Select value={filterUser} onValueChange={setFilterUser}>
           <SelectTrigger className="w-48"><SelectValue placeholder="Filtrar comercial" /></SelectTrigger>
@@ -243,27 +290,35 @@ export default function CampanhasPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Comercial</TableHead>
-                  <TableHead className="text-center">Meta vis.</TableHead>
-                  <TableHead className="text-center">Feitas</TableHead>
-                  <TableHead className="text-center">%</TableHead>
-                  <TableHead className="text-center">Meta prosp.</TableHead>
-                  <TableHead className="text-center">Feitas</TableHead>
-                  <TableHead className="text-center">%</TableHead>
+                  <TableHead className="text-center">Visitas</TableHead>
+                  <TableHead className="text-center">Prospecções</TableHead>
+                  <TableHead className="text-center">Cancelamentos</TableHead>
+                  <TableHead className="text-center">Pontuação</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {participantData.map(p => (
+                {participantData.sort((a, b) => b.score - a.score).map(p => (
                   <TableRow key={p.userId}>
                     <TableCell className="font-medium">{p.user?.name}</TableCell>
-                    <TableCell className="text-center">{p.visitGoal}</TableCell>
-                    <TableCell className="text-center">{p.visits}</TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="secondary" className="text-xs">{p.visitGoal > 0 ? Math.round((p.visits / p.visitGoal) * 100) : 0}%</Badge>
+                      <span className="font-semibold">{p.visits}</span>
+                      <span className="text-muted-foreground text-xs">/{p.visitGoal}</span>
                     </TableCell>
-                    <TableCell className="text-center">{p.prospectionGoal}</TableCell>
-                    <TableCell className="text-center">{p.prospections}</TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="secondary" className="text-xs">{p.prospectionGoal > 0 ? Math.round((p.prospections / p.prospectionGoal) * 100) : 0}%</Badge>
+                      <span className="font-semibold">{p.prospections}</span>
+                      <span className="text-muted-foreground text-xs">/{p.prospectionGoal}</span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {p.cancellations > 0 ? (
+                        <span className="text-destructive font-semibold flex items-center justify-center gap-1">
+                          <Ban className="h-3 w-3" /> {p.cancellations}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">0</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="secondary" className="tabular-nums">{p.score} pts</Badge>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -310,7 +365,7 @@ export default function CampanhasPage() {
     );
   }
 
-  // Main view: Campaigns overview + Gamification
+  // Main view
   return (
     <div className="space-y-6">
       <div>
@@ -333,7 +388,7 @@ export default function CampanhasPage() {
       )}
 
       {/* Active campaign highlight */}
-      {activeCampaign && (
+      {activeCampaign && activeConfig && (
         <Card className="bg-gradient-to-br from-primary/5 via-background to-primary/5 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedCampaign(activeCampaign)}>
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
@@ -360,6 +415,13 @@ export default function CampanhasPage() {
                   </Avatar>
                 );
               })}
+            </div>
+            {/* Rules summary */}
+            <div className="flex items-center gap-3 text-[10px] text-muted-foreground mb-3">
+              <Gamepad2 className="h-3 w-3" />
+              <span>Visita: +{activeConfig.pointsPerVisit}pt</span>
+              <span>Prospecção: +{activeConfig.pointsPerProspection}pt</span>
+              <span>Cancelamento: {activeConfig.pointsPerCancellation}pt</span>
             </div>
             {(() => {
               const totalGoal = activeCampaign.participants.reduce((s, p) => s + p.visitGoal + p.prospectionGoal, 0);
@@ -513,6 +575,11 @@ export default function CampanhasPage() {
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
                         <span>{item.visits} vis</span>
                         <span>{item.prospections} prosp</span>
+                        {item.cancellations > 0 && (
+                          <span className="text-destructive flex items-center gap-0.5">
+                            <Ban className="h-3 w-3" /> {item.cancellations}
+                          </span>
+                        )}
                       </div>
                       <Badge variant="secondary" className="tabular-nums">{item.score} pts</Badge>
                     </motion.div>
@@ -566,30 +633,37 @@ export default function CampanhasPage() {
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><Award className="h-4 w-4" /> Conquistas</CardTitle></CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-                {badgeDefinitions.map((badge, i) => {
-                  const unlocked = myBadges.includes(badge.id);
-                  return (
-                    <motion.div
-                      key={badge.id}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3, delay: 0.1 * i }}
-                      whileHover={unlocked ? { scale: 1.08 } : undefined}
-                      className={cn(
-                        'flex flex-col items-center gap-2 p-4 rounded-xl border transition-all text-center cursor-default',
-                        unlocked ? 'bg-primary/5 border-primary/20' : 'bg-muted/30 border-border opacity-50'
-                      )}
-                    >
-                      <div className={cn('w-10 h-10 rounded-full flex items-center justify-center', unlocked ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
-                        {badge.icon}
-                      </div>
-                      <p className="text-xs font-semibold">{badge.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{badge.description}</p>
-                    </motion.div>
-                  );
-                })}
-              </div>
+              {campaignBadges.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                  <Trophy className="h-12 w-12 text-muted-foreground/30 mb-3" />
+                  <p className="text-muted-foreground text-sm">Nenhuma campanha ativa no momento</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                  {campaignBadges.map((badge, i) => {
+                    const unlocked = myBadges.includes(badge.id);
+                    return (
+                      <motion.div
+                        key={badge.id}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3, delay: 0.1 * i }}
+                        whileHover={unlocked ? { scale: 1.08 } : undefined}
+                        className={cn(
+                          'flex flex-col items-center gap-2 p-4 rounded-xl border transition-all text-center cursor-default',
+                          unlocked ? 'bg-primary/5 border-primary/20' : 'bg-muted/30 border-border opacity-50'
+                        )}
+                      >
+                        <div className={cn('w-10 h-10 rounded-full flex items-center justify-center', unlocked ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
+                          {badge.icon}
+                        </div>
+                        <p className="text-xs font-semibold">{badge.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{badge.description}</p>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
