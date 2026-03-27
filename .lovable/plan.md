@@ -1,121 +1,54 @@
 
 
-# Remocao do Dashboard + Reformulacao da Pagina de Campanhas
+# Reorganizar Pagina de Campanhas
 
 ## Resumo
 
-Remover a pagina Dashboard (rota, componente, menu). Redirecionar `/dashboard` para `/campanhas`. Reescrever completamente a pagina de Campanhas como centro estrategico unico, sem abas, com todas as secoes visiveis em scroll. Expandir conquistas com novas categorias. Adicionar comparativo entre campanhas, historico de pontuacao e streak.
+Reordenar secoes, remover graficos e regras, ajustar layouts de conquistas e podio, acrescentar cards de alerta e detalhar historico de pontuacao.
 
-## Mudancas
+## Nova Ordem da Pagina
 
-### 1. Remover Dashboard
+1. **Cabecalho** (imagem 4) — manter como esta: titulo, periodo, selects
+2. **Retirar badge** "Pontuacao valida apenas durante esta campanha" (imagem 5)
+3. **Cards de alerta** (imagem 3) — nova secao com 3 cards informativos:
+   - "Faltam X visitas para sua meta em [campanha]"
+   - "Campanha [nome] termina em X dias"
+   - "Voce esta acima/abaixo da media da equipe"
+4. **KPI Cards** (imagem 6) — manter como esta
+5. **Streak + Podio** (imagem 1) — layout como era antes: streak como card compacto horizontal e podio como card separado, lado a lado (2 colunas em desktop)
+6. **Voce vs Media** — card individual
+7. **Conquistas** (imagem 2) — layout compacto em uma unica linha horizontal (6 colunas), cards menores com icone, nome e descricao empilhados, sem progress bar
+8. **Historico de Pontuacao** — detalhar com data e hora de cada evento
 
-**`src/App.tsx`**
-- Remover import de `DashboardPage`
-- Remover rota `/dashboard`
-- Alterar redirect de `/` para `/campanhas`
-- Manter redirect de `/dashboard` para `/campanhas` (compatibilidade)
+## Secoes Removidas
 
-**`src/components/AppLayout.tsx`**
-- Remover item `Dashboard` do array `navItems`
+- Graficos "Contribuicao — Visitas" e "Contribuicao — Prospecoes"
+- Grafico "Comparativo entre campanhas"
+- Card "Regras de pontuacao desta campanha"
+- Badge "Pontuacao valida apenas durante esta campanha"
 
-**`src/pages/DashboardPage.tsx`**
-- Deletar arquivo
+## Mudancas Tecnicas
 
-**`src/data/permissions.ts`**
-- Remover permissoes `dashboard.*` (linhas 13-16)
+### `src/pages/CampanhasPage.tsx`
 
-### 2. Expandir modelo de conquistas (`src/data/campaigns.ts`)
+**Remover**: imports de BarChart/Bar/XAxis/YAxis/CartesianGrid/Tooltip/ResponsiveContainer/Cell/Legend do recharts. Remover variaveis `comparisonData`, `visitChartData`, `prospChartData`, `chartColors`. Remover blocos JSX dos graficos (linhas 463-521), regras (linhas 568-608), badge (linhas 291-293).
 
-Adicionar ao `GamificationConfig.achievements`:
-```typescript
-achievements: {
-  // existentes
-  visitMilestone: number;
-  visitReward: number;
-  prospectionMilestone: number;
-  prospectionReward: number;
-  // novos
-  firstVisitReward: number;        // pts por primeira visita
-  firstProspectionReward: number;  // pts por primeira prospecao
-  fullGoalReward: number;          // pts por 100% meta geral
-};
-```
+**Acrescentar cards de alerta**: Calcular dias restantes da campanha, visitas faltantes, comparar com media. Renderizar 3 cards horizontais com icones (AlertTriangle, Clock, TrendingUp).
 
-Atualizar `defaultGamification`, `initialCampaigns` e `calculateUserScore` para incluir as novas conquistas.
+**Conquistas**: Trocar grid de `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4` para `grid-cols-3 md:grid-cols-6` (ou `grid-cols-7` se 7 conquistas). Cards compactos: icone centralizado no topo, nome abaixo, descricao pequena. Sem progress bar, sem badge de pontos inline — layout igual a imagem 2.
 
-### 3. Reescrever `src/pages/CampanhasPage.tsx`
+**Streak + Podio**: Mudar de grid 3 colunas para grid 2 colunas (streak + podio lado a lado). Streak como card compacto com "X dias" e subtitulo. Podio separado. "Voce vs Media" abaixo como card individual.
 
-Pagina inteira sem abas, tudo em scroll continuo. Layout:
+**Historico de Pontuacao**: Expandir `getUserScoreBreakdown` em `campaigns.ts` para retornar `date` e `time` em cada item. Gerar timestamps mock baseados no periodo da campanha. Exibir coluna de data/hora na tabela do accordion.
 
-**A) Cabecalho + Filtros**
-- Titulo da campanha selecionada + periodo
-- Select de campanha (default: ativa, permite ver anteriores, oculta futuras)
-- Select de comercial (visivel apenas para diretor/gerente/ascom/cadastro)
+### `src/data/campaigns.ts`
 
-**B) Reforco visual**
-- Badge: "Pontuacao valida apenas durante esta campanha"
-
-**C) Indicadores (cards KPI)**
-- Visitas concluidas / meta
-- Prospecoes concluidas / meta
-- Pontuacao total
-- Taxa de conclusao
-- Cancelamentos
-
-**D) Conquistas (inline, sem aba)**
-- Cards de conquista com: nome, descricao, progresso, status, pontuacao
-- Conquistas: Primeira visita, Primeira prospecao, Milestone visitas, Milestone prospecoes, 100% meta visitas, 100% meta prospecoes, 100% meta geral
-- Animacao ao concluir
-
-**E) Streak + Podio + Voce vs Media (grid 3 colunas)**
-- Streak: dias consecutivos com atividade
-- Podio: ranking por pontuacao total (remover criterios paralelos)
-- Voce vs Media (remover Voce vs Lider)
-
-**F) Graficos — Contribuicao por visitas e prospecoes (bar charts existentes)**
-
-**G) Comparativo entre campanhas**
-- Grafico de barras comparando campanha atual vs anteriores (excluir futuras)
-- Dados: visitas, prospecoes, pontuacao, taxa conclusao, cancelamentos
-
-**H) Historico de pontuacao (accordion)**
-- Comercial: ve apenas seus dados
-- Outros cargos: ve geral com filtro por usuario
-- Tabela com detalhes de pontuacao por acao
-
-**I) Estados vazios**
-- Sem campanha: "Nenhuma campanha ativa no momento"
-- Sem dados: "Sem dados suficientes"
-
-### 4. Ajustar `src/components/settings/CampaignsTab.tsx`
-
-Adicionar campos para as novas conquistas no formulario:
-- Pontos por primeira visita
-- Pontos por primeira prospecao
-- Pontos por 100% meta geral
-
-### 5. Componentes removidos/ajustados
-
-- `src/components/home/CampaignProgress.tsx` — remover (era usado no Dashboard)
-- `src/components/home/StatusChart.tsx` — remover (era usado no Dashboard)
-- `src/components/home/HeroSection.tsx` — avaliar se ainda e usado, remover se nao
-
-### 6. MobileMenuDrawer / MobileNav
-
-- Atualizar para refletir remocao do Dashboard (item nao aparecera pois `navItems` foi atualizado)
+Adicionar campo `date?: string` e `time?: string` ao `ScoreBreakdown`. Atualizar `getUserScoreBreakdown` para gerar datas mock dentro do periodo da campanha.
 
 ## Arquivos
 
 | Arquivo | Acao |
 |---|---|
-| `src/App.tsx` | Remover rota Dashboard, redirect para /campanhas |
-| `src/components/AppLayout.tsx` | Remover Dashboard do navItems |
-| `src/pages/DashboardPage.tsx` | Deletar |
-| `src/data/permissions.ts` | Remover permissoes dashboard.* |
-| `src/data/campaigns.ts` | Expandir achievements com novas conquistas |
-| `src/pages/CampanhasPage.tsx` | Reescrever completa — sem abas, scroll unico |
-| `src/components/settings/CampaignsTab.tsx` | Adicionar campos novas conquistas |
-| `src/components/home/CampaignProgress.tsx` | Deletar |
-| `src/components/home/StatusChart.tsx` | Deletar |
+| `src/pages/CampanhasPage.tsx` | Reordenar, remover graficos/regras/badge, adicionar alertas, ajustar conquistas e podio |
+| `src/data/campaigns.ts` | Adicionar date/time ao ScoreBreakdown |
 
