@@ -8,6 +8,7 @@ interface AnimatedKpiCardProps {
   icon: LucideIcon;
   label: string;
   value: number | string;
+  secondaryValue?: number | string;
   color?: string;
   suffix?: string;
   delay?: number;
