@@ -484,8 +484,8 @@ export default function AgendaPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={indicators.visitasCriadas + indicators.prospecoesCriadas} color="text-info" delay={0.1} onClick={() => setShowTodayPanel(prev => !prev)} active={showTodayPanel} />
         <AnimatedKpiCard icon={CheckCircle} label="Concluídas" value={indicators.visitasConcluidas + indicators.prospecoesConcluidas} color="text-success" delay={0.15} />
-        <AnimatedKpiCard icon={Handshake} label="Visitas" value={indicators.visitasCriadas} color="text-info" delay={0.2} />
-        <AnimatedKpiCard icon={UserPlus} label="Prospecções" value={indicators.prospecoesCriadas} color="text-warning" delay={0.25} />
+        <AnimatedKpiCard icon={Handshake} label="Visitas" value={`${indicators.visitasConcluidas}✓ de ${indicators.visitasCriadas}`} color="text-info" delay={0.2} />
+        <AnimatedKpiCard icon={UserPlus} label="Prospecções" value={`${indicators.prospecoesConcluidas}✓ de ${indicators.prospecoesCriadas}`} color="text-warning" delay={0.25} />
       </div>
 
       <AnimatePresence>
