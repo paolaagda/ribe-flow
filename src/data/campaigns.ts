@@ -9,6 +9,9 @@ export interface GamificationConfig {
     visitReward: number;
     prospectionMilestone: number;
     prospectionReward: number;
+    firstVisitReward: number;
+    firstProspectionReward: number;
+    fullGoalReward: number;
   };
 }
 
@@ -21,6 +24,9 @@ export const defaultGamification: GamificationConfig = {
     visitReward: 10,
     prospectionMilestone: 8,
     prospectionReward: 15,
+    firstVisitReward: 3,
+    firstProspectionReward: 3,
+    fullGoalReward: 25,
   },
 };
 
@@ -89,6 +95,7 @@ export function getCancelledVisitsForUser(userId: string, startDate: string, end
 
 export function calculateUserScore(campaign: Campaign, userId: string): number {
   const config = getGamificationConfig(campaign);
+  const participant = campaign.participants.find(p => p.userId === userId);
   const visits = getCompletedVisitsForUser(userId, campaign.startDate, campaign.endDate);
   const prospections = getCompletedProspectionsForUser(userId, campaign.startDate, campaign.endDate);
   const cancellations = getCancelledVisitsForUser(userId, campaign.startDate, campaign.endDate);
@@ -99,14 +106,48 @@ export function calculateUserScore(campaign: Campaign, userId: string): number {
   score += cancellations * config.pointsPerCancellation;
 
   // Achievement bonuses
-  if (visits >= config.achievements.visitMilestone) {
-    score += config.achievements.visitReward;
-  }
-  if (prospections >= config.achievements.prospectionMilestone) {
-    score += config.achievements.prospectionReward;
+  if (visits >= 1) score += config.achievements.firstVisitReward;
+  if (prospections >= 1) score += config.achievements.firstProspectionReward;
+  if (visits >= config.achievements.visitMilestone) score += config.achievements.visitReward;
+  if (prospections >= config.achievements.prospectionMilestone) score += config.achievements.prospectionReward;
+
+  // Full goal reward
+  if (participant) {
+    if (visits >= participant.visitGoal && prospections >= participant.prospectionGoal) {
+      score += config.achievements.fullGoalReward;
+    }
   }
 
   return Math.max(0, Math.round(score * 10) / 10);
+}
+
+export interface ScoreBreakdown {
+  label: string;
+  points: number;
+  type: 'earn' | 'penalty' | 'achievement';
+}
+
+export function getUserScoreBreakdown(campaign: Campaign, userId: string): ScoreBreakdown[] {
+  const config = getGamificationConfig(campaign);
+  const participant = campaign.participants.find(p => p.userId === userId);
+  const visits = getCompletedVisitsForUser(userId, campaign.startDate, campaign.endDate);
+  const prospections = getCompletedProspectionsForUser(userId, campaign.startDate, campaign.endDate);
+  const cancellations = getCancelledVisitsForUser(userId, campaign.startDate, campaign.endDate);
+
+  const items: ScoreBreakdown[] = [];
+
+  if (visits > 0) items.push({ label: `${visits} visita(s) × ${config.pointsPerVisit}pt`, points: visits * config.pointsPerVisit, type: 'earn' });
+  if (prospections > 0) items.push({ label: `${prospections} prospecção(ões) × ${config.pointsPerProspection}pt`, points: prospections * config.pointsPerProspection, type: 'earn' });
+  if (cancellations > 0) items.push({ label: `${cancellations} cancelamento(s) × ${config.pointsPerCancellation}pt`, points: cancellations * config.pointsPerCancellation, type: 'penalty' });
+  if (visits >= 1) items.push({ label: 'Primeira visita', points: config.achievements.firstVisitReward, type: 'achievement' });
+  if (prospections >= 1) items.push({ label: 'Primeira prospecção', points: config.achievements.firstProspectionReward, type: 'achievement' });
+  if (visits >= config.achievements.visitMilestone) items.push({ label: `Meta ${config.achievements.visitMilestone} visitas`, points: config.achievements.visitReward, type: 'achievement' });
+  if (prospections >= config.achievements.prospectionMilestone) items.push({ label: `Meta ${config.achievements.prospectionMilestone} prospecções`, points: config.achievements.prospectionReward, type: 'achievement' });
+  if (participant && visits >= participant.visitGoal && prospections >= participant.prospectionGoal) {
+    items.push({ label: '100% meta geral', points: config.achievements.fullGoalReward, type: 'achievement' });
+  }
+
+  return items;
 }
 
 const today = new Date();
@@ -139,6 +180,9 @@ export const initialCampaigns: Campaign[] = [
         visitReward: 10,
         prospectionMilestone: 8,
         prospectionReward: 15,
+        firstVisitReward: 3,
+        firstProspectionReward: 3,
+        fullGoalReward: 25,
       },
     },
   },
@@ -160,6 +204,9 @@ export const initialCampaigns: Campaign[] = [
         visitReward: 8,
         prospectionMilestone: 6,
         prospectionReward: 12,
+        firstVisitReward: 2,
+        firstProspectionReward: 2,
+        fullGoalReward: 20,
       },
     },
   },
@@ -182,6 +229,9 @@ export const initialCampaigns: Campaign[] = [
         visitReward: 15,
         prospectionMilestone: 10,
         prospectionReward: 20,
+        firstVisitReward: 5,
+        firstProspectionReward: 5,
+        fullGoalReward: 30,
       },
     },
   },

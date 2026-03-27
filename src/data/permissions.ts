@@ -9,12 +9,6 @@ export interface PermissionItem {
 }
 
 export const permissionItems: PermissionItem[] = [
-  // Dashboard
-  { module: 'Dashboard', action: 'Ver métricas gerais', key: 'dashboard.metrics' },
-  { module: 'Dashboard', action: 'Ver metas', key: 'dashboard.goals' },
-  { module: 'Dashboard', action: 'Ver gráficos', key: 'dashboard.charts' },
-  { module: 'Dashboard', action: 'Ver agenda do dia', key: 'dashboard.todayAgenda' },
-
   // Agenda
   { module: 'Agenda', action: 'Ver agenda', key: 'agenda.view' },
   { module: 'Agenda', action: 'Criar agenda', key: 'agenda.create' },
@@ -71,10 +65,6 @@ const allWrite = Object.fromEntries(permissionItems.map(p => [p.key, 'write' as 
 export const defaultPermissions: Record<AppProfile, Record<string, PermissionLevel>> = {
   gestor: { ...allWrite },
   nao_gestor: {
-    'dashboard.metrics': 'read',
-    'dashboard.goals': 'read',
-    'dashboard.charts': 'read',
-    'dashboard.todayAgenda': 'read',
     'agenda.view': 'read',
     'agenda.create': 'write',
     'agenda.edit': 'read',

@@ -135,6 +135,46 @@ function GamificationSection({ gamification, onChange }: { gamification: Gamific
             </div>
           </div>
         </div>
+
+        <p className="text-xs font-medium text-muted-foreground mt-3">Conquistas adicionais</p>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Pts 1ª visita</Label>
+            <Input
+              type="number"
+              className="h-8"
+              value={gamification.achievements.firstVisitReward}
+              onChange={e => onChange({
+                ...gamification,
+                achievements: { ...gamification.achievements, firstVisitReward: Number(e.target.value) },
+              })}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Pts 1ª prospecção</Label>
+            <Input
+              type="number"
+              className="h-8"
+              value={gamification.achievements.firstProspectionReward}
+              onChange={e => onChange({
+                ...gamification,
+                achievements: { ...gamification.achievements, firstProspectionReward: Number(e.target.value) },
+              })}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Pts 100% meta geral</Label>
+            <Input
+              type="number"
+              className="h-8"
+              value={gamification.achievements.fullGoalReward}
+              onChange={e => onChange({
+                ...gamification,
+                achievements: { ...gamification.achievements, fullGoalReward: Number(e.target.value) },
+              })}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
