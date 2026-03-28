@@ -193,6 +193,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
             <Handshake className="h-4 w-4" />
           </button>
           <span className="font-bold text-sm flex-1">Canal Parceiro</span>
+          <ThemeToggleButton />
           <NotificationInbox />
         </header>
         <main className="p-4" {...pageSwipe}>{children}</main>
