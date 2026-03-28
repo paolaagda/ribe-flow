@@ -14,6 +14,8 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import MobileMenuDrawer from '@/components/MobileMenuDrawer';
 import NotificationInbox from '@/components/notifications/NotificationInbox';
 import { usePermission } from '@/hooks/usePermission';
+import { useTheme } from '@/hooks/useTheme';
+import { Moon, Sun } from 'lucide-react';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import {
   Sidebar,
