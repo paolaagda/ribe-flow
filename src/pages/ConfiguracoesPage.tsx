@@ -2,11 +2,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageTransition from '@/components/PageTransition';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePermission } from '@/hooks/usePermission';
-import { ShieldOff, Users, Trophy, Palette, Building2, Database } from 'lucide-react';
+import { ShieldOff, Users, Trophy, Building2, Database } from 'lucide-react';
 import UsersTab from '@/components/settings/UsersTab';
 import CampaignsTab from '@/components/settings/CampaignsTab';
 import PartnersTab from '@/components/settings/PartnersTab';
-import AppearanceTab from '@/components/settings/AppearanceTab';
 import SystemDataTab from '@/components/settings/SystemDataTab';
 
 export default function ConfiguracoesPage() {
