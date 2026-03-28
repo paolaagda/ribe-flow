@@ -606,7 +606,29 @@ export default function AgendaPage() {
         )}
       </div>
 
-      {/* Calendar Grid */}
+      <AnimatePresence>
+        {showTodayPanel && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              <TodayAgenda viewMode="personal" />
+              <VisitMap viewMode="personal" />
+            </div>
+            <div className="pt-4">
+              <PendingTasksCard onOpenVisit={(visitId) => {
+                const v = visits.find(vi => vi.id === visitId);
+                if (v) { setSelectedVisit(v); setShowDetail(true); }
+              }} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {view === 'month' ? (
         <Card>
           <CardContent className="p-2 sm:p-4">
