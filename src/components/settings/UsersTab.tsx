@@ -190,7 +190,7 @@ export default function UsersTab() {
                   <p className="text-xs text-muted-foreground">{user.bio}</p>
                   {isGestor && (
                     <>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                         {canWrite('users.edit') && (
                           <Tooltip>
                             <TooltipTrigger asChild>
