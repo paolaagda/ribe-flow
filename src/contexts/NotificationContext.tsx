@@ -113,6 +113,25 @@ function generateMockNotifications(userId: string): AppNotification[] {
       createdAt: new Date(now.getTime() - 48 * 3600000).toISOString(),
       message: getRandomMessage('invite_detail', { parceiro: p1.name, nome: u5.name, data: format(new Date(now.getTime() - 2 * 86400000), "dd 'de' MMMM", { locale: ptBR }), hora: '11:00' }),
     },
+    // Task overdue notifications
+    {
+      id: 'notif-task-1', type: 'task_overdue' as NotificationType, visitId: 'vt1',
+      fromUserId: userId, toUserId: userId,
+      partnerId: p1.id, partnerName: p1.name,
+      date: today, time: '',
+      read: false, status: 'pending' as InviteStatus,
+      createdAt: new Date(now.getTime() - 12 * 86400000).toISOString(),
+      message: `⚠️ Tarefa pendente há mais de 10 dias para ${p1.name}. Verifique e conclua.`,
+    },
+    {
+      id: 'notif-task-2', type: 'task_overdue' as NotificationType, visitId: 'vt2',
+      fromUserId: userId, toUserId: userId,
+      partnerId: p2.id, partnerName: p2.name,
+      date: today, time: '',
+      read: false, status: 'pending' as InviteStatus,
+      createdAt: new Date(now.getTime() - 15 * 86400000).toISOString(),
+      message: `⚠️ Tarefa pendente há mais de 10 dias para ${p2.name}. Verifique e conclua.`,
+    },
   ];
 }
 
