@@ -125,8 +125,8 @@ export default function CampanhasPage() {
       { id: 'first_prosp', name: 'Primeira Prospecção', description: '1ª prospecção concluída', icon: <Star className="h-4 w-4" />, done: prospections >= 1, reward: config.achievements.firstProspectionReward },
       { id: 'visit_milestone', name: `${config.achievements.visitMilestone} Visitas`, description: `Meta de ${config.achievements.visitMilestone} visitas`, icon: <Trophy className="h-4 w-4" />, done: visits >= config.achievements.visitMilestone, reward: config.achievements.visitReward },
       { id: 'prosp_milestone', name: `${config.achievements.prospectionMilestone} Prospecções`, description: `Meta de ${config.achievements.prospectionMilestone}`, icon: <Medal className="h-4 w-4" />, done: prospections >= config.achievements.prospectionMilestone, reward: config.achievements.prospectionReward },
-      { id: 'full_visit_goal', name: '100% Visitas', description: `${participant.visitGoal} visitas`, icon: <Target className="h-4 w-4" />, done: visits >= participant.visitGoal, reward: 0 },
-      { id: 'full_prosp_goal', name: '100% Prospecções', description: `${participant.prospectionGoal} prospecções`, icon: <Target className="h-4 w-4" />, done: prospections >= participant.prospectionGoal, reward: 0 },
+      { id: 'full_visit_goal', name: '100% Visitas', description: `${participant.visitGoal} visitas`, icon: <Target className="h-4 w-4" />, done: visits >= participant.visitGoal, reward: config.achievements.fullVisitGoalReward },
+      { id: 'full_prosp_goal', name: '100% Prospecções', description: `${participant.prospectionGoal} prospecções`, icon: <Target className="h-4 w-4" />, done: prospections >= participant.prospectionGoal, reward: config.achievements.fullProspectionGoalReward },
       { id: 'full_goal', name: '100% Meta Geral', description: 'Todas as metas', icon: <Award className="h-4 w-4" />, done: visits >= participant.visitGoal && prospections >= participant.prospectionGoal, reward: config.achievements.fullGoalReward },
     ];
   }, [selectedCampaign, config, user, filterUserId, isComercial]);
@@ -262,7 +262,7 @@ export default function CampanhasPage() {
       {alertCards.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {alertCards.map((card, i) => (
-            <Card key={i} className={cn('border', card.color)}>
+            <Card key={i} className={cn('border min-h-[56px] hover:shadow-md transition-shadow', card.color)}>
               <CardContent className="p-3 flex items-center gap-3">
                 {card.icon}
                 <p className="text-xs font-medium">{card.text}</p>
@@ -275,7 +275,7 @@ export default function CampanhasPage() {
       {/* 4. KPI Cards */}
       {kpis && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <Card>
+          <Card className="min-h-[120px] hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Visitas</p>
               <div className="flex items-end gap-1">
@@ -285,7 +285,7 @@ export default function CampanhasPage() {
               <Progress value={kpis.totalVisitGoal > 0 ? Math.min(100, (kpis.totalVisits / kpis.totalVisitGoal) * 100) : 0} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
-          <Card>
+          <Card className="min-h-[120px] hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Prospecções</p>
               <div className="flex items-end gap-1">
@@ -295,21 +295,21 @@ export default function CampanhasPage() {
               <Progress value={kpis.totalProspGoal > 0 ? Math.min(100, (kpis.totalProsp / kpis.totalProspGoal) * 100) : 0} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
-          <Card>
+          <Card className="min-h-[120px] hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Pontuação</p>
               <span className="text-2xl font-bold text-primary">{kpis.totalScore}</span>
               <p className="text-[10px] text-muted-foreground mt-1">pts acumulados</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="min-h-[120px] hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Taxa de conclusão</p>
               <span className="text-2xl font-bold">{kpis.rate}%</span>
               <Progress value={kpis.rate} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
-          <Card>
+          <Card className="min-h-[120px] hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Cancelamentos</p>
               <span className={cn("text-2xl font-bold", kpis.totalCancel > 0 && "text-destructive")}>{kpis.totalCancel}</span>
@@ -389,7 +389,7 @@ export default function CampanhasPage() {
 
       {/* 6. You vs Average */}
       {myStats && ranking.length > 0 && (
-        <Card>
+        <Card className="min-h-[100px] hover:shadow-md transition-shadow">
           <CardContent className="p-4">
             <p className="text-xs font-semibold mb-3">Você vs Média</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -424,7 +424,7 @@ export default function CampanhasPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.2, delay: i * 0.03 }}
               >
-                <Card className={cn("transition-all text-center", a.done ? "border-primary/30 bg-primary/5" : "opacity-60")}>
+                <Card className={cn("transition-all text-center min-h-[120px] hover:shadow-md", a.done ? "border-primary/30 bg-primary/5" : "opacity-60")}>
                   <CardContent className="p-3 flex flex-col items-center gap-1.5">
                     <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", a.done ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
                       {a.done ? <CheckCircle2 className="h-4 w-4" /> : a.icon}
