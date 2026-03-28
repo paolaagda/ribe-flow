@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { Eye, Target, TrendingUp } from 'lucide-react';
+import { Handshake, UserPlus, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockVisits } from '@/data/mock-data';
 import { initialCampaigns, getCampaignStatus, getCompletedVisitsForUser } from '@/data/campaigns';
@@ -38,14 +38,16 @@ export default function HeroSection() {
     return () => clearInterval(interval);
   }, []);
 
-  const today = new Date().toISOString().split('T')[0];
+  
 
   const stats = useMemo(() => {
     const isCommercial = user?.profile === 'nao_gestor';
-    const todayVisits = mockVisits.filter(v =>
-      v.date === today && (!isCommercial || v.userId === user?.id)
-    );
-    const todayProspections = todayVisits.filter(v => v.type === 'prospecção');
+    const userVisits = isCommercial && user
+      ? mockVisits.filter(v => v.userId === user.id || v.createdBy === user.id || v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted'))
+      : mockVisits;
+
+    const visitasConcluidas = userVisits.filter(v => v.type === 'visita' && v.status === 'Concluída').length;
+    const prospecoesConcluidas = userVisits.filter(v => v.type === 'prospecção' && v.status === 'Concluída').length;
 
     const activeCampaign = campaigns.find(c => getCampaignStatus(c) === 'Ativa');
     let campaignProgress = 0;
@@ -58,11 +60,11 @@ export default function HeroSection() {
     }
 
     return {
-      visits: todayVisits.length,
-      prospections: todayProspections.length,
+      visitasConcluidas,
+      prospecoesConcluidas,
       campaignProgress,
     };
-  }, [today, user, campaigns]);
+  }, [user, campaigns]);
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?';
 
@@ -103,13 +105,13 @@ export default function HeroSection() {
 
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-primary" />
-                <span className="font-semibold tabular-nums">{stats.visits}</span>
+                <Handshake className="h-4 w-4 text-info" />
+                <span className="font-semibold tabular-nums">{stats.visitasConcluidas}</span>
                 <span className="text-muted-foreground">visitas</span>
               </div>
               <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-info" />
-                <span className="font-semibold tabular-nums">{stats.prospections}</span>
+                <UserPlus className="h-4 w-4 text-warning" />
+                <span className="font-semibold tabular-nums">{stats.prospecoesConcluidas}</span>
                 <span className="text-muted-foreground">prospecções</span>
               </div>
               {stats.campaignProgress > 0 && (

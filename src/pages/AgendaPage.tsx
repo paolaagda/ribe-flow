@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import PageTransition from '@/components/PageTransition';
 import HeroSection from '@/components/home/HeroSection';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
-import { CalendarDays, CheckCircle } from 'lucide-react';
+import { CalendarDays, CheckCircle, ListTodo } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ import { usePartners } from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { getRandomMessage } from '@/data/notification-messages';
+import { useTasks } from '@/hooks/useTasks';
 import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, DollarSign, Clock as ClockIcon, Handshake, UserPlus, CalendarRange } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, addWeeks, subWeeks, isSameDay, isSameMonth, parseISO, isValid, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -148,6 +149,8 @@ export default function AgendaPage() {
   }, []);
 
   // Performance indicators
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  
   const indicators = useMemo(() => {
     const visitas = filteredVisits.filter(v => v.type === 'visita');
     const prospecoes = filteredVisits.filter(v => v.type === 'prospecção');
@@ -156,8 +159,20 @@ export default function AgendaPage() {
       visitasConcluidas: visitas.filter(v => v.status === 'Concluída').length,
       prospecoesCriadas: prospecoes.length,
       prospecoesConcluidas: prospecoes.filter(v => v.status === 'Concluída').length,
+      totalAgendas: filteredVisits.length,
+      totalConcluidas: filteredVisits.filter(v => v.status === 'Concluída').length,
     };
   }, [filteredVisits]);
+
+  const todayIndicators = useMemo(() => {
+    const todayVisits = visibleVisits.filter(v => v.date === todayStr);
+    return {
+      total: todayVisits.length,
+      concluidas: todayVisits.filter(v => v.status === 'Concluída').length,
+    };
+  }, [visibleVisits, todayStr]);
+
+  const { pendingTasks, completedTasks } = useTasks();
 
   const handleDragStart = (e: React.DragEvent, visitId: string) => {
     setDraggedVisitId(visitId);
@@ -482,69 +497,26 @@ export default function AgendaPage() {
     <PageTransition className="space-y-6">
       <HeroSection />
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={indicators.visitasCriadas + indicators.prospecoesCriadas} color="text-info" delay={0.1} onClick={() => setShowTodayPanel(prev => !prev)} active={showTodayPanel} />
-        <AnimatedKpiCard icon={CheckCircle} label="Concluídas" value={indicators.visitasConcluidas + indicators.prospecoesConcluidas} color="text-success" delay={0.15} />
-        <AnimatedKpiCard icon={Handshake} label="Visitas" value={indicators.visitasConcluidas} secondaryValue={indicators.visitasCriadas} color="text-info" delay={0.2} />
-        <AnimatedKpiCard icon={UserPlus} label="Prospecções" value={indicators.prospecoesConcluidas} secondaryValue={indicators.prospecoesCriadas} color="text-warning" delay={0.25} />
-      </div>
-
-      <AnimatePresence>
-        {showTodayPanel && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-              <TodayAgenda viewMode="personal" />
-              <VisitMap viewMode="personal" />
-            </div>
-            <div className="pt-4">
-              <PendingTasksCard onOpenVisit={(visitId) => {
-                const v = visits.find(vi => vi.id === visitId);
-                if (v) { setSelectedVisit(v); setShowDetail(true); }
-              }} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-bold">Agenda</h1>
-            <p className="text-muted-foreground text-sm">Gerencie suas agendas</p>
-          </div>
-        </div>
-        {canWrite('agenda.create') && (
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="h-4 w-4 mr-1" /> Nova agenda
-          </Button>
-        )}
-      </div>
-
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => navigateCalendar('prev')}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm font-medium min-w-[160px] text-center capitalize">
-            {view === 'day' ? format(currentDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) :
-             view === 'week' ? `${format(startOfWeek(currentDate, { locale: ptBR }), 'dd/MM')} — ${format(endOfWeek(currentDate, { locale: ptBR }), 'dd/MM/yyyy')}` :
-             format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
-          </span>
-          <Button variant="outline" size="icon" onClick={() => navigateCalendar('next')}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setCurrentDate(new Date())}>Hoje</Button>
-        </div>
+      {/* Title + Filters */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold shrink-0">Agenda</h1>
         <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar('prev')}>
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </Button>
+            <span className="text-xs font-medium min-w-[120px] text-center capitalize">
+              {view === 'day' ? format(currentDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) :
+               view === 'week' ? `${format(startOfWeek(currentDate, { locale: ptBR }), 'dd/MM')} — ${format(endOfWeek(currentDate, { locale: ptBR }), 'dd/MM/yyyy')}` :
+               format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
+            </span>
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar('next')}>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => setCurrentDate(new Date())}>Hoje</Button>
+          </div>
           <Select value={view} onValueChange={(v) => setView(v as ViewMode)}>
-            <SelectTrigger className="w-28 h-9"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-24 h-7 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="day">Diário</SelectItem>
               <SelectItem value="week">Semanal</SelectItem>
@@ -552,7 +524,7 @@ export default function AgendaPage() {
             </SelectContent>
           </Select>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-32 h-9"><SelectValue placeholder="Status" /></SelectTrigger>
+            <SelectTrigger className="w-28 h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos status</SelectItem>
               <SelectItem value="Planejada">Planejada</SelectItem>
@@ -562,18 +534,17 @@ export default function AgendaPage() {
             </SelectContent>
           </Select>
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-32 h-9"><SelectValue placeholder="Tipo" /></SelectTrigger>
+            <SelectTrigger className="w-28 h-7 text-xs"><SelectValue placeholder="Tipo" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos tipos</SelectItem>
               <SelectItem value="visita">Visita</SelectItem>
               <SelectItem value="prospecção">Prospecção</SelectItem>
             </SelectContent>
           </Select>
-          {/* Date Range Filter */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={cn('h-9 gap-1.5', (dateRange.from || dateRange.to) && 'border-primary text-primary')}>
-                <CalendarRange className="h-3.5 w-3.5" />
+              <Button variant="outline" size="sm" className={cn('h-7 text-xs gap-1', (dateRange.from || dateRange.to) && 'border-primary text-primary')}>
+                <CalendarRange className="h-3 w-3" />
                 {dateRange.from && dateRange.to
                   ? `${format(dateRange.from, 'dd/MM')} — ${format(dateRange.to, 'dd/MM')}`
                   : dateRange.from
@@ -611,7 +582,53 @@ export default function AgendaPage() {
         </div>
       </div>
 
-      {/* Calendar Grid */}
+      {/* KPI Grid - 6 cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={todayIndicators.concluidas} secondaryValue={todayIndicators.total} color="text-info" delay={0.1} onClick={() => setShowTodayPanel(prev => !prev)} active={showTodayPanel} />
+        <AnimatedKpiCard icon={ListTodo} label="Tarefas" value={completedTasks.length} secondaryValue={pendingTasks.length} color="text-warning" delay={0.15} />
+        <AnimatedKpiCard icon={CheckCircle} label="Agendas" value={indicators.totalConcluidas} secondaryValue={indicators.totalAgendas} color="text-success" delay={0.2} />
+        <AnimatedKpiCard icon={Handshake} label="Visitas" value={indicators.visitasConcluidas} secondaryValue={indicators.visitasCriadas} color="text-info" delay={0.25} />
+        <AnimatedKpiCard icon={UserPlus} label="Prospecções" value={indicators.prospecoesConcluidas} secondaryValue={indicators.prospecoesCriadas} color="text-warning" delay={0.3} />
+        {canWrite('agenda.create') && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4 }}>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer h-full border-dashed border-2 border-primary/20 hover:border-primary/40" onClick={() => setShowForm(true)}>
+              <CardContent className="p-4 flex items-center gap-3 h-full">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <Plus className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-primary">Nova agenda</p>
+                  <p className="text-xs text-muted-foreground">Criar</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {showTodayPanel && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              <TodayAgenda viewMode="personal" />
+              <VisitMap viewMode="personal" />
+            </div>
+            <div className="pt-4">
+              <PendingTasksCard onOpenVisit={(visitId) => {
+                const v = visits.find(vi => vi.id === visitId);
+                if (v) { setSelectedVisit(v); setShowDetail(true); }
+              }} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {view === 'month' ? (
         <Card>
           <CardContent className="p-2 sm:p-4">
