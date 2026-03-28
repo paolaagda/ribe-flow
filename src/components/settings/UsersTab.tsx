@@ -35,7 +35,7 @@ export default function UsersTab() {
   const [editUser, setEditUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState({ name: '', email: '', role: '' as UserRole, profile: 'nao_gestor' as AppProfile, bio: '' });
   const [permissions, setPermissions] = useLocalStorage<Record<AppProfile, Record<string, PermissionLevel>>>(
-    'ribercred_permissions_v2',
+    'ribercred_permissions_v3',
     defaultPermissions
   );
   const [hasChanges, setHasChanges] = useState(false);
