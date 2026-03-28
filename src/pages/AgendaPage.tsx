@@ -31,6 +31,7 @@ import VisitMap from '@/components/home/VisitMap';
 import JustificationModal from '@/components/agenda/JustificationModal';
 import PendingTasksCard from '@/components/agenda/PendingTasksCard';
 import TasksDrawer from '@/components/agenda/TasksDrawer';
+import AgendaMap from '@/components/agenda/AgendaMap';
 import { usePermission } from '@/hooks/usePermission';
 import { ShieldOff } from 'lucide-react';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
