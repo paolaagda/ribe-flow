@@ -26,9 +26,9 @@ function AppRoutes() {
   const { isAuthenticated } = useAuth();
   return (
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/campanhas" replace /> : <LoginPage />} />
-      <Route path="/" element={<Navigate to="/campanhas" replace />} />
-      <Route path="/dashboard" element={<Navigate to="/campanhas" replace />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/agenda" replace /> : <LoginPage />} />
+      <Route path="/" element={<Navigate to="/agenda" replace />} />
+      <Route path="/dashboard" element={<Navigate to="/agenda" replace />} />
       <Route path="/campanhas" element={<ProtectedRoute><CampanhasPage /></ProtectedRoute>} />
       <Route path="/agenda" element={<ProtectedRoute><AgendaPage /></ProtectedRoute>} />
       <Route path="/analises" element={<ProtectedRoute><AnalisesPage /></ProtectedRoute>} />
