@@ -46,21 +46,22 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
+      className="h-full"
     >
-      <Card className={cn('hover:shadow-md transition-shadow', onClick && 'cursor-pointer', active && 'ring-2 ring-primary')} onClick={onClick}>
-        <CardContent className="p-4 flex items-center gap-3">
-          <div className={cn('p-2 rounded-lg bg-muted', color)}>
+      <Card className={cn('hover:shadow-md transition-shadow h-full', onClick && 'cursor-pointer', active && 'ring-2 ring-primary')} onClick={onClick}>
+        <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 h-full min-h-[72px]">
+          <div className={cn('p-2 rounded-lg bg-muted shrink-0', color)}>
             <Icon className="h-4 w-4" />
           </div>
-          <div>
-            <p className="text-2xl font-bold tabular-nums leading-tight">
+          <div className="min-w-0 flex-1">
+            <p className="text-xl sm:text-2xl font-bold tabular-nums leading-tight truncate">
               {numericValue !== null ? displayValue : value}
               {secondaryValue !== undefined && (
-                <span className="text-sm font-normal text-muted-foreground">/{secondaryValue}</span>
+                <span className="text-xs sm:text-sm font-normal text-muted-foreground">/{secondaryValue}</span>
               )}
-              {suffix && !secondaryValue && <span className="text-sm font-normal text-muted-foreground ml-0.5">{suffix}</span>}
+              {suffix && !secondaryValue && <span className="text-xs sm:text-sm font-normal text-muted-foreground ml-0.5">{suffix}</span>}
             </p>
-            <p className="text-xs text-muted-foreground">{label}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{label}</p>
           </div>
         </CardContent>
       </Card>

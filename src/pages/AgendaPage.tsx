@@ -666,6 +666,37 @@ export default function AgendaPage() {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {showTasksPanel && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <Card className="mt-1">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <ListTodo className="h-4 w-4 text-warning" />
+                    <span className="text-sm font-semibold">Tarefas</span>
+                    <Badge variant="secondary" className="text-xs">{pendingTasks.length + completedTasks.length}</Badge>
+                  </div>
+                  <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setShowTasksDrawer(true)}>
+                    Ver todas
+                  </Button>
+                </div>
+                <PendingTasksCard onOpenVisit={(visitId) => {
+                  const v = visits.find(vi => vi.id === visitId);
+                  if (v) { setSelectedVisit(v); setShowDetail(true); }
+                }} />
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {view === 'month' ? (
         <Card>
           <CardContent className="p-2 sm:p-4">
