@@ -105,13 +105,13 @@ export default function HeroSection() {
 
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-primary" />
-                <span className="font-semibold tabular-nums">{stats.visits}</span>
+                <Handshake className="h-4 w-4 text-info" />
+                <span className="font-semibold tabular-nums">{stats.visitasConcluidas}</span>
                 <span className="text-muted-foreground">visitas</span>
               </div>
               <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-info" />
-                <span className="font-semibold tabular-nums">{stats.prospections}</span>
+                <UserPlus className="h-4 w-4 text-warning" />
+                <span className="font-semibold tabular-nums">{stats.prospecoesConcluidas}</span>
                 <span className="text-muted-foreground">prospecções</span>
               </div>
               {stats.campaignProgress > 0 && (
