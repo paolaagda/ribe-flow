@@ -141,7 +141,7 @@ export default function UsersTab() {
       />
       <Tabs defaultValue="equipe">
         <TabsList>
-          <TabsTrigger value="equipe">Equipe</TabsTrigger>
+          <TabsTrigger value="equipe">Colaboradores</TabsTrigger>
           {canRead('teams.view') && <TabsTrigger value="equipes">Equipes</TabsTrigger>}
           {isGestor && <TabsTrigger value="permissoes">Permissões</TabsTrigger>}
         </TabsList>
