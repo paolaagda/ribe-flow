@@ -42,10 +42,12 @@ export default function HeroSection() {
 
   const stats = useMemo(() => {
     const isCommercial = user?.profile === 'nao_gestor';
-    const todayVisits = mockVisits.filter(v =>
-      v.date === today && (!isCommercial || v.userId === user?.id)
-    );
-    const todayProspections = todayVisits.filter(v => v.type === 'prospecção');
+    const userVisits = isCommercial && user
+      ? mockVisits.filter(v => v.userId === user.id || v.createdBy === user.id || v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted'))
+      : mockVisits;
+
+    const visitasConcluidas = userVisits.filter(v => v.type === 'visita' && v.status === 'Concluída').length;
+    const prospecoesConcluidas = userVisits.filter(v => v.type === 'prospecção' && v.status === 'Concluída').length;
 
     const activeCampaign = campaigns.find(c => getCampaignStatus(c) === 'Ativa');
     let campaignProgress = 0;
@@ -58,11 +60,11 @@ export default function HeroSection() {
     }
 
     return {
-      visits: todayVisits.length,
-      prospections: todayProspections.length,
+      visitasConcluidas,
+      prospecoesConcluidas,
       campaignProgress,
     };
-  }, [today, user, campaigns]);
+  }, [user, campaigns]);
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?';
 
