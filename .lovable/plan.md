@@ -1,47 +1,57 @@
 
 
-# Reordenacao do Menu + Evolucao do Podio
+# Ajuste de Gamificacao (100% Metas) + Padronizacao Visual dos Cards
 
 ## Resumo
 
-Reordenar os itens de navegacao (Agenda primeiro) e transformar o podio em um componente mais visual, com destaque para o 1o lugar, animacoes e microinteracoes.
+Separar a conquista "100% Meta Geral" em tres conquistas independentes com pontuacao configuravel: 100% Visitas, 100% Prospecoes e 100% Meta Geral. Adicionar campos de configuracao na aba de Campanhas. Padronizar altura dos cards em toda a pagina.
 
 ## Mudancas
 
-### 1. Reordenar menu
+### 1. Modelo de dados (`src/data/campaigns.ts`)
 
-**`src/components/AppLayout.tsx`** — alterar array `navItems`:
-```
-Agenda → Campanhas → Analises → Parceiros → Configuracoes
-```
+Expandir `GamificationConfig.achievements` com dois novos campos:
+- `fullVisitGoalReward: number` — pontos por atingir 100% das visitas
+- `fullProspectionGoalReward: number` — pontos por atingir 100% das prospecoes
 
-**`src/components/MobileMenuDrawer.tsx`** — alterar array `allNavItems` na mesma ordem (remover Dashboard que ja nao existe).
+Atualizar `defaultGamification` com valores padrao (ex: 10 cada).
 
-**`src/App.tsx`** — alterar redirect de `/` para `/agenda` (priorizar uso diario).
+Atualizar `calculateUserScore`:
+- Adicionar bonus separado quando `visits >= participant.visitGoal` → `+fullVisitGoalReward`
+- Adicionar bonus separado quando `prospections >= participant.prospectionGoal` → `+fullProspectionGoalReward`
 
-### 2. Evoluir Podio (`src/pages/CampanhasPage.tsx`)
+Atualizar `getUserScoreBreakdown` com entradas separadas para cada conquista de 100%.
 
-Substituir o bloco do podio (linhas 339-376) por um componente mais elaborado:
+Atualizar `initialCampaigns` com os novos campos.
 
-- **Layout**: 1o lugar centralizado e elevado, 2o a esquerda, 3o a direita — formato classico de podio
-- **1o lugar**: Avatar maior (h-16), borda dourada com glow (`ring-2 ring-yellow-400 shadow-lg shadow-yellow-400/20`), icone de coroa/estrela acima, confetti ao carregar
-- **2o e 3o**: Avatares medios (h-12), bordas prata e bronze
-- **Barras do podio**: Alturas diferenciadas (h-24, h-16, h-10) com gradientes mais vivos
-- **Informacoes**: Nome, pontuacao, cargo (em fonte menor)
-- **Microinteracoes**: `whileHover={{ scale: 1.05 }}` no motion.div, transicao spring com stagger
-- **Animacao de entrada**: Barras crescem de baixo para cima com delay escalonado
-- **Mobile**: Em telas pequenas, reduzir gap e tamanhos de avatar proporcionalmente
+### 2. Configuracao (`src/components/settings/CampaignsTab.tsx`)
 
-### 3. Confetti para 1o lugar
+Na secao "Conquistas adicionais", adicionar 2 novos campos:
+- "Pts 100% visitas"
+- "Pts 100% prospecoes"
 
-Usar `canvas-confetti` (ja importado) para disparar uma animacao sutil ao montar o podio, celebrando o lider.
+(ao lado do campo existente "Pts 100% meta geral", formando grid de 5 ou reorganizar em 2 linhas)
+
+### 3. Conquistas na pagina (`src/pages/CampanhasPage.tsx`)
+
+Atualizar array `achievements` (linhas 128-129) para usar `reward: config.achievements.fullVisitGoalReward` e `reward: config.achievements.fullProspectionGoalReward` em vez de `reward: 0`.
+
+### 4. Padronizacao visual dos cards
+
+Aplicar `min-h-[X]` consistente nos cards:
+- **KPI cards** (linhas 278-321): adicionar `min-h-[120px]` em cada Card
+- **Alert cards** (linhas 264-272): adicionar `min-h-[56px]`
+- **Achievement cards** (linhas 427-437): adicionar `min-h-[120px]`
+- **Streak card**: ja tem altura consistente, manter
+- **Voce vs Media**: adicionar `min-h-[100px]`
+
+Adicionar `hover:shadow-md transition-shadow` em todos os cards interativos para feedback consistente.
 
 ## Arquivos
 
 | Arquivo | Acao |
 |---|---|
-| `src/components/AppLayout.tsx` | Reordenar navItems |
-| `src/components/MobileMenuDrawer.tsx` | Reordenar allNavItems, remover Dashboard |
-| `src/App.tsx` | Redirect `/` para `/agenda` |
-| `src/pages/CampanhasPage.tsx` | Redesign do podio com visual premium |
+| `src/data/campaigns.ts` | Adicionar fullVisitGoalReward e fullProspectionGoalReward ao GamificationConfig, atualizar calculo e breakdown |
+| `src/components/settings/CampaignsTab.tsx` | Adicionar campos de configuracao para 100% visitas e 100% prospecoes |
+| `src/pages/CampanhasPage.tsx` | Usar novos rewards nas conquistas, padronizar min-h e hover nos cards |
 
