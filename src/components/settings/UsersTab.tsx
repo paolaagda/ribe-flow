@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +29,7 @@ import { cn } from '@/lib/utils';
 const allProfiles: AppProfile[] = ['gestor', 'nao_gestor'];
 
 export default function UsersTab() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { profile } = useAuth();
   const [search, setSearch] = useState('');
@@ -155,7 +157,7 @@ export default function UsersTab() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map(user => (
-              <Card key={user.id} className={cn('transition-shadow hover:shadow-md', !user.active && 'opacity-60')}>
+              <Card key={user.id} className={cn('transition-shadow hover:shadow-md cursor-pointer', !user.active && 'opacity-60')} onClick={() => navigate(`/colaborador/${user.id}`)}>
                 <CardContent className="p-4 space-y-4">
                   <div className="flex items-start gap-3">
                     <div className="relative group">
@@ -188,7 +190,7 @@ export default function UsersTab() {
                   <p className="text-xs text-muted-foreground">{user.bio}</p>
                   {isGestor && (
                     <>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                         {canWrite('users.edit') && (
                           <Tooltip>
                             <TooltipTrigger asChild>
