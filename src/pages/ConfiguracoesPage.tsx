@@ -68,13 +68,6 @@ export default function ConfiguracoesPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="aparencia">
-          <Card>
-            <CardContent className="p-4 md:p-6">
-              <AppearanceTab />
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="dados">
           <Card>

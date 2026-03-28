@@ -210,7 +210,8 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-14 flex items-center border-b border-border px-4 bg-card/50 backdrop-blur-sm">
             <SidebarTrigger className="mr-4" />
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-1">
+              <ThemeToggleButton />
               <NotificationInbox />
             </div>
           </header>
