@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 
-export type NotificationType = 'invite' | 'accept' | 'reject' | 'remove' | 'update';
+export type NotificationType = 'invite' | 'accept' | 'reject' | 'remove' | 'update' | 'task_overdue';
 export type InviteStatus = 'pending' | 'accepted' | 'rejected';
 
 export interface AppNotification {
