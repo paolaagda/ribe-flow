@@ -34,6 +34,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
+function ThemeToggleButton() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleTheme}>
+      {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    </Button>
+  );
+}
+
 const navItems = [
   { title: 'Agenda', url: '/agenda', icon: CalendarDays, permKey: 'agenda.view' },
   { title: 'Campanhas', url: '/campanhas', icon: Trophy, permKey: 'campaigns.view' },
