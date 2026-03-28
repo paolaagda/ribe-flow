@@ -9,7 +9,7 @@ import { VisitComment, getUserById } from '@/data/mock-data';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { MessageSquare, CheckSquare, Send, Reply, MessageCircle } from 'lucide-react';
+import { MessageSquare, CheckSquare, Send, Reply, MessageCircle, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
@@ -67,19 +67,34 @@ export default function AgendaComments({ comments, onAddComment, onToggleTask }:
               <span className="text-[10px] text-muted-foreground">
                 {format(parseISO(comment.createdAt), "dd/MM 'às' HH:mm", { locale: ptBR })}
               </span>
-              {comment.type === 'task' && (
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    'text-[9px] px-1.5 py-0',
-                    comment.taskCompleted
-                      ? 'bg-success/10 text-success border-success/20'
-                      : 'bg-warning/10 text-warning border-warning/20',
-                  )}
-                >
-                  {comment.taskCompleted ? 'Concluída' : 'Aberta'}
-                </Badge>
-              )}
+              {comment.type === 'task' && (() => {
+                const daysPending = !comment.taskCompleted
+                  ? Math.floor((Date.now() - new Date(comment.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+                  : 0;
+                const isOverdue = daysPending >= 10;
+                return (
+                  <>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        'text-[9px] px-1.5 py-0',
+                        comment.taskCompleted
+                          ? 'bg-success/10 text-success border-success/20'
+                          : isOverdue
+                            ? 'bg-destructive/10 text-destructive border-destructive/20'
+                            : 'bg-warning/10 text-warning border-warning/20',
+                      )}
+                    >
+                      {comment.taskCompleted ? 'Concluída' : isOverdue ? 'Atrasada' : 'Aberta'}
+                    </Badge>
+                    {!comment.taskCompleted && daysPending > 0 && (
+                      <span className={cn('text-[9px] flex items-center gap-0.5', isOverdue ? 'text-destructive' : 'text-muted-foreground')}>
+                        <Clock className="h-2.5 w-2.5" /> há {daysPending}d
+                      </span>
+                    )}
+                  </>
+                );
+              })()}
             </div>
             <div className="flex items-start gap-2">
               {comment.type === 'task' && (

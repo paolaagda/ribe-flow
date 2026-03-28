@@ -28,6 +28,7 @@ import AgendaDetailModal from '@/components/AgendaDetailModal';
 import TodayAgenda from '@/components/home/TodayAgenda';
 import VisitMap from '@/components/home/VisitMap';
 import JustificationModal from '@/components/agenda/JustificationModal';
+import PendingTasksCard from '@/components/agenda/PendingTasksCard';
 import { usePermission } from '@/hooks/usePermission';
 import { ShieldOff } from 'lucide-react';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
@@ -500,6 +501,12 @@ export default function AgendaPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
               <TodayAgenda viewMode="personal" />
               <VisitMap viewMode="personal" />
+            </div>
+            <div className="pt-4">
+              <PendingTasksCard onOpenVisit={(visitId) => {
+                const v = visits.find(vi => vi.id === visitId);
+                if (v) { setSelectedVisit(v); setShowDetail(true); }
+              }} />
             </div>
           </motion.div>
         )}
