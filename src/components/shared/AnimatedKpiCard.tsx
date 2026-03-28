@@ -56,7 +56,7 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
             <p className="text-2xl font-bold tabular-nums leading-tight">
               {numericValue !== null ? displayValue : value}
               {secondaryValue !== undefined && (
-                <span className="text-sm font-normal text-muted-foreground">✓ de <span className="text-base">{secondaryValue}</span></span>
+                <span className="text-sm font-normal text-muted-foreground">/{secondaryValue}</span>
               )}
               {suffix && !secondaryValue && <span className="text-sm font-normal text-muted-foreground ml-0.5">{suffix}</span>}
             </p>
