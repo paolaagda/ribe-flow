@@ -1,20 +1,23 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { usePermission } from '@/hooks/usePermission';
 import { usePartners } from '@/hooks/usePartners';
-import { mockUsers, Partner, STORE_STRUCTURES, getUserById } from '@/data/mock-data';
-import { Plus, Edit, Trash2, Search, Building2, MapPin, Phone } from 'lucide-react';
+import { useStores } from '@/hooks/useStores';
+import { mockUsers, Partner, Store, STORE_STRUCTURES, getUserById } from '@/data/mock-data';
+import { Plus, Edit, Trash2, Search, Building2, MapPin, Phone, Download, Upload, FileSpreadsheet, CheckCircle2, AlertTriangle, X } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const potentialColors: Record<string, string> = {
   alto: 'bg-success/10 text-success border-success/20',
@@ -32,19 +35,77 @@ const emptyForm = {
   structures: [] as string[],
   responsibleUserId: '',
   potential: '' as 'alto' | 'médio' | 'baixo' | '',
+  storeId: '',
 };
+
+const CSV_HEADERS = ['Nome da Loja', 'Razão Social', 'CNPJ', 'Endereço', 'Telefone', 'Contato', 'Estruturas (separar por ;)', 'Potencial (alto/médio/baixo)', 'Email Comercial Responsável'];
+
+interface ImportRow {
+  name: string;
+  razaoSocial: string;
+  cnpj: string;
+  address: string;
+  phone: string;
+  contact: string;
+  structures: string[];
+  potential: 'alto' | 'médio' | 'baixo';
+  responsibleEmail: string;
+  responsibleUserId: string;
+  valid: boolean;
+  errors: string[];
+}
+
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
 
 export default function PartnersTab() {
   const { toast } = useToast();
   const { canWrite } = usePermission();
   const { partners, setPartners } = usePartners();
+  const { stores } = useStores();
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
   const [deletingPartnerId, setDeletingPartnerId] = useState<string | null>(null);
   const [formData, setFormData] = useState(emptyForm);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importRows, setImportRows] = useState<ImportRow[]>([]);
+  const [importStep, setImportStep] = useState<'upload' | 'preview'>('upload');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const commercials = mockUsers.filter(u => u.role === 'comercial');
+
+  // Available stores not yet linked to a partner (excluding current editing partner)
+  const assignedStoreIds = partners
+    .filter(p => p.id !== editingPartner?.id)
+    .map(p => {
+      const store = stores.find(s => s.partnerId === p.id);
+      return store?.id;
+    })
+    .filter(Boolean);
+
+  const availableStores = stores.filter(s => !assignedStoreIds.includes(s.id));
 
   const filtered = search
     ? partners.filter(p =>
@@ -62,6 +123,7 @@ export default function PartnersTab() {
 
   const openEdit = (p: Partner) => {
     setEditingPartner(p);
+    const linkedStore = stores.find(s => s.partnerId === p.id);
     setFormData({
       name: p.name,
       razaoSocial: p.razaoSocial,
@@ -72,6 +134,7 @@ export default function PartnersTab() {
       structures: [...p.structures],
       responsibleUserId: p.responsibleUserId,
       potential: p.potential,
+      storeId: linkedStore?.id || '',
     });
     setShowForm(true);
   };
@@ -122,18 +185,176 @@ export default function PartnersTab() {
     setDeletingPartnerId(null);
   };
 
+  // ── Export template CSV ──
+  const handleExportTemplate = () => {
+    const bom = '\uFEFF';
+    const exampleRow = [
+      'Exemplo Loja',
+      'Exemplo Ltda',
+      '00.000.000/0001-00',
+      'Rua Exemplo, 100 — Cidade, UF',
+      '(00) 0000-0000',
+      'Nome do Contato',
+      'Help;Loja balcão',
+      'alto',
+      commercials[0]?.email || 'comercial@empresa.com',
+    ].join(',');
+
+    const csv = bom + CSV_HEADERS.join(',') + '\n' + exampleRow + '\n';
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'modelo_parceiros.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: 'Planilha modelo exportada!' });
+  };
+
+  // ── Import CSV ──
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const text = evt.target?.result as string;
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+
+      if (lines.length < 2) {
+        toast({ title: 'Arquivo vazio ou sem dados', variant: 'destructive' });
+        return;
+      }
+
+      // Skip header
+      const dataLines = lines.slice(1);
+      const parsed: ImportRow[] = dataLines.map(line => {
+        const cols = parseCSVLine(line);
+        const errors: string[] = [];
+
+        const name = cols[0] || '';
+        const razaoSocial = cols[1] || '';
+        const cnpj = cols[2] || '';
+        const address = cols[3] || '';
+        const phone = cols[4] || '';
+        const contact = cols[5] || '';
+        const structuresRaw = cols[6] || '';
+        const potentialRaw = (cols[7] || '').toLowerCase().trim();
+        const responsibleEmail = (cols[8] || '').trim();
+
+        if (!name) errors.push('Nome obrigatório');
+        if (!razaoSocial) errors.push('Razão social obrigatória');
+        if (!cnpj) errors.push('CNPJ obrigatório');
+        if (!address) errors.push('Endereço obrigatório');
+
+        // Check duplicate CNPJ
+        if (cnpj && partners.some(p => p.cnpj === cnpj)) {
+          errors.push('CNPJ já cadastrado');
+        }
+
+        const potential = (['alto', 'médio', 'medio', 'baixo'].includes(potentialRaw)
+          ? (potentialRaw === 'medio' ? 'médio' : potentialRaw)
+          : '') as 'alto' | 'médio' | 'baixo';
+        if (!potential) errors.push('Potencial inválido');
+
+        const structures = structuresRaw
+          .split(';')
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
+
+        const foundUser = mockUsers.find(u => u.email.toLowerCase() === responsibleEmail.toLowerCase() && u.role === 'comercial');
+        if (!foundUser && responsibleEmail) errors.push('Comercial não encontrado');
+        if (!responsibleEmail) errors.push('Email do comercial obrigatório');
+
+        return {
+          name,
+          razaoSocial,
+          cnpj,
+          address,
+          phone,
+          contact,
+          structures,
+          potential: potential || 'baixo',
+          responsibleEmail,
+          responsibleUserId: foundUser?.id || '',
+          valid: errors.length === 0,
+          errors,
+        };
+      });
+
+      setImportRows(parsed);
+      setImportStep('preview');
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const handleConfirmImport = () => {
+    const validRows = importRows.filter(r => r.valid);
+    if (validRows.length === 0) {
+      toast({ title: 'Nenhum registro válido para importar', variant: 'destructive' });
+      return;
+    }
+
+    const newPartners: Partner[] = validRows.map((row, idx) => ({
+      id: `p${Date.now()}_${idx}`,
+      name: row.name,
+      razaoSocial: row.razaoSocial,
+      cnpj: row.cnpj,
+      address: row.address,
+      lat: 0,
+      lng: 0,
+      structures: row.structures,
+      potential: row.potential,
+      phone: row.phone,
+      contact: row.contact,
+      responsibleUserId: row.responsibleUserId,
+    }));
+
+    setPartners(prev => [...prev, ...newPartners]);
+    toast({ title: `${validRows.length} parceiro(s) importado(s) com sucesso!` });
+    setShowImportDialog(false);
+    setImportRows([]);
+    setImportStep('upload');
+  };
+
   const isFormValid = formData.name && formData.razaoSocial && formData.cnpj && formData.address && formData.responsibleUserId && formData.potential;
+
+  const validCount = importRows.filter(r => r.valid).length;
+  const invalidCount = importRows.filter(r => !r.valid).length;
 
   return (
     <>
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <p className="text-sm text-muted-foreground">Gerencie os parceiros cadastrados no sistema.</p>
-        {canWrite('partners.create') && (
-          <Button size="sm" onClick={openCreate}>
-            <Plus className="h-4 w-4 mr-1" /> Novo parceiro
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {canWrite('partners.bulkImport') && (
+            <>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm" onClick={handleExportTemplate}>
+                    <Download className="h-4 w-4 mr-1" /> Modelo
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Baixar planilha modelo para preenchimento</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm" onClick={() => { setShowImportDialog(true); setImportStep('upload'); setImportRows([]); }}>
+                    <Upload className="h-4 w-4 mr-1" /> Importar
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Importar parceiros em lote via CSV</TooltipContent>
+              </Tooltip>
+            </>
+          )}
+          {canWrite('partners.create') && (
+            <Button size="sm" onClick={openCreate}>
+              <Plus className="h-4 w-4 mr-1" /> Novo parceiro
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="relative">
@@ -222,6 +443,7 @@ export default function PartnersTab() {
         </div>
       )}
 
+      {/* Partner Form Dialog */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
@@ -293,6 +515,20 @@ export default function PartnersTab() {
                 </Select>
               </div>
             </div>
+            <div className="space-y-2">
+              <Label>Loja vinculada (centro de custo)</Label>
+              <Select value={formData.storeId} onValueChange={v => setFormData({ ...formData, storeId: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a loja (opcional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableStores.map(s => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] text-muted-foreground">Relação 1:1 — cada loja pertence a um único parceiro.</p>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
@@ -300,6 +536,115 @@ export default function PartnersTab() {
               {editingPartner ? 'Salvar' : 'Cadastrar parceiro'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={(open) => { setShowImportDialog(open); if (!open) { setImportRows([]); setImportStep('upload'); } }}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileSpreadsheet className="h-5 w-5 text-primary" />
+              Importar Parceiros em Lote
+            </DialogTitle>
+            <DialogDescription>
+              Faça upload de um arquivo CSV com os dados dos parceiros. Baixe o modelo primeiro para garantir o formato correto.
+            </DialogDescription>
+          </DialogHeader>
+
+          {importStep === 'upload' && (
+            <div className="flex flex-col items-center gap-6 py-8">
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-xl p-10 text-center w-full">
+                <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-sm font-medium mb-1">Arraste ou selecione o arquivo CSV</p>
+                <p className="text-xs text-muted-foreground mb-4">Formato aceito: .csv (UTF-8)</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+                <div className="flex items-center justify-center gap-3">
+                  <Button variant="outline" onClick={handleExportTemplate}>
+                    <Download className="h-4 w-4 mr-1" /> Baixar modelo
+                  </Button>
+                  <Button onClick={() => fileInputRef.current?.click()}>
+                    <Upload className="h-4 w-4 mr-1" /> Selecionar arquivo
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {importStep === 'preview' && (
+            <div className="flex flex-col gap-4 flex-1 overflow-hidden">
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1.5 text-success">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span className="font-medium">{validCount} válido(s)</span>
+                </div>
+                {invalidCount > 0 && (
+                  <div className="flex items-center gap-1.5 text-destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span className="font-medium">{invalidCount} com erro(s)</span>
+                  </div>
+                )}
+                <span className="text-muted-foreground">Total: {importRows.length} registro(s)</span>
+              </div>
+
+              <ScrollArea className="flex-1 max-h-[400px] rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="text-xs w-8">#</TableHead>
+                      <TableHead className="text-xs">Status</TableHead>
+                      <TableHead className="text-xs">Nome</TableHead>
+                      <TableHead className="text-xs">CNPJ</TableHead>
+                      <TableHead className="text-xs">Potencial</TableHead>
+                      <TableHead className="text-xs">Comercial</TableHead>
+                      <TableHead className="text-xs">Erros</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {importRows.map((row, idx) => (
+                      <TableRow key={idx} className={cn(!row.valid && 'bg-destructive/5')}>
+                        <TableCell className="text-xs text-muted-foreground">{idx + 1}</TableCell>
+                        <TableCell>
+                          {row.valid
+                            ? <CheckCircle2 className="h-4 w-4 text-success" />
+                            : <AlertTriangle className="h-4 w-4 text-destructive" />
+                          }
+                        </TableCell>
+                        <TableCell className="text-xs font-medium">{row.name || '—'}</TableCell>
+                        <TableCell className="text-xs">{row.cnpj || '—'}</TableCell>
+                        <TableCell>
+                          {row.potential && (
+                            <Badge variant="outline" className={cn('text-[10px]', potentialColors[row.potential])}>
+                              {row.potential}
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs">{row.responsibleEmail || '—'}</TableCell>
+                        <TableCell className="text-xs text-destructive max-w-[200px] truncate">
+                          {row.errors.join(', ')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+
+              <DialogFooter className="flex-shrink-0">
+                <Button variant="outline" onClick={() => { setImportStep('upload'); setImportRows([]); }}>
+                  <X className="h-4 w-4 mr-1" /> Cancelar
+                </Button>
+                <Button onClick={handleConfirmImport} disabled={validCount === 0}>
+                  <CheckCircle2 className="h-4 w-4 mr-1" /> Importar {validCount} parceiro(s)
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
