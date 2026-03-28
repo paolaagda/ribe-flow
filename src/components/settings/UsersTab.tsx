@@ -29,6 +29,7 @@ import { cn } from '@/lib/utils';
 const allProfiles: AppProfile[] = ['gestor', 'nao_gestor'];
 
 export default function UsersTab() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { profile } = useAuth();
   const [search, setSearch] = useState('');
