@@ -149,6 +149,8 @@ export default function AgendaPage() {
   }, []);
 
   // Performance indicators
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  
   const indicators = useMemo(() => {
     const visitas = filteredVisits.filter(v => v.type === 'visita');
     const prospecoes = filteredVisits.filter(v => v.type === 'prospecção');
@@ -157,8 +159,20 @@ export default function AgendaPage() {
       visitasConcluidas: visitas.filter(v => v.status === 'Concluída').length,
       prospecoesCriadas: prospecoes.length,
       prospecoesConcluidas: prospecoes.filter(v => v.status === 'Concluída').length,
+      totalAgendas: filteredVisits.length,
+      totalConcluidas: filteredVisits.filter(v => v.status === 'Concluída').length,
     };
   }, [filteredVisits]);
+
+  const todayIndicators = useMemo(() => {
+    const todayVisits = visibleVisits.filter(v => v.date === todayStr);
+    return {
+      total: todayVisits.length,
+      concluidas: todayVisits.filter(v => v.status === 'Concluída').length,
+    };
+  }, [visibleVisits, todayStr]);
+
+  const { pendingTasks, completedTasks } = useTasks();
 
   const handleDragStart = (e: React.DragEvent, visitId: string) => {
     setDraggedVisitId(visitId);
