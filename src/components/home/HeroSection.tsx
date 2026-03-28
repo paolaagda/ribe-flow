@@ -38,7 +38,7 @@ export default function HeroSection() {
     return () => clearInterval(interval);
   }, []);
 
-  const today = new Date().toISOString().split('T')[0];
+  
 
   const stats = useMemo(() => {
     const isCommercial = user?.profile === 'nao_gestor';
