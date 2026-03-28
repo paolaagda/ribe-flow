@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { Eye, Target, TrendingUp } from 'lucide-react';
+import { Handshake, UserPlus, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockVisits } from '@/data/mock-data';
 import { initialCampaigns, getCampaignStatus, getCompletedVisitsForUser } from '@/data/campaigns';
