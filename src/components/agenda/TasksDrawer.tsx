@@ -2,17 +2,22 @@ import { useState, useMemo } from 'react';
 import { useTasks, TaskItem } from '@/hooks/useTasks';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserById, mockUsers } from '@/data/mock-data';
+import { usePartners } from '@/hooks/usePartners';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { Clock, AlertTriangle, CheckCircle2, ListTodo } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { Clock, AlertTriangle, CheckCircle2, ListTodo, CalendarIcon, Filter, X } from 'lucide-react';
+import { format, parseISO, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import type { DateRange } from 'react-day-picker';
 
 interface Props {
   open: boolean;
@@ -23,23 +28,59 @@ interface Props {
 export default function TasksDrawer({ open, onOpenChange, onOpenVisit }: Props) {
   const { allTasks, pendingTasks, completedTasks, overdueTasks, toggleTask, getDaysPending } = useTasks();
   const { profile } = useAuth();
+  const { partners } = usePartners();
   const [filterUser, setFilterUser] = useState('all');
+  const [filterPartner, setFilterPartner] = useState('all');
+  const [filterOverdue, setFilterOverdue] = useState('all');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [showFilters, setShowFilters] = useState(false);
   const [tab, setTab] = useState('pending');
-
-  const filteredPending = useMemo(() => {
-    if (filterUser === 'all') return pendingTasks;
-    return pendingTasks.filter(t => t.visit.userId === filterUser);
-  }, [pendingTasks, filterUser]);
-
-  const filteredCompleted = useMemo(() => {
-    if (filterUser === 'all') return completedTasks;
-    return completedTasks.filter(t => t.visit.userId === filterUser);
-  }, [completedTasks, filterUser]);
 
   const activeUsers = useMemo(() => {
     const ids = new Set(allTasks.map(t => t.visit.userId));
     return mockUsers.filter(u => ids.has(u.id));
   }, [allTasks]);
+
+  const activePartners = useMemo(() => {
+    const ids = new Set(allTasks.map(t => t.visit.partnerId));
+    return partners.filter(p => ids.has(p.id));
+  }, [allTasks, partners]);
+
+  const applyFilters = (tasks: TaskItem[]) => {
+    let result = tasks;
+    if (filterUser !== 'all') {
+      result = result.filter(t => t.visit.userId === filterUser);
+    }
+    if (filterPartner !== 'all') {
+      result = result.filter(t => t.visit.partnerId === filterPartner);
+    }
+    if (dateRange?.from) {
+      const from = startOfDay(dateRange.from);
+      result = result.filter(t => !isBefore(parseISO(t.task.createdAt), from));
+    }
+    if (dateRange?.to) {
+      const to = endOfDay(dateRange.to);
+      result = result.filter(t => !isAfter(parseISO(t.task.createdAt), to));
+    }
+    if (filterOverdue === 'overdue') {
+      result = result.filter(t => getDaysPending(t.task.createdAt) >= 10);
+    } else if (filterOverdue === 'on_time') {
+      result = result.filter(t => getDaysPending(t.task.createdAt) < 10);
+    }
+    return result;
+  };
+
+  const filteredPending = useMemo(() => applyFilters(pendingTasks), [pendingTasks, filterUser, filterPartner, dateRange, filterOverdue]);
+  const filteredCompleted = useMemo(() => applyFilters(completedTasks), [completedTasks, filterUser, filterPartner, dateRange, filterOverdue]);
+
+  const hasActiveFilters = filterUser !== 'all' || filterPartner !== 'all' || filterOverdue !== 'all' || !!dateRange;
+
+  const clearFilters = () => {
+    setFilterUser('all');
+    setFilterPartner('all');
+    setFilterOverdue('all');
+    setDateRange(undefined);
+  };
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -51,21 +92,100 @@ export default function TasksDrawer({ open, onOpenChange, onOpenVisit }: Props) 
               Tarefas
               <Badge variant="secondary" className="text-xs">{allTasks.length}</Badge>
             </DrawerTitle>
-            {profile === 'gestor' && activeUsers.length > 1 && (
-              <Select value={filterUser} onValueChange={setFilterUser}>
-                <SelectTrigger className="w-40 h-8 text-xs">
-                  <SelectValue placeholder="Todos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  {activeUsers.map(u => (
-                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant={showFilters ? 'secondary' : 'ghost'}
+                size="sm"
+                className="h-7 text-xs gap-1 relative"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter className="h-3.5 w-3.5" />
+                Filtros
+                {hasActiveFilters && (
+                  <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary text-[9px] text-primary-foreground flex items-center justify-center">!</span>
+                )}
+              </Button>
+              {hasActiveFilters && (
+                <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground" onClick={clearFilters}>
+                  <X className="h-3 w-3" /> Limpar
+                </Button>
+              )}
+            </div>
           </div>
         </DrawerHeader>
+
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden px-4"
+            >
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pb-3">
+                {profile === 'gestor' && activeUsers.length > 1 && (
+                  <Select value={filterUser} onValueChange={setFilterUser}>
+                    <SelectTrigger className="h-7 text-xs">
+                      <SelectValue placeholder="Usuário" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos usuários</SelectItem>
+                      {activeUsers.map(u => (
+                        <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+
+                <Select value={filterPartner} onValueChange={setFilterPartner}>
+                  <SelectTrigger className="h-7 text-xs">
+                    <SelectValue placeholder="Parceiro" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos parceiros</SelectItem>
+                    {activePartners.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={filterOverdue} onValueChange={setFilterOverdue}>
+                  <SelectTrigger className="h-7 text-xs">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos status</SelectItem>
+                    <SelectItem value="overdue">Atrasadas (10+d)</SelectItem>
+                    <SelectItem value="on_time">No prazo</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("h-7 text-xs justify-start gap-1 font-normal", !dateRange && "text-muted-foreground")}>
+                      <CalendarIcon className="h-3 w-3" />
+                      {dateRange?.from ? (
+                        dateRange.to
+                          ? `${format(dateRange.from, 'dd/MM')} - ${format(dateRange.to, 'dd/MM')}`
+                          : format(dateRange.from, 'dd/MM/yy')
+                      ) : 'Período'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      mode="range"
+                      selected={dateRange}
+                      onSelect={setDateRange}
+                      numberOfMonths={1}
+                      locale={ptBR}
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <Tabs value={tab} onValueChange={setTab} className="px-4 pb-4">
           <TabsList className="w-full">
@@ -80,7 +200,7 @@ export default function TasksDrawer({ open, onOpenChange, onOpenVisit }: Props) 
           </TabsList>
 
           <TabsContent value="pending" className="mt-3">
-            <ScrollArea className="max-h-[55vh]">
+            <ScrollArea className="max-h-[50vh]">
               {filteredPending.length === 0 ? (
                 <div className="py-8 text-center text-sm text-muted-foreground">Nenhuma tarefa pendente</div>
               ) : (
@@ -106,7 +226,7 @@ export default function TasksDrawer({ open, onOpenChange, onOpenVisit }: Props) 
           </TabsContent>
 
           <TabsContent value="completed" className="mt-3">
-            <ScrollArea className="max-h-[55vh]">
+            <ScrollArea className="max-h-[50vh]">
               {filteredCompleted.length === 0 ? (
                 <div className="py-8 text-center text-sm text-muted-foreground">Nenhuma tarefa concluída</div>
               ) : (
