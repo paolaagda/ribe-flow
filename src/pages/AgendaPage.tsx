@@ -30,6 +30,7 @@ import TodayAgenda from '@/components/home/TodayAgenda';
 import VisitMap from '@/components/home/VisitMap';
 import JustificationModal from '@/components/agenda/JustificationModal';
 import PendingTasksCard from '@/components/agenda/PendingTasksCard';
+import TasksDrawer from '@/components/agenda/TasksDrawer';
 import { usePermission } from '@/hooks/usePermission';
 import { ShieldOff } from 'lucide-react';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
@@ -66,6 +67,7 @@ export default function AgendaPage() {
   const [showJustificationModal, setShowJustificationModal] = useState(false);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [showTodayPanel, setShowTodayPanel] = useState(false);
+  const [showTasksDrawer, setShowTasksDrawer] = useState(false);
 
   // Form state
   const [formStep, setFormStep] = useState(0);
@@ -585,7 +587,7 @@ export default function AgendaPage() {
       {/* KPI Grid - 6 cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={todayIndicators.concluidas} secondaryValue={todayIndicators.total} color="text-info" delay={0.1} onClick={() => setShowTodayPanel(prev => !prev)} active={showTodayPanel} />
-        <AnimatedKpiCard icon={ListTodo} label="Tarefas" value={completedTasks.length} secondaryValue={pendingTasks.length} color="text-warning" delay={0.15} />
+        <AnimatedKpiCard icon={ListTodo} label="Tarefas" value={completedTasks.length} secondaryValue={pendingTasks.length} color="text-warning" delay={0.15} onClick={() => setShowTasksDrawer(true)} />
         <AnimatedKpiCard icon={CheckCircle} label="Agendas" value={indicators.totalConcluidas} secondaryValue={indicators.totalAgendas} color="text-success" delay={0.2} />
         <AnimatedKpiCard icon={Handshake} label="Visitas" value={indicators.visitasConcluidas} secondaryValue={indicators.visitasCriadas} color="text-info" delay={0.25} />
         <AnimatedKpiCard icon={UserPlus} label="Prospecções" value={indicators.prospecoesConcluidas} secondaryValue={indicators.prospecoesCriadas} color="text-warning" delay={0.3} />
