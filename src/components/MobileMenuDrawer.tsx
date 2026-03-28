@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard,
   CalendarDays,
   BarChart3,
   Building2,
@@ -23,10 +22,9 @@ import {
 import { cn } from '@/lib/utils';
 
 const allNavItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard, permKey: 'dashboard.metrics' },
   { title: 'Agenda', url: '/agenda', icon: CalendarDays, permKey: 'agenda.view' },
-  { title: 'Análises', url: '/analises', icon: BarChart3, permKey: 'analysis.reports' },
   { title: 'Campanhas', url: '/campanhas', icon: Trophy, permKey: 'campaigns.view' },
+  { title: 'Análises', url: '/analises', icon: BarChart3, permKey: 'analysis.reports' },
   { title: 'Parceiros', url: '/parceiros', icon: Building2, permKey: 'partners.list' },
   { title: 'Configurações', url: '/configuracoes', icon: Settings, permKey: 'settings.view' },
 ];

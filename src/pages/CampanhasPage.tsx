@@ -336,35 +336,47 @@ export default function CampanhasPage() {
         </Card>
       </motion.div>
 
-      {/* 5b. Podium */}
+      {/* 5b. Podium — Classic Layout */}
       {canRead('gamification.ranking') && podium.length >= 3 && (
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-sm font-semibold mb-6 flex items-center gap-2"><Trophy className="h-4 w-4" /> Pódio</p>
-            <div className="flex items-end justify-center gap-8">
+        <Card className="overflow-hidden">
+          <CardContent className="p-6 pb-0">
+            <p className="text-sm font-semibold mb-6 flex items-center gap-2"><Trophy className="h-4 w-4 text-yellow-500" /> Pódio</p>
+            <div className="flex items-end justify-center gap-3 md:gap-6">
               {podiumOrder.map((item, idx) => {
                 const pos = podium.indexOf(item) + 1;
                 const isFirst = pos === 1;
-                const avatarColors = ['', 'bg-success/15 text-success border-success/30', 'bg-muted text-muted-foreground border-border', 'bg-warning/15 text-warning border-warning/30'];
+                const isSecond = pos === 2;
+                const avatarSize = isFirst ? 'h-16 w-16' : 'h-12 w-12';
+                const barHeight = isFirst ? 'h-24' : isSecond ? 'h-16' : 'h-10';
+                const ringColor = isFirst ? 'ring-2 ring-yellow-400 shadow-lg shadow-yellow-400/20' : isSecond ? 'ring-2 ring-slate-300' : 'ring-2 ring-amber-600/60';
+                const barGradient = isFirst
+                  ? 'bg-gradient-to-t from-yellow-500/40 to-yellow-300/10 border-yellow-400/50'
+                  : isSecond
+                  ? 'bg-gradient-to-t from-slate-400/30 to-slate-200/10 border-slate-300/40'
+                  : 'bg-gradient-to-t from-amber-700/30 to-amber-500/10 border-amber-600/40';
+                const fallbackColor = isFirst ? 'bg-yellow-100 text-yellow-700' : isSecond ? 'bg-slate-100 text-slate-600' : 'bg-amber-100 text-amber-700';
+
                 return (
                   <motion.div
                     key={item.user.id}
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.3 + idx * 0.15, type: 'spring', bounce: 0.3 }}
+                    transition={{ duration: 0.5, delay: 0.2 + idx * 0.15, type: 'spring', bounce: 0.35 }}
+                    whileHover={{ scale: 1.05 }}
                     className="flex flex-col items-center gap-1.5"
                   >
-                    <Medal className={cn('h-5 w-5', medalColors[pos])} />
-                    <Avatar className={cn(isFirst ? 'h-14 w-14' : 'h-11 w-11', 'border-2', avatarColors[pos])}>
-                      <AvatarFallback className={cn('text-sm font-bold', avatarColors[pos])}>
+                    {isFirst && <Star className="h-5 w-5 text-yellow-500 fill-yellow-500 -mb-1" />}
+                    <Avatar className={cn(avatarSize, ringColor, 'transition-all')}>
+                      <AvatarFallback className={cn('font-bold', isFirst ? 'text-base' : 'text-sm', fallbackColor)}>
                         {item.user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                       </AvatarFallback>
                     </Avatar>
-                    <p className="text-xs font-medium">{item.user.name.split(' ')[0]}</p>
+                    <p className={cn("font-medium", isFirst ? "text-sm" : "text-xs")}>{item.user.name.split(' ')[0]}</p>
+                    <p className="text-[10px] text-muted-foreground capitalize">{item.user.role}</p>
                     <Badge variant={isFirst ? 'default' : 'secondary'} className="text-[11px]">{item.score} pts</Badge>
-                    <div className={cn('w-16 rounded-t-lg bg-gradient-to-t border-x border-t', podiumColors[pos], isFirst ? 'h-20' : pos === 2 ? 'h-12' : 'h-8')}>
+                    <div className={cn('w-16 md:w-20 rounded-t-lg border-x border-t', barGradient, barHeight)}>
                       <div className="flex items-center justify-center h-full">
-                        <span className="font-bold text-muted-foreground">{pos}º</span>
+                        <span className={cn("font-bold", isFirst ? "text-lg text-yellow-600" : "text-muted-foreground")}>{pos}º</span>
                       </div>
                     </div>
                   </motion.div>
