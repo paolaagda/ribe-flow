@@ -16,6 +16,7 @@ import { useVisits } from '@/hooks/useVisits';
 import { mockUsers, getPartnerById, statusColors, VisitStatus } from '@/data/mock-data';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 import { cn } from '@/lib/utils';
+import SmartInsights from '@/components/shared/SmartInsights';
 
 const STATUS_COLORS: Record<string, string> = statusColors;
 const CHART_COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
@@ -135,6 +136,7 @@ export default function AnalisesPage() {
 
   return (
     <PageTransition className="space-y-6">
+      <SmartInsights page="analises" />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>

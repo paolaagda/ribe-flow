@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
 import PartnerDetailView from '@/components/partners/PartnerDetailView';
+import SmartInsights from '@/components/shared/SmartInsights';
 
 export default function ParceirosPage() {
   const [search, setSearch] = useState('');
@@ -50,6 +51,7 @@ export default function ParceirosPage() {
 
   return (
     <PageTransition className="space-y-6">
+      <SmartInsights page="parceiros" />
       <div>
         <h1 className="text-2xl font-bold">Parceiros</h1>
         <p className="text-muted-foreground text-sm">

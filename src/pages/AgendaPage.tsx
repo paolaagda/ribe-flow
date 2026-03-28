@@ -32,6 +32,7 @@ import JustificationModal from '@/components/agenda/JustificationModal';
 import PendingTasksCard from '@/components/agenda/PendingTasksCard';
 import TasksDrawer from '@/components/agenda/TasksDrawer';
 import AgendaMap from '@/components/agenda/AgendaMap';
+import SmartInsights from '@/components/shared/SmartInsights';
 import { usePermission } from '@/hooks/usePermission';
 import { ShieldOff } from 'lucide-react';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
@@ -512,6 +513,8 @@ export default function AgendaPage() {
   return (
     <PageTransition className="space-y-6">
       <HeroSection />
+
+      <SmartInsights page="agenda" />
 
       {/* Title + Month nav + Filters toggle */}
       <div className="flex flex-col gap-2">

@@ -18,6 +18,7 @@ import {
   getUserScoreBreakdown,
 } from '@/data/campaigns';
 import { Trophy, Flame, Medal, Star, TrendingUp, ShieldOff, Award, Ban, CheckCircle2, Target, Calendar, XCircle, AlertTriangle, Clock } from 'lucide-react';
+import SmartInsights from '@/components/shared/SmartInsights';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
@@ -217,6 +218,7 @@ export default function CampanhasPage() {
 
   return (
     <div className="space-y-6">
+      <SmartInsights page="campanhas" />
       {/* 1. Header + Filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
