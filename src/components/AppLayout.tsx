@@ -14,6 +14,8 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import MobileMenuDrawer from '@/components/MobileMenuDrawer';
 import NotificationInbox from '@/components/notifications/NotificationInbox';
 import { usePermission } from '@/hooks/usePermission';
+import { useTheme } from '@/hooks/useTheme';
+import { Moon, Sun } from 'lucide-react';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import {
   Sidebar,
@@ -31,6 +33,15 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+
+function ThemeToggleButton() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleTheme}>
+      {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    </Button>
+  );
+}
 
 const navItems = [
   { title: 'Agenda', url: '/agenda', icon: CalendarDays, permKey: 'agenda.view' },
@@ -191,6 +202,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
             <Handshake className="h-4 w-4" />
           </button>
           <span className="font-bold text-sm flex-1">Canal Parceiro</span>
+          <ThemeToggleButton />
           <NotificationInbox />
         </header>
         <main className="p-4" {...pageSwipe}>{children}</main>
@@ -207,7 +219,8 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-14 flex items-center border-b border-border px-4 bg-card/50 backdrop-blur-sm">
             <SidebarTrigger className="mr-4" />
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-1">
+              <ThemeToggleButton />
               <NotificationInbox />
             </div>
           </header>
