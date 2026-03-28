@@ -1,59 +1,73 @@
 
 
-# Gerar PDF — Documentacao Completa do Canal Parceiro
+# Sistema de Tarefas Relacionadas a Agenda e Parceiro
 
-## Objetivo
+## Resumo
 
-Criar um PDF detalhado documentando toda a estrutura do app, paginas, regras de acesso, permissoes por perfil e funcionalidades.
+Criar um sistema de tarefas que extrai as tarefas dos comentarios das visitas (ja existentes como `VisitComment` com `type: 'task'`), centraliza-as em um hook dedicado, e exibe paineis de tarefas pendentes na agenda do dia, no detalhe do parceiro e no sistema de notificacoes.
 
-## Conteudo do Documento
+## Situacao Atual
 
-### 1. Capa
-- Nome do app: Canal Parceiro
-- Subtitulo: Documentacao de Estrutura, Acessos e Permissoes
+- Tarefas ja existem como `VisitComment` com `type: 'task'` e `taskCompleted` dentro de cada `Visit`
+- Sao criadas via `AgendaComments` no modal de detalhe da agenda
+- O parceiro ja exibe contagem de tarefas pendentes nos KPIs
+- Nao ha visao centralizada, notificacoes de pendencia, nem links diretos entre tarefa/agenda/parceiro
 
-### 2. Visao Geral
-- App de gestao comercial com foco em visitas, prospecoes e campanhas de gamificacao
-- Stack: React + Vite + Tailwind + TypeScript
-- Autenticacao simulada com selecao de Cargo e Perfil do App
+## Mudancas
 
-### 3. Modelo de Acesso
-- **Perfil do App (2 niveis)**: Gestor (acesso total) e Nao Gestor (acesso restrito)
-- **Cargos da Empresa (5 tipos)**: Diretor, Gerente, ASCOM, Comercial, Cadastro
-- Permissoes controladas pelo Perfil do App, nao pelo Cargo
-- Cargo define o contexto/label do usuario, Perfil define o que ele pode fazer
+### 1. Hook centralizado `useTasks` (`src/hooks/useTasks.ts`)
 
-### 4. Paginas do Sistema (uma secao por pagina)
+Novo hook que agrega todas as tarefas de todos os `visits.comments` com `type: 'task'`. Retorna:
+- `allTasks` — lista de objetos `{ task: VisitComment, visit: Visit, partner }` 
+- `pendingTasks` — filtro de nao concluidas
+- `completedTasks` — filtro de concluidas
+- `getTasksByPartnerId(id)` — tarefas de um parceiro
+- `getTasksByVisitId(id)` — tarefas de uma visita
+- `overdueTasks` — pendentes ha mais de 10 dias (baseado em `createdAt`)
+- `toggleTask(visitId, commentId)` — alterna completado
 
-**Agenda** — Calendario de visitas e prospecoes com views dia/semana/mes, CRUD de agendamentos, filtro por comercial (gestor), mapa de visitas do dia, KPIs, convidados, justificativas obrigatorias para cancelamento/reagendamento, comentarios
+### 2. Card de Tarefas Pendentes na Agenda (`src/components/agenda/PendingTasksCard.tsx`)
 
-**Campanhas** — Centro estrategico de gamificacao: KPIs, alertas, streak de dias consecutivos, podio animado com confetti, conquistas (badges), ranking, historico de pontuacao detalhado, filtro por comercial
+Card compacto exibido na pagina de Agenda (ao lado ou abaixo dos KPIs existentes) mostrando:
+- Contagem de tarefas pendentes e atrasadas
+- Lista das 5 mais antigas com nome do parceiro, texto da tarefa e data de criacao
+- Checkbox para concluir direto do card
+- Clique abre o modal de detalhe da agenda correspondente
+- Badge de alerta para tarefas com mais de 10 dias
 
-**Analises** — Graficos e relatorios: distribuicao por status, evolucao temporal, ranking de comerciais, filtro por periodo e data customizada
+### 3. Secao de Tarefas no Detalhe do Parceiro (`PartnerDetailView.tsx`)
 
-**Parceiros** — Lista de parceiros com busca, detalhe com timeline, graficos, historico de visitas, informacoes de contato e lojas vinculadas
+Novo card entre Insights e Charts com:
+- Resumo: X pendentes, Y concluidas
+- Lista de tarefas pendentes com link para a agenda (abre modal de detalhe)
+- Accordion com historico de tarefas concluidas
+- Cada item mostra: texto, data de criacao, agenda vinculada
 
-**Configuracoes** — 5 abas: Usuarios (lista, editar, bloquear, resetar senha, permissoes), Campanhas (criar/editar com gamificacao configuravel), Parceiros (gestao), Aparencia (tema claro/escuro), Dados do Sistema (bancos, produtos, estruturas, motivos)
+### 4. Notificacoes de Tarefas Atrasadas (`NotificationContext.tsx`)
 
-### 5. Tabela Completa de Permissoes
-Tabela com todas as 40+ permissoes organizadas por modulo, mostrando o nivel (none/read/write) para Gestor e Nao Gestor
+Adicionar novo tipo de notificacao `'task_overdue'`:
+- No `ensureInitialized`, verificar tarefas pendentes ha mais de 10 dias
+- Gerar notificacao automatica para cada tarefa atrasada (max 5)
+- Exibir na aba "Recentes" do NotificationInbox com icone de tarefa
+- Ao clicar, navegar para a agenda correspondente
 
-### 6. Regras de Visibilidade de Dados
-- Nao Gestor ve apenas agendas que criou ou foi convidado
-- Nao Gestor ve apenas parceiros vinculados ao seu usuario
-- Gestor ve todos os dados e pode filtrar por comercial
-- Convidados tem permissao de leitura (ver detalhes e comentar), mas nao editam status
+### 5. Historico de tarefas no modal de detalhe da agenda (`AgendaDetailModal.tsx`)
 
-### 7. Gamificacao
-- Pontos por visita, prospecao, conquistas e deflator por cancelamento
-- Conquistas: Primeira Visita, Primeira Prospecao, Milestones, 100% Visitas, 100% Prospecoes, 100% Meta Geral
-- Tudo configuravel por campanha
+Melhorar a secao de AgendaComments para destacar visualmente as tarefas pendentes com badge de dias pendentes (ex: "ha 5 dias"). Ja funciona mas ganhar indicador temporal.
 
-## Execucao
+### 6. Integracao na pagina de Agenda (`AgendaPage.tsx`)
 
-Script Python com `reportlab` gerando PDF formatado com:
-- Capa estilizada
-- Secoes com titulos e paragrafos
-- Tabelas de permissoes com cores
-- Output em `/mnt/documents/canal_parceiro_documentacao.pdf`
+Inserir o `PendingTasksCard` no layout, visivel quando `showTodayPanel` esta ativo ou como card fixo acima do calendario. Respeitar visibilidade: nao gestor ve apenas suas tarefas.
+
+## Arquivos
+
+| Arquivo | Acao |
+|---|---|
+| `src/hooks/useTasks.ts` | Criar — hook centralizado |
+| `src/components/agenda/PendingTasksCard.tsx` | Criar — card de tarefas pendentes |
+| `src/pages/AgendaPage.tsx` | Inserir PendingTasksCard |
+| `src/components/partners/PartnerDetailView.tsx` | Adicionar secao de tarefas do parceiro |
+| `src/contexts/NotificationContext.tsx` | Adicionar tipo task_overdue e geracao automatica |
+| `src/components/agenda/AgendaComments.tsx` | Adicionar indicador de dias pendentes |
+| `src/data/mock-data.ts` | Adicionar tipo `task_overdue` ao NotificationType se necessario |
 
