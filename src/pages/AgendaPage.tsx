@@ -21,7 +21,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { getRandomMessage } from '@/data/notification-messages';
 import { useTasks } from '@/hooks/useTasks';
-import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, DollarSign, Clock as ClockIcon, Handshake, UserPlus, CalendarRange } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, DollarSign, Clock as ClockIcon, Handshake, UserPlus, CalendarRange, Filter } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, addWeeks, subWeeks, isSameDay, isSameMonth, parseISO, isValid, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -67,7 +67,9 @@ export default function AgendaPage() {
   const [showJustificationModal, setShowJustificationModal] = useState(false);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [showTodayPanel, setShowTodayPanel] = useState(false);
+  const [showTasksPanel, setShowTasksPanel] = useState(false);
   const [showTasksDrawer, setShowTasksDrawer] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Form state
   const [formStep, setFormStep] = useState(0);
@@ -499,95 +501,128 @@ export default function AgendaPage() {
     <PageTransition className="space-y-6">
       <HeroSection />
 
-      {/* Title + Filters */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold shrink-0">Agenda</h1>
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar('prev')}>
-              <ChevronLeft className="h-3.5 w-3.5" />
-            </Button>
-            <span className="text-xs font-medium min-w-[120px] text-center capitalize">
-              {view === 'day' ? format(currentDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) :
-               view === 'week' ? `${format(startOfWeek(currentDate, { locale: ptBR }), 'dd/MM')} — ${format(endOfWeek(currentDate, { locale: ptBR }), 'dd/MM/yyyy')}` :
-               format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
-            </span>
-            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar('next')}>
-              <ChevronRight className="h-3.5 w-3.5" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => setCurrentDate(new Date())}>Hoje</Button>
-          </div>
-          <Select value={view} onValueChange={(v) => setView(v as ViewMode)}>
-            <SelectTrigger className="w-24 h-7 text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="day">Diário</SelectItem>
-              <SelectItem value="week">Semanal</SelectItem>
-              <SelectItem value="month">Mensal</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-28 h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos status</SelectItem>
-              <SelectItem value="Planejada">Planejada</SelectItem>
-              <SelectItem value="Concluída">Concluída</SelectItem>
-              <SelectItem value="Reagendada">Reagendada</SelectItem>
-              <SelectItem value="Cancelada">Cancelada</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-28 h-7 text-xs"><SelectValue placeholder="Tipo" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos tipos</SelectItem>
-              <SelectItem value="visita">Visita</SelectItem>
-              <SelectItem value="prospecção">Prospecção</SelectItem>
-            </SelectContent>
-          </Select>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={cn('h-7 text-xs gap-1', (dateRange.from || dateRange.to) && 'border-primary text-primary')}>
-                <CalendarRange className="h-3 w-3" />
-                {dateRange.from && dateRange.to
-                  ? `${format(dateRange.from, 'dd/MM')} — ${format(dateRange.to, 'dd/MM')}`
-                  : dateRange.from
-                  ? `A partir de ${format(dateRange.from, 'dd/MM')}`
-                  : 'Período'}
+      {/* Title + Month nav + Filters toggle */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold shrink-0">Agenda</h1>
+            <div className="flex items-center gap-1">
+              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar('prev')}>
+                <ChevronLeft className="h-3.5 w-3.5" />
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-3" align="start">
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Data inicial</p>
-                  <Calendar
-                    mode="single"
-                    selected={dateRange.from}
-                    onSelect={(d) => setDateRange(prev => ({ ...prev, from: d || undefined }))}
-                    className="p-2 pointer-events-auto"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Data final</p>
-                  <Calendar
-                    mode="single"
-                    selected={dateRange.to}
-                    onSelect={(d) => setDateRange(prev => ({ ...prev, to: d || undefined }))}
-                    disabled={(d) => dateRange.from ? d < dateRange.from : false}
-                    className="p-2 pointer-events-auto"
-                  />
-                </div>
-                {(dateRange.from || dateRange.to) && (
-                  <Button variant="ghost" size="sm" className="w-full" onClick={() => setDateRange({})}>Limpar período</Button>
+              <span className="text-xs font-medium min-w-[100px] text-center capitalize">
+                {view === 'day' ? format(currentDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) :
+                 view === 'week' ? `${format(startOfWeek(currentDate, { locale: ptBR }), 'dd/MM')} — ${format(endOfWeek(currentDate, { locale: ptBR }), 'dd/MM/yyyy')}` :
+                 format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
+              </span>
+              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar('next')}>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => setCurrentDate(new Date())}>Hoje</Button>
+            </div>
+          </div>
+          <Button
+            variant={showFilters ? 'secondary' : 'ghost'}
+            size="sm"
+            className="h-7 text-xs gap-1.5 relative shrink-0"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <Filter className="h-3.5 w-3.5" />
+            Filtros
+            {(filterStatus !== 'all' || filterType !== 'all' || dateRange.from || dateRange.to) && (
+              <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary text-[9px] text-primary-foreground flex items-center justify-center">!</span>
+            )}
+          </Button>
+        </div>
+
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="flex items-center gap-2 flex-wrap py-2">
+                <Select value={view} onValueChange={(v) => setView(v as ViewMode)}>
+                  <SelectTrigger className="w-24 h-7 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="day">Diário</SelectItem>
+                    <SelectItem value="week">Semanal</SelectItem>
+                    <SelectItem value="month">Mensal</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="w-28 h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos status</SelectItem>
+                    <SelectItem value="Planejada">Planejada</SelectItem>
+                    <SelectItem value="Concluída">Concluída</SelectItem>
+                    <SelectItem value="Reagendada">Reagendada</SelectItem>
+                    <SelectItem value="Cancelada">Cancelada</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger className="w-28 h-7 text-xs"><SelectValue placeholder="Tipo" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos tipos</SelectItem>
+                    <SelectItem value="visita">Visita</SelectItem>
+                    <SelectItem value="prospecção">Prospecção</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className={cn('h-7 text-xs gap-1', (dateRange.from || dateRange.to) && 'border-primary text-primary')}>
+                      <CalendarRange className="h-3 w-3" />
+                      {dateRange.from && dateRange.to
+                        ? `${format(dateRange.from, 'dd/MM')} — ${format(dateRange.to, 'dd/MM')}`
+                        : dateRange.from
+                        ? `A partir de ${format(dateRange.from, 'dd/MM')}`
+                        : 'Período'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-3" align="end">
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground">Data inicial</p>
+                        <Calendar
+                          mode="single"
+                          selected={dateRange.from}
+                          onSelect={(d) => setDateRange(prev => ({ ...prev, from: d || undefined }))}
+                          className="p-2 pointer-events-auto"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground">Data final</p>
+                        <Calendar
+                          mode="single"
+                          selected={dateRange.to}
+                          onSelect={(d) => setDateRange(prev => ({ ...prev, to: d || undefined }))}
+                          disabled={(d) => dateRange.from ? d < dateRange.from : false}
+                          className="p-2 pointer-events-auto"
+                        />
+                      </div>
+                      {(dateRange.from || dateRange.to) && (
+                        <Button variant="ghost" size="sm" className="w-full" onClick={() => setDateRange({})}>Limpar período</Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                {(filterStatus !== 'all' || filterType !== 'all' || dateRange.from || dateRange.to) && (
+                  <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground" onClick={() => { setFilterStatus('all'); setFilterType('all'); setDateRange({}); }}>
+                    <X className="h-3 w-3" /> Limpar
+                  </Button>
                 )}
               </div>
-            </PopoverContent>
-          </Popover>
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* KPI Grid - 6 cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={todayIndicators.concluidas} secondaryValue={todayIndicators.total} color="text-info" delay={0.1} onClick={() => setShowTodayPanel(prev => !prev)} active={showTodayPanel} />
-        <AnimatedKpiCard icon={ListTodo} label="Tarefas" value={completedTasks.length} secondaryValue={pendingTasks.length} color="text-warning" delay={0.15} onClick={() => setShowTasksDrawer(true)} />
+        <AnimatedKpiCard icon={ListTodo} label="Tarefas" value={completedTasks.length} secondaryValue={pendingTasks.length} color="text-warning" delay={0.15} onClick={() => setShowTasksPanel(prev => !prev)} active={showTasksPanel} />
         <AnimatedKpiCard icon={CheckCircle} label="Agendas" value={indicators.totalConcluidas} secondaryValue={indicators.totalAgendas} color="text-success" delay={0.2} />
         <AnimatedKpiCard icon={Handshake} label="Visitas" value={indicators.visitasConcluidas} secondaryValue={indicators.visitasCriadas} color="text-info" delay={0.25} />
         <AnimatedKpiCard icon={UserPlus} label="Prospecções" value={indicators.prospecoesConcluidas} secondaryValue={indicators.prospecoesCriadas} color="text-warning" delay={0.3} />
@@ -627,6 +662,37 @@ export default function AgendaPage() {
                 if (v) { setSelectedVisit(v); setShowDetail(true); }
               }} />
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showTasksPanel && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <Card className="mt-1">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <ListTodo className="h-4 w-4 text-warning" />
+                    <span className="text-sm font-semibold">Tarefas</span>
+                    <Badge variant="secondary" className="text-xs">{pendingTasks.length + completedTasks.length}</Badge>
+                  </div>
+                  <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setShowTasksDrawer(true)}>
+                    Ver todas
+                  </Button>
+                </div>
+                <PendingTasksCard onOpenVisit={(visitId) => {
+                  const v = visits.find(vi => vi.id === visitId);
+                  if (v) { setSelectedVisit(v); setShowDetail(true); }
+                }} />
+              </CardContent>
+            </Card>
           </motion.div>
         )}
       </AnimatePresence>
