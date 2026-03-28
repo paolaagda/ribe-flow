@@ -1106,6 +1106,15 @@ export default function AgendaPage() {
         targetStatus={pendingFormStatus || 'Reagendada'}
         onConfirm={handleJustificationConfirm}
       />
+
+      <TasksDrawer
+        open={showTasksDrawer}
+        onOpenChange={setShowTasksDrawer}
+        onOpenVisit={(visitId) => {
+          const v = visits.find(vi => vi.id === visitId);
+          if (v) { setSelectedVisit(v); setShowDetail(true); }
+        }}
+      />
     </PageTransition>
   );
 }
