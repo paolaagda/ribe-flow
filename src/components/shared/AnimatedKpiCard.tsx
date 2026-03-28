@@ -14,9 +14,10 @@ interface AnimatedKpiCardProps {
   delay?: number;
   onClick?: () => void;
   active?: boolean;
+  pulse?: boolean;
 }
 
-export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryValue, color = 'text-primary', suffix, delay = 0, onClick, active }: AnimatedKpiCardProps) {
+export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryValue, color = 'text-primary', suffix, delay = 0, onClick, active, pulse }: AnimatedKpiCardProps) {
   const [displayValue, setDisplayValue] = useState(0);
   const numericValue = typeof value === 'number' ? value : null;
 
@@ -50,8 +51,11 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
     >
       <Card className={cn('hover:shadow-md transition-shadow h-full', onClick && 'cursor-pointer', active && 'ring-2 ring-primary')} onClick={onClick}>
         <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 h-full min-h-[72px]">
-          <div className={cn('p-2 rounded-lg bg-muted shrink-0', color)}>
+          <div className={cn('p-2 rounded-lg bg-muted shrink-0 relative', color)}>
             <Icon className="h-4 w-4" />
+            {pulse && (
+              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-destructive animate-pulse" />
+            )}
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xl sm:text-2xl font-bold tabular-nums leading-tight truncate">

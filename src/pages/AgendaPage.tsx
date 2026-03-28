@@ -71,6 +71,17 @@ export default function AgendaPage() {
   const [showTasksDrawer, setShowTasksDrawer] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Exclusive toggle: close other panels when opening one
+  const togglePanel = (panel: 'today' | 'tasks') => {
+    if (panel === 'today') {
+      setShowTodayPanel(prev => !prev);
+      setShowTasksPanel(false);
+    } else {
+      setShowTasksPanel(prev => !prev);
+      setShowTodayPanel(false);
+    }
+  };
+
   // Form state
   const [formStep, setFormStep] = useState(0);
   const [formData, setFormData] = useState({
@@ -621,8 +632,8 @@ export default function AgendaPage() {
 
       {/* KPI Grid - 6 cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={todayIndicators.concluidas} secondaryValue={todayIndicators.total} color="text-info" delay={0.1} onClick={() => setShowTodayPanel(prev => !prev)} active={showTodayPanel} />
-        <AnimatedKpiCard icon={ListTodo} label="Tarefas" value={completedTasks.length} secondaryValue={pendingTasks.length} color="text-warning" delay={0.15} onClick={() => setShowTasksPanel(prev => !prev)} active={showTasksPanel} />
+        <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={todayIndicators.concluidas} secondaryValue={todayIndicators.total} color="text-info" delay={0.1} onClick={() => togglePanel('today')} active={showTodayPanel} />
+        <AnimatedKpiCard icon={ListTodo} label="Tarefas" value={completedTasks.length} secondaryValue={pendingTasks.length} color="text-warning" delay={0.15} onClick={() => togglePanel('tasks')} active={showTasksPanel} pulse={pendingTasks.some(t => { const days = Math.floor((Date.now() - new Date(t.task.createdAt).getTime()) / 86400000); return days >= 10; })} />
         <AnimatedKpiCard icon={CheckCircle} label="Agendas" value={indicators.totalConcluidas} secondaryValue={indicators.totalAgendas} color="text-success" delay={0.2} />
         <AnimatedKpiCard icon={Handshake} label="Visitas" value={indicators.visitasConcluidas} secondaryValue={indicators.visitasCriadas} color="text-info" delay={0.25} />
         <AnimatedKpiCard icon={UserPlus} label="Prospecções" value={indicators.prospecoesConcluidas} secondaryValue={indicators.prospecoesCriadas} color="text-warning" delay={0.3} />
