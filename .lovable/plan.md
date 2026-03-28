@@ -1,73 +1,81 @@
 
 
-# Sistema de Tarefas Relacionadas a Agenda e Parceiro
+# Reestruturar Pagina de Agenda — Cards, Filtros e Localizacao
 
 ## Resumo
 
-Criar um sistema de tarefas que extrai as tarefas dos comentarios das visitas (ja existentes como `VisitComment` com `type: 'task'`), centraliza-as em um hook dedicado, e exibe paineis de tarefas pendentes na agenda do dia, no detalhe do parceiro e no sistema de notificacoes.
+Reorganizar a pagina de Agenda com nova ordem de elementos, novos cards de KPI, filtros ao lado do titulo abaixo do hero, calendario em pt-BR e ajustes no HeroSection.
 
-## Situacao Atual
+## Nova Ordem da Pagina (top-down)
 
-- Tarefas ja existem como `VisitComment` com `type: 'task'` e `taskCompleted` dentro de cada `Visit`
-- Sao criadas via `AgendaComments` no modal de detalhe da agenda
-- O parceiro ja exibe contagem de tarefas pendentes nos KPIs
-- Nao ha visao centralizada, notificacoes de pendencia, nem links diretos entre tarefa/agenda/parceiro
+```text
+1. HeroSection (saudacao + stats ajustados)
+2. Titulo "Agenda" + seletor de mes + filtros (mesma linha)
+3. Grade de 6 cards KPI:
+   [Agenda hoje] [Tarefas] [Agendas] [Visitas] [Prospecoes] [+ Nova agenda]
+4. Painel expandivel (TodayAgenda + Mapa + PendingTasks)
+5. Calendario
+```
 
 ## Mudancas
 
-### 1. Hook centralizado `useTasks` (`src/hooks/useTasks.ts`)
+### 1. HeroSection (`src/components/home/HeroSection.tsx`)
 
-Novo hook que agrega todas as tarefas de todos os `visits.comments` com `type: 'task'`. Retorna:
-- `allTasks` — lista de objetos `{ task: VisitComment, visit: Visit, partner }` 
-- `pendingTasks` — filtro de nao concluidas
-- `completedTasks` — filtro de concluidas
-- `getTasksByPartnerId(id)` — tarefas de um parceiro
-- `getTasksByVisitId(id)` — tarefas de uma visita
-- `overdueTasks` — pendentes ha mais de 10 dias (baseado em `createdAt`)
-- `toggleTask(visitId, commentId)` — alterna completado
+Ajustar a secao de stats para mostrar apenas contagens de **concluidas**:
+- Icone `Handshake` + `{visitasConcluidas} visitas` (em vez de Eye + total)
+- Icone `UserPlus` + `{prospecoesConcluidas} prospecoes` (em vez de Target + total)
+- Manter barra de progresso da campanha
 
-### 2. Card de Tarefas Pendentes na Agenda (`src/components/agenda/PendingTasksCard.tsx`)
+### 2. Titulo + Filtros abaixo do Hero (`src/pages/AgendaPage.tsx`)
 
-Card compacto exibido na pagina de Agenda (ao lado ou abaixo dos KPIs existentes) mostrando:
-- Contagem de tarefas pendentes e atrasadas
-- Lista das 5 mais antigas com nome do parceiro, texto da tarefa e data de criacao
-- Checkbox para concluir direto do card
-- Clique abre o modal de detalhe da agenda correspondente
-- Badge de alerta para tarefas com mais de 10 dias
+Mover o bloco de titulo "Agenda" e todos os controles (navegacao mes, selects de modo/status/tipo, periodo) para logo abaixo do HeroSection, antes dos KPI cards. Layout em uma unica linha responsiva:
+- Esquerda: "Agenda" (titulo sem subtitulo)
+- Direita: navegacao mes `< Marco 2026 >` + Hoje + selects (Mensal, Status, Tipo) + Periodo
 
-### 3. Secao de Tarefas no Detalhe do Parceiro (`PartnerDetailView.tsx`)
+### 3. Reestruturar KPI cards
 
-Novo card entre Insights e Charts com:
-- Resumo: X pendentes, Y concluidas
-- Lista de tarefas pendentes com link para a agenda (abre modal de detalhe)
-- Accordion com historico de tarefas concluidas
-- Cada item mostra: texto, data de criacao, agenda vinculada
+**Card 1 — Agenda hoje** (dados do dia atual apenas):
+- Valor: `{concluidasHoje}` / secondaryValue: `{totalHoje}`
+- Label: "Agendas hoje"
+- Interativo (abre painel)
 
-### 4. Notificacoes de Tarefas Atrasadas (`NotificationContext.tsx`)
+**Card 2 — Tarefas** (novo):
+- Valor: `{tarefasConcluidas}` / secondaryValue: `{tarefasPendentes}`
+- Label: "Tarefas"
+- Interativo: abre modal/drawer com lista completa de tarefas
+- Comercial ve suas tarefas; gestor ve todas com filtros
 
-Adicionar novo tipo de notificacao `'task_overdue'`:
-- No `ensureInitialized`, verificar tarefas pendentes ha mais de 10 dias
-- Gerar notificacao automatica para cada tarefa atrasada (max 5)
-- Exibir na aba "Recentes" do NotificationInbox com icone de tarefa
-- Ao clicar, navegar para a agenda correspondente
+**Card 3 — Agendas** (controle geral):
+- Valor: `{totalConcluidas}` / secondaryValue: `{totalAgendas}`
+- Label: "Agendas"
 
-### 5. Historico de tarefas no modal de detalhe da agenda (`AgendaDetailModal.tsx`)
+**Card 4 — Visitas**:
+- Manter como esta (concluidas/criadas)
 
-Melhorar a secao de AgendaComments para destacar visualmente as tarefas pendentes com badge de dias pendentes (ex: "ha 5 dias"). Ja funciona mas ganhar indicador temporal.
+**Card 5 — Prospecoes**:
+- Manter como esta (concluidas/criadas)
 
-### 6. Integracao na pagina de Agenda (`AgendaPage.tsx`)
+**Card 6 — + Nova agenda** (botao como card):
+- Card com icone Plus, label "Nova agenda"
+- Ao clicar abre o form de criacao
+- Visivel apenas se `canWrite('agenda.create')`
 
-Inserir o `PendingTasksCard` no layout, visivel quando `showTodayPanel` esta ativo ou como card fixo acima do calendario. Respeitar visibilidade: nao gestor ve apenas suas tarefas.
+Grid: `grid-cols-2 sm:grid-cols-3 lg:grid-cols-6`
+
+### 4. Calendario em pt-BR (`src/components/ui/calendar.tsx`)
+
+Adicionar `locale={ptBR}` ao `DayPicker` para que o calendario do seletor de periodo exiba meses e dias em portugues.
+
+### 5. Indicadores para hoje
+
+Criar `todayIndicators` separado dos `indicators` filtrados, contando apenas visitas do dia atual para o card "Agenda hoje".
 
 ## Arquivos
 
 | Arquivo | Acao |
 |---|---|
-| `src/hooks/useTasks.ts` | Criar — hook centralizado |
-| `src/components/agenda/PendingTasksCard.tsx` | Criar — card de tarefas pendentes |
-| `src/pages/AgendaPage.tsx` | Inserir PendingTasksCard |
-| `src/components/partners/PartnerDetailView.tsx` | Adicionar secao de tarefas do parceiro |
-| `src/contexts/NotificationContext.tsx` | Adicionar tipo task_overdue e geracao automatica |
-| `src/components/agenda/AgendaComments.tsx` | Adicionar indicador de dias pendentes |
-| `src/data/mock-data.ts` | Adicionar tipo `task_overdue` ao NotificationType se necessario |
+| `src/pages/AgendaPage.tsx` | Reordenar layout, novos cards, mover filtros, add card Tarefas e +Nova agenda |
+| `src/components/home/HeroSection.tsx` | Trocar icones/stats para mostrar concluidas com Handshake/UserPlus |
+| `src/components/ui/calendar.tsx` | Adicionar locale pt-BR ao DayPicker |
+| `src/components/shared/AnimatedKpiCard.tsx` | Nenhuma mudanca necessaria |
 
