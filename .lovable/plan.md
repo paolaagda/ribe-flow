@@ -1,57 +1,59 @@
 
 
-# Ajuste de Gamificacao (100% Metas) + Padronizacao Visual dos Cards
+# Gerar PDF — Documentacao Completa do Canal Parceiro
 
-## Resumo
+## Objetivo
 
-Separar a conquista "100% Meta Geral" em tres conquistas independentes com pontuacao configuravel: 100% Visitas, 100% Prospecoes e 100% Meta Geral. Adicionar campos de configuracao na aba de Campanhas. Padronizar altura dos cards em toda a pagina.
+Criar um PDF detalhado documentando toda a estrutura do app, paginas, regras de acesso, permissoes por perfil e funcionalidades.
 
-## Mudancas
+## Conteudo do Documento
 
-### 1. Modelo de dados (`src/data/campaigns.ts`)
+### 1. Capa
+- Nome do app: Canal Parceiro
+- Subtitulo: Documentacao de Estrutura, Acessos e Permissoes
 
-Expandir `GamificationConfig.achievements` com dois novos campos:
-- `fullVisitGoalReward: number` — pontos por atingir 100% das visitas
-- `fullProspectionGoalReward: number` — pontos por atingir 100% das prospecoes
+### 2. Visao Geral
+- App de gestao comercial com foco em visitas, prospecoes e campanhas de gamificacao
+- Stack: React + Vite + Tailwind + TypeScript
+- Autenticacao simulada com selecao de Cargo e Perfil do App
 
-Atualizar `defaultGamification` com valores padrao (ex: 10 cada).
+### 3. Modelo de Acesso
+- **Perfil do App (2 niveis)**: Gestor (acesso total) e Nao Gestor (acesso restrito)
+- **Cargos da Empresa (5 tipos)**: Diretor, Gerente, ASCOM, Comercial, Cadastro
+- Permissoes controladas pelo Perfil do App, nao pelo Cargo
+- Cargo define o contexto/label do usuario, Perfil define o que ele pode fazer
 
-Atualizar `calculateUserScore`:
-- Adicionar bonus separado quando `visits >= participant.visitGoal` → `+fullVisitGoalReward`
-- Adicionar bonus separado quando `prospections >= participant.prospectionGoal` → `+fullProspectionGoalReward`
+### 4. Paginas do Sistema (uma secao por pagina)
 
-Atualizar `getUserScoreBreakdown` com entradas separadas para cada conquista de 100%.
+**Agenda** — Calendario de visitas e prospecoes com views dia/semana/mes, CRUD de agendamentos, filtro por comercial (gestor), mapa de visitas do dia, KPIs, convidados, justificativas obrigatorias para cancelamento/reagendamento, comentarios
 
-Atualizar `initialCampaigns` com os novos campos.
+**Campanhas** — Centro estrategico de gamificacao: KPIs, alertas, streak de dias consecutivos, podio animado com confetti, conquistas (badges), ranking, historico de pontuacao detalhado, filtro por comercial
 
-### 2. Configuracao (`src/components/settings/CampaignsTab.tsx`)
+**Analises** — Graficos e relatorios: distribuicao por status, evolucao temporal, ranking de comerciais, filtro por periodo e data customizada
 
-Na secao "Conquistas adicionais", adicionar 2 novos campos:
-- "Pts 100% visitas"
-- "Pts 100% prospecoes"
+**Parceiros** — Lista de parceiros com busca, detalhe com timeline, graficos, historico de visitas, informacoes de contato e lojas vinculadas
 
-(ao lado do campo existente "Pts 100% meta geral", formando grid de 5 ou reorganizar em 2 linhas)
+**Configuracoes** — 5 abas: Usuarios (lista, editar, bloquear, resetar senha, permissoes), Campanhas (criar/editar com gamificacao configuravel), Parceiros (gestao), Aparencia (tema claro/escuro), Dados do Sistema (bancos, produtos, estruturas, motivos)
 
-### 3. Conquistas na pagina (`src/pages/CampanhasPage.tsx`)
+### 5. Tabela Completa de Permissoes
+Tabela com todas as 40+ permissoes organizadas por modulo, mostrando o nivel (none/read/write) para Gestor e Nao Gestor
 
-Atualizar array `achievements` (linhas 128-129) para usar `reward: config.achievements.fullVisitGoalReward` e `reward: config.achievements.fullProspectionGoalReward` em vez de `reward: 0`.
+### 6. Regras de Visibilidade de Dados
+- Nao Gestor ve apenas agendas que criou ou foi convidado
+- Nao Gestor ve apenas parceiros vinculados ao seu usuario
+- Gestor ve todos os dados e pode filtrar por comercial
+- Convidados tem permissao de leitura (ver detalhes e comentar), mas nao editam status
 
-### 4. Padronizacao visual dos cards
+### 7. Gamificacao
+- Pontos por visita, prospecao, conquistas e deflator por cancelamento
+- Conquistas: Primeira Visita, Primeira Prospecao, Milestones, 100% Visitas, 100% Prospecoes, 100% Meta Geral
+- Tudo configuravel por campanha
 
-Aplicar `min-h-[X]` consistente nos cards:
-- **KPI cards** (linhas 278-321): adicionar `min-h-[120px]` em cada Card
-- **Alert cards** (linhas 264-272): adicionar `min-h-[56px]`
-- **Achievement cards** (linhas 427-437): adicionar `min-h-[120px]`
-- **Streak card**: ja tem altura consistente, manter
-- **Voce vs Media**: adicionar `min-h-[100px]`
+## Execucao
 
-Adicionar `hover:shadow-md transition-shadow` em todos os cards interativos para feedback consistente.
-
-## Arquivos
-
-| Arquivo | Acao |
-|---|---|
-| `src/data/campaigns.ts` | Adicionar fullVisitGoalReward e fullProspectionGoalReward ao GamificationConfig, atualizar calculo e breakdown |
-| `src/components/settings/CampaignsTab.tsx` | Adicionar campos de configuracao para 100% visitas e 100% prospecoes |
-| `src/pages/CampanhasPage.tsx` | Usar novos rewards nas conquistas, padronizar min-h e hover nos cards |
+Script Python com `reportlab` gerando PDF formatado com:
+- Capa estilizada
+- Secoes com titulos e paragrafos
+- Tabelas de permissoes com cores
+- Output em `/mnt/documents/canal_parceiro_documentacao.pdf`
 
