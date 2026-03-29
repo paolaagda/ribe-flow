@@ -151,7 +151,7 @@ export default function AnalisesPage() {
   }
 
   return (
-    <PageTransition className="space-y-6">
+    <PageTransition className="space-y-4">
       <SmartInsights page="analises" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
