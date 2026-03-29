@@ -155,12 +155,8 @@ export default function AnalisesPage() {
     <PageTransition className="space-y-8">
       <SmartInsights page="analises" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Análises</h1>
-          <p className="text-muted-foreground text-sm">Métricas e performance da equipe</p>
-        </div>
-        {canRead('analysis.filterPeriod') && (
+        <PageHeader title="Análises" description="Métricas e performance da equipe">
+          {canRead('analysis.filterPeriod') && (
           <div className="flex items-center gap-2">
             <Select value={period} onValueChange={v => { setPeriod(v); if (v !== 'custom') setDateRange({}); }}>
               <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
