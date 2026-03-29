@@ -190,7 +190,7 @@ export default function AnalisesPage() {
             )}
           </div>
         )}
-      </div>
+        </PageHeader>
 
       <AnimatedFilterContent filterKey={activeInsight}>
       {/* KPI Cards */}
