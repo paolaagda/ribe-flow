@@ -3,28 +3,29 @@ import PageTransition from '@/components/PageTransition';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { getUserById } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useStores } from '@/hooks/useStores';
-import { Search, Building2, MapPin, ShieldOff, User, Store as StoreIcon, Phone, ToggleLeft, ToggleRight } from 'lucide-react';
+import { useVisits } from '@/hooks/useVisits';
+import { Search, Building2, MapPin, ShieldOff, User, Store as StoreIcon, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
 import PartnerDetailView from '@/components/partners/PartnerDetailView';
 import SmartInsights from '@/components/shared/SmartInsights';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { differenceInDays, parseISO } from 'date-fns';
 
 export default function ParceirosPage() {
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [insightModal, setInsightModal] = useState<{ text: string; variant: string } | null>(null);
+  const [activeInsight, setActiveInsight] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'parceiros' | 'lojas'>('parceiros');
   const { canRead } = usePermission();
   const { user, profile } = useAuth();
   const { partners } = usePartners();
   const { stores } = useStores();
+  const { visits } = useVisits();
 
   // Filter partners by role: comercial only sees their own partners
   const visiblePartners = useMemo(() => {
@@ -40,20 +41,41 @@ export default function ParceirosPage() {
   }, [stores, visiblePartners]);
 
   const filtered = useMemo(() => {
-    if (!search) return visiblePartners;
+    const today = new Date();
+    let base = visiblePartners;
+
+    // Apply insight filter
+    if (activeInsight === 'parc_alto_potencial') {
+      base = base.filter(p => p.potential === 'alto');
+    } else if (activeInsight === 'parc_sem_visita_30d') {
+      const last30ConcludedPartnerIds = new Set(
+        visits.filter(v => {
+          const d = parseISO(v.date);
+          return v.status === 'Concluída' && differenceInDays(today, d) >= 0 && differenceInDays(today, d) <= 30;
+        }).map(v => v.partnerId)
+      );
+      base = base.filter(p => !last30ConcludedPartnerIds.has(p.id));
+    }
+
+    if (!search) return base;
     const q = search.toLowerCase();
-    return visiblePartners.filter(p => p.name.toLowerCase().includes(q) || p.cnpj.includes(q) || p.address.toLowerCase().includes(q));
-  }, [search, visiblePartners]);
+    return base.filter(p => p.name.toLowerCase().includes(q) || p.cnpj.includes(q) || p.address.toLowerCase().includes(q));
+  }, [search, visiblePartners, activeInsight, visits]);
 
   const filteredStores = useMemo(() => {
-    if (!search) return visibleStores;
+    const filteredPartnerIds = new Set(filtered.map(p => p.id));
+    let base = visibleStores;
+    if (activeInsight) {
+      base = base.filter(s => filteredPartnerIds.has(s.partnerId));
+    }
+    if (!search) return base;
     const q = search.toLowerCase();
-    return visibleStores.filter(s =>
+    return base.filter(s =>
       s.name.toLowerCase().includes(q) ||
       s.address.toLowerCase().includes(q) ||
       partners.find(p => p.id === s.partnerId)?.name.toLowerCase().includes(q)
     );
-  }, [search, visibleStores, partners]);
+  }, [search, visibleStores, partners, activeInsight, filtered]);
 
   const potentialColors = { alto: 'text-success', médio: 'text-warning', baixo: 'text-muted-foreground' };
 
@@ -80,7 +102,7 @@ export default function ParceirosPage() {
         </p>
       </div>
 
-      <SmartInsights page="parceiros" onInsightClick={(text, variant) => setInsightModal({ text, variant })} />
+      <SmartInsights page="parceiros" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
 
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
@@ -192,15 +214,6 @@ export default function ParceirosPage() {
         </div>
       )}
 
-      {/* Insight detail modal */}
-      <Dialog open={!!insightModal} onOpenChange={() => setInsightModal(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">Detalhe do Insight</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">{insightModal?.text}</p>
-        </DialogContent>
-      </Dialog>
     </PageTransition>
   );
 }
