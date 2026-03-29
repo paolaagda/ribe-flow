@@ -50,7 +50,7 @@ export default function ConfiguracoesPage() {
 
         <TabsContent value="usuarios">
           <Card>
-            <CardContent className="p-4 md:p-6">
+            <CardContent className="p-5 md:p-7">
               <UsersTab />
             </CardContent>
 
@@ -59,7 +59,7 @@ export default function ConfiguracoesPage() {
 
         <TabsContent value="campanhas">
           <Card>
-            <CardContent className="p-4 md:p-6">
+            <CardContent className="p-5 md:p-7">
               <CampaignsTab />
             </CardContent>
           </Card>
@@ -67,7 +67,7 @@ export default function ConfiguracoesPage() {
 
         <TabsContent value="parceiros">
           <Card>
-            <CardContent className="p-4 md:p-6">
+            <CardContent className="p-5 md:p-7">
               <PartnersTab />
             </CardContent>
           </Card>
@@ -76,7 +76,7 @@ export default function ConfiguracoesPage() {
 
         <TabsContent value="lojas">
           <Card>
-            <CardContent className="p-4 md:p-6">
+            <CardContent className="p-5 md:p-7">
               <StoresTab />
             </CardContent>
           </Card>
@@ -84,7 +84,7 @@ export default function ConfiguracoesPage() {
 
         <TabsContent value="dados">
           <Card>
-            <CardContent className="p-4 md:p-6">
+            <CardContent className="p-5 md:p-7">
               <SystemDataTab />
             </CardContent>
           </Card>
