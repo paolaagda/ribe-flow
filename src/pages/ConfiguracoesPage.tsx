@@ -8,6 +8,7 @@ import CampaignsTab from '@/components/settings/CampaignsTab';
 import PartnersTab from '@/components/settings/PartnersTab';
 import SystemDataTab from '@/components/settings/SystemDataTab';
 import StoresTab from '@/components/settings/StoresTab';
+import PageHeader from '@/components/shared/PageHeader';
 
 export default function ConfiguracoesPage() {
   const { canRead } = usePermission();
