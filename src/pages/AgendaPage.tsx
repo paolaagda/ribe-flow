@@ -72,6 +72,7 @@ export default function AgendaPage() {
   const [showTasksPanel, setShowTasksPanel] = useState(false);
   const [showTasksDrawer, setShowTasksDrawer] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [activeInsight, setActiveInsight] = useState<string | null>(null);
 
   // Exclusive toggle: close other panels when opening one
   const togglePanel = (panel: 'today' | 'tasks') => {
@@ -147,9 +148,21 @@ export default function AgendaPage() {
         const vDate = parseISO(v.date);
         if (vDate < dateRange.from) return false;
       }
+      // Insight filters
+      if (activeInsight === 'agenda_evolucao') {
+        const d = parseISO(v.date);
+        const days = (new Date().getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
+        if (!(v.status === 'Concluída' && days >= 0 && days <= 30)) return false;
+      }
+      if (activeInsight === 'agenda_valor_hoje') {
+        if (!(v.date === todayStr && (v.potentialValue || 0) > 0)) return false;
+      }
+      if (activeInsight === 'agenda_taxa_conclusao') {
+        if (v.status !== 'Concluída') return false;
+      }
       return true;
     });
-  }, [visibleVisits, filterStatus, filterType, filterUser, dateRange]);
+  }, [visibleVisits, filterStatus, filterType, filterUser, dateRange, activeInsight, todayStr]);
 
   // Helper: get participants for a visit (owner + accepted invitees)
   const getParticipants = useCallback((v: Visit) => {
@@ -514,7 +527,7 @@ export default function AgendaPage() {
     <PageTransition className="space-y-6">
       <HeroSection />
 
-      <SmartInsights page="agenda" />
+      <SmartInsights page="agenda" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
 
       {/* Title + Month nav + Filters toggle */}
       <div className="flex flex-col gap-2">
