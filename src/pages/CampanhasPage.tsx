@@ -17,7 +17,7 @@ import {
   getCancelledVisitsForUser, calculateUserScore, getGamificationConfig,
   getUserScoreBreakdown,
 } from '@/data/campaigns';
-import { Trophy, Flame, Medal, Star, TrendingUp, ShieldOff, Award, Ban, CheckCircle2, Target, Calendar, XCircle, AlertTriangle, Clock } from 'lucide-react';
+import { Trophy, Flame, Medal, Star, TrendingUp, ShieldOff, Award, Ban, CheckCircle2, Target, Calendar, XCircle } from 'lucide-react';
 import SmartInsights from '@/components/shared/SmartInsights';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import { cn } from '@/lib/utils';
@@ -160,27 +160,6 @@ export default function CampanhasPage() {
     }, 800);
   }, [ranking]);
 
-  // Alert cards data
-  const alertCards = useMemo(() => {
-    if (!selectedCampaign || !myStats) return [];
-    const today = new Date();
-    const endDate = new Date(selectedCampaign.endDate);
-    const daysRemaining = Math.max(0, Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
-    const visitsRemaining = Math.max(0, myStats.visitGoal - myStats.visits);
-    const avgScore = ranking.length > 0 ? Math.round(ranking.reduce((s, r) => s + r.score, 0) / ranking.length) : 0;
-    const aboveAvg = myStats.score >= avgScore;
-
-    const cards: { icon: React.ReactNode; text: string; color: string }[] = [];
-    if (visitsRemaining > 0) {
-      cards.push({ icon: <AlertTriangle className="h-4 w-4" />, text: `Faltam ${visitsRemaining} visitas para sua meta em ${selectedCampaign.name}`, color: 'bg-warning/10 text-warning border-warning/20' });
-    }
-    if (daysRemaining > 0 && getCampaignStatus(selectedCampaign) === 'Ativa') {
-      cards.push({ icon: <Clock className="h-4 w-4" />, text: `${selectedCampaign.name} termina em ${daysRemaining} dia${daysRemaining !== 1 ? 's' : ''}`, color: 'bg-info/10 text-info border-info/20' });
-    }
-    cards.push({ icon: <TrendingUp className="h-4 w-4" />, text: aboveAvg ? 'Você está acima da média da equipe!' : 'Você está abaixo da média da equipe', color: aboveAvg ? 'bg-success/10 text-success border-success/20' : 'bg-destructive/10 text-destructive border-destructive/20' });
-    return cards;
-  }, [selectedCampaign, myStats, ranking]);
-
   // Score history
   const scoreHistory = useMemo(() => {
     if (!selectedCampaign) return [];
@@ -221,8 +200,6 @@ export default function CampanhasPage() {
 
   return (
     <div className="space-y-ds-lg">
-      <SmartInsights page="campanhas" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
-      <AnimatedFilterContent filterKey={activeInsight}>
       {/* 1. Header + Filters */}
       <PageHeader
         title={selectedCampaign?.name || 'Campanhas'}
@@ -256,58 +233,49 @@ export default function CampanhasPage() {
         )}
       </PageHeader>
 
-      {/* 3. Alert Cards */}
-      {alertCards.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-ds-sm">
-          {alertCards.map((card, i) => (
-            <Card key={i} className={cn('border min-h-[56px] transition-all duration-300 hover:shadow-[var(--shadow-sm)]', card.color)}>
-              <CardContent className="p-ds-sm flex items-center gap-3">
-                {card.icon}
-                <p className="text-ds-xs font-medium">{card.text}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      {/* 2. Smart Insights */}
+      <SmartInsights page="campanhas" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
+
+      <AnimatedFilterContent filterKey={activeInsight}>
 
       {/* 4. KPI Cards */}
       {kpis && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-ds-sm">
-           <Card className="min-h-[120px] card-flat group overflow-hidden relative">
+           <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
               <p className="text-ds-xs text-muted-foreground mb-1.5">Visitas</p>
-              <div className="flex items-end gap-1">
+              <div className="flex items-baseline gap-1 flex-wrap">
                 <span className="text-ds-xl font-bold">{kpis.totalVisits}</span>
-                <span className="text-ds-sm text-muted-foreground mb-0.5">/ {kpis.totalVisitGoal}</span>
+                <span className="text-ds-sm text-muted-foreground">/ {kpis.totalVisitGoal}</span>
               </div>
               <Progress value={kpis.totalVisitGoal > 0 ? Math.min(100, (kpis.totalVisits / kpis.totalVisitGoal) * 100) : 0} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
-           <Card className="min-h-[120px] card-flat group overflow-hidden relative">
+           <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
               <p className="text-ds-xs text-muted-foreground mb-1.5">Prospecções</p>
-              <div className="flex items-end gap-1">
+              <div className="flex items-baseline gap-1 flex-wrap">
                 <span className="text-ds-xl font-bold">{kpis.totalProsp}</span>
-                <span className="text-ds-sm text-muted-foreground mb-0.5">/ {kpis.totalProspGoal}</span>
+                <span className="text-ds-sm text-muted-foreground">/ {kpis.totalProspGoal}</span>
               </div>
               <Progress value={kpis.totalProspGoal > 0 ? Math.min(100, (kpis.totalProsp / kpis.totalProspGoal) * 100) : 0} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
-           <Card className="min-h-[120px] card-flat group overflow-hidden relative">
+           <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
               <p className="text-ds-xs text-muted-foreground mb-1.5">Pontuação</p>
               <span className="text-ds-xl font-bold text-primary">{kpis.totalScore}</span>
               <p className="text-ds-xs text-muted-foreground mt-1">pts acumulados</p>
             </CardContent>
           </Card>
-           <Card className="min-h-[120px] card-flat group overflow-hidden relative">
+           <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
               <p className="text-ds-xs text-muted-foreground mb-1.5">Taxa de conclusão</p>
               <span className="text-ds-xl font-bold">{kpis.rate}%</span>
               <Progress value={kpis.rate} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
-          <Card className="min-h-[120px] card-flat group overflow-hidden relative">
+          <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
               <p className="text-ds-xs text-muted-foreground mb-1.5">Cancelamentos</p>
               <span className={cn("text-ds-xl font-bold", kpis.totalCancel > 0 && "text-destructive")}>{kpis.totalCancel}</span>

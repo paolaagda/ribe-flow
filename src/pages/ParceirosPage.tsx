@@ -144,18 +144,18 @@ export default function ParceirosPage() {
                 onClick={() => canRead('partners.details') && setSelectedId(p.id)}
               >
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gradient-primary" />
-                <CardContent className="p-ds-sm space-y-3.5 relative">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="icon-container-sm icon-container-primary transition-transform duration-300 group-hover:scale-105">
+                <CardContent className="p-ds-sm space-y-3.5 relative min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="icon-container-sm icon-container-primary transition-transform duration-300 group-hover:scale-105 shrink-0">
                         <Building2 className="h-4 w-4 text-primary" />
                       </div>
-                      <div>
-                        <p className="text-ds-sm font-semibold">{p.name}</p>
-                        <p className="text-ds-xs text-muted-foreground">{p.cnpj}</p>
+                      <div className="min-w-0">
+                        <p className="text-ds-sm font-semibold truncate">{p.name}</p>
+                        <p className="text-ds-xs text-muted-foreground truncate">{p.cnpj}</p>
                       </div>
                     </div>
-                    <Badge variant="outline" className={cn('text-ds-xs capitalize', potentialColors[p.potential])}>
+                    <Badge variant="outline" className={cn('text-ds-xs capitalize shrink-0', potentialColors[p.potential])}>
                       {p.potential}
                     </Badge>
                   </div>
