@@ -219,7 +219,7 @@ export default function CampanhasPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <SmartInsights page="campanhas" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
       <AnimatedFilterContent filterKey={activeInsight}>
       {/* 1. Header + Filters */}
