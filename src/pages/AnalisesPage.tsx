@@ -32,12 +32,13 @@ const tooltipStyle = {
 export default function AnalisesPage() {
   const [period, setPeriod] = useState('month');
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [activeInsight, setActiveInsight] = useState<string | null>(null);
   const { canRead } = usePermission();
   const { visits } = useVisits();
 
   const periodVisits = useMemo(() => {
     const now = new Date();
-    return visits.filter(v => {
+    let base = visits.filter(v => {
       const d = new Date(v.date);
       if (period === 'custom' && dateRange.from) {
         const to = dateRange.to || dateRange.from;
@@ -49,7 +50,21 @@ export default function AnalisesPage() {
       if (period === 'year') return diff <= 365 && diff >= 0;
       return true;
     });
-  }, [period, visits, dateRange]);
+
+    // Insight filters
+    if (activeInsight === 'anal_tendencia') {
+      base = base.filter(v => {
+        const diff = (now.getTime() - new Date(v.date).getTime()) / (1000 * 60 * 60 * 24);
+        return v.status === 'Concluída' && diff >= 0 && diff <= 30;
+      });
+    } else if (activeInsight === 'anal_proporcao') {
+      base = base.filter(v => v.type === 'visita' || v.type === 'prospecção');
+    } else if (activeInsight === 'anal_ticket') {
+      base = base.filter(v => (v.potentialValue || 0) > 0);
+    }
+
+    return base;
+  }, [period, visits, dateRange, activeInsight]);
 
   const kpis = useMemo(() => {
     const total = periodVisits.length;
@@ -136,7 +151,7 @@ export default function AnalisesPage() {
 
   return (
     <PageTransition className="space-y-6">
-      <SmartInsights page="analises" />
+      <SmartInsights page="analises" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
