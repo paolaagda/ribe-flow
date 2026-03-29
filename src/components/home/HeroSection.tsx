@@ -73,8 +73,8 @@ export default function HeroSection() {
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-primary/5 -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 w-24 h-24 rounded-full bg-primary/3 translate-y-1/2 blur-xl pointer-events-none" />
         
-        <CardContent className="p-6 relative">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+        <CardContent className="p-ds-md relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-ds-sm">
             <motion.div whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
               <Avatar className="h-16 w-16 border-2 border-primary/15 shadow-[var(--shadow-lg)] ring-4 ring-primary/5">
                 <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
@@ -84,7 +84,7 @@ export default function HeroSection() {
             </motion.div>
 
             <div className="flex-1 min-w-0 space-y-1.5">
-              <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              <h1 className="text-ds-xl font-bold text-foreground tracking-tight">
                 {getGreeting()}, {user?.name?.split(' ')[0]}! 👋
               </h1>
               <AnimatePresence mode="wait">
@@ -94,14 +94,14 @@ export default function HeroSection() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -5 }}
                   transition={{ duration: 0.4 }}
-                  className="text-muted-foreground text-sm italic"
+                  className="text-muted-foreground text-ds-sm italic"
                 >
                   "{motivationalPhrases[phraseIndex]}"
                 </motion.p>
               </AnimatePresence>
             </div>
 
-            <div className="flex flex-wrap gap-3 text-sm">
+            <div className="flex flex-wrap gap-3 text-ds-sm">
               <div className="stat-chip">
                 <div className="w-7 h-7 rounded-lg bg-info/10 flex items-center justify-center">
                   <Handshake className="h-3.5 w-3.5 text-info" />
