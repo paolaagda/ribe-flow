@@ -63,7 +63,7 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
           onClick && 'group-hover:opacity-100',
         )} style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.03) 0%, transparent 60%)' }} />
         
-        <CardContent className="p-5 flex items-center gap-4 h-full min-h-[88px] relative">
+        <CardContent className="p-ds-sm flex items-center gap-ds-sm h-full min-h-[88px] relative">
           <div className={cn(
             'icon-container-sm relative transition-transform duration-300',
             onClick && 'group-hover:scale-105',
@@ -76,14 +76,14 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-2xl font-bold tabular-nums leading-tight truncate tracking-tight">
+            <p className="text-ds-xl font-bold tabular-nums leading-tight truncate tracking-tight">
               {numericValue !== null ? displayValue : value}
               {secondaryValue !== undefined && (
-                <span className="text-sm font-normal text-muted-foreground ml-0.5">/{secondaryValue}</span>
+                <span className="text-ds-sm font-normal text-muted-foreground ml-0.5">/{secondaryValue}</span>
               )}
-              {suffix && !secondaryValue && <span className="text-sm font-normal text-muted-foreground ml-0.5">{suffix}</span>}
+              {suffix && !secondaryValue && <span className="text-ds-sm font-normal text-muted-foreground ml-0.5">{suffix}</span>}
             </p>
-            <p className="text-xs text-muted-foreground truncate mt-0.5 font-medium">{label}</p>
+            <p className="text-ds-xs text-muted-foreground truncate mt-0.5 font-medium">{label}</p>
           </div>
         </CardContent>
       </Card>

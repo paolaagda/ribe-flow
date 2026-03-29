@@ -154,16 +154,16 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
       transition={{ duration: 0.4, delay: 0.1 }}
     >
       <Card className="border-border/40 gradient-subtle">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-3">
+        <CardContent className="p-ds-sm">
+          <div className="flex items-center gap-ds-xs mb-3">
             <div className="p-1 rounded-md bg-warning/10">
               <Lightbulb className="h-3.5 w-3.5 text-warning" />
             </div>
-            <span className="text-sm font-semibold">Insights Inteligentes</span>
+            <span className="text-ds-sm font-semibold">Insights Inteligentes</span>
             {activeFilter && (
               <button
                 onClick={() => onFilterClick?.(null)}
-                className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted"
+                className="ml-auto flex items-center gap-1 text-ds-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted"
               >
                 <X className="h-3 w-3" /> Limpar filtro
               </button>
@@ -177,7 +177,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.15 + i * 0.05, duration: 0.3 }}
                 className={cn(
-                  'flex items-center gap-2.5 px-3.5 py-3 rounded-xl border text-xs font-medium cursor-pointer transition-all duration-200',
+                  'flex items-center gap-2.5 px-3.5 py-3 rounded-xl border text-ds-xs font-medium cursor-pointer transition-all duration-200',
                   activeFilter === insight.id
                     ? activeVariantStyles[insight.variant]
                     : variantStyles[insight.variant],
