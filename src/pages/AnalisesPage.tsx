@@ -151,7 +151,7 @@ export default function AnalisesPage() {
   }
 
   return (
-    <PageTransition className="space-y-6">
+    <PageTransition className="space-y-8">
       <SmartInsights page="analises" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -197,7 +197,7 @@ export default function AnalisesPage() {
 
       <AnimatedFilterContent filterKey={activeInsight}>
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
         <AnimatedKpiCard icon={BarChart3} label="Total" value={kpis.total} color="text-foreground" delay={0} />
         <AnimatedKpiCard icon={CheckCircle} label="Concluídas" value={kpis.completed} color="text-success" delay={0.1} />
         <AnimatedKpiCard icon={Eye} label="Visitas" value={kpis.visitas} color="text-info" delay={0.2} />
@@ -214,7 +214,7 @@ export default function AnalisesPage() {
       )}
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Monthly Trend */}
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base">Tendência mensal</CardTitle></CardHeader>

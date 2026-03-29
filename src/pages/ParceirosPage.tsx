@@ -95,7 +95,7 @@ export default function ParceirosPage() {
   }
 
   return (
-    <PageTransition className="space-y-6">
+    <PageTransition className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Parceiros</h1>
         <p className="text-muted-foreground text-sm">
@@ -132,7 +132,7 @@ export default function ParceirosPage() {
 
       <AnimatedFilterContent filterKey={activeInsight}>
       {viewMode === 'parceiros' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map(p => {
             const responsible = getUserById(p.responsibleUserId);
             return (
@@ -145,7 +145,7 @@ export default function ParceirosPage() {
                 onClick={() => canRead('partners.details') && setSelectedId(p.id)}
               >
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gradient-primary" />
-                <CardContent className="p-4 space-y-3 relative">
+                <CardContent className="p-5 space-y-3.5 relative">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="icon-container-sm icon-container-primary transition-transform duration-300 group-hover:scale-105">
@@ -181,12 +181,12 @@ export default function ParceirosPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredStores.map(store => {
             const partner = partners.find(p => p.id === store.partnerId);
             return (
               <Card key={store.id} className="card-flat group overflow-hidden relative hover:shadow-[var(--shadow-md)] transition-all duration-300 hover:-translate-y-0.5">
-                <CardContent className="p-4 space-y-3">
+                <CardContent className="p-5 space-y-3.5">
                   <div className="flex items-center gap-3">
                      <div className="icon-container-sm">
                        <StoreIcon className="h-4 w-4 text-muted-foreground" />

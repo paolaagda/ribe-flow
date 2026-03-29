@@ -23,7 +23,7 @@ export default function ConfiguracoesPage() {
   }
 
   return (
-    <PageTransition className="space-y-6">
+    <PageTransition className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Configurações</h1>
         <p className="text-muted-foreground text-sm">Centro administrativo do sistema</p>
@@ -53,6 +53,7 @@ export default function ConfiguracoesPage() {
             <CardContent className="p-4 md:p-6">
               <UsersTab />
             </CardContent>
+
           </Card>
         </TabsContent>
 
