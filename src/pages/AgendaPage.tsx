@@ -526,7 +526,7 @@ export default function AgendaPage() {
   }
 
   return (
-    <PageTransition className="space-y-6">
+    <PageTransition className="space-y-4">
       <HeroSection />
 
       <SmartInsights page="agenda" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
