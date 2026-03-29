@@ -22,6 +22,7 @@ export default function LoginPage() {
   const [forgotError, setForgotError] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
+  const [mockResetLink, setMockResetLink] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
