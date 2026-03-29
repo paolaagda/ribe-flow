@@ -24,7 +24,7 @@ export default function ConfiguracoesPage() {
   }
 
   return (
-    <PageTransition className="space-y-8">
+    <PageTransition className="space-y-ds-lg">
       <PageHeader title="Configurações" description="Centro administrativo do sistema" />
 
       <Tabs defaultValue="usuarios">

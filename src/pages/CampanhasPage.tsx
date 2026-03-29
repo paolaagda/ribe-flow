@@ -220,7 +220,7 @@ export default function CampanhasPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-ds-lg">
       <SmartInsights page="campanhas" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
       <AnimatedFilterContent filterKey={activeInsight}>
       {/* 1. Header + Filters */}
@@ -258,12 +258,12 @@ export default function CampanhasPage() {
 
       {/* 3. Alert Cards */}
       {alertCards.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-ds-sm">
           {alertCards.map((card, i) => (
             <Card key={i} className={cn('border min-h-[56px] transition-all duration-300 hover:shadow-[var(--shadow-sm)]', card.color)}>
-              <CardContent className="p-3 flex items-center gap-3">
+              <CardContent className="p-ds-sm flex items-center gap-3">
                 {card.icon}
-                <p className="text-xs font-medium">{card.text}</p>
+                <p className="text-ds-xs font-medium">{card.text}</p>
               </CardContent>
             </Card>
           ))}
@@ -272,47 +272,47 @@ export default function CampanhasPage() {
 
       {/* 4. KPI Cards */}
       {kpis && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-ds-sm">
            <Card className="min-h-[120px] card-flat group overflow-hidden relative">
-            <CardContent className="p-5">
-              <p className="text-xs text-muted-foreground mb-1.5">Visitas</p>
+            <CardContent className="p-ds-sm">
+              <p className="text-ds-xs text-muted-foreground mb-1.5">Visitas</p>
               <div className="flex items-end gap-1">
-                <span className="text-2xl font-bold">{kpis.totalVisits}</span>
-                <span className="text-sm text-muted-foreground mb-0.5">/ {kpis.totalVisitGoal}</span>
+                <span className="text-ds-xl font-bold">{kpis.totalVisits}</span>
+                <span className="text-ds-sm text-muted-foreground mb-0.5">/ {kpis.totalVisitGoal}</span>
               </div>
               <Progress value={kpis.totalVisitGoal > 0 ? Math.min(100, (kpis.totalVisits / kpis.totalVisitGoal) * 100) : 0} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
            <Card className="min-h-[120px] card-flat group overflow-hidden relative">
-            <CardContent className="p-5">
-              <p className="text-xs text-muted-foreground mb-1.5">Prospecções</p>
+            <CardContent className="p-ds-sm">
+              <p className="text-ds-xs text-muted-foreground mb-1.5">Prospecções</p>
               <div className="flex items-end gap-1">
-                <span className="text-2xl font-bold">{kpis.totalProsp}</span>
-                <span className="text-sm text-muted-foreground mb-0.5">/ {kpis.totalProspGoal}</span>
+                <span className="text-ds-xl font-bold">{kpis.totalProsp}</span>
+                <span className="text-ds-sm text-muted-foreground mb-0.5">/ {kpis.totalProspGoal}</span>
               </div>
               <Progress value={kpis.totalProspGoal > 0 ? Math.min(100, (kpis.totalProsp / kpis.totalProspGoal) * 100) : 0} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
            <Card className="min-h-[120px] card-flat group overflow-hidden relative">
-            <CardContent className="p-5">
-              <p className="text-xs text-muted-foreground mb-1.5">Pontuação</p>
-              <span className="text-2xl font-bold text-primary">{kpis.totalScore}</span>
-              <p className="text-[10px] text-muted-foreground mt-1">pts acumulados</p>
+            <CardContent className="p-ds-sm">
+              <p className="text-ds-xs text-muted-foreground mb-1.5">Pontuação</p>
+              <span className="text-ds-xl font-bold text-primary">{kpis.totalScore}</span>
+              <p className="text-ds-xs text-muted-foreground mt-1">pts acumulados</p>
             </CardContent>
           </Card>
            <Card className="min-h-[120px] card-flat group overflow-hidden relative">
-            <CardContent className="p-5">
-              <p className="text-xs text-muted-foreground mb-1.5">Taxa de conclusão</p>
-              <span className="text-2xl font-bold">{kpis.rate}%</span>
+            <CardContent className="p-ds-sm">
+              <p className="text-ds-xs text-muted-foreground mb-1.5">Taxa de conclusão</p>
+              <span className="text-ds-xl font-bold">{kpis.rate}%</span>
               <Progress value={kpis.rate} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
           <Card className="min-h-[120px] card-flat group overflow-hidden relative">
-            <CardContent className="p-5">
-              <p className="text-xs text-muted-foreground mb-1.5">Cancelamentos</p>
-              <span className={cn("text-2xl font-bold", kpis.totalCancel > 0 && "text-destructive")}>{kpis.totalCancel}</span>
+            <CardContent className="p-ds-sm">
+              <p className="text-ds-xs text-muted-foreground mb-1.5">Cancelamentos</p>
+              <span className={cn("text-ds-xl font-bold", kpis.totalCancel > 0 && "text-destructive")}>{kpis.totalCancel}</span>
               {kpis.totalCancel > 0 && config && (
-                <p className="text-[10px] text-destructive mt-1">{Math.abs(kpis.totalCancel * config.pointsPerCancellation)} pts perdidos</p>
+                <p className="text-ds-xs text-destructive mt-1">{Math.abs(kpis.totalCancel * config.pointsPerCancellation)} pts perdidos</p>
               )}
             </CardContent>
           </Card>
@@ -322,12 +322,12 @@ export default function CampanhasPage() {
       {/* 5. Streak */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <Card className="border-l-4 border-l-success">
-          <CardContent className="p-6 flex items-center gap-5">
+          <CardContent className="p-ds-md flex items-center gap-ds-sm">
             <div className="w-12 h-12 rounded-full bg-success/10 text-success flex items-center justify-center">
               <Flame className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{streak} {streak === 1 ? 'dia' : 'dias'}</p>
+              <p className="text-ds-xl font-bold">{streak} {streak === 1 ? 'dia' : 'dias'}</p>
               <p className="text-xs text-muted-foreground">Streak de atividades consecutivas</p>
             </div>
           </CardContent>

@@ -152,7 +152,7 @@ export default function AnalisesPage() {
   }
 
   return (
-    <PageTransition className="space-y-8">
+    <PageTransition className="space-y-ds-lg">
       <SmartInsights page="analises" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
       {/* Header */}
         <PageHeader title="Análises" description="Métricas e performance da equipe">
@@ -194,7 +194,7 @@ export default function AnalisesPage() {
 
       <AnimatedFilterContent filterKey={activeInsight}>
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-ds-sm">
         <AnimatedKpiCard icon={BarChart3} label="Total" value={kpis.total} color="text-foreground" delay={0} />
         <AnimatedKpiCard icon={CheckCircle} label="Concluídas" value={kpis.completed} color="text-success" delay={0.1} />
         <AnimatedKpiCard icon={Eye} label="Visitas" value={kpis.visitas} color="text-info" delay={0.2} />
@@ -203,18 +203,18 @@ export default function AnalisesPage() {
 
       {/* Conversion badge */}
       {kpis.total > 0 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="flex items-center gap-2">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="flex items-center gap-ds-xs">
           <TrendingUp className="h-4 w-4 text-success" />
-          <span className="text-sm text-muted-foreground">Taxa de conversão:</span>
+          <span className="text-ds-sm text-muted-foreground">Taxa de conversão:</span>
           <Badge variant="secondary" className="font-bold tabular-nums">{kpis.conversion}%</Badge>
         </motion.div>
       )}
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm">
         {/* Monthly Trend */}
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-base">Tendência mensal</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-ds-md">Tendência mensal</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={monthlyTrend}>
@@ -233,7 +233,7 @@ export default function AnalisesPage() {
 
         {/* Status Distribution - Donut */}
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-base">Distribuição por status</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-ds-md">Distribuição por status</CardTitle></CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
               <ResponsiveContainer width="60%" height={280}>
@@ -246,11 +246,11 @@ export default function AnalisesPage() {
               </ResponsiveContainer>
               <div className="space-y-2 flex-1">
                 {statusData.map((s, i) => (
-                  <div key={s.name} className="flex items-center gap-2 text-sm">
+                  <div key={s.name} className="flex items-center gap-2 text-ds-sm">
                     <div className="h-3 w-3 rounded-sm shrink-0" style={{ backgroundColor: s.fill }} />
                     <span className="text-muted-foreground truncate">{s.name}</span>
                     <span className="ml-auto font-medium tabular-nums">{s.value}</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-ds-xs text-muted-foreground">
                       ({kpis.total > 0 ? Math.round((s.value / kpis.total) * 100) : 0}%)
                     </span>
                   </div>
@@ -262,7 +262,7 @@ export default function AnalisesPage() {
 
         {/* Created vs Completed */}
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-base">Criadas vs Concluídas</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-ds-md">Criadas vs Concluídas</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={createdVsCompleted}>
@@ -280,10 +280,10 @@ export default function AnalisesPage() {
 
         {/* Top Partners */}
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-base">Top parceiros visitados</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-ds-md">Top parceiros visitados</CardTitle></CardHeader>
           <CardContent>
             {topPartners.length === 0 ? (
-              <div className="h-[280px] flex items-center justify-center text-muted-foreground text-sm">Nenhum dado no período</div>
+              <div className="h-[280px] flex items-center justify-center text-muted-foreground text-ds-sm">Nenhum dado no período</div>
             ) : (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={topPartners} layout="vertical">
@@ -301,7 +301,7 @@ export default function AnalisesPage() {
         {/* Individual Performance */}
         {canRead('analysis.ranking') && (
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-base">Performance individual</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-ds-md">Performance individual</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={userPerformance}>
@@ -327,7 +327,7 @@ export default function AnalisesPage() {
         {/* Visit Map */}
         {canRead('analysis.partnerMap') && (
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><MapPin className="h-4 w-4" /> Mapa de visitas</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-ds-md flex items-center gap-2"><MapPin className="h-4 w-4" /> Mapa de visitas</CardTitle></CardHeader>
             <CardContent>
               <div className="relative bg-muted rounded-lg h-[280px] overflow-hidden">
                 <div className="absolute inset-0 opacity-20" style={{
