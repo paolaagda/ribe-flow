@@ -41,20 +41,41 @@ export default function ParceirosPage() {
   }, [stores, visiblePartners]);
 
   const filtered = useMemo(() => {
-    if (!search) return visiblePartners;
+    const today = new Date();
+    let base = visiblePartners;
+
+    // Apply insight filter
+    if (activeInsight === 'parc_alto_potencial') {
+      base = base.filter(p => p.potential === 'alto');
+    } else if (activeInsight === 'parc_sem_visita_30d') {
+      const last30ConcludedPartnerIds = new Set(
+        visits.filter(v => {
+          const d = parseISO(v.date);
+          return v.status === 'Concluída' && differenceInDays(today, d) >= 0 && differenceInDays(today, d) <= 30;
+        }).map(v => v.partnerId)
+      );
+      base = base.filter(p => !last30ConcludedPartnerIds.has(p.id));
+    }
+
+    if (!search) return base;
     const q = search.toLowerCase();
-    return visiblePartners.filter(p => p.name.toLowerCase().includes(q) || p.cnpj.includes(q) || p.address.toLowerCase().includes(q));
-  }, [search, visiblePartners]);
+    return base.filter(p => p.name.toLowerCase().includes(q) || p.cnpj.includes(q) || p.address.toLowerCase().includes(q));
+  }, [search, visiblePartners, activeInsight, visits]);
 
   const filteredStores = useMemo(() => {
-    if (!search) return visibleStores;
+    const filteredPartnerIds = new Set(filtered.map(p => p.id));
+    let base = visibleStores;
+    if (activeInsight) {
+      base = base.filter(s => filteredPartnerIds.has(s.partnerId));
+    }
+    if (!search) return base;
     const q = search.toLowerCase();
-    return visibleStores.filter(s =>
+    return base.filter(s =>
       s.name.toLowerCase().includes(q) ||
       s.address.toLowerCase().includes(q) ||
       partners.find(p => p.id === s.partnerId)?.name.toLowerCase().includes(q)
     );
-  }, [search, visibleStores, partners]);
+  }, [search, visibleStores, partners, activeInsight, filtered]);
 
   const potentialColors = { alto: 'text-success', médio: 'text-warning', baixo: 'text-muted-foreground' };
 
@@ -81,7 +102,7 @@ export default function ParceirosPage() {
         </p>
       </div>
 
-      <SmartInsights page="parceiros" onInsightClick={(text, variant) => setInsightModal({ text, variant })} />
+      <SmartInsights page="parceiros" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
 
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
@@ -193,15 +214,6 @@ export default function ParceirosPage() {
         </div>
       )}
 
-      {/* Insight detail modal */}
-      <Dialog open={!!insightModal} onOpenChange={() => setInsightModal(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">Detalhe do Insight</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">{insightModal?.text}</p>
-        </DialogContent>
-      </Dialog>
     </PageTransition>
   );
 }
