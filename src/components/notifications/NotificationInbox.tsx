@@ -86,7 +86,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
           )}
         </div>
 
-        <Tabs defaultValue="invites" className="w-full">
+        <Tabs defaultValue="invites" className="w-full flex-1 flex flex-col overflow-hidden">
           <TabsList className="w-full rounded-none border-b bg-transparent h-9">
             <TabsTrigger value="invites" className="flex-1 text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
               Convites {pendingInvites.length > 0 && `(${pendingInvites.length})`}
