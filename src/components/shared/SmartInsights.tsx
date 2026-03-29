@@ -163,8 +163,8 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
       <Card className="border-border/40 gradient-subtle">
         <CardContent className="p-ds-sm">
           <div className="flex items-center gap-ds-xs mb-3">
-            <div className="p-1 rounded-md bg-warning/10">
-              <Lightbulb className="h-3.5 w-3.5 text-warning" />
+            <div className="p-1.5 rounded-lg bg-warning/10">
+              <Lightbulb className="h-4 w-4 text-warning animate-pulse" style={{ animationDuration: '3s' }} />
             </div>
             <span className="text-ds-sm font-semibold">Insights Inteligentes</span>
             {activeFilter && (
