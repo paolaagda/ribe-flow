@@ -224,7 +224,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
               <NotificationInbox />
             </div>
           </header>
-          <main className="flex-1 p-5 lg:p-6 overflow-auto scrollbar-thin">{children}</main>
+          <main className="flex-1 p-6 lg:p-8 overflow-auto scrollbar-thin">{children}</main>
         </div>
       </div>
     </SidebarProvider>
