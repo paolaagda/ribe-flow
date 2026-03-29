@@ -351,8 +351,8 @@ export default function AnalisesPage() {
 
         {/* Visit Map */}
         {canRead('analysis.partnerMap') && (
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-ds-md flex items-center gap-2"><MapPin className="h-4 w-4" /> Mapa de visitas</CardTitle></CardHeader>
+          <Card className="card-hover">
+            <CardHeader className="p-ds-sm pb-2"><CardTitle className="card-section-title"><div className="icon-container-sm icon-container-primary"><MapPin className="h-4 w-4 text-primary" /></div> Mapa de visitas</CardTitle></CardHeader>
             <CardContent>
               <div className="relative bg-muted rounded-lg h-[280px] overflow-hidden">
                 <div className="absolute inset-0 opacity-20" style={{

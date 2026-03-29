@@ -145,7 +145,7 @@ export default function ParceirosPage() {
               >
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gradient-primary" />
                 <CardContent className="p-ds-sm space-y-0 divide-y divide-border/40 relative min-w-0">
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start justify-between gap-2 pb-3">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="icon-container-sm icon-container-primary transition-transform duration-300 group-hover:scale-105 shrink-0">
                         <Building2 className="h-4 w-4 text-primary" />
@@ -159,15 +159,17 @@ export default function ParceirosPage() {
                       {p.potential}
                     </Badge>
                   </div>
-                  <p className="text-ds-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" />{p.address}</p>
-                  <div className="flex items-center justify-between">
+                  <div className="py-2.5 space-y-2">
+                    <p className="text-ds-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3 shrink-0" />{p.address}</p>
                     <div className="flex flex-wrap gap-1">
                       {p.structures.map(s => <Badge key={s} variant="secondary" className="text-ds-xs">{s}</Badge>)}
                     </div>
                   </div>
-                  <p className="text-ds-xs text-muted-foreground flex items-center gap-1">
-                    <User className="h-3 w-3" /> {responsible?.name}
-                  </p>
+                  <div className="pt-2.5">
+                    <p className="text-ds-xs text-muted-foreground flex items-center gap-1">
+                      <User className="h-3 w-3" /> {responsible?.name}
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             );
