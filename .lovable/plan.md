@@ -1,81 +1,61 @@
 
 
-# Reestruturar Pagina de Agenda — Cards, Filtros e Localizacao
+# Melhorar o Design Visual dos Cards e Componentes
 
 ## Resumo
 
-Reorganizar a pagina de Agenda com nova ordem de elementos, novos cards de KPI, filtros ao lado do titulo abaixo do hero, calendario em pt-BR e ajustes no HeroSection.
+Elevar a qualidade visual dos cards e componentes em todas as páginas, adicionando refinamentos sutis como bordas com gradiente, ícones com fundos coloridos nos cards de gráficos, melhor hierarquia tipográfica, e microinterações mais polidas — sem alterar lógica ou estrutura de dados.
 
-## Nova Ordem da Pagina (top-down)
+## Alterações Planejadas
 
-```text
-1. HeroSection (saudacao + stats ajustados)
-2. Titulo "Agenda" + seletor de mes + filtros (mesma linha)
-3. Grade de 6 cards KPI:
-   [Agenda hoje] [Tarefas] [Agendas] [Visitas] [Prospecoes] [+ Nova agenda]
-4. Painel expandivel (TodayAgenda + Mapa + PendingTasks)
-5. Calendario
-```
+### 1. Melhorar o Card base (`src/components/ui/card.tsx`)
+- Adicionar transição suave padrão no Card base (`transition-all duration-200`)
+- Bordas mais refinadas com opacidade
 
-## Mudancas
+### 2. Melhorar cards de gráficos na Análises (`src/pages/AnalisesPage.tsx`)
+- Adicionar ícones coloridos nos títulos dos cards de gráficos (já usam `CardTitle` mas sem ícone visual)
+- Usar `icon-container-sm` com ícone temático ao lado de cada título
+- Aplicar `card-hover` nos cards de gráficos para feedback visual no hover
+- Padronizar `CardHeader` com `p-ds-sm pb-2`
 
-### 1. HeroSection (`src/components/home/HeroSection.tsx`)
+### 3. Melhorar cards KPI na Campanhas (`src/pages/CampanhasPage.tsx`)
+- Adicionar ícones nos 5 cards KPI (atualmente só texto), usando `icon-container-sm` com ícones temáticos (Target, UserPlus, Star, CheckCircle2, Ban)
+- Aplicar `card-hover` nos cards
+- Card "Você vs Média": padronizar para tokens `p-ds-sm`, `text-ds-xs`
+- Cards de conquistas: aplicar tokens `text-ds-xs` nos textos `text-[10px]` e `text-[9px]`
 
-Ajustar a secao de stats para mostrar apenas contagens de **concluidas**:
-- Icone `Handshake` + `{visitasConcluidas} visitas` (em vez de Eye + total)
-- Icone `UserPlus` + `{prospecoesConcluidas} prospecoes` (em vez de Target + total)
-- Manter barra de progresso da campanha
+### 4. Cards de Parceiros (`src/pages/ParceirosPage.tsx`)
+- Adicionar separador visual sutil entre informações do card (endereço, estruturas, responsável) usando `divide-y` ou spacing melhor
+- Melhorar o badge de potencial com cores mais vibrantes
 
-### 2. Titulo + Filtros abaixo do Hero (`src/pages/AgendaPage.tsx`)
+### 5. SmartInsights (`src/components/shared/SmartInsights.tsx`)
+- Adicionar ícone animado sutil no header (pulse leve no Lightbulb)
+- Melhorar contraste dos items de insight com `backdrop-blur-sm`
 
-Mover o bloco de titulo "Agenda" e todos os controles (navegacao mes, selects de modo/status/tipo, periodo) para logo abaixo do HeroSection, antes dos KPI cards. Layout em uma unica linha responsiva:
-- Esquerda: "Agenda" (titulo sem subtitulo)
-- Direita: navegacao mes `< Marco 2026 >` + Hoje + selects (Mensal, Status, Tipo) + Periodo
+### 6. AnimatedKpiCard (`src/components/shared/AnimatedKpiCard.tsx`)
+- Adicionar um gradiente sutil de fundo baseado na cor do ícone quando ativo
+- Melhorar a separação visual entre valor e label
 
-### 3. Reestruturar KPI cards
+### 7. HeroSection (`src/components/home/HeroSection.tsx`)
+- Melhorar os `stat-chip` com ícones mais proeminentes e melhor separação visual
 
-**Card 1 — Agenda hoje** (dados do dia atual apenas):
-- Valor: `{concluidasHoje}` / secondaryValue: `{totalHoje}`
-- Label: "Agendas hoje"
-- Interativo (abre painel)
+### 8. Estilos globais (`src/index.css`)
+- Adicionar utility `.card-section-title` para padronizar títulos de seções dentro de cards
+- Adicionar `.badge-potential-alto/medio/baixo` com cores semânticas
 
-**Card 2 — Tarefas** (novo):
-- Valor: `{tarefasConcluidas}` / secondaryValue: `{tarefasPendentes}`
-- Label: "Tarefas"
-- Interativo: abre modal/drawer com lista completa de tarefas
-- Comercial ve suas tarefas; gestor ve todas com filtros
+## Arquivos Afetados
+- `src/components/ui/card.tsx`
+- `src/index.css`
+- `src/components/shared/AnimatedKpiCard.tsx`
+- `src/components/shared/SmartInsights.tsx`
+- `src/components/home/HeroSection.tsx`
+- `src/pages/AnalisesPage.tsx`
+- `src/pages/CampanhasPage.tsx`
+- `src/pages/ParceirosPage.tsx`
 
-**Card 3 — Agendas** (controle geral):
-- Valor: `{totalConcluidas}` / secondaryValue: `{totalAgendas}`
-- Label: "Agendas"
-
-**Card 4 — Visitas**:
-- Manter como esta (concluidas/criadas)
-
-**Card 5 — Prospecoes**:
-- Manter como esta (concluidas/criadas)
-
-**Card 6 — + Nova agenda** (botao como card):
-- Card com icone Plus, label "Nova agenda"
-- Ao clicar abre o form de criacao
-- Visivel apenas se `canWrite('agenda.create')`
-
-Grid: `grid-cols-2 sm:grid-cols-3 lg:grid-cols-6`
-
-### 4. Calendario em pt-BR (`src/components/ui/calendar.tsx`)
-
-Adicionar `locale={ptBR}` ao `DayPicker` para que o calendario do seletor de periodo exiba meses e dias em portugues.
-
-### 5. Indicadores para hoje
-
-Criar `todayIndicators` separado dos `indicators` filtrados, contando apenas visitas do dia atual para o card "Agenda hoje".
-
-## Arquivos
-
-| Arquivo | Acao |
-|---|---|
-| `src/pages/AgendaPage.tsx` | Reordenar layout, novos cards, mover filtros, add card Tarefas e +Nova agenda |
-| `src/components/home/HeroSection.tsx` | Trocar icones/stats para mostrar concluidas com Handshake/UserPlus |
-| `src/components/ui/calendar.tsx` | Adicionar locale pt-BR ao DayPicker |
-| `src/components/shared/AnimatedKpiCard.tsx` | Nenhuma mudanca necessaria |
+## O que NÃO será alterado
+- Lógica de negócio ou dados
+- Estrutura de rotas
+- Funcionalidades existentes
+- Tokens do design system já definidos
 
