@@ -100,7 +100,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
           </TabsList>
 
           <TabsContent value="invites" className="mt-0">
-            <ScrollArea className="max-h-[400px]">
+            <ScrollArea className="max-h-[400px] scrollbar-thin">
               {pendingInvites.length === 0 ? (
                 <div className="py-8 text-center">
                   <p className="text-sm text-muted-foreground">{getEmptyStateMessage()}</p>
@@ -121,7 +121,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
           </TabsContent>
 
           <TabsContent value="recent" className="mt-0">
-            <ScrollArea className="max-h-[400px]">
+            <ScrollArea className="max-h-[400px] scrollbar-thin">
               {recentNotifications.length === 0 ? (
                 <div className="py-8 text-center">
                   <p className="text-sm text-muted-foreground">Nenhuma notificação recente</p>
@@ -142,7 +142,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
           </TabsContent>
 
           <TabsContent value="history" className="mt-0">
-            <ScrollArea className="max-h-[400px]">
+            <ScrollArea className="max-h-[400px] scrollbar-thin">
               {history.length === 0 ? (
                 <div className="py-8 text-center">
                   <p className="text-sm text-muted-foreground">Histórico limpo</p>
