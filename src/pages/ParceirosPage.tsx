@@ -15,6 +15,7 @@ import PartnerDetailView from '@/components/partners/PartnerDetailView';
 import SmartInsights from '@/components/shared/SmartInsights';
 import { Button } from '@/components/ui/button';
 import { differenceInDays, parseISO } from 'date-fns';
+import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 
 export default function ParceirosPage() {
   const [search, setSearch] = useState('');
@@ -129,6 +130,7 @@ export default function ParceirosPage() {
         </div>
       </div>
 
+      <AnimatedFilterContent filterKey={activeInsight}>
       {viewMode === 'parceiros' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map(p => {
@@ -213,6 +215,7 @@ export default function ParceirosPage() {
           )}
         </div>
       )}
+      </AnimatedFilterContent>
 
     </PageTransition>
   );

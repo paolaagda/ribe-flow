@@ -17,6 +17,7 @@ import { mockUsers, getPartnerById, statusColors, VisitStatus } from '@/data/moc
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 import { cn } from '@/lib/utils';
 import SmartInsights from '@/components/shared/SmartInsights';
+import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 
 const STATUS_COLORS: Record<string, string> = statusColors;
 const CHART_COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
@@ -194,6 +195,7 @@ export default function AnalisesPage() {
         )}
       </div>
 
+      <AnimatedFilterContent filterKey={activeInsight}>
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <AnimatedKpiCard icon={BarChart3} label="Total" value={kpis.total} color="text-foreground" delay={0} />
