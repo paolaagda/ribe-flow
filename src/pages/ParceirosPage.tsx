@@ -16,6 +16,7 @@ import SmartInsights from '@/components/shared/SmartInsights';
 import { Button } from '@/components/ui/button';
 import { differenceInDays, parseISO } from 'date-fns';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
+import PageHeader from '@/components/shared/PageHeader';
 
 export default function ParceirosPage() {
   const [search, setSearch] = useState('');
@@ -96,12 +97,10 @@ export default function ParceirosPage() {
 
   return (
     <PageTransition className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold">Parceiros</h1>
-        <p className="text-muted-foreground text-sm">
-          {profile === 'nao_gestor' ? 'Seus parceiros vinculados' : 'Gerencie lojas e parceiros'}
-        </p>
-      </div>
+      <PageHeader
+        title="Parceiros"
+        description={profile === 'nao_gestor' ? 'Seus parceiros vinculados' : 'Gerencie lojas e parceiros'}
+      />
 
       <SmartInsights page="parceiros" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
 

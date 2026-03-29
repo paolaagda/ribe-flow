@@ -8,6 +8,7 @@ import CampaignsTab from '@/components/settings/CampaignsTab';
 import PartnersTab from '@/components/settings/PartnersTab';
 import SystemDataTab from '@/components/settings/SystemDataTab';
 import StoresTab from '@/components/settings/StoresTab';
+import PageHeader from '@/components/shared/PageHeader';
 
 export default function ConfiguracoesPage() {
   const { canRead } = usePermission();
@@ -24,10 +25,7 @@ export default function ConfiguracoesPage() {
 
   return (
     <PageTransition className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold">Configurações</h1>
-        <p className="text-muted-foreground text-sm">Centro administrativo do sistema</p>
-      </div>
+      <PageHeader title="Configurações" description="Centro administrativo do sistema" />
 
       <Tabs defaultValue="usuarios">
         <TabsList>

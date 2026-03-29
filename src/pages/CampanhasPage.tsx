@@ -23,6 +23,7 @@ import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import PageHeader from '@/components/shared/PageHeader';
 
 const podiumColors = [
   '',
@@ -223,45 +224,37 @@ export default function CampanhasPage() {
       <SmartInsights page="campanhas" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
       <AnimatedFilterContent filterKey={activeInsight}>
       {/* 1. Header + Filters */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">{selectedCampaign?.name || 'Campanhas'}</h1>
-          {selectedCampaign && (
-            <div className="flex items-center gap-2 mt-1">
-              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">{selectedCampaign.startDate} — {selectedCampaign.endDate}</p>
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <Select value={selectedCampaignId} onValueChange={setSelectedCampaignId}>
-            <SelectTrigger className="w-48 h-9">
-              <SelectValue placeholder="Selecionar campanha" />
+      <PageHeader
+        title={selectedCampaign?.name || 'Campanhas'}
+        description={selectedCampaign ? `${selectedCampaign.startDate} — ${selectedCampaign.endDate}` : undefined}
+      >
+        <Select value={selectedCampaignId} onValueChange={setSelectedCampaignId}>
+          <SelectTrigger className="w-48 h-9">
+            <SelectValue placeholder="Selecionar campanha" />
+          </SelectTrigger>
+          <SelectContent>
+            {selectableCampaigns.map(c => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name} {getCampaignStatus(c) === 'Ativa' && '●'}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {canFilterUsers && selectedCampaign && (
+          <Select value={filterUserId} onValueChange={setFilterUserId}>
+            <SelectTrigger className="w-44 h-9">
+              <SelectValue placeholder="Comercial" />
             </SelectTrigger>
             <SelectContent>
-              {selectableCampaigns.map(c => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.name} {getCampaignStatus(c) === 'Ativa' && '●'}
-                </SelectItem>
-              ))}
+              <SelectItem value="all">Todos</SelectItem>
+              {selectedCampaign.participants.map(p => {
+                const u = getUserById(p.userId);
+                return <SelectItem key={p.userId} value={p.userId}>{u?.name}</SelectItem>;
+              })}
             </SelectContent>
           </Select>
-          {canFilterUsers && selectedCampaign && (
-            <Select value={filterUserId} onValueChange={setFilterUserId}>
-              <SelectTrigger className="w-44 h-9">
-                <SelectValue placeholder="Comercial" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                {selectedCampaign.participants.map(p => {
-                  const u = getUserById(p.userId);
-                  return <SelectItem key={p.userId} value={p.userId}>{u?.name}</SelectItem>;
-                })}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-      </div>
+        )}
+      </PageHeader>
 
       {/* 3. Alert Cards */}
       {alertCards.length > 0 && (

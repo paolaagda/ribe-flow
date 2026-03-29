@@ -13,6 +13,24 @@ export default {
       },
     },
     extend: {
+      /* ── Design Tokens: Spacing ── */
+      spacing: {
+        "ds-xs": "8px",
+        "ds-sm": "16px",
+        "ds-md": "24px",
+        "ds-lg": "32px",
+        "ds-xl": "40px",
+      },
+      /* ── Design Tokens: Font Size ── */
+      fontSize: {
+        "ds-xs": ["0.6875rem", { lineHeight: "1rem" }],      // 11px
+        "ds-sm": ["0.8125rem", { lineHeight: "1.25rem" }],    // 13px
+        "ds-base": ["0.875rem", { lineHeight: "1.375rem" }],  // 14px
+        "ds-md": ["1rem", { lineHeight: "1.5rem" }],          // 16px
+        "ds-lg": ["1.25rem", { lineHeight: "1.75rem" }],      // 20px
+        "ds-xl": ["1.5rem", { lineHeight: "2rem" }],          // 24px
+        "ds-2xl": ["1.875rem", { lineHeight: "2.25rem" }],    // 30px
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -22,6 +40,8 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          light: "hsl(var(--primary-light))",
+          dark: "hsl(var(--primary-dark))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -75,20 +95,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
