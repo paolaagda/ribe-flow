@@ -237,8 +237,13 @@ export default function AnalisesPage() {
         </Card>
 
         {/* Status Distribution - Donut */}
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-ds-md">Distribuição por status</CardTitle></CardHeader>
+        <Card className="card-hover">
+          <CardHeader className="p-ds-sm pb-2">
+            <CardTitle className="card-section-title">
+              <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--chart-4) / 0.15) 0%, hsl(var(--chart-4) / 0.05) 100%)' }}><PieChartIcon className="h-4 w-4" style={{ color: 'hsl(var(--chart-4))' }} /></div>
+              Distribuição por status
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
               <ResponsiveContainer width="60%" height={280}>
