@@ -144,7 +144,7 @@ export default function ParceirosPage() {
                 onClick={() => canRead('partners.details') && setSelectedId(p.id)}
               >
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gradient-primary" />
-                <CardContent className="p-ds-sm space-y-3.5 relative min-w-0">
+                <CardContent className="p-ds-sm space-y-0 divide-y divide-border/40 relative min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="icon-container-sm icon-container-primary transition-transform duration-300 group-hover:scale-105 shrink-0">
