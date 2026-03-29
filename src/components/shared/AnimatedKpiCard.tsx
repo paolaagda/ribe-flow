@@ -51,33 +51,39 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
     >
       <Card
         className={cn(
-          'transition-all duration-300 h-full border-border/60',
-          onClick && 'cursor-pointer hover:-translate-y-0.5',
-          active && 'ring-2 ring-primary shadow-[var(--shadow-glow)]',
-          !active && 'hover:shadow-[var(--shadow-md)]'
+          'h-full border-border/50 overflow-hidden relative group',
+          onClick ? 'card-interactive cursor-pointer' : 'card-flat',
+          active && 'ring-2 ring-primary/30 border-primary/20 card-glow',
         )}
         onClick={onClick}
       >
-        <CardContent className="p-3.5 sm:p-4 flex items-center gap-3 h-full min-h-[76px]">
+        {/* Subtle gradient overlay on hover */}
+        <div className={cn(
+          'absolute inset-0 opacity-0 transition-opacity duration-300 pointer-events-none',
+          onClick && 'group-hover:opacity-100',
+        )} style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.03) 0%, transparent 60%)' }} />
+        
+        <CardContent className="p-4 flex items-center gap-3.5 h-full min-h-[80px] relative">
           <div className={cn(
-            'p-2.5 rounded-xl bg-gradient-to-br from-muted to-muted/60 shrink-0 relative transition-transform duration-300',
+            'icon-container-sm relative transition-transform duration-300',
             onClick && 'group-hover:scale-105',
+            active ? 'icon-container-primary' : '',
             color
           )}>
-            <Icon className="h-4.5 w-4.5" style={{ width: '18px', height: '18px' }} />
+            <Icon className="h-[18px] w-[18px]" />
             {pulse && (
               <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-destructive animate-pulse ring-2 ring-card" />
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xl sm:text-2xl font-bold tabular-nums leading-tight truncate tracking-tight">
+            <p className="text-2xl font-bold tabular-nums leading-tight truncate tracking-tight">
               {numericValue !== null ? displayValue : value}
               {secondaryValue !== undefined && (
-                <span className="text-xs sm:text-sm font-normal text-muted-foreground">/{secondaryValue}</span>
+                <span className="text-sm font-normal text-muted-foreground ml-0.5">/{secondaryValue}</span>
               )}
-              {suffix && !secondaryValue && <span className="text-xs sm:text-sm font-normal text-muted-foreground ml-0.5">{suffix}</span>}
+              {suffix && !secondaryValue && <span className="text-sm font-normal text-muted-foreground ml-0.5">{suffix}</span>}
             </p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground truncate mt-0.5">{label}</p>
+            <p className="text-xs text-muted-foreground truncate mt-0.5 font-medium">{label}</p>
           </div>
         </CardContent>
       </Card>

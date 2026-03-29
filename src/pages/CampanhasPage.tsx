@@ -267,7 +267,7 @@ export default function CampanhasPage() {
       {alertCards.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {alertCards.map((card, i) => (
-            <Card key={i} className={cn('border min-h-[56px] hover:shadow-md transition-shadow', card.color)}>
+            <Card key={i} className={cn('border min-h-[56px] transition-all duration-300 hover:shadow-[var(--shadow-sm)]', card.color)}>
               <CardContent className="p-3 flex items-center gap-3">
                 {card.icon}
                 <p className="text-xs font-medium">{card.text}</p>
@@ -280,7 +280,7 @@ export default function CampanhasPage() {
       {/* 4. KPI Cards */}
       {kpis && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <Card className="min-h-[120px] hover:shadow-md transition-shadow">
+           <Card className="min-h-[120px] card-flat group overflow-hidden relative">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Visitas</p>
               <div className="flex items-end gap-1">
@@ -290,7 +290,7 @@ export default function CampanhasPage() {
               <Progress value={kpis.totalVisitGoal > 0 ? Math.min(100, (kpis.totalVisits / kpis.totalVisitGoal) * 100) : 0} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
-          <Card className="min-h-[120px] hover:shadow-md transition-shadow">
+           <Card className="min-h-[120px] card-flat group overflow-hidden relative">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Prospecções</p>
               <div className="flex items-end gap-1">
@@ -300,21 +300,21 @@ export default function CampanhasPage() {
               <Progress value={kpis.totalProspGoal > 0 ? Math.min(100, (kpis.totalProsp / kpis.totalProspGoal) * 100) : 0} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
-          <Card className="min-h-[120px] hover:shadow-md transition-shadow">
+           <Card className="min-h-[120px] card-flat group overflow-hidden relative">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Pontuação</p>
               <span className="text-2xl font-bold text-primary">{kpis.totalScore}</span>
               <p className="text-[10px] text-muted-foreground mt-1">pts acumulados</p>
             </CardContent>
           </Card>
-          <Card className="min-h-[120px] hover:shadow-md transition-shadow">
+           <Card className="min-h-[120px] card-flat group overflow-hidden relative">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Taxa de conclusão</p>
               <span className="text-2xl font-bold">{kpis.rate}%</span>
               <Progress value={kpis.rate} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
-          <Card className="min-h-[120px] hover:shadow-md transition-shadow">
+          <Card className="min-h-[120px] card-flat group overflow-hidden relative">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Cancelamentos</p>
               <span className={cn("text-2xl font-bold", kpis.totalCancel > 0 && "text-destructive")}>{kpis.totalCancel}</span>
