@@ -107,14 +107,13 @@ export default function HeroSection() {
                   <Handshake className="h-3.5 w-3.5 text-info" />
                 </div>
                 <span className="font-bold tabular-nums">{stats.visitasConcluidas}</span>
-                <span className="text-muted-foreground text-xs">visitas</span>
-              </div>
+                <span className="text-muted-foreground text-ds-xs">visitas</span>
               <div className="stat-chip">
                 <div className="w-7 h-7 rounded-lg bg-warning/10 flex items-center justify-center">
                   <UserPlus className="h-3.5 w-3.5 text-warning" />
                 </div>
                 <span className="font-bold tabular-nums">{stats.prospecoesConcluidas}</span>
-                <span className="text-muted-foreground text-xs">prospecções</span>
+                <span className="text-muted-foreground text-ds-xs">prospecções</span>
               </div>
               {stats.campaignProgress > 0 && (
                 <div className="stat-chip min-w-[140px]">
@@ -122,7 +121,7 @@ export default function HeroSection() {
                     <TrendingUp className="h-3.5 w-3.5 text-success" />
                   </div>
                   <Progress value={stats.campaignProgress} className="h-2 flex-1" />
-                  <span className="font-bold tabular-nums text-xs">{stats.campaignProgress}%</span>
+                  <span className="font-bold tabular-nums text-ds-xs">{stats.campaignProgress}%</span>
                 </div>
               )}
             </div>
