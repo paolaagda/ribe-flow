@@ -38,6 +38,7 @@ export default function CampanhasPage() {
   const [campaigns] = useLocalStorage<Campaign[]>('ribercred_campaigns', initialCampaigns);
   const [unlockedBadges, setUnlockedBadges] = useLocalStorage<Record<string, string[]>>('ribercred_badges', {});
   const confettiFired = useRef(false);
+  const [activeInsight, setActiveInsight] = useState<string | null>(null);
 
   const selectableCampaigns = useMemo(() => campaigns.filter(c => getCampaignStatus(c) !== 'Futura'), [campaigns]);
   const activeCampaign = useMemo(() => campaigns.find(c => getCampaignStatus(c) === 'Ativa'), [campaigns]);
@@ -218,7 +219,7 @@ export default function CampanhasPage() {
 
   return (
     <div className="space-y-6">
-      <SmartInsights page="campanhas" />
+      <SmartInsights page="campanhas" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
       {/* 1. Header + Filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
