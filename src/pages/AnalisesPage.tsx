@@ -213,8 +213,13 @@ export default function AnalisesPage() {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm">
         {/* Monthly Trend */}
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-ds-md">Tendência mensal</CardTitle></CardHeader>
+        <Card className="card-hover">
+          <CardHeader className="p-ds-sm pb-2">
+            <CardTitle className="card-section-title">
+              <div className="icon-container-sm icon-container-primary"><TrendingUp className="h-4 w-4 text-primary" /></div>
+              Tendência mensal
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={monthlyTrend}>
