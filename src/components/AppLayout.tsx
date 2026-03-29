@@ -205,7 +205,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
           <ThemeToggleButton />
           <NotificationInbox />
         </header>
-        <main className="p-4 pb-20" {...pageSwipe}>{children}</main>
+        <main className="p-5 pb-24" {...pageSwipe}>{children}</main>
         <MobileNav />
         <MobileMenuDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
       </div>
@@ -224,7 +224,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
               <NotificationInbox />
             </div>
           </header>
-          <main className="flex-1 p-5 lg:p-6 overflow-auto scrollbar-thin">{children}</main>
+          <main className="flex-1 p-6 lg:p-8 overflow-auto scrollbar-thin">{children}</main>
         </div>
       </div>
     </SidebarProvider>
