@@ -23,6 +23,7 @@ import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import PageHeader from '@/components/shared/PageHeader';
 
 const podiumColors = [
   '',
