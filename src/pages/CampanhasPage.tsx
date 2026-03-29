@@ -380,19 +380,19 @@ export default function CampanhasPage() {
 
       {/* 6. You vs Average */}
       {myStats && ranking.length > 0 && (
-        <Card className="min-h-[100px] hover:shadow-md transition-shadow">
-          <CardContent className="p-5">
-            <p className="text-xs font-semibold mb-4">Você vs Média</p>
+        <Card className="min-h-[100px] card-hover">
+          <CardContent className="p-ds-md">
+            <p className="card-section-title mb-4">Você vs Média</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <div className="flex justify-between text-xs mb-1">
+                <div className="flex justify-between text-ds-xs mb-1">
                   <span>Você ({myPosition}º)</span>
                   <span className="font-semibold">{myStats.score} pts</span>
                 </div>
                 <Progress value={ranking[0]?.score > 0 ? (myStats.score / ranking[0].score) * 100 : 0} className="h-2" />
               </div>
               <div>
-                <div className="flex justify-between text-xs mb-1">
+                <div className="flex justify-between text-ds-xs mb-1">
                   <span>Média</span>
                   <span>{Math.round(ranking.reduce((s, r) => s + r.score, 0) / ranking.length)} pts</span>
                 </div>
