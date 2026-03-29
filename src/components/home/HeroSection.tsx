@@ -38,8 +38,6 @@ export default function HeroSection() {
     return () => clearInterval(interval);
   }, []);
 
-  
-
   const stats = useMemo(() => {
     const isCommercial = user?.profile === 'nao_gestor';
     const userVisits = isCommercial && user
@@ -72,21 +70,23 @@ export default function HeroSection() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
     >
-      <Card className="border-none bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
-        <CardContent className="p-6">
+      <Card className="border-none bg-gradient-to-br from-primary/10 via-primary/5 to-transparent overflow-hidden relative">
+        {/* Decorative accent */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-primary/5 pointer-events-none" />
+        <CardContent className="p-6 relative">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <motion.div whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 300 }}>
-              <Avatar className="h-16 w-16 border-2 border-primary/20">
+            <motion.div whileHover={{ scale: 1.08 }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+              <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-[var(--shadow-md)]">
                 <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
             </motion.div>
 
-            <div className="flex-1 min-w-0 space-y-1">
-              <h1 className="text-2xl font-bold text-foreground">
+            <div className="flex-1 min-w-0 space-y-1.5">
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">
                 {getGreeting()}, {user?.name?.split(' ')[0]}! 👋
               </h1>
               <AnimatePresence mode="wait">
@@ -104,18 +104,18 @@ export default function HeroSection() {
             </div>
 
             <div className="flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-card/60 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-border/30">
                 <Handshake className="h-4 w-4 text-info" />
                 <span className="font-semibold tabular-nums">{stats.visitasConcluidas}</span>
-                <span className="text-muted-foreground">visitas</span>
+                <span className="text-muted-foreground text-xs">visitas</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-card/60 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-border/30">
                 <UserPlus className="h-4 w-4 text-warning" />
                 <span className="font-semibold tabular-nums">{stats.prospecoesConcluidas}</span>
-                <span className="text-muted-foreground">prospecções</span>
+                <span className="text-muted-foreground text-xs">prospecções</span>
               </div>
               {stats.campaignProgress > 0 && (
-                <div className="flex items-center gap-2 min-w-[120px]">
+                <div className="flex items-center gap-2 bg-card/60 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-border/30 min-w-[130px]">
                   <TrendingUp className="h-4 w-4 text-success" />
                   <Progress value={stats.campaignProgress} className="h-2 flex-1" />
                   <span className="font-semibold tabular-nums text-xs">{stats.campaignProgress}%</span>
