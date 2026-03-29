@@ -29,6 +29,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={isAuthenticated ? <Navigate to="/agenda" replace /> : <LoginPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/" element={<Navigate to="/agenda" replace />} />
       <Route path="/dashboard" element={<Navigate to="/agenda" replace />} />
       <Route path="/campanhas" element={<ProtectedRoute><CampanhasPage /></ProtectedRoute>} />
