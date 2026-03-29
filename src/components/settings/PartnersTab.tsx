@@ -449,86 +449,106 @@ export default function PartnersTab() {
           <DialogHeader>
             <DialogTitle>{editingPartner ? 'Editar Parceiro' : 'Novo Parceiro'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Nome da loja</Label>
-              <Input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Ex: Loja Crédito Fácil" />
-            </div>
-            <div className="space-y-2">
-              <Label>Razão social</Label>
-              <Input value={formData.razaoSocial} onChange={e => setFormData({ ...formData, razaoSocial: e.target.value })} placeholder="Ex: Crédito Fácil Ltda" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-5">
+            {/* ── Identificação ── */}
+            <fieldset className="space-y-3 border border-border/50 rounded-lg p-4">
+              <legend className="text-xs font-semibold text-muted-foreground px-2">Identificação</legend>
               <div className="space-y-2">
-                <Label>CNPJ</Label>
-                <Input value={formData.cnpj} onChange={e => setFormData({ ...formData, cnpj: e.target.value })} placeholder="00.000.000/0001-00" />
+                <Label>Nome do parceiro <span className="text-destructive">*</span></Label>
+                <Input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Ex: Crédito Fácil" />
+                {!formData.name && formData.razaoSocial && <p className="text-[10px] text-destructive">Nome é obrigatório</p>}
               </div>
               <div className="space-y-2">
-                <Label>Telefone</Label>
-                <Input value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="(00) 0000-0000" />
+                <Label>Razão social <span className="text-destructive">*</span></Label>
+                <Input value={formData.razaoSocial} onChange={e => setFormData({ ...formData, razaoSocial: e.target.value })} placeholder="Ex: Crédito Fácil Ltda" />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Endereço</Label>
-              <Input value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} placeholder="Rua, número — Cidade, UF" />
-            </div>
-            <div className="space-y-2">
-              <Label>Contato</Label>
-              <Input value={formData.contact} onChange={e => setFormData({ ...formData, contact: e.target.value })} placeholder="Nome do contato principal" />
-            </div>
-            <div className="space-y-2">
-              <Label>Estrutura da loja</Label>
-              <div className="flex flex-wrap gap-3">
-                {STORE_STRUCTURES.map(s => (
-                  <label key={s} className="flex items-center gap-2 text-sm cursor-pointer">
-                    <Checkbox checked={formData.structures.includes(s)} onCheckedChange={() => toggleStructure(s)} />
-                    {s}
-                  </label>
-                ))}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>CNPJ <span className="text-destructive">*</span></Label>
+                  <Input value={formData.cnpj} onChange={e => setFormData({ ...formData, cnpj: e.target.value })} placeholder="00.000.000/0001-00" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Telefone</Label>
+                  <Input value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="(00) 0000-0000" />
+                </div>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+            </fieldset>
+
+            {/* ── Localização e Contato ── */}
+            <fieldset className="space-y-3 border border-border/50 rounded-lg p-4">
+              <legend className="text-xs font-semibold text-muted-foreground px-2">Localização e Contato</legend>
               <div className="space-y-2">
-                <Label>Comercial responsável</Label>
-                <Select value={formData.responsibleUserId} onValueChange={v => setFormData({ ...formData, responsibleUserId: v })}>
+                <Label>Endereço <span className="text-destructive">*</span></Label>
+                <Input value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} placeholder="Rua, número — Cidade, UF" />
+              </div>
+              <div className="space-y-2">
+                <Label>Contato</Label>
+                <Input value={formData.contact} onChange={e => setFormData({ ...formData, contact: e.target.value })} placeholder="Nome do contato principal" />
+              </div>
+            </fieldset>
+
+            {/* ── Estrutura e Classificação ── */}
+            <fieldset className="space-y-3 border border-border/50 rounded-lg p-4">
+              <legend className="text-xs font-semibold text-muted-foreground px-2">Estrutura e Classificação</legend>
+              <div className="space-y-2">
+                <Label>Estrutura da loja</Label>
+                <div className="flex flex-wrap gap-3">
+                  {STORE_STRUCTURES.map(s => (
+                    <label key={s} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <Checkbox checked={formData.structures.includes(s)} onCheckedChange={() => toggleStructure(s)} />
+                      {s}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Comercial responsável <span className="text-destructive">*</span></Label>
+                  <Select value={formData.responsibleUserId} onValueChange={v => setFormData({ ...formData, responsibleUserId: v })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {commercials.map(u => (
+                        <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Score de potencial <span className="text-destructive">*</span></Label>
+                  <Select value={formData.potential} onValueChange={v => setFormData({ ...formData, potential: v as 'alto' | 'médio' | 'baixo' })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="alto">Alto</SelectItem>
+                      <SelectItem value="médio">Médio</SelectItem>
+                      <SelectItem value="baixo">Baixo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </fieldset>
+
+            {/* ── Vínculo com Loja ── */}
+            <fieldset className="space-y-3 border border-border/50 rounded-lg p-4">
+              <legend className="text-xs font-semibold text-muted-foreground px-2">Centro de Custo (Loja)</legend>
+              <div className="space-y-2">
+                <Label>Loja vinculada</Label>
+                <Select value={formData.storeId} onValueChange={v => setFormData({ ...formData, storeId: v })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
+                    <SelectValue placeholder="Selecione a loja" />
                   </SelectTrigger>
                   <SelectContent>
-                    {commercials.map(u => (
-                      <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                    {availableStores.map(s => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-[10px] text-muted-foreground">Relação 1:1 — cada loja pertence a um único parceiro.</p>
               </div>
-              <div className="space-y-2">
-                <Label>Score de potencial</Label>
-                <Select value={formData.potential} onValueChange={v => setFormData({ ...formData, potential: v as 'alto' | 'médio' | 'baixo' })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="alto">Alto</SelectItem>
-                    <SelectItem value="médio">Médio</SelectItem>
-                    <SelectItem value="baixo">Baixo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Loja vinculada (centro de custo)</Label>
-              <Select value={formData.storeId} onValueChange={v => setFormData({ ...formData, storeId: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a loja (opcional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableStores.map(s => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-[10px] text-muted-foreground">Relação 1:1 — cada loja pertence a um único parceiro.</p>
-            </div>
+            </fieldset>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
