@@ -361,6 +361,7 @@ export default function AnalisesPage() {
           </Card>
         )}
       </div>
+      </AnimatedFilterContent>
     </PageTransition>
   );
 }
