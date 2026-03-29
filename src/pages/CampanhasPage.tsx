@@ -17,7 +17,7 @@ import {
   getCancelledVisitsForUser, calculateUserScore, getGamificationConfig,
   getUserScoreBreakdown,
 } from '@/data/campaigns';
-import { Trophy, Flame, Medal, Star, TrendingUp, ShieldOff, Award, Ban, CheckCircle2, Target, Calendar, XCircle } from 'lucide-react';
+import { Trophy, Flame, Medal, Star, TrendingUp, ShieldOff, Award, Ban, CheckCircle2, Target, Calendar, XCircle, Eye } from 'lucide-react';
 import SmartInsights from '@/components/shared/SmartInsights';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import { cn } from '@/lib/utils';
