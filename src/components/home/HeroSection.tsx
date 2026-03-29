@@ -57,11 +57,7 @@ export default function HeroSection() {
       }
     }
 
-    return {
-      visitasConcluidas,
-      prospecoesConcluidas,
-      campaignProgress,
-    };
+    return { visitasConcluidas, prospecoesConcluidas, campaignProgress };
   }, [user, campaigns]);
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?';
@@ -72,13 +68,15 @@ export default function HeroSection() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
     >
-      <Card className="border-none bg-gradient-to-br from-primary/10 via-primary/5 to-transparent overflow-hidden relative">
-        {/* Decorative accent */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-primary/5 pointer-events-none" />
+      <Card className="border-border/40 overflow-hidden relative gradient-primary">
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-primary/5 -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-24 h-24 rounded-full bg-primary/3 translate-y-1/2 blur-xl pointer-events-none" />
+        
         <CardContent className="p-6 relative">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <motion.div whileHover={{ scale: 1.08 }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
-              <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-[var(--shadow-md)]">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            <motion.div whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+              <Avatar className="h-16 w-16 border-2 border-primary/15 shadow-[var(--shadow-lg)] ring-4 ring-primary/5">
                 <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
                   {initials}
                 </AvatarFallback>
@@ -103,22 +101,28 @@ export default function HeroSection() {
               </AnimatePresence>
             </div>
 
-            <div className="flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center gap-2 bg-card/60 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-border/30">
-                <Handshake className="h-4 w-4 text-info" />
-                <span className="font-semibold tabular-nums">{stats.visitasConcluidas}</span>
+            <div className="flex flex-wrap gap-3 text-sm">
+              <div className="stat-chip">
+                <div className="w-7 h-7 rounded-lg bg-info/10 flex items-center justify-center">
+                  <Handshake className="h-3.5 w-3.5 text-info" />
+                </div>
+                <span className="font-bold tabular-nums">{stats.visitasConcluidas}</span>
                 <span className="text-muted-foreground text-xs">visitas</span>
               </div>
-              <div className="flex items-center gap-2 bg-card/60 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-border/30">
-                <UserPlus className="h-4 w-4 text-warning" />
-                <span className="font-semibold tabular-nums">{stats.prospecoesConcluidas}</span>
+              <div className="stat-chip">
+                <div className="w-7 h-7 rounded-lg bg-warning/10 flex items-center justify-center">
+                  <UserPlus className="h-3.5 w-3.5 text-warning" />
+                </div>
+                <span className="font-bold tabular-nums">{stats.prospecoesConcluidas}</span>
                 <span className="text-muted-foreground text-xs">prospecções</span>
               </div>
               {stats.campaignProgress > 0 && (
-                <div className="flex items-center gap-2 bg-card/60 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-border/30 min-w-[130px]">
-                  <TrendingUp className="h-4 w-4 text-success" />
+                <div className="stat-chip min-w-[140px]">
+                  <div className="w-7 h-7 rounded-lg bg-success/10 flex items-center justify-center">
+                    <TrendingUp className="h-3.5 w-3.5 text-success" />
+                  </div>
                   <Progress value={stats.campaignProgress} className="h-2 flex-1" />
-                  <span className="font-semibold tabular-nums text-xs">{stats.campaignProgress}%</span>
+                  <span className="font-bold tabular-nums text-xs">{stats.campaignProgress}%</span>
                 </div>
               )}
             </div>
