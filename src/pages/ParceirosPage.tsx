@@ -79,7 +79,7 @@ export default function ParceirosPage() {
     );
   }, [search, visibleStores, partners, activeInsight, filtered]);
 
-  const potentialColors = { alto: 'text-success', médio: 'text-warning', baixo: 'text-muted-foreground' };
+  const potentialBadgeClass: Record<string, string> = { alto: 'badge-potential-alto', médio: 'badge-potential-medio', baixo: 'badge-potential-baixo' };
 
   if (!canRead('partners.list')) {
     return (
