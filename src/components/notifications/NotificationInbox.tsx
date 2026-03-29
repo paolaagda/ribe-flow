@@ -141,8 +141,8 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="history" className="mt-0">
-            <ScrollArea className="max-h-[400px] scrollbar-thin">
+          <TabsContent value="history" className="mt-0 flex-1 overflow-hidden">
+            <ScrollArea className="h-full" style={{ maxHeight: 'calc(min(70vh, 520px) - 100px)' }}>
               {history.length === 0 ? (
                 <div className="py-8 text-center">
                   <p className="text-sm text-muted-foreground">Histórico limpo</p>
