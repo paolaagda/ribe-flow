@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
-import { ShieldOff, CalendarIcon, TrendingUp, CheckCircle, Eye, Search, MapPin, BarChart3 } from 'lucide-react';
+import { ShieldOff, CalendarIcon, TrendingUp, CheckCircle, Eye, Search, MapPin, BarChart3, PieChart as PieChartIcon, Users, Handshake } from 'lucide-react';
 import { usePermission } from '@/hooks/usePermission';
 import { useVisits } from '@/hooks/useVisits';
 import { mockUsers, getPartnerById, statusColors, VisitStatus } from '@/data/mock-data';
