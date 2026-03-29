@@ -138,13 +138,17 @@ export default function ParceirosPage() {
             return (
               <Card
                 key={p.id}
-                className={cn('card-hover', canRead('partners.details') && 'cursor-pointer')}
+                className={cn(
+                  canRead('partners.details') ? 'card-interactive cursor-pointer' : 'card-flat',
+                  'group overflow-hidden relative'
+                )}
                 onClick={() => canRead('partners.details') && setSelectedId(p.id)}
               >
-                <CardContent className="p-4 space-y-3">
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gradient-primary" />
+                <CardContent className="p-4 space-y-3 relative">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <div className="icon-container-sm icon-container-primary transition-transform duration-300 group-hover:scale-105">
                         <Building2 className="h-4 w-4 text-primary" />
                       </div>
                       <div>
@@ -181,12 +185,12 @@ export default function ParceirosPage() {
           {filteredStores.map(store => {
             const partner = partners.find(p => p.id === store.partnerId);
             return (
-              <Card key={store.id} className="card-hover">
+              <Card key={store.id} className="card-flat group overflow-hidden relative hover:shadow-[var(--shadow-md)] transition-all duration-300 hover:-translate-y-0.5">
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-accent/50 flex items-center justify-center shrink-0">
-                      <StoreIcon className="h-4 w-4 text-muted-foreground" />
-                    </div>
+                     <div className="icon-container-sm">
+                       <StoreIcon className="h-4 w-4 text-muted-foreground" />
+                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold truncate">{store.name}</p>
                       <p className="text-[10px] text-muted-foreground">Centro de custo</p>
