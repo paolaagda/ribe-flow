@@ -75,7 +75,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[380px] p-0 max-h-[70vh] overflow-hidden flex flex-col" align="end" sideOffset={8}>
+      <PopoverContent className="w-[380px] p-0 overflow-hidden flex flex-col" align="end" sideOffset={8} style={{ maxHeight: 'min(70vh, 520px)' }}>
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <h3 className="text-sm font-semibold">Notificações</h3>
           {unreadCount > 0 && (
@@ -86,7 +86,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
           )}
         </div>
 
-        <Tabs defaultValue="invites" className="w-full">
+        <Tabs defaultValue="invites" className="w-full flex-1 flex flex-col overflow-hidden">
           <TabsList className="w-full rounded-none border-b bg-transparent h-9">
             <TabsTrigger value="invites" className="flex-1 text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
               Convites {pendingInvites.length > 0 && `(${pendingInvites.length})`}
@@ -99,8 +99,8 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="invites" className="mt-0">
-            <ScrollArea className="max-h-[400px] scrollbar-thin">
+          <TabsContent value="invites" className="mt-0 flex-1 overflow-hidden">
+            <ScrollArea className="h-full" style={{ maxHeight: 'calc(min(70vh, 520px) - 100px)' }}>
               {pendingInvites.length === 0 ? (
                 <div className="py-8 text-center">
                   <p className="text-sm text-muted-foreground">{getEmptyStateMessage()}</p>
@@ -120,8 +120,8 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="recent" className="mt-0">
-            <ScrollArea className="max-h-[400px] scrollbar-thin">
+          <TabsContent value="recent" className="mt-0 flex-1 overflow-hidden">
+            <ScrollArea className="h-full" style={{ maxHeight: 'calc(min(70vh, 520px) - 100px)' }}>
               {recentNotifications.length === 0 ? (
                 <div className="py-8 text-center">
                   <p className="text-sm text-muted-foreground">Nenhuma notificação recente</p>
@@ -141,8 +141,8 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="history" className="mt-0">
-            <ScrollArea className="max-h-[400px] scrollbar-thin">
+          <TabsContent value="history" className="mt-0 flex-1 overflow-hidden">
+            <ScrollArea className="h-full" style={{ maxHeight: 'calc(min(70vh, 520px) - 100px)' }}>
               {history.length === 0 ? (
                 <div className="py-8 text-center">
                   <p className="text-sm text-muted-foreground">Histórico limpo</p>
