@@ -200,8 +200,6 @@ export default function CampanhasPage() {
 
   return (
     <div className="space-y-ds-lg">
-      <SmartInsights page="campanhas" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
-      <AnimatedFilterContent filterKey={activeInsight}>
       {/* 1. Header + Filters */}
       <PageHeader
         title={selectedCampaign?.name || 'Campanhas'}
@@ -235,19 +233,10 @@ export default function CampanhasPage() {
         )}
       </PageHeader>
 
-      {/* 3. Alert Cards */}
-      {alertCards.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-ds-sm">
-          {alertCards.map((card, i) => (
-            <Card key={i} className={cn('border min-h-[56px] transition-all duration-300 hover:shadow-[var(--shadow-sm)]', card.color)}>
-              <CardContent className="p-ds-sm flex items-center gap-3">
-                {card.icon}
-                <p className="text-ds-xs font-medium">{card.text}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      {/* 2. Smart Insights */}
+      <SmartInsights page="campanhas" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
+
+      <AnimatedFilterContent filterKey={activeInsight}>
 
       {/* 4. KPI Cards */}
       {kpis && (
