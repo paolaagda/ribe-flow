@@ -1182,6 +1182,8 @@ export default function AgendaPage() {
         </DialogContent>
       </Dialog>
 
+      </AnimatedFilterContent>
+
       {/* Detail Modal */}
       <AgendaDetailModal
         visit={selectedVisit}
