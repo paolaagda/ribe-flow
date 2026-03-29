@@ -160,8 +160,6 @@ export default function CampanhasPage() {
     }, 800);
   }, [ranking]);
 
-  const podium = ranking.slice(0, 3);
-
   // Score history
   const scoreHistory = useMemo(() => {
     if (!selectedCampaign) return [];
