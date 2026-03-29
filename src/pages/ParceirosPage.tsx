@@ -155,7 +155,7 @@ export default function ParceirosPage() {
                         <p className="text-ds-xs text-muted-foreground truncate">{p.cnpj}</p>
                       </div>
                     </div>
-                    <Badge variant="outline" className={cn('text-ds-xs capitalize shrink-0', potentialColors[p.potential])}>
+                    <Badge variant="outline" className={cn('text-ds-xs capitalize shrink-0', potentialBadgeClass[p.potential])}>
                       {p.potential}
                     </Badge>
                   </div>
