@@ -33,9 +33,10 @@ const iconByVariant = {
 
 interface SmartInsightsProps {
   page: InsightPage;
+  onInsightClick?: (text: string, variant: string) => void;
 }
 
-export default function SmartInsights({ page }: SmartInsightsProps) {
+export default function SmartInsights({ page, onInsightClick }: SmartInsightsProps) {
   const { visits } = useVisits();
   const { partners } = usePartners();
   const { pendingTasks, completedTasks } = useTasks();
@@ -163,7 +164,9 @@ export default function SmartInsights({ page }: SmartInsightsProps) {
               className={cn(
                 'flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-medium',
                 variantStyles[insight.variant],
+                onInsightClick && 'cursor-pointer hover:opacity-80 transition-opacity',
               )}
+              onClick={() => onInsightClick?.(insight.text, insight.variant)}
             >
               {insight.icon}
               <span className="leading-snug">{insight.text}</span>
