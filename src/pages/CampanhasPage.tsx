@@ -243,7 +243,12 @@ export default function CampanhasPage() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-ds-sm">
            <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
-              <p className="text-ds-xs text-muted-foreground mb-1.5">Visitas</p>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--info) / 0.15) 0%, hsl(var(--info) / 0.05) 100%)' }}>
+                  <Eye className="h-4 w-4 text-info" />
+                </div>
+                <p className="text-ds-xs text-muted-foreground">Visitas</p>
+              </div>
               <div className="flex items-baseline gap-1 flex-wrap">
                 <span className="text-ds-xl font-bold">{kpis.totalVisits}</span>
                 <span className="text-ds-sm text-muted-foreground">/ {kpis.totalVisitGoal}</span>
@@ -253,7 +258,12 @@ export default function CampanhasPage() {
           </Card>
            <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
-              <p className="text-ds-xs text-muted-foreground mb-1.5">Prospecções</p>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--warning) / 0.15) 0%, hsl(var(--warning) / 0.05) 100%)' }}>
+                  <Target className="h-4 w-4 text-warning" />
+                </div>
+                <p className="text-ds-xs text-muted-foreground">Prospecções</p>
+              </div>
               <div className="flex items-baseline gap-1 flex-wrap">
                 <span className="text-ds-xl font-bold">{kpis.totalProsp}</span>
                 <span className="text-ds-sm text-muted-foreground">/ {kpis.totalProspGoal}</span>
@@ -263,21 +273,36 @@ export default function CampanhasPage() {
           </Card>
            <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
-              <p className="text-ds-xs text-muted-foreground mb-1.5">Pontuação</p>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="icon-container-sm icon-container-primary">
+                  <Star className="h-4 w-4 text-primary" />
+                </div>
+                <p className="text-ds-xs text-muted-foreground">Pontuação</p>
+              </div>
               <span className="text-ds-xl font-bold text-primary">{kpis.totalScore}</span>
               <p className="text-ds-xs text-muted-foreground mt-1">pts acumulados</p>
             </CardContent>
           </Card>
            <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
-              <p className="text-ds-xs text-muted-foreground mb-1.5">Taxa de conclusão</p>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--success) / 0.15) 0%, hsl(var(--success) / 0.05) 100%)' }}>
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                </div>
+                <p className="text-ds-xs text-muted-foreground">Taxa de conclusão</p>
+              </div>
               <span className="text-ds-xl font-bold">{kpis.rate}%</span>
               <Progress value={kpis.rate} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
           <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
-              <p className="text-ds-xs text-muted-foreground mb-1.5">Cancelamentos</p>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--destructive) / 0.15) 0%, hsl(var(--destructive) / 0.05) 100%)' }}>
+                  <Ban className="h-4 w-4 text-destructive" />
+                </div>
+                <p className="text-ds-xs text-muted-foreground">Cancelamentos</p>
+              </div>
               <span className={cn("text-ds-xl font-bold", kpis.totalCancel > 0 && "text-destructive")}>{kpis.totalCancel}</span>
               {kpis.totalCancel > 0 && config && (
                 <p className="text-ds-xs text-destructive mt-1">{Math.abs(kpis.totalCancel * config.pointsPerCancellation)} pts perdidos</p>
