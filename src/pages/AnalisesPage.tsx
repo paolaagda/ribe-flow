@@ -294,8 +294,13 @@ export default function AnalisesPage() {
         </Card>
 
         {/* Top Partners */}
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-ds-md">Top parceiros visitados</CardTitle></CardHeader>
+        <Card className="card-hover">
+          <CardHeader className="p-ds-sm pb-2">
+            <CardTitle className="card-section-title">
+              <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--chart-3) / 0.15) 0%, hsl(var(--chart-3) / 0.05) 100%)' }}><Handshake className="h-4 w-4" style={{ color: 'hsl(var(--chart-3))' }} /></div>
+              Top parceiros visitados
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             {topPartners.length === 0 ? (
               <div className="h-[280px] flex items-center justify-center text-muted-foreground text-ds-sm">Nenhum dado no período</div>
