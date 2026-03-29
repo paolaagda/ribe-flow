@@ -3,28 +3,29 @@ import PageTransition from '@/components/PageTransition';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { getUserById } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useStores } from '@/hooks/useStores';
-import { Search, Building2, MapPin, ShieldOff, User, Store as StoreIcon, Phone, ToggleLeft, ToggleRight } from 'lucide-react';
+import { useVisits } from '@/hooks/useVisits';
+import { Search, Building2, MapPin, ShieldOff, User, Store as StoreIcon, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
 import PartnerDetailView from '@/components/partners/PartnerDetailView';
 import SmartInsights from '@/components/shared/SmartInsights';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { differenceInDays, parseISO } from 'date-fns';
 
 export default function ParceirosPage() {
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [insightModal, setInsightModal] = useState<{ text: string; variant: string } | null>(null);
+  const [activeInsight, setActiveInsight] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'parceiros' | 'lojas'>('parceiros');
   const { canRead } = usePermission();
   const { user, profile } = useAuth();
   const { partners } = usePartners();
   const { stores } = useStores();
+  const { visits } = useVisits();
 
   // Filter partners by role: comercial only sees their own partners
   const visiblePartners = useMemo(() => {
