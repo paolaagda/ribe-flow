@@ -102,19 +102,23 @@ export default function HeroSection() {
             </div>
 
             <div className="flex flex-wrap gap-3 text-ds-sm">
-              <div className="stat-chip">
-                <div className="w-7 h-7 rounded-lg bg-info/10 flex items-center justify-center">
-                  <Handshake className="h-3.5 w-3.5 text-info" />
+              <div className="stat-chip gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-info/12 flex items-center justify-center">
+                  <Handshake className="h-4 w-4 text-info" />
                 </div>
-                <span className="font-bold tabular-nums">{stats.visitasConcluidas}</span>
-                <span className="text-muted-foreground text-ds-xs">visitas</span>
+                <div className="flex flex-col">
+                  <span className="font-bold tabular-nums text-ds-sm leading-tight">{stats.visitasConcluidas}</span>
+                  <span className="text-muted-foreground text-ds-xs">visitas</span>
+                </div>
               </div>
-              <div className="stat-chip">
-                <div className="w-7 h-7 rounded-lg bg-warning/10 flex items-center justify-center">
-                  <UserPlus className="h-3.5 w-3.5 text-warning" />
+              <div className="stat-chip gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-warning/12 flex items-center justify-center">
+                  <UserPlus className="h-4 w-4 text-warning" />
                 </div>
-                <span className="font-bold tabular-nums">{stats.prospecoesConcluidas}</span>
-                <span className="text-muted-foreground text-ds-xs">prospecções</span>
+                <div className="flex flex-col">
+                  <span className="font-bold tabular-nums text-ds-sm leading-tight">{stats.prospecoesConcluidas}</span>
+                  <span className="text-muted-foreground text-ds-xs">prospecções</span>
+                </div>
               </div>
               {stats.campaignProgress > 0 && (
                 <div className="stat-chip min-w-[140px]">
