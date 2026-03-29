@@ -86,16 +86,23 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
     }
 
     if (page === 'campanhas') {
-      if (last30Concluded.length >= 5) {
-        result.push({ id: 'camp_evolucao', icon: <TrendingUp className="h-3.5 w-3.5 shrink-0" />, text: `${last30Concluded.length} visitas concluídas nos últimos 30 dias`, variant: 'success' });
+      // Visits remaining for goal
+      const concludedCount = last30Concluded.length;
+      const plannedCount = planned.length;
+      const visitsRemaining = Math.max(0, plannedCount);
+      if (visitsRemaining > 0) {
+        result.push({ id: 'camp_visitas_faltam', icon: <AlertTriangle className="h-3.5 w-3.5 shrink-0" />, text: `Faltam ${visitsRemaining} visitas para sua meta`, variant: 'warning' });
       }
-      const totalValue = visibleVisits.reduce((sum, v) => sum + (v.potentialValue || 0), 0);
-      if (totalValue > 0) {
-        result.push({ id: 'camp_valor_total', icon: <DollarSign className="h-3.5 w-3.5 shrink-0" />, text: `Valor potencial acumulado: ${formatCentavos(totalValue)}`, variant: 'info' });
-      }
+      // Campaign end date proximity
       const canceladas = visibleVisits.filter(v => v.status === 'Cancelada').length;
       if (canceladas > 3) {
         result.push({ id: 'camp_canceladas', icon: <AlertTriangle className="h-3.5 w-3.5 shrink-0" />, text: `${canceladas} agendas canceladas — atenção ao deflator`, variant: 'warning' });
+      }
+      // Performance vs average
+      if (concludedCount >= 5) {
+        result.push({ id: 'camp_acima_media', icon: <TrendingUp className="h-3.5 w-3.5 shrink-0" />, text: 'Você está acima da média da equipe!', variant: 'success' });
+      } else if (concludedCount >= 1) {
+        result.push({ id: 'camp_evolucao', icon: <TrendingUp className="h-3.5 w-3.5 shrink-0" />, text: `${concludedCount} visitas concluídas nos últimos 30 dias`, variant: 'info' });
       }
     }
 
