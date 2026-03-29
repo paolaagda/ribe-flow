@@ -205,7 +205,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
           <ThemeToggleButton />
           <NotificationInbox />
         </header>
-        <main className="p-4 pb-20" {...pageSwipe}>{children}</main>
+        <main className="p-5 pb-24" {...pageSwipe}>{children}</main>
         <MobileNav />
         <MobileMenuDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
       </div>
