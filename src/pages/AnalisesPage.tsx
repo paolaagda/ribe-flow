@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
-import { ShieldOff, CalendarIcon, TrendingUp, CheckCircle, Eye, Search, MapPin, BarChart3 } from 'lucide-react';
+import { ShieldOff, CalendarIcon, TrendingUp, CheckCircle, Eye, Search, MapPin, BarChart3, PieChart as PieChartIcon, Users, Handshake } from 'lucide-react';
 import { usePermission } from '@/hooks/usePermission';
 import { useVisits } from '@/hooks/useVisits';
 import { mockUsers, getPartnerById, statusColors, VisitStatus } from '@/data/mock-data';
@@ -213,8 +213,13 @@ export default function AnalisesPage() {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm">
         {/* Monthly Trend */}
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-ds-md">Tendência mensal</CardTitle></CardHeader>
+        <Card className="card-hover">
+          <CardHeader className="p-ds-sm pb-2">
+            <CardTitle className="card-section-title">
+              <div className="icon-container-sm icon-container-primary"><TrendingUp className="h-4 w-4 text-primary" /></div>
+              Tendência mensal
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={monthlyTrend}>
@@ -232,8 +237,13 @@ export default function AnalisesPage() {
         </Card>
 
         {/* Status Distribution - Donut */}
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-ds-md">Distribuição por status</CardTitle></CardHeader>
+        <Card className="card-hover">
+          <CardHeader className="p-ds-sm pb-2">
+            <CardTitle className="card-section-title">
+              <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--chart-4) / 0.15) 0%, hsl(var(--chart-4) / 0.05) 100%)' }}><PieChartIcon className="h-4 w-4" style={{ color: 'hsl(var(--chart-4))' }} /></div>
+              Distribuição por status
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
               <ResponsiveContainer width="60%" height={280}>
@@ -261,8 +271,13 @@ export default function AnalisesPage() {
         </Card>
 
         {/* Created vs Completed */}
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-ds-md">Criadas vs Concluídas</CardTitle></CardHeader>
+        <Card className="card-hover">
+          <CardHeader className="p-ds-sm pb-2">
+            <CardTitle className="card-section-title">
+              <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--chart-2) / 0.15) 0%, hsl(var(--chart-2) / 0.05) 100%)' }}><CheckCircle className="h-4 w-4" style={{ color: 'hsl(var(--chart-2))' }} /></div>
+              Criadas vs Concluídas
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={createdVsCompleted}>
@@ -279,8 +294,13 @@ export default function AnalisesPage() {
         </Card>
 
         {/* Top Partners */}
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-ds-md">Top parceiros visitados</CardTitle></CardHeader>
+        <Card className="card-hover">
+          <CardHeader className="p-ds-sm pb-2">
+            <CardTitle className="card-section-title">
+              <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--chart-3) / 0.15) 0%, hsl(var(--chart-3) / 0.05) 100%)' }}><Handshake className="h-4 w-4" style={{ color: 'hsl(var(--chart-3))' }} /></div>
+              Top parceiros visitados
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             {topPartners.length === 0 ? (
               <div className="h-[280px] flex items-center justify-center text-muted-foreground text-ds-sm">Nenhum dado no período</div>
@@ -300,8 +320,13 @@ export default function AnalisesPage() {
 
         {/* Individual Performance */}
         {canRead('analysis.ranking') && (
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-ds-md">Performance individual</CardTitle></CardHeader>
+          <Card className="card-hover">
+            <CardHeader className="p-ds-sm pb-2">
+              <CardTitle className="card-section-title">
+                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--chart-5) / 0.15) 0%, hsl(var(--chart-5) / 0.05) 100%)' }}><Users className="h-4 w-4" style={{ color: 'hsl(var(--chart-5))' }} /></div>
+                Performance individual
+              </CardTitle>
+            </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={userPerformance}>
@@ -326,8 +351,8 @@ export default function AnalisesPage() {
 
         {/* Visit Map */}
         {canRead('analysis.partnerMap') && (
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-ds-md flex items-center gap-2"><MapPin className="h-4 w-4" /> Mapa de visitas</CardTitle></CardHeader>
+          <Card className="card-hover">
+            <CardHeader className="p-ds-sm pb-2"><CardTitle className="card-section-title"><div className="icon-container-sm icon-container-primary"><MapPin className="h-4 w-4 text-primary" /></div> Mapa de visitas</CardTitle></CardHeader>
             <CardContent>
               <div className="relative bg-muted rounded-lg h-[280px] overflow-hidden">
                 <div className="absolute inset-0 opacity-20" style={{

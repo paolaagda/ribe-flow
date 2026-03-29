@@ -17,7 +17,7 @@ import {
   getCancelledVisitsForUser, calculateUserScore, getGamificationConfig,
   getUserScoreBreakdown,
 } from '@/data/campaigns';
-import { Trophy, Flame, Medal, Star, TrendingUp, ShieldOff, Award, Ban, CheckCircle2, Target, Calendar, XCircle } from 'lucide-react';
+import { Trophy, Flame, Medal, Star, TrendingUp, ShieldOff, Award, Ban, CheckCircle2, Target, Calendar, XCircle, Eye } from 'lucide-react';
 import SmartInsights from '@/components/shared/SmartInsights';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import { cn } from '@/lib/utils';
@@ -243,7 +243,12 @@ export default function CampanhasPage() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-ds-sm">
            <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
-              <p className="text-ds-xs text-muted-foreground mb-1.5">Visitas</p>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--info) / 0.15) 0%, hsl(var(--info) / 0.05) 100%)' }}>
+                  <Eye className="h-4 w-4 text-info" />
+                </div>
+                <p className="text-ds-xs text-muted-foreground">Visitas</p>
+              </div>
               <div className="flex items-baseline gap-1 flex-wrap">
                 <span className="text-ds-xl font-bold">{kpis.totalVisits}</span>
                 <span className="text-ds-sm text-muted-foreground">/ {kpis.totalVisitGoal}</span>
@@ -253,7 +258,12 @@ export default function CampanhasPage() {
           </Card>
            <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
-              <p className="text-ds-xs text-muted-foreground mb-1.5">Prospecções</p>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--warning) / 0.15) 0%, hsl(var(--warning) / 0.05) 100%)' }}>
+                  <Target className="h-4 w-4 text-warning" />
+                </div>
+                <p className="text-ds-xs text-muted-foreground">Prospecções</p>
+              </div>
               <div className="flex items-baseline gap-1 flex-wrap">
                 <span className="text-ds-xl font-bold">{kpis.totalProsp}</span>
                 <span className="text-ds-sm text-muted-foreground">/ {kpis.totalProspGoal}</span>
@@ -263,21 +273,36 @@ export default function CampanhasPage() {
           </Card>
            <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
-              <p className="text-ds-xs text-muted-foreground mb-1.5">Pontuação</p>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="icon-container-sm icon-container-primary">
+                  <Star className="h-4 w-4 text-primary" />
+                </div>
+                <p className="text-ds-xs text-muted-foreground">Pontuação</p>
+              </div>
               <span className="text-ds-xl font-bold text-primary">{kpis.totalScore}</span>
               <p className="text-ds-xs text-muted-foreground mt-1">pts acumulados</p>
             </CardContent>
           </Card>
            <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
-              <p className="text-ds-xs text-muted-foreground mb-1.5">Taxa de conclusão</p>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--success) / 0.15) 0%, hsl(var(--success) / 0.05) 100%)' }}>
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                </div>
+                <p className="text-ds-xs text-muted-foreground">Taxa de conclusão</p>
+              </div>
               <span className="text-ds-xl font-bold">{kpis.rate}%</span>
               <Progress value={kpis.rate} className="mt-2 h-1.5" />
             </CardContent>
           </Card>
           <Card className="card-flat group overflow-hidden relative">
             <CardContent className="p-ds-sm">
-              <p className="text-ds-xs text-muted-foreground mb-1.5">Cancelamentos</p>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--destructive) / 0.15) 0%, hsl(var(--destructive) / 0.05) 100%)' }}>
+                  <Ban className="h-4 w-4 text-destructive" />
+                </div>
+                <p className="text-ds-xs text-muted-foreground">Cancelamentos</p>
+              </div>
               <span className={cn("text-ds-xl font-bold", kpis.totalCancel > 0 && "text-destructive")}>{kpis.totalCancel}</span>
               {kpis.totalCancel > 0 && config && (
                 <p className="text-ds-xs text-destructive mt-1">{Math.abs(kpis.totalCancel * config.pointsPerCancellation)} pts perdidos</p>
@@ -355,19 +380,19 @@ export default function CampanhasPage() {
 
       {/* 6. You vs Average */}
       {myStats && ranking.length > 0 && (
-        <Card className="min-h-[100px] hover:shadow-md transition-shadow">
-          <CardContent className="p-5">
-            <p className="text-xs font-semibold mb-4">Você vs Média</p>
+        <Card className="min-h-[100px] card-hover">
+          <CardContent className="p-ds-md">
+            <p className="card-section-title mb-4">Você vs Média</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <div className="flex justify-between text-xs mb-1">
+                <div className="flex justify-between text-ds-xs mb-1">
                   <span>Você ({myPosition}º)</span>
                   <span className="font-semibold">{myStats.score} pts</span>
                 </div>
                 <Progress value={ranking[0]?.score > 0 ? (myStats.score / ranking[0].score) * 100 : 0} className="h-2" />
               </div>
               <div>
-                <div className="flex justify-between text-xs mb-1">
+                <div className="flex justify-between text-ds-xs mb-1">
                   <span>Média</span>
                   <span>{Math.round(ranking.reduce((s, r) => s + r.score, 0) / ranking.length)} pts</span>
                 </div>
@@ -390,14 +415,14 @@ export default function CampanhasPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.2, delay: i * 0.03 }}
               >
-                <Card className={cn("transition-all text-center min-h-[120px] hover:shadow-md", a.done ? "border-primary/30 bg-primary/5" : "opacity-60")}>
+                <Card className={cn("transition-all text-center min-h-[120px] card-hover", a.done ? "border-primary/30 bg-primary/5" : "opacity-60")}>
                   <CardContent className="p-3 flex flex-col items-center gap-1.5">
                     <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", a.done ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
                       {a.done ? <CheckCircle2 className="h-4 w-4" /> : a.icon}
                     </div>
-                    <p className="text-[10px] font-semibold leading-tight">{a.name}</p>
-                    <p className="text-[9px] text-muted-foreground leading-tight">{a.description}</p>
-                    {a.reward > 0 && <Badge variant="secondary" className="text-[9px] px-1.5 py-0">+{a.reward}pts</Badge>}
+                    <p className="text-ds-xs font-semibold leading-tight">{a.name}</p>
+                    <p className="text-ds-xs text-muted-foreground leading-tight opacity-70">{a.description}</p>
+                    {a.reward > 0 && <Badge variant="secondary" className="text-ds-xs px-1.5 py-0">+{a.reward}pts</Badge>}
                   </CardContent>
                 </Card>
               </motion.div>

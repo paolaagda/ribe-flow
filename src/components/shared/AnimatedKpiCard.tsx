@@ -83,7 +83,7 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
               )}
               {suffix && !secondaryValue && <span className="text-ds-sm font-normal text-muted-foreground ml-0.5">{suffix}</span>}
             </p>
-            <p className="text-ds-xs text-muted-foreground truncate mt-0.5 font-medium">{label}</p>
+            <p className="text-ds-xs text-muted-foreground truncate mt-1.5 font-medium tracking-wide uppercase">{label}</p>
           </div>
         </CardContent>
       </Card>
