@@ -228,7 +228,7 @@ export default function LoginPage() {
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="text-center space-y-3 py-4"
+                      className="text-center space-y-4 py-4"
                     >
                       <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-success/15">
                         <CheckCircle2 className="h-6 w-6 text-success" />
@@ -236,6 +236,17 @@ export default function LoginPage() {
                       <p className="text-sm text-muted-foreground leading-relaxed">
                         Se este e-mail estiver cadastrado, você receberá instruções para redefinir sua senha.
                       </p>
+                      {mockResetLink && (
+                        <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-1.5">
+                          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Link simulado (dev)</p>
+                          <Link
+                            to={mockResetLink}
+                            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
+                          >
+                            <ExternalLink className="h-3 w-3" /> Redefinir senha
+                          </Link>
+                        </div>
+                      )}
                     </motion.div>
                   )}
 
