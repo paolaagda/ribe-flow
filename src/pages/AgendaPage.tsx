@@ -526,7 +526,7 @@ export default function AgendaPage() {
   }
 
   return (
-    <PageTransition className="space-y-6">
+    <PageTransition className="space-y-8">
       <HeroSection />
 
       <SmartInsights page="agenda" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
@@ -651,7 +651,7 @@ export default function AgendaPage() {
 
       <AnimatedFilterContent filterKey={activeInsight}>
       {/* KPI Grid - 6 cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={todayIndicators.concluidas} secondaryValue={todayIndicators.total} color="text-info" delay={0.1} onClick={() => togglePanel('today')} active={showTodayPanel} />
         <AnimatedKpiCard icon={ListTodo} label="Tarefas" value={completedTasks.length} secondaryValue={pendingTasks.length} color="text-warning" delay={0.15} onClick={() => togglePanel('tasks')} active={showTasksPanel} pulse={pendingTasks.some(t => { const days = Math.floor((Date.now() - new Date(t.task.createdAt).getTime()) / 86400000); return days >= 10; })} />
         <AnimatedKpiCard icon={CheckCircle} label="Agendas" value={indicators.totalConcluidas} secondaryValue={indicators.totalAgendas} color="text-success" delay={0.2} />
@@ -683,7 +683,7 @@ export default function AgendaPage() {
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
               <TodayAgenda viewMode="personal" />
               <VisitMap viewMode="personal" />
             </div>

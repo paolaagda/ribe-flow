@@ -63,7 +63,7 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
           onClick && 'group-hover:opacity-100',
         )} style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.03) 0%, transparent 60%)' }} />
         
-        <CardContent className="p-4 flex items-center gap-3.5 h-full min-h-[80px] relative">
+        <CardContent className="p-5 flex items-center gap-4 h-full min-h-[88px] relative">
           <div className={cn(
             'icon-container-sm relative transition-transform duration-300',
             onClick && 'group-hover:scale-105',
