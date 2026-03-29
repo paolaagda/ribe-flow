@@ -18,6 +18,7 @@ import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 import { cn } from '@/lib/utils';
 import SmartInsights from '@/components/shared/SmartInsights';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
+import PageHeader from '@/components/shared/PageHeader';
 
 const STATUS_COLORS: Record<string, string> = statusColors;
 const CHART_COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
