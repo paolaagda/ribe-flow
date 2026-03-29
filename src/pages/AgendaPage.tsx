@@ -33,6 +33,7 @@ import PendingTasksCard from '@/components/agenda/PendingTasksCard';
 import TasksDrawer from '@/components/agenda/TasksDrawer';
 import AgendaMap from '@/components/agenda/AgendaMap';
 import SmartInsights from '@/components/shared/SmartInsights';
+import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import { usePermission } from '@/hooks/usePermission';
 import { ShieldOff } from 'lucide-react';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
@@ -648,6 +649,7 @@ export default function AgendaPage() {
         </AnimatePresence>
       </div>
 
+      <AnimatedFilterContent filterKey={activeInsight}>
       {/* KPI Grid - 6 cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={todayIndicators.concluidas} secondaryValue={todayIndicators.total} color="text-info" delay={0.1} onClick={() => togglePanel('today')} active={showTodayPanel} />
@@ -1179,6 +1181,8 @@ export default function AgendaPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      </AnimatedFilterContent>
 
       {/* Detail Modal */}
       <AgendaDetailModal
