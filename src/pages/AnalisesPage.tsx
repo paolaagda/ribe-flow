@@ -271,8 +271,13 @@ export default function AnalisesPage() {
         </Card>
 
         {/* Created vs Completed */}
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-ds-md">Criadas vs Concluídas</CardTitle></CardHeader>
+        <Card className="card-hover">
+          <CardHeader className="p-ds-sm pb-2">
+            <CardTitle className="card-section-title">
+              <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--chart-2) / 0.15) 0%, hsl(var(--chart-2) / 0.05) 100%)' }}><CheckCircle className="h-4 w-4" style={{ color: 'hsl(var(--chart-2))' }} /></div>
+              Criadas vs Concluídas
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={createdVsCompleted}>
