@@ -75,7 +75,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[380px] p-0 max-h-[70vh] overflow-hidden flex flex-col" align="end" sideOffset={8}>
+      <PopoverContent className="w-[380px] p-0 overflow-hidden flex flex-col" align="end" sideOffset={8} style={{ maxHeight: 'min(70vh, 520px)' }}>
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <h3 className="text-sm font-semibold">Notificações</h3>
           {unreadCount > 0 && (
