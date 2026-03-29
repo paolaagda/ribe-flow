@@ -49,8 +49,14 @@ export default function LoginPage() {
     }
     setForgotLoading(true);
     setTimeout(() => {
+      // Generate mock token with 15min expiry
+      const token = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      const expiry = Date.now() + 15 * 60 * 1000; // 15 minutes
+      localStorage.setItem('reset_token', JSON.stringify({ token, email: forgotEmail.trim(), expiry }));
+
       setForgotLoading(false);
       setForgotSuccess(true);
+      setMockResetLink(`/reset-password?token=${token}`);
       toast({
         title: 'Instruções enviadas',
         description: 'Verifique sua caixa de entrada.',
