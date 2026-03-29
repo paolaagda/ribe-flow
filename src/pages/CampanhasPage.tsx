@@ -160,26 +160,7 @@ export default function CampanhasPage() {
     }, 800);
   }, [ranking]);
 
-  // Alert cards data
-  const alertCards = useMemo(() => {
-    if (!selectedCampaign || !myStats) return [];
-    const today = new Date();
-    const endDate = new Date(selectedCampaign.endDate);
-    const daysRemaining = Math.max(0, Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
-    const visitsRemaining = Math.max(0, myStats.visitGoal - myStats.visits);
-    const avgScore = ranking.length > 0 ? Math.round(ranking.reduce((s, r) => s + r.score, 0) / ranking.length) : 0;
-    const aboveAvg = myStats.score >= avgScore;
-
-    const cards: { icon: React.ReactNode; text: string; color: string }[] = [];
-    if (visitsRemaining > 0) {
-      cards.push({ icon: <AlertTriangle className="h-4 w-4" />, text: `Faltam ${visitsRemaining} visitas para sua meta em ${selectedCampaign.name}`, color: 'bg-warning/10 text-warning border-warning/20' });
-    }
-    if (daysRemaining > 0 && getCampaignStatus(selectedCampaign) === 'Ativa') {
-      cards.push({ icon: <Clock className="h-4 w-4" />, text: `${selectedCampaign.name} termina em ${daysRemaining} dia${daysRemaining !== 1 ? 's' : ''}`, color: 'bg-info/10 text-info border-info/20' });
-    }
-    cards.push({ icon: <TrendingUp className="h-4 w-4" />, text: aboveAvg ? 'Você está acima da média da equipe!' : 'Você está abaixo da média da equipe', color: aboveAvg ? 'bg-success/10 text-success border-success/20' : 'bg-destructive/10 text-destructive border-destructive/20' });
-    return cards;
-  }, [selectedCampaign, myStats, ranking]);
+  const podium = ranking.slice(0, 3);
 
   // Score history
   const scoreHistory = useMemo(() => {
