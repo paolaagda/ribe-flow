@@ -99,8 +99,8 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="invites" className="mt-0">
-            <ScrollArea className="max-h-[400px] scrollbar-thin">
+          <TabsContent value="invites" className="mt-0 flex-1 overflow-hidden">
+            <ScrollArea className="h-full" style={{ maxHeight: 'calc(min(70vh, 520px) - 100px)' }}>
               {pendingInvites.length === 0 ? (
                 <div className="py-8 text-center">
                   <p className="text-sm text-muted-foreground">{getEmptyStateMessage()}</p>
