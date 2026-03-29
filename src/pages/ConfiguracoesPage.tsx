@@ -23,7 +23,7 @@ export default function ConfiguracoesPage() {
   }
 
   return (
-    <PageTransition className="space-y-4">
+    <PageTransition className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Configurações</h1>
         <p className="text-muted-foreground text-sm">Centro administrativo do sistema</p>
