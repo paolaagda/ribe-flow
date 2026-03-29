@@ -136,6 +136,8 @@ export default function AgendaPage() {
     return visits;
   }, [visits, user, profile]);
 
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+
   const filteredVisits = useMemo(() => {
     return visibleVisits.filter(v => {
       if (filterStatus !== 'all' && v.status !== filterStatus) return false;
@@ -179,7 +181,6 @@ export default function AgendaPage() {
   }, []);
 
   // Performance indicators
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
   
   const indicators = useMemo(() => {
     const visitas = filteredVisits.filter(v => v.type === 'visita');
