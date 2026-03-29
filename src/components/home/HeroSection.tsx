@@ -108,6 +108,7 @@ export default function HeroSection() {
                 </div>
                 <span className="font-bold tabular-nums">{stats.visitasConcluidas}</span>
                 <span className="text-muted-foreground text-ds-xs">visitas</span>
+              </div>
               <div className="stat-chip">
                 <div className="w-7 h-7 rounded-lg bg-warning/10 flex items-center justify-center">
                   <UserPlus className="h-3.5 w-3.5 text-warning" />
