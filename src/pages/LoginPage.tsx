@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Moon, Sun, Handshake, ArrowLeft, Mail, CheckCircle2 } from 'lucide-react';
+import { Loader2, Moon, Sun, Handshake, ArrowLeft, Mail, CheckCircle2, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useTheme } from '@/hooks/useTheme';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,6 +23,7 @@ export default function LoginPage() {
   const [forgotError, setForgotError] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
+  const [mockResetLink, setMockResetLink] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -49,8 +51,14 @@ export default function LoginPage() {
     }
     setForgotLoading(true);
     setTimeout(() => {
+      // Generate mock token with 15min expiry
+      const token = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      const expiry = Date.now() + 15 * 60 * 1000; // 15 minutes
+      localStorage.setItem('reset_token', JSON.stringify({ token, email: forgotEmail.trim(), expiry }));
+
       setForgotLoading(false);
       setForgotSuccess(true);
+      setMockResetLink(`/reset-password?token=${token}`);
       toast({
         title: 'Instruções enviadas',
         description: 'Verifique sua caixa de entrada.',
@@ -63,6 +71,7 @@ export default function LoginPage() {
     setForgotEmail('');
     setForgotError('');
     setForgotSuccess(false);
+    setMockResetLink('');
   };
 
   return (
@@ -219,7 +228,7 @@ export default function LoginPage() {
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="text-center space-y-3 py-4"
+                      className="text-center space-y-4 py-4"
                     >
                       <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-success/15">
                         <CheckCircle2 className="h-6 w-6 text-success" />
@@ -227,6 +236,17 @@ export default function LoginPage() {
                       <p className="text-sm text-muted-foreground leading-relaxed">
                         Se este e-mail estiver cadastrado, você receberá instruções para redefinir sua senha.
                       </p>
+                      {mockResetLink && (
+                        <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-1.5">
+                          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Link simulado (dev)</p>
+                          <Link
+                            to={mockResetLink}
+                            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
+                          >
+                            <ExternalLink className="h-3 w-3" /> Redefinir senha
+                          </Link>
+                        </div>
+                      )}
                     </motion.div>
                   )}
 

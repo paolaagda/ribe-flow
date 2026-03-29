@@ -13,6 +13,7 @@ import ParceirosPage from "@/pages/ParceirosPage";
 import ConfiguracoesPage from "@/pages/ConfiguracoesPage";
 import CampanhasPage from "@/pages/CampanhasPage";
 import ColaboradorPerfilPage from "@/pages/ColaboradorPerfilPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={isAuthenticated ? <Navigate to="/agenda" replace /> : <LoginPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/" element={<Navigate to="/agenda" replace />} />
       <Route path="/dashboard" element={<Navigate to="/agenda" replace />} />
       <Route path="/campanhas" element={<ProtectedRoute><CampanhasPage /></ProtectedRoute>} />
