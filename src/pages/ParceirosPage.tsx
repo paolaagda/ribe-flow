@@ -16,6 +16,7 @@ import SmartInsights from '@/components/shared/SmartInsights';
 import { Button } from '@/components/ui/button';
 import { differenceInDays, parseISO } from 'date-fns';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
+import PageHeader from '@/components/shared/PageHeader';
 
 export default function ParceirosPage() {
   const [search, setSearch] = useState('');
