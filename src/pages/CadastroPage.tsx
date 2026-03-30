@@ -4,12 +4,23 @@ import PageTransition from '@/components/PageTransition';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine } from 'lucide-react';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useSystemData } from '@/hooks/useSystemData';
 import RegistrationCard from '@/components/cadastro/RegistrationCard';
 import RegistrationModal from '@/components/cadastro/RegistrationModal';
 import { Registration } from '@/data/registrations';
+import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
+
+const statusKpiConfig: Record<string, { icon: any; color: string }> = {
+  'Não iniciado': { icon: FileText, color: 'text-muted-foreground' },
+  'Colhendo documentação': { icon: Clock, color: 'text-info' },
+  'Em análise': { icon: AlertCircle, color: 'text-warning' },
+  'Colhendo assinaturas': { icon: PenLine, color: 'text-violet-500' },
+  'Concluído': { icon: CheckCircle2, color: 'text-success' },
+  'Em pausa': { icon: PauseCircle, color: 'text-orange-500' },
+  'Cancelado': { icon: XCircle, color: 'text-destructive' },
+};
 
 export default function CadastroPage() {
   const { registrations } = useRegistrations();
