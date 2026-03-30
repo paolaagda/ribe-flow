@@ -202,6 +202,9 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
       {/* Insights */}
       <PartnerInsights partner={partner} visits={partnerVisits} stats={stats} />
 
+      {/* Registrations */}
+      <PartnerRegistrations partnerId={partnerId} />
+
       {/* Tasks */}
       <PartnerTasksSection partnerId={partnerId} />
 
