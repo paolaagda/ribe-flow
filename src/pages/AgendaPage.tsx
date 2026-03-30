@@ -660,13 +660,13 @@ export default function AgendaPage() {
         {canWrite('agenda.create') && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4 }}>
             <Card className="hover:shadow-md transition-shadow cursor-pointer h-full border-dashed border-2 border-primary/20 hover:border-primary/40" onClick={() => setShowForm(true)}>
-              <CardContent className="p-4 flex items-center gap-3 h-full">
+              <CardContent className="p-ds-sm flex items-center gap-ds-sm h-full">
                 <div className="p-2 rounded-lg bg-primary/10 text-primary">
                   <Plus className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-primary">Nova agenda</p>
-                  <p className="text-xs text-muted-foreground">Criar</p>
+                  <p className="text-ds-sm font-semibold text-primary">Nova agenda</p>
+                  <p className="text-ds-xs text-muted-foreground">Criar</p>
                 </div>
               </CardContent>
             </Card>
