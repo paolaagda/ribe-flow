@@ -6,7 +6,7 @@ import { AppProfile } from '@/data/mock-data';
 export function usePermission() {
   const { profile } = useAuth();
   const [permissions] = useLocalStorage<Record<AppProfile, Record<string, PermissionLevel>>>(
-    'ribercred_permissions_v3',
+    'ribercred_permissions_v4',
     defaultPermissions
   );
 
