@@ -22,9 +22,12 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   registration?: Registration | null;
+  canEdit?: boolean;
+  canChangeStatus?: boolean;
+  canEditObservation?: boolean;
 }
 
-export default function RegistrationModal({ open, onOpenChange, registration }: Props) {
+export default function RegistrationModal({ open, onOpenChange, registration, canEdit = true, canChangeStatus = true, canEditObservation = true }: Props) {
   const { partners } = usePartners();
   const { getActiveItems } = useSystemData();
   const { getAvatar } = useUserAvatars();
