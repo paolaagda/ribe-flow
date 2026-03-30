@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Registration, statusColors } from '@/data/registrations';
+import AuditTimeline from '@/components/shared/AuditTimeline';
 import { mockUsers } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useSystemData } from '@/hooks/useSystemData';
