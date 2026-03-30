@@ -9,13 +9,14 @@ import { usePartners } from '@/hooks/usePartners';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus, FileText } from 'lucide-react';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCentavos } from '@/lib/currency';
 import AgendaComments from '@/components/agenda/AgendaComments';
+import { useRegistrationBadge } from '@/hooks/useRegistrationBadge';
 
 interface AgendaDetailModalProps {
   visit: Visit | null;
@@ -35,7 +36,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   const { user } = useAuth();
   const { getAvatar } = useUserAvatars();
   const { getPartnerById } = usePartners();
-
+  const { hasActive, activeCount, regs } = useRegistrationBadge(visit?.partnerId);
   if (!visit) return null;
 
   const partner = getPartnerById(visit.partnerId);
@@ -116,6 +117,23 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
               <span className="text-xs text-muted-foreground italic">Potencial não informado</span>
             )}
           </div>
+
+          {/* Registration indicator */}
+          {hasActive && (
+            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-info/10 border border-info/20 text-sm">
+              <FileText className="h-4 w-4 text-info shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-info">Cadastro em andamento ({activeCount})</p>
+                {regs.map(r => (
+                  <div key={r.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant="outline" className="text-[9px]">{r.bank}</Badge>
+                    <span>{r.status}</span>
+                    <span>• {r.handlingWith}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <Separator />
 

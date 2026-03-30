@@ -12,13 +12,15 @@ import { usePartners } from '@/hooks/usePartners';
 import { useTasks } from '@/hooks/useTasks';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { useTeamFilter } from '@/hooks/useTeamFilter';
+import { useRegistrations } from '@/hooks/useRegistrations';
 import { cargoLabels, cargoColors, profileLabels, getPartnerById } from '@/data/mock-data';
+import { statusColors } from '@/data/registrations';
 import { format, parseISO, differenceInDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
   ArrowLeft, Mail, Briefcase, Shield, Calendar, CheckCircle2,
   Clock, Target, TrendingUp, Users2, MapPin, AlertTriangle,
-  Handshake, UserPlus, ListTodo
+  Handshake, UserPlus, ListTodo, FileText, Landmark, User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +33,7 @@ export default function ColaboradorPerfilPage() {
   const { allTasks } = useTasks();
   const { getAvatar } = useUserAvatars();
   const { teams } = useTeamFilter();
+  const { registrations } = useRegistrations();
 
   const user = users.find(u => u.id === id);
 
@@ -233,6 +236,55 @@ export default function ColaboradorPerfilPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Cadastros sob responsabilidade */}
+          {(() => {
+            const userPartnerIds = [...new Set(visits.filter(v => v.userId === user.id).map(v => v.partnerId))];
+            const userRegs = registrations.filter(r => userPartnerIds.includes(r.partnerId) || r.commercialUserId === user.id);
+            if (userRegs.length === 0) return null;
+            const activeRegs = userRegs.filter(r => !['Concluído', 'Cancelado'].includes(r.status));
+            const doneRegs = userRegs.filter(r => r.status === 'Concluído');
+            const cancelledRegs = userRegs.filter(r => r.status === 'Cancelado');
+            return (
+              <Card>
+                <CardContent className="p-5 space-y-4">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" /> Cadastros sob responsabilidade
+                    <Badge variant="secondary" className="text-xs">{userRegs.length}</Badge>
+                  </h3>
+                  <Separator />
+                  <div className="flex gap-3 text-xs text-muted-foreground mb-2">
+                    {activeRegs.length > 0 && <span className="text-warning font-medium">{activeRegs.length} em andamento</span>}
+                    {doneRegs.length > 0 && <span className="text-success font-medium">{doneRegs.length} concluídos</span>}
+                    {cancelledRegs.length > 0 && <span className="text-destructive font-medium">{cancelledRegs.length} cancelados</span>}
+                  </div>
+                  <div className="space-y-2">
+                    {userRegs.sort((a, b) => b.requestedAt.localeCompare(a.requestedAt)).map(reg => {
+                      const partner = getPartnerById(reg.partnerId);
+                      return (
+                        <div key={reg.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/30 transition-colors">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                            <Landmark className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-medium truncate">{partner?.name || 'Parceiro'}</span>
+                              <Badge variant="outline" className="text-[10px]">{reg.bank}</Badge>
+                              <Badge variant="outline" className={cn('text-[10px]', statusColors[reg.status])}>{reg.status}</Badge>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                              <span>{reg.solicitation}</span>
+                              <span>• {reg.handlingWith}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
 
           {/* Partners Attended */}
           <Card>

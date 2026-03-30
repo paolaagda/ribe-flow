@@ -35,7 +35,8 @@ import AgendaMap from '@/components/agenda/AgendaMap';
 import SmartInsights from '@/components/shared/SmartInsights';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import { usePermission } from '@/hooks/usePermission';
-import { ShieldOff } from 'lucide-react';
+import { ShieldOff, FileText } from 'lucide-react';
+import { useRegistrations } from '@/hooks/useRegistrations';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -53,6 +54,11 @@ export default function AgendaPage() {
   const { addNotification } = useNotifications();
   const { visits, setVisits } = useVisits();
   const { getActiveItems } = useSystemData();
+  const { registrations } = useRegistrations();
+
+  const hasActiveRegistration = useCallback((partnerId: string) => {
+    return registrations.some(r => r.partnerId === partnerId && !['Concluído', 'Cancelado'].includes(r.status));
+  }, [registrations]);
   const [view, setView] = useState<ViewMode>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showForm, setShowForm] = useState(false);
@@ -891,6 +897,11 @@ export default function AgendaPage() {
                           );
                         })()}
                         <div className="flex items-center gap-1.5">
+                          {hasActiveRegistration(v.partnerId) && (
+                            <Badge variant="outline" className="text-[9px] bg-info/10 text-info border-info/20 gap-0.5">
+                              <FileText className="h-2.5 w-2.5" />Cadastro
+                            </Badge>
+                          )}
                           {v.potentialValue && (
                             <Badge variant="outline" className={cn('text-[9px]', v.potentialValue >= 1000000 ? 'bg-warning/10 text-warning border-warning/20' : '')}>
                               {formatCentavos(v.potentialValue)}
