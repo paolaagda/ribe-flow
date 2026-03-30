@@ -33,6 +33,7 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
   const { getActiveItems } = useSystemData();
   const { getAvatar } = useUserAvatars();
   const { addRegistration, updateRegistration } = useRegistrations();
+  const { addLog, getLogsForEntity } = useAuditLog();
   const { toast } = useToast();
 
   const isEdit = !!registration;
