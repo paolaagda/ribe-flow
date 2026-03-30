@@ -12,6 +12,7 @@ import AnalisesPage from "@/pages/AnalisesPage";
 import ParceirosPage from "@/pages/ParceirosPage";
 import ConfiguracoesPage from "@/pages/ConfiguracoesPage";
 import CampanhasPage from "@/pages/CampanhasPage";
+import CadastroPage from "@/pages/CadastroPage";
 import ColaboradorPerfilPage from "@/pages/ColaboradorPerfilPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import NotFound from "@/pages/NotFound";
