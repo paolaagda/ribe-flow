@@ -200,7 +200,7 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
           {/* Tratando com */}
           <div className="space-y-1.5">
             <Label>Tratando com *</Label>
-            <Select value={handlingWith} onValueChange={setHandlingWith}>
+            <Select value={handlingWith} onValueChange={setHandlingWith} disabled={!canChangeStatus}>
               <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
                 {handlers.map(h => (
