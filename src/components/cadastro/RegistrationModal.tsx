@@ -13,6 +13,7 @@ import { usePartners } from '@/hooks/usePartners';
 import { useSystemData } from '@/hooks/useSystemData';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { useRegistrations } from '@/hooks/useRegistrations';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
