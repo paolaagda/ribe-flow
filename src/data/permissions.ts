@@ -96,6 +96,9 @@ export const permissionItems: PermissionItem[] = [
   { module: 'Cadastro', action: 'Alterar status', key: 'registration.changeStatus' },
   { module: 'Cadastro', action: 'Editar observação', key: 'registration.editObservation' },
 
+  // Logs
+  { module: 'Logs', action: 'Ver logs do sistema', key: 'logs.view' },
+
   // Insights
   { module: 'Insights', action: 'Ver insights inteligentes', key: 'insights.view' },
 ];
