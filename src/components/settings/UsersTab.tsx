@@ -50,6 +50,8 @@ export default function UsersTab() {
   const [uploadTargetUserId, setUploadTargetUserId] = useState<string | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [deletingTeamId, setDeletingTeamId] = useState<string | null>(null);
+  const [showNewUser, setShowNewUser] = useState(false);
+  const [newUserForm, setNewUserForm] = useState({ name: '', email: '', role: 'comercial' as UserRole, profile: 'nao_gestor' as AppProfile, bio: '' });
 
   const isGestor = profile === 'gestor';
   const { canRead, canWrite } = usePermission();
@@ -132,6 +134,24 @@ export default function UsersTab() {
     fileInputRef.current?.click();
   };
 
+  const handleCreateUser = () => {
+    if (!newUserForm.name || !newUserForm.email) return;
+    const newUser: User = {
+      id: `u${Date.now()}`,
+      name: newUserForm.name,
+      email: newUserForm.email,
+      role: newUserForm.role,
+      profile: newUserForm.profile,
+      bio: newUserForm.bio || 'Novo colaborador',
+      active: true,
+      avatar: '',
+    };
+    setUsers(prev => [...prev, newUser]);
+    setShowNewUser(false);
+    setNewUserForm({ name: '', email: '', role: 'comercial', profile: 'nao_gestor', bio: '' });
+    toast({ title: 'Colaborador criado com sucesso!' });
+  };
+
   return (
     <div className="space-y-6">
       <input
@@ -150,9 +170,16 @@ export default function UsersTab() {
 
         {/* Tab Equipe */}
         <TabsContent value="equipe" className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Buscar usuário..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Buscar usuário..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+            </div>
+            {isGestor && canWrite('users.edit') && (
+              <Button size="sm" onClick={() => setShowNewUser(true)}>
+                <Plus className="h-4 w-4 mr-1" /> Novo
+              </Button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -561,6 +588,52 @@ export default function UsersTab() {
             >
               {editingTeam ? 'Salvar' : 'Criar equipe'}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New User Dialog */}
+      <Dialog open={showNewUser} onOpenChange={setShowNewUser}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Novo colaborador</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nome</Label>
+              <Input value={newUserForm.name} onChange={e => setNewUserForm({...newUserForm, name: e.target.value})} placeholder="Nome completo" />
+            </div>
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input value={newUserForm.email} onChange={e => setNewUserForm({...newUserForm, email: e.target.value})} placeholder="email@exemplo.com" />
+            </div>
+            <div className="space-y-2">
+              <Label>Cargo (empresa)</Label>
+              <Select value={newUserForm.role} onValueChange={v => setNewUserForm({...newUserForm, role: v as UserRole})}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {allCargos.map(c => (
+                    <SelectItem key={c} value={c}>{cargoLabels[c]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Perfil do App</Label>
+              <Select value={newUserForm.profile} onValueChange={v => setNewUserForm({...newUserForm, profile: v as AppProfile})}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gestor">Gestor</SelectItem>
+                  <SelectItem value="nao_gestor">Não Gestor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Bio</Label>
+              <Input value={newUserForm.bio} onChange={e => setNewUserForm({...newUserForm, bio: e.target.value})} placeholder="Breve descrição" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewUser(false)}>Cancelar</Button>
+            <Button onClick={handleCreateUser} disabled={!newUserForm.name || !newUserForm.email}>Criar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
