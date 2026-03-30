@@ -136,7 +136,7 @@ export default function CadastroPage() {
         </PageHeader>
 
         {/* KPIs */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+        <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
           <AnimatedKpiCard
             icon={FileText}
             label="Total"
