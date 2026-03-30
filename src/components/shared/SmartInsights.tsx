@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+
 import { Lightbulb, TrendingUp, DollarSign, AlertTriangle, CheckCircle2, Target, Calendar, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useVisits } from '@/hooks/useVisits';
