@@ -1,53 +1,35 @@
 
 
-# Controle de Permissões para Página "Cadastro"
+# Ajustar Cor das Barras de Rolagem no Modo Escuro
 
-## Resumo
-
-Adicionar permissões granulares para a página Cadastro, seguindo o padrão existente do sistema (`permissions.ts` + `usePermission`). Inclui 5 novas chaves de permissão, configuração padrão por perfil, e aplicação nos componentes da página.
+## Problema
+As scrollbars (tanto as customizadas `.scrollbar-thin` quanto as do Radix ScrollArea) estão muito claras/destacadas no modo escuro.
 
 ## Alterações
 
-### 1. `src/data/permissions.ts`
-- Adicionar nova seção "Cadastro" no array `permissionItems` com 5 entradas:
-  - `registration.view` — Visualizar cadastros
-  - `registration.create` — Criar cadastro
-  - `registration.edit` — Editar cadastro
-  - `registration.changeStatus` — Alterar status
-  - `registration.editObservation` — Editar observação
-- Atualizar `defaultPermissions`:
-  - **Gestor**: todas em `write`(já coberto pelo `allWrite`)
-  - **Não Gestor**: `registration.view` = `read`, restante = `none`
+### 1. `src/index.css` — scrollbar-thin no dark mode
+Adicionar regra `.dark .scrollbar-thin` com cores mais escuras para track e thumb.
 
-### 2. `src/components/AppLayout.tsx` (linha 52)
-- Alterar `permKey` do item Cadastro de `'partners.list'` para `'registration.view'`
-- O menu já oculta itens sem permissão de leitura
+### 2. `src/components/ui/scroll-area.tsx` — ScrollAreaThumb
+Atualmente usa `bg-muted-foreground/25` e hover `bg-muted-foreground/40`. No dark mode, `muted-foreground` é `215 12% 55%` — relativamente claro. Ajustar para usar opacidades menores no dark mode via classes condicionais: `dark:bg-muted-foreground/15 dark:hover:bg-muted-foreground/25`.
 
-### 3. `src/pages/CadastroPage.tsx`
-- Importar `usePermission`
-- Adicionar guard no topo: se `!canRead('registration.view')` → exibir tela de acesso restrito (padrão igual ao de ConfiguracoesPage)
-- Condicionar botão "Novo Cadastro": visível apenas se `canWrite('registration.create')`
-- Passar flags de permissão para `RegistrationCard` e `RegistrationModal`
+### Detalhes Técnicos
 
-### 4. `src/components/cadastro/RegistrationModal.tsx`
-- Receber props de permissão (`canEdit`, `canChangeStatus`, `canEditObservation`)
-- Desabilitar campos de edição geral se `!canEdit`
-- Desabilitar select de Status se `!canChangeStatus`
-- Desabilitar textarea de Observação se `!canEditObservation`
-- Desabilitar select de "Tratando com" se `!canChangeStatus` (vinculado à mesma permissão)
-- Exibir tooltip "Sem permissão" nos campos desabilitados
+**index.css** — após o bloco `.scrollbar-thin`, adicionar:
+```css
+.dark .scrollbar-thin {
+  scrollbar-color: hsl(var(--muted-foreground) / 0.12) transparent;
+}
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.12);
+}
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.25);
+}
+```
 
-### 5. `src/components/cadastro/RegistrationCard.tsx`
-- Nenhuma alteração necessária (card é somente leitura, ação de clique abre modal que já terá os controles)
-
-## Arquivos Afetados
-- `src/data/permissions.ts` — novas chaves e defaults
-- `src/components/AppLayout.tsx` — corrigir permKey
-- `src/pages/CadastroPage.tsx` — guard + condicional do botão
-- `src/components/cadastro/RegistrationModal.tsx` — campos condicionais
-
-## O que NÃO será alterado
-- Lógica de dados ou localStorage
-- Estrutura visual dos componentes
-- Outras permissões existentes
+**scroll-area.tsx** — ScrollAreaThumb:
+```
+bg-muted-foreground/25 hover:bg-muted-foreground/40 dark:bg-muted-foreground/15 dark:hover:bg-muted-foreground/25
+```
 
