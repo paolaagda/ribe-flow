@@ -5,22 +5,35 @@ import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { PenLine, RefreshCw, Lock, Trash2 } from 'lucide-react';
 
 interface Props {
   registration: Registration;
   onClick: () => void;
+  onEdit?: () => void;
+  onChangeStatus?: () => void;
+  onTogglePause?: () => void;
+  onDelete?: () => void;
 }
 
-export default function RegistrationCard({ registration, onClick }: Props) {
+export default function RegistrationCard({ registration, onClick, onEdit, onChangeStatus, onTogglePause, onDelete }: Props) {
   const { getPartnerById } = usePartners();
   const { getAvatar } = useUserAvatars();
   const partner = getPartnerById(registration.partnerId);
   const commercial = mockUsers.find(u => u.id === registration.commercialUserId);
   const lastUpdate = registration.updates.length > 0 ? registration.updates[registration.updates.length - 1] : null;
   const lastUpdateUser = lastUpdate ? mockUsers.find(u => u.id === lastUpdate.userId) : null;
+  const isPaused = registration.status === 'Em pausa';
+
+  const handleAction = (e: React.MouseEvent, action?: () => void) => {
+    e.stopPropagation();
+    action?.();
+  };
 
   return (
     <Card
@@ -77,6 +90,42 @@ export default function RegistrationCard({ registration, onClick }: Props) {
             </span>
           </div>
         )}
+
+        {/* Action buttons */}
+        <div className="flex items-center justify-end gap-1 pt-1 border-t border-border">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => handleAction(e, onEdit)}>
+                <PenLine className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Editar</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => handleAction(e, onChangeStatus)}>
+                <RefreshCw className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Atualizar status</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className={cn("h-7 w-7", isPaused && "text-warning")} onClick={e => handleAction(e, onTogglePause)}>
+                <Lock className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{isPaused ? 'Reativar' : 'Pausar'}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={e => handleAction(e, onDelete)}>
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Excluir</TooltipContent>
+          </Tooltip>
+        </div>
       </CardContent>
     </Card>
   );
