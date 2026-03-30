@@ -8,7 +8,7 @@ export interface SystemItem {
   active: boolean;
 }
 
-export type SystemCategory = 'banks' | 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods';
+export type SystemCategory = 'banks' | 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationBanks' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers';
 
 const categoryLabels: Record<SystemCategory, string> = {
   banks: 'Bancos',
@@ -17,6 +17,10 @@ const categoryLabels: Record<SystemCategory, string> = {
   cancelReasons: 'Justificativas de Cancelamento',
   storeStructures: 'Tipos de Loja',
   periods: 'Períodos da Agenda',
+  registrationBanks: 'Bancos (Cadastro)',
+  registrationStatuses: 'Status de Cadastro',
+  registrationSolicitations: 'Tipos de Solicitação',
+  registrationHandlers: 'Tratando Com',
 };
 
 function buildInitial(items: readonly string[]): SystemItem[] {
