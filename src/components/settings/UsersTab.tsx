@@ -144,6 +144,7 @@ export default function UsersTab() {
       profile: newUserForm.profile,
       bio: newUserForm.bio || 'Novo colaborador',
       active: true,
+      avatar: '',
     };
     setUsers(prev => [...prev, newUser]);
     setShowNewUser(false);
