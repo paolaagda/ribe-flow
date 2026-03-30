@@ -86,9 +86,11 @@ export default function CadastroPage() {
     <PageTransition>
       <div className="space-y-ds-lg">
         <PageHeader title="Cadastro" description="Gerencie o credenciamento de parceiros com bancos.">
-          <Button onClick={handleNew} className="gap-2">
-            <Plus className="h-4 w-4" /> Novo Cadastro
-          </Button>
+          {canWrite('registration.create') && (
+            <Button onClick={handleNew} className="gap-2">
+              <Plus className="h-4 w-4" /> Novo Cadastro
+            </Button>
+          )}
         </PageHeader>
 
         {/* KPIs */}
