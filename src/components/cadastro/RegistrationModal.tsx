@@ -257,31 +257,17 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
                   <span>{format(new Date(registration.completedAt), "dd/MM/yyyy", { locale: ptBR })}</span>
                 </div>
               )}
-              {registration.updates.length > 0 && (
-                <div className="space-y-1.5 pt-2">
-                  <span className="text-xs font-medium">Histórico de atualizações</span>
-                  <div className="space-y-1 max-h-32 overflow-y-auto">
-                    {[...registration.updates].reverse().map((upd, i) => {
-                      const updUser = mockUsers.find(u => u.id === upd.userId);
-                      return (
-                        <div key={i} className="flex items-start gap-2 text-[11px] text-muted-foreground">
-                          <Avatar className="h-4 w-4 mt-0.5 shrink-0">
-                            {getAvatar(upd.userId) && <AvatarImage src={getAvatar(upd.userId)} />}
-                            <AvatarFallback className="text-[7px]">
-                              {updUser?.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <span className="font-medium text-foreground">{updUser?.name.split(' ')[0]}</span>
-                            {' · '}{format(new Date(upd.date), "dd/MM/yy", { locale: ptBR })}
-                            <p className="text-muted-foreground">{upd.text}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
+              {(() => {
+                const entityLogs = getLogsForEntity(registration.id);
+                return entityLogs.length > 0 ? (
+                  <div className="space-y-1.5 pt-2">
+                    <span className="text-xs font-medium">Trilha de Auditoria</span>
+                    <div className="max-h-40 overflow-y-auto">
+                      <AuditTimeline logs={entityLogs} />
+                    </div>
                   </div>
-                </div>
-              )}
+                ) : null;
+              })()}
             </div>
           )}
         </div>
