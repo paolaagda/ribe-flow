@@ -100,6 +100,13 @@ export default function CadastroPage() {
   const handleConfirmDelete = () => {
     if (deleteTarget) {
       deleteRegistration(deleteTarget.id);
+      addLog({
+        module: 'Cadastro',
+        action: 'delete',
+        entityId: deleteTarget.id,
+        entityLabel: `Cadastro - ${deleteTarget.bank}`,
+        description: `Excluiu cadastro do banco ${deleteTarget.bank}`,
+      });
       toast({ title: 'Cadastro excluído' });
       setDeleteTarget(null);
     }
