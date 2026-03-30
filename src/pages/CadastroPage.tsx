@@ -4,6 +4,7 @@ import PageTransition from '@/components/PageTransition';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine, ShieldAlert } from 'lucide-react';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useSystemData } from '@/hooks/useSystemData';
@@ -12,6 +13,7 @@ import RegistrationModal from '@/components/cadastro/RegistrationModal';
 import { Registration } from '@/data/registrations';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 import { usePermission } from '@/hooks/usePermission';
+import { useToast } from '@/hooks/use-toast';
 
 const statusKpiConfig: Record<string, { icon: any; color: string }> = {
   'Não iniciado': { icon: FileText, color: 'text-muted-foreground' },
@@ -24,14 +26,16 @@ const statusKpiConfig: Record<string, { icon: any; color: string }> = {
 };
 
 export default function CadastroPage() {
-  const { registrations } = useRegistrations();
+  const { registrations, updateRegistration, deleteRegistration } = useRegistrations();
   const { getActiveItems } = useSystemData();
   const { canRead, canWrite } = usePermission();
+  const { toast } = useToast();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterBank, setFilterBank] = useState('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Registration | null>(null);
 
   const statuses = getActiveItems('registrationStatuses');
   const banks = getActiveItems('registrationBanks');
@@ -68,6 +72,25 @@ export default function CadastroPage() {
   const handleNew = () => {
     setSelectedReg(null);
     setModalOpen(true);
+  };
+
+  const handleEdit = (reg: Registration) => {
+    setSelectedReg(reg);
+    setModalOpen(true);
+  };
+
+  const handleTogglePause = (reg: Registration) => {
+    const newStatus = reg.status === 'Em pausa' ? 'Não iniciado' : 'Em pausa';
+    updateRegistration(reg.id, { status: newStatus });
+    toast({ title: newStatus === 'Em pausa' ? 'Cadastro pausado' : 'Cadastro reativado' });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteTarget) {
+      deleteRegistration(deleteTarget.id);
+      toast({ title: 'Cadastro excluído' });
+      setDeleteTarget(null);
+    }
   };
 
   if (!canRead('registration.view')) {
@@ -162,7 +185,15 @@ export default function CadastroPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map(reg => (
-              <RegistrationCard key={reg.id} registration={reg} onClick={() => handleCardClick(reg)} />
+              <RegistrationCard
+                key={reg.id}
+                registration={reg}
+                onClick={() => handleCardClick(reg)}
+                onEdit={() => handleEdit(reg)}
+                onChangeStatus={() => handleEdit(reg)}
+                onTogglePause={() => handleTogglePause(reg)}
+                onDelete={() => setDeleteTarget(reg)}
+              />
             ))}
           </div>
         )}
@@ -175,6 +206,23 @@ export default function CadastroPage() {
           canChangeStatus={canWrite('registration.changeStatus')}
           canEditObservation={canWrite('registration.editObservation')}
         />
+
+        <AlertDialog open={!!deleteTarget} onOpenChange={open => !open && setDeleteTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir cadastro</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir este cadastro? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </PageTransition>
   );

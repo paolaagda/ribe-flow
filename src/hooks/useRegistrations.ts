@@ -52,9 +52,13 @@ export function useRegistrations() {
     }));
   }, [setRegistrations, user]);
 
+  const deleteRegistration = useCallback((id: string) => {
+    setRegistrations(prev => prev.filter(r => r.id !== id));
+  }, [setRegistrations]);
+
   const getById = useCallback((id: string) => {
     return registrations.find(r => r.id === id);
   }, [registrations]);
 
-  return { registrations, addRegistration, updateRegistration, getById };
+  return { registrations, addRegistration, updateRegistration, deleteRegistration, getById };
 }

@@ -63,11 +63,12 @@ export function useSystemData() {
   }, [setData]);
 
   const getActiveItems = useCallback((category: SystemCategory): string[] => {
-    return data[category].filter(item => item.active).map(item => item.label);
+    const items = data[category] || initialData[category] || [];
+    return items.filter(item => item.active).map(item => item.label);
   }, [data]);
 
   const getItems = useCallback((category: SystemCategory): SystemItem[] => {
-    return data[category];
+    return data[category] || initialData[category] || [];
   }, [data]);
 
   return { data, addItem, toggleItem, getActiveItems, getItems };
