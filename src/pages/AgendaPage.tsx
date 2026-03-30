@@ -526,7 +526,7 @@ export default function AgendaPage() {
   }
 
   return (
-    <PageTransition className="space-y-8">
+    <PageTransition className="space-y-ds-lg">
       <HeroSection />
 
       <SmartInsights page="agenda" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
@@ -535,12 +535,12 @@ export default function AgendaPage() {
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold shrink-0">Agenda</h1>
+            <h1 className="text-ds-xl font-bold shrink-0">Agenda</h1>
             <div className="flex items-center gap-1">
               <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar('prev')}>
                 <ChevronLeft className="h-3.5 w-3.5" />
               </Button>
-              <span className="text-xs font-medium min-w-[100px] text-center capitalize">
+              <span className="text-ds-xs font-medium min-w-[100px] text-center capitalize">
                 {view === 'day' ? format(currentDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) :
                  view === 'week' ? `${format(startOfWeek(currentDate, { locale: ptBR }), 'dd/MM')} — ${format(endOfWeek(currentDate, { locale: ptBR }), 'dd/MM/yyyy')}` :
                  format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
@@ -651,7 +651,7 @@ export default function AgendaPage() {
 
       <AnimatedFilterContent filterKey={activeInsight}>
       {/* KPI Grid - 6 cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-ds-sm">
         <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={todayIndicators.concluidas} secondaryValue={todayIndicators.total} color="text-info" delay={0.1} onClick={() => togglePanel('today')} active={showTodayPanel} />
         <AnimatedKpiCard icon={ListTodo} label="Tarefas" value={completedTasks.length} secondaryValue={pendingTasks.length} color="text-warning" delay={0.15} onClick={() => togglePanel('tasks')} active={showTasksPanel} pulse={pendingTasks.some(t => { const days = Math.floor((Date.now() - new Date(t.task.createdAt).getTime()) / 86400000); return days >= 10; })} />
         <AnimatedKpiCard icon={CheckCircle} label="Agendas" value={indicators.totalConcluidas} secondaryValue={indicators.totalAgendas} color="text-success" delay={0.2} />
@@ -660,13 +660,13 @@ export default function AgendaPage() {
         {canWrite('agenda.create') && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4 }}>
             <Card className="hover:shadow-md transition-shadow cursor-pointer h-full border-dashed border-2 border-primary/20 hover:border-primary/40" onClick={() => setShowForm(true)}>
-              <CardContent className="p-4 flex items-center gap-3 h-full">
+              <CardContent className="p-ds-sm flex items-center gap-ds-sm h-full">
                 <div className="p-2 rounded-lg bg-primary/10 text-primary">
                   <Plus className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-primary">Nova agenda</p>
-                  <p className="text-xs text-muted-foreground">Criar</p>
+                  <p className="text-ds-sm font-semibold text-primary">Nova agenda</p>
+                  <p className="text-ds-xs text-muted-foreground">Criar</p>
                 </div>
               </CardContent>
             </Card>
@@ -683,11 +683,11 @@ export default function AgendaPage() {
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm pt-ds-xs">
               <TodayAgenda viewMode="personal" />
               <VisitMap viewMode="personal" />
             </div>
-            <div className="pt-4">
+            <div className="pt-ds-sm">
               <PendingTasksCard onOpenVisit={(visitId) => {
                 const v = visits.find(vi => vi.id === visitId);
                 if (v) { setSelectedVisit(v); setShowDetail(true); }
@@ -707,8 +707,8 @@ export default function AgendaPage() {
             className="overflow-hidden"
           >
             <Card className="mt-1">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
+              <CardContent className="p-ds-sm">
+                <div className="flex items-center justify-between mb-ds-xs">
                   <div className="flex items-center gap-2">
                     <ListTodo className="h-4 w-4 text-warning" />
                     <span className="text-sm font-semibold">Tarefas</span>
@@ -730,7 +730,7 @@ export default function AgendaPage() {
 
       {view === 'month' ? (
         <Card>
-          <CardContent className="p-2 sm:p-4">
+          <CardContent className="p-ds-xs sm:p-ds-sm">
             <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
               {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(d => (
                 <div key={d} className="bg-muted px-2 py-2 text-center text-xs font-medium text-muted-foreground">{d}</div>

@@ -330,9 +330,9 @@ export default function CampanhasPage() {
       {/* 5b. Podium — Classic Layout */}
       {canRead('gamification.ranking') && podium.length >= 3 && (
         <Card className="overflow-hidden">
-          <CardContent className="p-6 pb-0">
-            <p className="text-sm font-semibold mb-6 flex items-center gap-2"><Trophy className="h-4 w-4 text-yellow-500" /> Pódio</p>
-            <div className="flex items-end justify-center gap-3 md:gap-6">
+          <CardContent className="p-ds-md pb-0">
+            <p className="text-ds-sm font-semibold mb-ds-sm flex items-center gap-2"><Trophy className="h-4 w-4 text-yellow-500" /> Pódio</p>
+            <div className="flex items-end justify-center gap-ds-sm md:gap-ds-md">
               {podiumOrder.map((item, idx) => {
                 const pos = podium.indexOf(item) + 1;
                 const isFirst = pos === 1;
@@ -354,7 +354,7 @@ export default function CampanhasPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 + idx * 0.15, type: 'spring', bounce: 0.35 }}
                     whileHover={{ scale: 1.05 }}
-                    className="flex flex-col items-center gap-1.5"
+                    className="flex flex-col items-center gap-2"
                   >
                     {isFirst && <Star className="h-5 w-5 text-yellow-500 fill-yellow-500 -mb-1" />}
                     <Avatar className={cn(avatarSize, ringColor, 'transition-all')}>
@@ -382,8 +382,8 @@ export default function CampanhasPage() {
       {myStats && ranking.length > 0 && (
         <Card className="min-h-[100px] card-hover">
           <CardContent className="p-ds-md">
-            <p className="card-section-title mb-4">Você vs Média</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <p className="card-section-title mb-ds-sm">Você vs Média</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm">
               <div>
                 <div className="flex justify-between text-ds-xs mb-1">
                   <span>Você ({myPosition}º)</span>
@@ -406,8 +406,8 @@ export default function CampanhasPage() {
       {/* 7. Achievements (compact single row) */}
       {achievements.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold mb-3 flex items-center gap-2"><Award className="h-4 w-4" /> Conquistas</h2>
-          <div className="grid grid-cols-3 md:grid-cols-7 gap-3">
+          <h2 className="text-ds-sm font-semibold mb-ds-xs flex items-center gap-2"><Award className="h-4 w-4" /> Conquistas</h2>
+          <div className="grid grid-cols-3 md:grid-cols-7 gap-ds-xs">
             {achievements.map((a, i) => (
               <motion.div
                 key={a.id}
@@ -434,7 +434,7 @@ export default function CampanhasPage() {
       {/* 8. Score History (detailed with date/time) */}
       {scoreHistory.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold mb-3">Histórico de Pontuação</h2>
+          <h2 className="text-ds-sm font-semibold mb-ds-xs">Histórico de Pontuação</h2>
           <Accordion type="multiple" className="space-y-2">
             {scoreHistory.map(entry => (
               <AccordionItem key={entry.user?.id} value={entry.user?.id || ''} className="border rounded-lg px-4">
