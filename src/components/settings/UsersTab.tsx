@@ -134,8 +134,14 @@ export default function UsersTab() {
     fileInputRef.current?.click();
   };
 
+  const isEmailDuplicate = users.some(u => u.email.toLowerCase() === newUserForm.email.toLowerCase().trim());
+
   const handleCreateUser = () => {
     if (!newUserForm.name || !newUserForm.email) return;
+    if (isEmailDuplicate) {
+      toast({ title: 'Email já cadastrado', description: 'Já existe um colaborador com este email.', variant: 'destructive' });
+      return;
+    }
     const newUser: User = {
       id: `u${Date.now()}`,
       name: newUserForm.name,
