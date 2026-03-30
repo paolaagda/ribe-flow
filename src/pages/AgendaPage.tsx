@@ -540,7 +540,7 @@ export default function AgendaPage() {
               <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar('prev')}>
                 <ChevronLeft className="h-3.5 w-3.5" />
               </Button>
-              <span className="text-xs font-medium min-w-[100px] text-center capitalize">
+              <span className="text-ds-xs font-medium min-w-[100px] text-center capitalize">
                 {view === 'day' ? format(currentDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) :
                  view === 'week' ? `${format(startOfWeek(currentDate, { locale: ptBR }), 'dd/MM')} — ${format(endOfWeek(currentDate, { locale: ptBR }), 'dd/MM/yyyy')}` :
                  format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
