@@ -219,7 +219,7 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
           {/* Observação */}
           <div className="space-y-1.5">
             <Label>Observação</Label>
-            <Textarea value={observation} onChange={e => setObservation(e.target.value)} placeholder="Descreva o andamento..." rows={3} />
+            <Textarea value={observation} onChange={e => setObservation(e.target.value)} placeholder="Descreva o andamento..." rows={3} disabled={!canEditObservation} />
           </div>
 
           {/* Info fields (edit only) */}
