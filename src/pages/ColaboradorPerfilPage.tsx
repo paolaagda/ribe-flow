@@ -33,6 +33,7 @@ export default function ColaboradorPerfilPage() {
   const { allTasks } = useTasks();
   const { getAvatar } = useUserAvatars();
   const { teams } = useTeamFilter();
+  const { registrations } = useRegistrations();
 
   const user = users.find(u => u.id === id);
 
