@@ -81,29 +81,48 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
     }
 
     if (isEdit && registration) {
+      // Track field changes for audit
+      const changes: Array<{ field: string; old: string; new: string }> = [];
+      if (status !== registration.status) changes.push({ field: 'Status', old: registration.status, new: status });
+      if (observation !== registration.observation) changes.push({ field: 'Observação', old: registration.observation || '(vazio)', new: observation });
+      if (bank !== registration.bank) changes.push({ field: 'Banco', old: registration.bank, new: bank });
+      if (handlingWith !== registration.handlingWith) changes.push({ field: 'Tratando com', old: registration.handlingWith, new: handlingWith });
+      if (code !== registration.code) changes.push({ field: 'Código', old: registration.code || '(vazio)', new: code });
+
       updateRegistration(registration.id, {
-        partnerId,
-        bank,
+        partnerId, bank,
         cnpj: selectedPartner?.cnpj || '',
         commercialUserId: selectedPartner?.responsibleUserId || '',
-        status,
-        solicitation,
-        handlingWith,
-        observation,
-        code,
+        status, solicitation, handlingWith, observation, code,
       });
+
+      changes.forEach(c => {
+        addLog({
+          module: 'Cadastro',
+          action: c.field === 'Status' ? 'status_change' : 'edit',
+          entityId: registration.id,
+          entityLabel: `Cadastro - ${bank}`,
+          field: c.field,
+          oldValue: c.old,
+          newValue: c.new,
+          description: `${c.field === 'Status' ? 'Alterou status' : 'Editou ' + c.field.toLowerCase()} de "${c.old}" para "${c.new}"`,
+        });
+      });
+
       toast({ title: 'Cadastro atualizado' });
     } else {
-      addRegistration({
-        partnerId,
-        bank,
+      const newReg = addRegistration({
+        partnerId, bank,
         cnpj: selectedPartner?.cnpj || '',
         commercialUserId: selectedPartner?.responsibleUserId || '',
-        status,
-        solicitation,
-        handlingWith,
-        observation,
-        code,
+        status, solicitation, handlingWith, observation, code,
+      });
+      addLog({
+        module: 'Cadastro',
+        action: 'create',
+        entityId: newReg.id,
+        entityLabel: `Cadastro - ${bank}`,
+        description: `Criou cadastro para ${selectedPartner?.name || 'parceiro'} com banco ${bank}`,
       });
       toast({ title: 'Cadastro criado com sucesso' });
     }
