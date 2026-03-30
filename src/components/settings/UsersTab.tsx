@@ -142,7 +142,7 @@ export default function UsersTab() {
         onChange={handlePhotoUpload}
       />
       <Tabs defaultValue="equipe">
-        <TabsList>
+        <TabsList className="w-full justify-center">
           <TabsTrigger value="equipe">Colaboradores</TabsTrigger>
           {canRead('teams.view') && <TabsTrigger value="equipes">Equipes</TabsTrigger>}
           {isGestor && <TabsTrigger value="permissoes">Permissões</TabsTrigger>}
