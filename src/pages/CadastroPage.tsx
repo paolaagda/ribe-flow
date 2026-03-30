@@ -77,7 +77,33 @@ export default function CadastroPage() {
           </Button>
         </PageHeader>
 
-        {/* Filters */}
+        {/* KPIs */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+          <AnimatedKpiCard
+            icon={FileText}
+            label="Total"
+            value={registrations.length}
+            color="text-primary"
+            delay={0}
+            onClick={() => setFilterStatus('all')}
+            active={filterStatus === 'all'}
+          />
+          {Object.entries(statusKpiConfig).map(([status, config], i) => (
+            <AnimatedKpiCard
+              key={status}
+              icon={config.icon}
+              label={status}
+              value={statusCounts[status] || 0}
+              color={config.color}
+              delay={(i + 1) * 0.05}
+              onClick={() => setFilterStatus(filterStatus === status ? 'all' : status)}
+              active={filterStatus === status}
+              pulse={status === 'Em análise' && (statusCounts[status] || 0) > 0}
+            />
+          ))}
+        </div>
+
+
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
