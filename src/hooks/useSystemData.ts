@@ -68,7 +68,7 @@ export function useSystemData() {
   }, [data]);
 
   const getItems = useCallback((category: SystemCategory): SystemItem[] => {
-    return data[category];
+    return data[category] || initialData[category] || [];
   }, [data]);
 
   return { data, addItem, toggleItem, getActiveItems, getItems };
