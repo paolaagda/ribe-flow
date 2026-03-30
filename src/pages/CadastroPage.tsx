@@ -4,12 +4,23 @@ import PageTransition from '@/components/PageTransition';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine } from 'lucide-react';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useSystemData } from '@/hooks/useSystemData';
 import RegistrationCard from '@/components/cadastro/RegistrationCard';
 import RegistrationModal from '@/components/cadastro/RegistrationModal';
 import { Registration } from '@/data/registrations';
+import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
+
+const statusKpiConfig: Record<string, { icon: any; color: string }> = {
+  'Não iniciado': { icon: FileText, color: 'text-muted-foreground' },
+  'Colhendo documentação': { icon: Clock, color: 'text-info' },
+  'Em análise': { icon: AlertCircle, color: 'text-warning' },
+  'Colhendo assinaturas': { icon: PenLine, color: 'text-violet-500' },
+  'Concluído': { icon: CheckCircle2, color: 'text-success' },
+  'Em pausa': { icon: PauseCircle, color: 'text-orange-500' },
+  'Cancelado': { icon: XCircle, color: 'text-destructive' },
+};
 
 export default function CadastroPage() {
   const { registrations } = useRegistrations();
@@ -22,6 +33,14 @@ export default function CadastroPage() {
 
   const statuses = getActiveItems('registrationStatuses');
   const banks = getActiveItems('registrationBanks');
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    registrations.forEach(r => {
+      counts[r.status] = (counts[r.status] || 0) + 1;
+    });
+    return counts;
+  }, [registrations]);
 
   const filtered = useMemo(() => {
     return registrations.filter(r => {
@@ -58,7 +77,33 @@ export default function CadastroPage() {
           </Button>
         </PageHeader>
 
-        {/* Filters */}
+        {/* KPIs */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+          <AnimatedKpiCard
+            icon={FileText}
+            label="Total"
+            value={registrations.length}
+            color="text-primary"
+            delay={0}
+            onClick={() => setFilterStatus('all')}
+            active={filterStatus === 'all'}
+          />
+          {Object.entries(statusKpiConfig).map(([status, config], i) => (
+            <AnimatedKpiCard
+              key={status}
+              icon={config.icon}
+              label={status}
+              value={statusCounts[status] || 0}
+              color={config.color}
+              delay={(i + 1) * 0.05}
+              onClick={() => setFilterStatus(filterStatus === status ? 'all' : status)}
+              active={filterStatus === status}
+              pulse={status === 'Em análise' && (statusCounts[status] || 0) > 0}
+            />
+          ))}
+        </div>
+
+
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
