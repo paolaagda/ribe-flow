@@ -535,7 +535,7 @@ export default function AgendaPage() {
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold shrink-0">Agenda</h1>
+            <h1 className="text-ds-xl font-bold shrink-0">Agenda</h1>
             <div className="flex items-center gap-1">
               <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar('prev')}>
                 <ChevronLeft className="h-3.5 w-3.5" />
