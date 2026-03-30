@@ -135,9 +135,10 @@ export default function UsersTab() {
   };
 
   const isEmailDuplicate = users.some(u => u.email.toLowerCase() === newUserForm.email.toLowerCase().trim());
+  const isEmailInvalid = !!newUserForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newUserForm.email.trim());
 
   const handleCreateUser = () => {
-    if (!newUserForm.name || !newUserForm.email) return;
+    if (!newUserForm.name || !newUserForm.email || isEmailInvalid) return;
     if (isEmailDuplicate) {
       toast({ title: 'Email já cadastrado', description: 'Já existe um colaborador com este email.', variant: 'destructive' });
       return;
@@ -636,13 +637,16 @@ export default function UsersTab() {
               <Label>Bio</Label>
               <Input value={newUserForm.bio} onChange={e => setNewUserForm({...newUserForm, bio: e.target.value})} placeholder="Breve descrição" />
             </div>
-            {isEmailDuplicate && newUserForm.email && (
+            {isEmailInvalid && (
+              <p className="text-destructive text-ds-xs">Formato de email inválido.</p>
+            )}
+            {isEmailDuplicate && newUserForm.email && !isEmailInvalid && (
               <p className="text-destructive text-ds-xs">Já existe um colaborador com este email.</p>
             )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowNewUser(false)}>Cancelar</Button>
-            <Button onClick={handleCreateUser} disabled={!newUserForm.name || !newUserForm.email || isEmailDuplicate}>Criar</Button>
+            <Button onClick={handleCreateUser} disabled={!newUserForm.name || !newUserForm.email || isEmailDuplicate || isEmailInvalid}>Criar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
