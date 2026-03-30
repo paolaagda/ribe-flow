@@ -181,7 +181,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 + i * 0.04, duration: 0.25 }}
               className={cn(
-                'flex items-center gap-2 px-3 py-2 rounded-lg border text-ds-xs cursor-pointer transition-all duration-200',
+                'flex items-center gap-1.5 px-2 py-1 rounded-md border text-[11px] cursor-pointer transition-all duration-200',
                 activeFilter === insight.id
                   ? activeVariantStyles[insight.variant]
                   : variantStyles[insight.variant],
