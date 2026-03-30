@@ -26,14 +26,16 @@ const statusKpiConfig: Record<string, { icon: any; color: string }> = {
 };
 
 export default function CadastroPage() {
-  const { registrations } = useRegistrations();
+  const { registrations, updateRegistration, deleteRegistration } = useRegistrations();
   const { getActiveItems } = useSystemData();
   const { canRead, canWrite } = usePermission();
+  const { toast } = useToast();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterBank, setFilterBank] = useState('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Registration | null>(null);
 
   const statuses = getActiveItems('registrationStatuses');
   const banks = getActiveItems('registrationBanks');
