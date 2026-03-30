@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+
 import { Lightbulb, TrendingUp, DollarSign, AlertTriangle, CheckCircle2, Target, Calendar, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useVisits } from '@/hooks/useVisits';
@@ -20,17 +20,17 @@ export interface Insight {
 }
 
 const variantStyles: Record<string, string> = {
-  success: 'bg-success/8 text-success border-success/15 hover:bg-success/15 hover:border-success/30',
-  info: 'bg-info/8 text-info border-info/15 hover:bg-info/15 hover:border-info/30',
-  warning: 'bg-warning/8 text-warning border-warning/15 hover:bg-warning/15 hover:border-warning/30',
-  neutral: 'bg-muted/50 text-muted-foreground border-border/50 hover:bg-muted hover:border-border',
+  success: 'bg-success/5 text-success border-success/10 hover:bg-success/10 hover:border-success/20',
+  info: 'bg-info/5 text-info border-info/10 hover:bg-info/10 hover:border-info/20',
+  warning: 'bg-warning/5 text-warning border-warning/10 hover:bg-warning/10 hover:border-warning/20',
+  neutral: 'bg-muted/30 text-muted-foreground border-border/30 hover:bg-muted/60 hover:border-border/50',
 };
 
 const activeVariantStyles: Record<string, string> = {
-  success: 'bg-success/20 text-success border-success/40 ring-1 ring-success/20 shadow-[0_0_12px_-3px_hsl(var(--success)/0.3)]',
-  info: 'bg-info/20 text-info border-info/40 ring-1 ring-info/20 shadow-[0_0_12px_-3px_hsl(var(--info)/0.3)]',
-  warning: 'bg-warning/20 text-warning border-warning/40 ring-1 ring-warning/20 shadow-[0_0_12px_-3px_hsl(var(--warning)/0.3)]',
-  neutral: 'bg-muted text-foreground border-foreground/20 ring-1 ring-foreground/10',
+  success: 'bg-success/15 text-success border-success/30 ring-1 ring-success/15',
+  info: 'bg-info/15 text-info border-info/30 ring-1 ring-info/15',
+  warning: 'bg-warning/15 text-warning border-warning/30 ring-1 ring-warning/15',
+  neutral: 'bg-muted/80 text-foreground border-foreground/15 ring-1 ring-foreground/5',
 };
 
 interface SmartInsightsProps {
@@ -156,48 +156,44 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.1 }}
+      transition={{ duration: 0.35, delay: 0.1 }}
     >
-      <Card className="border-border/40 gradient-subtle">
-        <CardContent className="p-ds-sm">
-          <div className="flex items-center gap-ds-xs mb-3">
-            <div className="p-1.5 rounded-lg bg-warning/10">
-              <Lightbulb className="h-4 w-4 text-warning animate-pulse" style={{ animationDuration: '3s' }} />
-            </div>
-            <span className="text-ds-sm font-semibold">Insights Inteligentes</span>
-            {activeFilter && (
-              <button
-                onClick={() => onFilterClick?.(null)}
-                className="ml-auto flex items-center gap-1 text-ds-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted"
-              >
-                <X className="h-3 w-3" /> Limpar filtro
-              </button>
-            )}
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-            {insights.map((insight, i) => (
-              <motion.div
-                key={insight.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.15 + i * 0.05, duration: 0.3 }}
-                className={cn(
-                  'flex items-center gap-2.5 px-3.5 py-3 rounded-xl border text-ds-xs font-medium cursor-pointer transition-all duration-200 backdrop-blur-sm',
-                  activeFilter === insight.id
-                    ? activeVariantStyles[insight.variant]
-                    : variantStyles[insight.variant],
-                )}
-                onClick={() => handleClick(insight)}
-              >
-                {insight.icon}
-                <span className="leading-snug">{insight.text}</span>
-              </motion.div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-2">
+        <div className="flex items-center gap-1.5">
+          <Lightbulb className="h-3.5 w-3.5 text-warning/70" />
+          <span className="text-ds-xs font-medium text-muted-foreground">Insights</span>
+          {activeFilter && (
+            <button
+              onClick={() => onFilterClick?.(null)}
+              className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors px-1.5 py-0.5 rounded hover:bg-muted"
+            >
+              <X className="h-2.5 w-2.5" /> Limpar
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {insights.map((insight, i) => (
+            <motion.div
+              key={insight.id}
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 + i * 0.04, duration: 0.25 }}
+              className={cn(
+                'flex items-center gap-2 px-3 py-2 rounded-lg border text-ds-xs cursor-pointer transition-all duration-200',
+                activeFilter === insight.id
+                  ? activeVariantStyles[insight.variant]
+                  : variantStyles[insight.variant],
+              )}
+              onClick={() => handleClick(insight)}
+            >
+              {insight.icon}
+              <span className="leading-snug">{insight.text}</span>
+            </motion.div>
+          ))}
+        </div>
+      </div>
     </motion.div>
   );
 }
