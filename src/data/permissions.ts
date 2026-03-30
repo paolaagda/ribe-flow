@@ -195,6 +195,9 @@ export const defaultPermissions: Record<AppProfile, Record<string, PermissionLev
     'registration.changeStatus': 'none',
     'registration.editObservation': 'none',
 
+    // Logs
+    'logs.view': 'none',
+
     // Insights
     'insights.view': 'read',
   },
