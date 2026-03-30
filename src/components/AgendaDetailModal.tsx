@@ -36,7 +36,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   const { user } = useAuth();
   const { getAvatar } = useUserAvatars();
   const { getPartnerById } = usePartners();
-
+  const { hasActive, activeCount, regs } = useRegistrationBadge(visit?.partnerId);
   if (!visit) return null;
 
   const partner = getPartnerById(visit.partnerId);
