@@ -91,6 +91,14 @@ export default function ConfiguracoesPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="logs">
+          <Card>
+            <CardContent className="p-5 md:p-7">
+              <LogsTab />
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </PageTransition>
   );
