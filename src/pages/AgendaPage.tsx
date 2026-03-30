@@ -897,6 +897,11 @@ export default function AgendaPage() {
                           );
                         })()}
                         <div className="flex items-center gap-1.5">
+                          {hasActiveRegistration(v.partnerId) && (
+                            <Badge variant="outline" className="text-[9px] bg-info/10 text-info border-info/20 gap-0.5">
+                              <FileText className="h-2.5 w-2.5" />Cadastro
+                            </Badge>
+                          )}
                           {v.potentialValue && (
                             <Badge variant="outline" className={cn('text-[9px]', v.potentialValue >= 1000000 ? 'bg-warning/10 text-warning border-warning/20' : '')}>
                               {formatCentavos(v.potentialValue)}
