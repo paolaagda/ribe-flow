@@ -330,9 +330,9 @@ export default function CampanhasPage() {
       {/* 5b. Podium — Classic Layout */}
       {canRead('gamification.ranking') && podium.length >= 3 && (
         <Card className="overflow-hidden">
-          <CardContent className="p-6 pb-0">
-            <p className="text-sm font-semibold mb-6 flex items-center gap-2"><Trophy className="h-4 w-4 text-yellow-500" /> Pódio</p>
-            <div className="flex items-end justify-center gap-3 md:gap-6">
+          <CardContent className="p-ds-md pb-0">
+            <p className="text-ds-sm font-semibold mb-ds-sm flex items-center gap-2"><Trophy className="h-4 w-4 text-yellow-500" /> Pódio</p>
+            <div className="flex items-end justify-center gap-ds-sm md:gap-ds-md">
               {podiumOrder.map((item, idx) => {
                 const pos = podium.indexOf(item) + 1;
                 const isFirst = pos === 1;
