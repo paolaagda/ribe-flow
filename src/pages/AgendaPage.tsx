@@ -54,6 +54,11 @@ export default function AgendaPage() {
   const { addNotification } = useNotifications();
   const { visits, setVisits } = useVisits();
   const { getActiveItems } = useSystemData();
+  const { registrations } = useRegistrations();
+
+  const hasActiveRegistration = useCallback((partnerId: string) => {
+    return registrations.some(r => r.partnerId === partnerId && !['Concluído', 'Cancelado'].includes(r.status));
+  }, [registrations]);
   const [view, setView] = useState<ViewMode>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showForm, setShowForm] = useState(false);
