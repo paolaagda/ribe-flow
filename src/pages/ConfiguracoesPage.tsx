@@ -28,7 +28,7 @@ export default function ConfiguracoesPage() {
       <PageHeader title="Configurações" description="Centro administrativo do sistema" />
 
       <Tabs defaultValue="usuarios">
-        <TabsList>
+        <TabsList className="w-full justify-center">
           <TabsTrigger value="usuarios" className="gap-1.5">
             <Users className="h-3.5 w-3.5" /> Usuários
           </TabsTrigger>

@@ -188,7 +188,7 @@ export default function TasksDrawer({ open, onOpenChange, onOpenVisit }: Props) 
         </AnimatePresence>
 
         <Tabs value={tab} onValueChange={setTab} className="px-4 pb-4">
-          <TabsList className="w-full">
+          <TabsList className="w-full justify-center">
             <TabsTrigger value="pending" className="flex-1 text-xs gap-1">
               Pendentes
               <Badge variant="destructive" className="text-[10px] px-1.5 py-0 ml-1">{filteredPending.length}</Badge>
