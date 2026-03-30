@@ -49,6 +49,7 @@ const navItems = [
   { title: 'Campanhas', url: '/campanhas', icon: Trophy, permKey: 'campaigns.view' },
   { title: 'Análises', url: '/analises', icon: BarChart3, permKey: 'analysis.reports' },
   { title: 'Parceiros', url: '/parceiros', icon: Building2, permKey: 'partners.list' },
+  { title: 'Cadastro', url: '/cadastro', icon: ClipboardList, permKey: 'partners.list' },
   { title: 'Configurações', url: '/configuracoes', icon: Settings, permKey: 'settings.view' },
 ];
 

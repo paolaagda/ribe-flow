@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useSystemData, SystemCategory, categoryLabels } from '@/hooks/useSystemData';
-import { Plus, Landmark, Package, AlertTriangle, XCircle, Store, Clock } from 'lucide-react';
+import { Plus, Landmark, Package, AlertTriangle, XCircle, Store, Clock, Building2, FileCheck, FileText, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const categoryIcons: Record<SystemCategory, React.ElementType> = {
@@ -16,9 +16,13 @@ const categoryIcons: Record<SystemCategory, React.ElementType> = {
   cancelReasons: XCircle,
   storeStructures: Store,
   periods: Clock,
+  registrationBanks: Building2,
+  registrationStatuses: FileCheck,
+  registrationSolicitations: FileText,
+  registrationHandlers: Users,
 };
 
-const categories: SystemCategory[] = ['banks', 'products', 'rescheduleReasons', 'cancelReasons', 'storeStructures', 'periods'];
+const categories: SystemCategory[] = ['banks', 'products', 'rescheduleReasons', 'cancelReasons', 'storeStructures', 'periods', 'registrationBanks', 'registrationStatuses', 'registrationSolicitations', 'registrationHandlers'];
 
 export default function SystemDataTab() {
   const { getItems, addItem, toggleItem } = useSystemData();
