@@ -50,6 +50,8 @@ export default function UsersTab() {
   const [uploadTargetUserId, setUploadTargetUserId] = useState<string | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [deletingTeamId, setDeletingTeamId] = useState<string | null>(null);
+  const [showNewUser, setShowNewUser] = useState(false);
+  const [newUserForm, setNewUserForm] = useState({ name: '', email: '', role: 'comercial' as UserRole, profile: 'nao_gestor' as AppProfile, bio: '' });
 
   const isGestor = profile === 'gestor';
   const { canRead, canWrite } = usePermission();
