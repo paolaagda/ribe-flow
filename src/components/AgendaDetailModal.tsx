@@ -118,6 +118,23 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             )}
           </div>
 
+          {/* Registration indicator */}
+          {hasActive && (
+            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-info/10 border border-info/20 text-sm">
+              <FileText className="h-4 w-4 text-info shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-info">Cadastro em andamento ({activeCount})</p>
+                {regs.map(r => (
+                  <div key={r.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant="outline" className="text-[9px]">{r.bank}</Badge>
+                    <span>{r.status}</span>
+                    <span>• {r.handlingWith}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <Separator />
 
           {/* Reschedule/Cancel Reason */}
