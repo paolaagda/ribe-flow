@@ -134,8 +134,14 @@ export default function UsersTab() {
     fileInputRef.current?.click();
   };
 
+  const isEmailDuplicate = users.some(u => u.email.toLowerCase() === newUserForm.email.toLowerCase().trim());
+
   const handleCreateUser = () => {
     if (!newUserForm.name || !newUserForm.email) return;
+    if (isEmailDuplicate) {
+      toast({ title: 'Email já cadastrado', description: 'Já existe um colaborador com este email.', variant: 'destructive' });
+      return;
+    }
     const newUser: User = {
       id: `u${Date.now()}`,
       name: newUserForm.name,
@@ -630,10 +636,13 @@ export default function UsersTab() {
               <Label>Bio</Label>
               <Input value={newUserForm.bio} onChange={e => setNewUserForm({...newUserForm, bio: e.target.value})} placeholder="Breve descrição" />
             </div>
+            {isEmailDuplicate && newUserForm.email && (
+              <p className="text-destructive text-ds-xs">Já existe um colaborador com este email.</p>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowNewUser(false)}>Cancelar</Button>
-            <Button onClick={handleCreateUser} disabled={!newUserForm.name || !newUserForm.email}>Criar</Button>
+            <Button onClick={handleCreateUser} disabled={!newUserForm.name || !newUserForm.email || isEmailDuplicate}>Criar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
