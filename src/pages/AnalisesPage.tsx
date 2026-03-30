@@ -192,7 +192,7 @@ export default function AnalisesPage() {
         )}
         </PageHeader>
 
-      <AnimatedFilterContent filterKey={activeInsight}>
+      <AnimatedFilterContent filterKey={activeInsight} className="space-y-ds-lg">
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-ds-sm">
         <AnimatedKpiCard icon={BarChart3} label="Total" value={kpis.total} color="text-foreground" delay={0} />
