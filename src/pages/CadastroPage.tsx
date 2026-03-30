@@ -84,6 +84,16 @@ export default function CadastroPage() {
   const handleTogglePause = (reg: Registration) => {
     const newStatus = reg.status === 'Em pausa' ? 'Não iniciado' : 'Em pausa';
     updateRegistration(reg.id, { status: newStatus });
+    addLog({
+      module: 'Cadastro',
+      action: 'status_change',
+      entityId: reg.id,
+      entityLabel: `Cadastro - ${reg.bank}`,
+      field: 'Status',
+      oldValue: reg.status,
+      newValue: newStatus,
+      description: `Alterou status de "${reg.status}" para "${newStatus}"`,
+    });
     toast({ title: newStatus === 'Em pausa' ? 'Cadastro pausado' : 'Cadastro reativado' });
   };
 
