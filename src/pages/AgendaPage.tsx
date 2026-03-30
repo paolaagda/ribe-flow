@@ -707,8 +707,8 @@ export default function AgendaPage() {
             className="overflow-hidden"
           >
             <Card className="mt-1">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
+              <CardContent className="p-ds-sm">
+                <div className="flex items-center justify-between mb-ds-xs">
                   <div className="flex items-center gap-2">
                     <ListTodo className="h-4 w-4 text-warning" />
                     <span className="text-sm font-semibold">Tarefas</span>
