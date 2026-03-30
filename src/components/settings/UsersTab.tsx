@@ -591,6 +591,52 @@ export default function UsersTab() {
         </DialogContent>
       </Dialog>
 
+      {/* New User Dialog */}
+      <Dialog open={showNewUser} onOpenChange={setShowNewUser}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Novo colaborador</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nome</Label>
+              <Input value={newUserForm.name} onChange={e => setNewUserForm({...newUserForm, name: e.target.value})} placeholder="Nome completo" />
+            </div>
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input value={newUserForm.email} onChange={e => setNewUserForm({...newUserForm, email: e.target.value})} placeholder="email@exemplo.com" />
+            </div>
+            <div className="space-y-2">
+              <Label>Cargo (empresa)</Label>
+              <Select value={newUserForm.role} onValueChange={v => setNewUserForm({...newUserForm, role: v as UserRole})}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {allCargos.map(c => (
+                    <SelectItem key={c} value={c}>{cargoLabels[c]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Perfil do App</Label>
+              <Select value={newUserForm.profile} onValueChange={v => setNewUserForm({...newUserForm, profile: v as AppProfile})}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gestor">Gestor</SelectItem>
+                  <SelectItem value="nao_gestor">Não Gestor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Bio</Label>
+              <Input value={newUserForm.bio} onChange={e => setNewUserForm({...newUserForm, bio: e.target.value})} placeholder="Breve descrição" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewUser(false)}>Cancelar</Button>
+            <Button onClick={handleCreateUser} disabled={!newUserForm.name || !newUserForm.email}>Criar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Edit User Dialog */}
       <Dialog open={!!editUser} onOpenChange={() => setEditUser(null)}>
         <DialogContent>
