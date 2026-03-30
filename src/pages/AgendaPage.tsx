@@ -683,7 +683,7 @@ export default function AgendaPage() {
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm pt-ds-xs">
               <TodayAgenda viewMode="personal" />
               <VisitMap viewMode="personal" />
             </div>
