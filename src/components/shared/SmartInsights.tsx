@@ -20,17 +20,17 @@ export interface Insight {
 }
 
 const variantStyles: Record<string, string> = {
-  success: 'bg-success/8 text-success border-success/15 hover:bg-success/15 hover:border-success/30',
-  info: 'bg-info/8 text-info border-info/15 hover:bg-info/15 hover:border-info/30',
-  warning: 'bg-warning/8 text-warning border-warning/15 hover:bg-warning/15 hover:border-warning/30',
-  neutral: 'bg-muted/50 text-muted-foreground border-border/50 hover:bg-muted hover:border-border',
+  success: 'bg-success/5 text-success border-success/10 hover:bg-success/10 hover:border-success/20',
+  info: 'bg-info/5 text-info border-info/10 hover:bg-info/10 hover:border-info/20',
+  warning: 'bg-warning/5 text-warning border-warning/10 hover:bg-warning/10 hover:border-warning/20',
+  neutral: 'bg-muted/30 text-muted-foreground border-border/30 hover:bg-muted/60 hover:border-border/50',
 };
 
 const activeVariantStyles: Record<string, string> = {
-  success: 'bg-success/20 text-success border-success/40 ring-1 ring-success/20 shadow-[0_0_12px_-3px_hsl(var(--success)/0.3)]',
-  info: 'bg-info/20 text-info border-info/40 ring-1 ring-info/20 shadow-[0_0_12px_-3px_hsl(var(--info)/0.3)]',
-  warning: 'bg-warning/20 text-warning border-warning/40 ring-1 ring-warning/20 shadow-[0_0_12px_-3px_hsl(var(--warning)/0.3)]',
-  neutral: 'bg-muted text-foreground border-foreground/20 ring-1 ring-foreground/10',
+  success: 'bg-success/15 text-success border-success/30 ring-1 ring-success/15',
+  info: 'bg-info/15 text-info border-info/30 ring-1 ring-info/15',
+  warning: 'bg-warning/15 text-warning border-warning/30 ring-1 ring-warning/15',
+  neutral: 'bg-muted/80 text-foreground border-foreground/15 ring-1 ring-foreground/5',
 };
 
 interface SmartInsightsProps {
