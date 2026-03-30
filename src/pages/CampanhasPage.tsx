@@ -236,7 +236,7 @@ export default function CampanhasPage() {
       {/* 2. Smart Insights */}
       <SmartInsights page="campanhas" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
 
-      <AnimatedFilterContent filterKey={activeInsight}>
+      <AnimatedFilterContent filterKey={activeInsight} className="space-y-ds-lg">
 
       {/* 4. KPI Cards */}
       {kpis && (
