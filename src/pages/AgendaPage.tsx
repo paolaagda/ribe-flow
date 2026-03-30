@@ -687,7 +687,7 @@ export default function AgendaPage() {
               <TodayAgenda viewMode="personal" />
               <VisitMap viewMode="personal" />
             </div>
-            <div className="pt-4">
+            <div className="pt-ds-sm">
               <PendingTasksCard onOpenVisit={(visitId) => {
                 const v = visits.find(vi => vi.id === visitId);
                 if (v) { setSelectedVisit(v); setShowDetail(true); }
