@@ -169,9 +169,16 @@ export default function UsersTab() {
 
         {/* Tab Equipe */}
         <TabsContent value="equipe" className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Buscar usuário..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Buscar usuário..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+            </div>
+            {isGestor && canWrite('users.edit') && (
+              <Button size="sm" onClick={() => setShowNewUser(true)}>
+                <Plus className="h-4 w-4 mr-1" /> Novo
+              </Button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
