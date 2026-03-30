@@ -1,0 +1,117 @@
+import { useState, useMemo } from 'react';
+import PageHeader from '@/components/shared/PageHeader';
+import PageTransition from '@/components/PageTransition';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Search } from 'lucide-react';
+import { useRegistrations } from '@/hooks/useRegistrations';
+import { useSystemData } from '@/hooks/useSystemData';
+import RegistrationCard from '@/components/cadastro/RegistrationCard';
+import RegistrationModal from '@/components/cadastro/RegistrationModal';
+import { Registration } from '@/data/registrations';
+
+export default function CadastroPage() {
+  const { registrations } = useRegistrations();
+  const { getActiveItems } = useSystemData();
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterBank, setFilterBank] = useState('all');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
+
+  const statuses = getActiveItems('registrationStatuses');
+  const banks = getActiveItems('registrationBanks');
+
+  const filtered = useMemo(() => {
+    return registrations.filter(r => {
+      if (filterStatus !== 'all' && r.status !== filterStatus) return false;
+      if (filterBank !== 'all' && r.bank !== filterBank) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const matchesSearch = r.observation.toLowerCase().includes(q) ||
+          r.bank.toLowerCase().includes(q) ||
+          r.code.toLowerCase().includes(q) ||
+          r.handlingWith.toLowerCase().includes(q);
+        if (!matchesSearch) return false;
+      }
+      return true;
+    });
+  }, [registrations, filterStatus, filterBank, search]);
+
+  const handleCardClick = (reg: Registration) => {
+    setSelectedReg(reg);
+    setModalOpen(true);
+  };
+
+  const handleNew = () => {
+    setSelectedReg(null);
+    setModalOpen(true);
+  };
+
+  return (
+    <PageTransition>
+      <div className="space-y-ds-lg">
+        <PageHeader title="Cadastro" description="Gerencie o credenciamento de parceiros com bancos.">
+          <Button onClick={handleNew} className="gap-2">
+            <Plus className="h-4 w-4" /> Novo Cadastro
+          </Button>
+        </PageHeader>
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por observação, banco, código..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-9 h-9"
+            />
+          </div>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-full sm:w-44 h-9">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              {statuses.map(s => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterBank} onValueChange={setFilterBank}>
+            <SelectTrigger className="w-full sm:w-36 h-9">
+              <SelectValue placeholder="Banco" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os bancos</SelectItem>
+              {banks.map(b => (
+                <SelectItem key={b} value={b}>{b}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Grid */}
+        {filtered.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <p className="text-sm">Nenhum cadastro encontrado.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filtered.map(reg => (
+              <RegistrationCard key={reg.id} registration={reg} onClick={() => handleCardClick(reg)} />
+            ))}
+          </div>
+        )}
+
+        <RegistrationModal
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          registration={selectedReg}
+        />
+      </div>
+    </PageTransition>
+  );
+}

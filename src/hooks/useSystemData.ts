@@ -1,6 +1,7 @@
 import { useLocalStorage } from './useLocalStorage';
 import { useCallback } from 'react';
 import { BANKS, PRODUCTS, RESCHEDULE_REASONS, CANCEL_REASONS, STORE_STRUCTURES } from '@/data/mock-data';
+import { REGISTRATION_BANKS, REGISTRATION_STATUSES, REGISTRATION_SOLICITATIONS, REGISTRATION_HANDLERS } from '@/data/registrations';
 
 export interface SystemItem {
   id: string;
@@ -8,7 +9,7 @@ export interface SystemItem {
   active: boolean;
 }
 
-export type SystemCategory = 'banks' | 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods';
+export type SystemCategory = 'banks' | 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationBanks' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers';
 
 const categoryLabels: Record<SystemCategory, string> = {
   banks: 'Bancos',
@@ -17,6 +18,10 @@ const categoryLabels: Record<SystemCategory, string> = {
   cancelReasons: 'Justificativas de Cancelamento',
   storeStructures: 'Tipos de Loja',
   periods: 'Períodos da Agenda',
+  registrationBanks: 'Bancos (Cadastro)',
+  registrationStatuses: 'Status de Cadastro',
+  registrationSolicitations: 'Tipos de Solicitação',
+  registrationHandlers: 'Tratando Com',
 };
 
 function buildInitial(items: readonly string[]): SystemItem[] {
@@ -30,6 +35,10 @@ const initialData: Record<SystemCategory, SystemItem[]> = {
   cancelReasons: buildInitial(CANCEL_REASONS),
   storeStructures: buildInitial(STORE_STRUCTURES),
   periods: buildInitial(['Manhã', 'Tarde']),
+  registrationBanks: buildInitial(REGISTRATION_BANKS),
+  registrationStatuses: buildInitial(REGISTRATION_STATUSES),
+  registrationSolicitations: buildInitial(REGISTRATION_SOLICITATIONS),
+  registrationHandlers: buildInitial(REGISTRATION_HANDLERS),
 };
 
 export { categoryLabels };

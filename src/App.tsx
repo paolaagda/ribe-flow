@@ -12,6 +12,7 @@ import AnalisesPage from "@/pages/AnalisesPage";
 import ParceirosPage from "@/pages/ParceirosPage";
 import ConfiguracoesPage from "@/pages/ConfiguracoesPage";
 import CampanhasPage from "@/pages/CampanhasPage";
+import CadastroPage from "@/pages/CadastroPage";
 import ColaboradorPerfilPage from "@/pages/ColaboradorPerfilPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import NotFound from "@/pages/NotFound";
@@ -37,6 +38,7 @@ function AppRoutes() {
       <Route path="/analises" element={<ProtectedRoute><AnalisesPage /></ProtectedRoute>} />
       <Route path="/parceiros" element={<ProtectedRoute><ParceirosPage /></ProtectedRoute>} />
       <Route path="/configuracoes" element={<ProtectedRoute><ConfiguracoesPage /></ProtectedRoute>} />
+      <Route path="/cadastro" element={<ProtectedRoute><CadastroPage /></ProtectedRoute>} />
       <Route path="/colaborador/:id" element={<ProtectedRoute><ColaboradorPerfilPage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
