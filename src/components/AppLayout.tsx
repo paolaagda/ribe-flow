@@ -8,6 +8,7 @@ import {
   Settings,
   LogOut,
   Handshake,
+  ClipboardList,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
