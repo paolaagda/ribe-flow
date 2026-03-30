@@ -34,6 +34,14 @@ export default function CadastroPage() {
   const statuses = getActiveItems('registrationStatuses');
   const banks = getActiveItems('registrationBanks');
 
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    registrations.forEach(r => {
+      counts[r.status] = (counts[r.status] || 0) + 1;
+    });
+    return counts;
+  }, [registrations]);
+
   const filtered = useMemo(() => {
     return registrations.filter(r => {
       if (filterStatus !== 'all' && r.status !== filterStatus) return false;
