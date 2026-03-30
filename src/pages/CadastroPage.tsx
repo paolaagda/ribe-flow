@@ -74,6 +74,25 @@ export default function CadastroPage() {
     setModalOpen(true);
   };
 
+  const handleEdit = (reg: Registration) => {
+    setSelectedReg(reg);
+    setModalOpen(true);
+  };
+
+  const handleTogglePause = (reg: Registration) => {
+    const newStatus = reg.status === 'Em pausa' ? 'Não iniciado' : 'Em pausa';
+    updateRegistration(reg.id, { status: newStatus });
+    toast({ title: newStatus === 'Em pausa' ? 'Cadastro pausado' : 'Cadastro reativado' });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteTarget) {
+      deleteRegistration(deleteTarget.id);
+      toast({ title: 'Cadastro excluído' });
+      setDeleteTarget(null);
+    }
+  };
+
   if (!canRead('registration.view')) {
     return (
       <PageTransition>
