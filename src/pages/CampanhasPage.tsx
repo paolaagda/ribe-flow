@@ -406,8 +406,8 @@ export default function CampanhasPage() {
       {/* 7. Achievements (compact single row) */}
       {achievements.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold mb-3 flex items-center gap-2"><Award className="h-4 w-4" /> Conquistas</h2>
-          <div className="grid grid-cols-3 md:grid-cols-7 gap-3">
+          <h2 className="text-ds-sm font-semibold mb-ds-xs flex items-center gap-2"><Award className="h-4 w-4" /> Conquistas</h2>
+          <div className="grid grid-cols-3 md:grid-cols-7 gap-ds-xs">
             {achievements.map((a, i) => (
               <motion.div
                 key={a.id}
