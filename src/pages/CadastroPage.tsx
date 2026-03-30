@@ -31,6 +31,7 @@ export default function CadastroPage() {
   const { getActiveItems } = useSystemData();
   const { canRead, canWrite } = usePermission();
   const { toast } = useToast();
+  const { addLog } = useAuditLog();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterBank, setFilterBank] = useState('all');
