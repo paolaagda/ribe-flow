@@ -649,7 +649,7 @@ export default function AgendaPage() {
         </AnimatePresence>
       </div>
 
-      <AnimatedFilterContent filterKey={activeInsight}>
+      <AnimatedFilterContent filterKey={activeInsight} className="space-y-ds-lg">
       {/* KPI Grid - 6 cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-ds-sm">
         <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={todayIndicators.concluidas} secondaryValue={todayIndicators.total} color="text-info" delay={0.1} onClick={() => togglePanel('today')} active={showTodayPanel} />
