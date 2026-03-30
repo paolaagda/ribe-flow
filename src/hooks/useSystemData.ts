@@ -1,6 +1,7 @@
 import { useLocalStorage } from './useLocalStorage';
 import { useCallback } from 'react';
 import { BANKS, PRODUCTS, RESCHEDULE_REASONS, CANCEL_REASONS, STORE_STRUCTURES } from '@/data/mock-data';
+import { REGISTRATION_BANKS, REGISTRATION_STATUSES, REGISTRATION_SOLICITATIONS, REGISTRATION_HANDLERS } from '@/data/registrations';
 
 export interface SystemItem {
   id: string;
