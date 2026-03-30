@@ -4,13 +4,14 @@ import PageTransition from '@/components/PageTransition';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine } from 'lucide-react';
+import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine, ShieldAlert } from 'lucide-react';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useSystemData } from '@/hooks/useSystemData';
 import RegistrationCard from '@/components/cadastro/RegistrationCard';
 import RegistrationModal from '@/components/cadastro/RegistrationModal';
 import { Registration } from '@/data/registrations';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
+import { usePermission } from '@/hooks/usePermission';
 
 const statusKpiConfig: Record<string, { icon: any; color: string }> = {
   'Não iniciado': { icon: FileText, color: 'text-muted-foreground' },
@@ -25,6 +26,7 @@ const statusKpiConfig: Record<string, { icon: any; color: string }> = {
 export default function CadastroPage() {
   const { registrations } = useRegistrations();
   const { getActiveItems } = useSystemData();
+  const { canRead, canWrite } = usePermission();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterBank, setFilterBank] = useState('all');
@@ -68,13 +70,27 @@ export default function CadastroPage() {
     setModalOpen(true);
   };
 
+  if (!canRead('registration.view')) {
+    return (
+      <PageTransition>
+        <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
+          <ShieldAlert className="h-16 w-16 text-muted-foreground/50" />
+          <h2 className="text-xl font-semibold text-foreground">Acesso Restrito</h2>
+          <p className="text-sm text-muted-foreground max-w-md">Você não tem permissão para acessar esta página.</p>
+        </div>
+      </PageTransition>
+    );
+  }
+
   return (
     <PageTransition>
       <div className="space-y-ds-lg">
         <PageHeader title="Cadastro" description="Gerencie o credenciamento de parceiros com bancos.">
-          <Button onClick={handleNew} className="gap-2">
-            <Plus className="h-4 w-4" /> Novo Cadastro
-          </Button>
+          {canWrite('registration.create') && (
+            <Button onClick={handleNew} className="gap-2">
+              <Plus className="h-4 w-4" /> Novo Cadastro
+            </Button>
+          )}
         </PageHeader>
 
         {/* KPIs */}
@@ -155,6 +171,9 @@ export default function CadastroPage() {
           open={modalOpen}
           onOpenChange={setModalOpen}
           registration={selectedReg}
+          canEdit={canWrite('registration.edit')}
+          canChangeStatus={canWrite('registration.changeStatus')}
+          canEditObservation={canWrite('registration.editObservation')}
         />
       </div>
     </PageTransition>

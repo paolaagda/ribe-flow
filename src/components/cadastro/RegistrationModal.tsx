@@ -22,9 +22,12 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   registration?: Registration | null;
+  canEdit?: boolean;
+  canChangeStatus?: boolean;
+  canEditObservation?: boolean;
 }
 
-export default function RegistrationModal({ open, onOpenChange, registration }: Props) {
+export default function RegistrationModal({ open, onOpenChange, registration, canEdit = true, canChangeStatus = true, canEditObservation = true }: Props) {
   const { partners } = usePartners();
   const { getActiveItems } = useSystemData();
   const { getAvatar } = useUserAvatars();
@@ -119,7 +122,7 @@ export default function RegistrationModal({ open, onOpenChange, registration }: 
           {/* Parceiro */}
           <div className="space-y-1.5">
             <Label>Parceiro *</Label>
-            <Select value={partnerId} onValueChange={setPartnerId}>
+            <Select value={partnerId} onValueChange={setPartnerId} disabled={isEdit && !canEdit}>
               <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
                 {partners.map(p => (
@@ -158,7 +161,7 @@ export default function RegistrationModal({ open, onOpenChange, registration }: 
           {/* Banco */}
           <div className="space-y-1.5">
             <Label>Banco *</Label>
-            <Select value={bank} onValueChange={setBank}>
+            <Select value={bank} onValueChange={setBank} disabled={isEdit && !canEdit}>
               <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
                 {banks.map(b => (
@@ -172,7 +175,7 @@ export default function RegistrationModal({ open, onOpenChange, registration }: 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Solicitação *</Label>
-              <Select value={solicitation} onValueChange={setSolicitation}>
+              <Select value={solicitation} onValueChange={setSolicitation} disabled={isEdit && !canEdit}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   {solicitations.map(s => (
@@ -183,7 +186,7 @@ export default function RegistrationModal({ open, onOpenChange, registration }: 
             </div>
             <div className="space-y-1.5">
               <Label>Status</Label>
-              <Select value={status} onValueChange={setStatus}>
+              <Select value={status} onValueChange={setStatus} disabled={!canChangeStatus}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {statuses.map(s => (
@@ -197,7 +200,7 @@ export default function RegistrationModal({ open, onOpenChange, registration }: 
           {/* Tratando com */}
           <div className="space-y-1.5">
             <Label>Tratando com *</Label>
-            <Select value={handlingWith} onValueChange={setHandlingWith}>
+            <Select value={handlingWith} onValueChange={setHandlingWith} disabled={!canChangeStatus}>
               <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
                 {handlers.map(h => (
@@ -210,13 +213,13 @@ export default function RegistrationModal({ open, onOpenChange, registration }: 
           {/* Código */}
           <div className="space-y-1.5">
             <Label>Código</Label>
-            <Input value={code} onChange={e => setCode(e.target.value)} placeholder="Código no banco" className="h-9" />
+            <Input value={code} onChange={e => setCode(e.target.value)} placeholder="Código no banco" className="h-9" disabled={isEdit && !canEdit} />
           </div>
 
           {/* Observação */}
           <div className="space-y-1.5">
             <Label>Observação</Label>
-            <Textarea value={observation} onChange={e => setObservation(e.target.value)} placeholder="Descreva o andamento..." rows={3} />
+            <Textarea value={observation} onChange={e => setObservation(e.target.value)} placeholder="Descreva o andamento..." rows={3} disabled={!canEditObservation} />
           </div>
 
           {/* Info fields (edit only) */}

@@ -89,6 +89,13 @@ export const permissionItems: PermissionItem[] = [
   { module: 'Notificações', action: 'Ver notificações', key: 'notifications.view' },
   { module: 'Notificações', action: 'Gerenciar notificações', key: 'notifications.manage' },
 
+  // Cadastro
+  { module: 'Cadastro', action: 'Visualizar cadastros', key: 'registration.view' },
+  { module: 'Cadastro', action: 'Criar cadastro', key: 'registration.create' },
+  { module: 'Cadastro', action: 'Editar cadastro', key: 'registration.edit' },
+  { module: 'Cadastro', action: 'Alterar status', key: 'registration.changeStatus' },
+  { module: 'Cadastro', action: 'Editar observação', key: 'registration.editObservation' },
+
   // Insights
   { module: 'Insights', action: 'Ver insights inteligentes', key: 'insights.view' },
 ];
@@ -177,6 +184,13 @@ export const defaultPermissions: Record<AppProfile, Record<string, PermissionLev
     // Notificações
     'notifications.view': 'read',
     'notifications.manage': 'none',
+
+    // Cadastro
+    'registration.view': 'read',
+    'registration.create': 'none',
+    'registration.edit': 'none',
+    'registration.changeStatus': 'none',
+    'registration.editObservation': 'none',
 
     // Insights
     'insights.view': 'read',
