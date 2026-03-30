@@ -213,7 +213,7 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
           {/* Código */}
           <div className="space-y-1.5">
             <Label>Código</Label>
-            <Input value={code} onChange={e => setCode(e.target.value)} placeholder="Código no banco" className="h-9" />
+            <Input value={code} onChange={e => setCode(e.target.value)} placeholder="Código no banco" className="h-9" disabled={isEdit && !canEdit} />
           </div>
 
           {/* Observação */}
