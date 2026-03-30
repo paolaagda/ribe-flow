@@ -75,15 +75,15 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
               <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-destructive animate-pulse ring-2 ring-card" />
             )}
           </div>
-          <div className="min-w-0 flex-1 text-center sm:text-left w-full overflow-hidden">
-            <p className="text-lg sm:text-ds-xl font-bold tabular-nums leading-tight tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
+          <div className="min-w-0 flex-1 text-center sm:text-left w-full">
+            <p className="text-lg sm:text-ds-xl font-bold tabular-nums leading-tight tracking-tight whitespace-nowrap">
               {numericValue !== null ? displayValue : value}
               {secondaryValue !== undefined && (
                 <span className="text-xs sm:text-ds-sm font-normal text-muted-foreground ml-0.5">/{secondaryValue}</span>
               )}
               {suffix && !secondaryValue && <span className="text-xs sm:text-ds-sm font-normal text-muted-foreground ml-0.5">{suffix}</span>}
             </p>
-            <p className="text-[10px] sm:text-ds-xs text-muted-foreground mt-1 sm:mt-2 font-medium tracking-wide uppercase truncate" title={label}>{label}</p>
+            <p className="text-[10px] sm:text-ds-xs text-muted-foreground mt-1 sm:mt-2 font-medium tracking-wide uppercase whitespace-nowrap">{label}</p>
           </div>
         </CardContent>
       </Card>
