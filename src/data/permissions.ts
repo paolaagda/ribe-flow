@@ -89,6 +89,13 @@ export const permissionItems: PermissionItem[] = [
   { module: 'Notificações', action: 'Ver notificações', key: 'notifications.view' },
   { module: 'Notificações', action: 'Gerenciar notificações', key: 'notifications.manage' },
 
+  // Cadastro
+  { module: 'Cadastro', action: 'Visualizar cadastros', key: 'registration.view' },
+  { module: 'Cadastro', action: 'Criar cadastro', key: 'registration.create' },
+  { module: 'Cadastro', action: 'Editar cadastro', key: 'registration.edit' },
+  { module: 'Cadastro', action: 'Alterar status', key: 'registration.changeStatus' },
+  { module: 'Cadastro', action: 'Editar observação', key: 'registration.editObservation' },
+
   // Insights
   { module: 'Insights', action: 'Ver insights inteligentes', key: 'insights.view' },
 ];
