@@ -636,10 +636,13 @@ export default function UsersTab() {
               <Label>Bio</Label>
               <Input value={newUserForm.bio} onChange={e => setNewUserForm({...newUserForm, bio: e.target.value})} placeholder="Breve descrição" />
             </div>
+            {isEmailDuplicate && newUserForm.email && (
+              <p className="text-destructive text-ds-xs">Já existe um colaborador com este email.</p>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowNewUser(false)}>Cancelar</Button>
-            <Button onClick={handleCreateUser} disabled={!newUserForm.name || !newUserForm.email}>Criar</Button>
+            <Button onClick={handleCreateUser} disabled={!newUserForm.name || !newUserForm.email || isEmailDuplicate}>Criar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
