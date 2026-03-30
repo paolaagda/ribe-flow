@@ -9,13 +9,14 @@ import { usePartners } from '@/hooks/usePartners';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus, FileText } from 'lucide-react';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCentavos } from '@/lib/currency';
 import AgendaComments from '@/components/agenda/AgendaComments';
+import { useRegistrationBadge } from '@/hooks/useRegistrationBadge';
 
 interface AgendaDetailModalProps {
   visit: Visit | null;
