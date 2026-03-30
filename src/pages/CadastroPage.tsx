@@ -171,6 +171,9 @@ export default function CadastroPage() {
           open={modalOpen}
           onOpenChange={setModalOpen}
           registration={selectedReg}
+          canEdit={canWrite('registration.edit')}
+          canChangeStatus={canWrite('registration.changeStatus')}
+          canEditObservation={canWrite('registration.editObservation')}
         />
       </div>
     </PageTransition>

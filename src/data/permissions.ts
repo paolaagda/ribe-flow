@@ -185,6 +185,13 @@ export const defaultPermissions: Record<AppProfile, Record<string, PermissionLev
     'notifications.view': 'read',
     'notifications.manage': 'none',
 
+    // Cadastro
+    'registration.view': 'read',
+    'registration.create': 'none',
+    'registration.edit': 'none',
+    'registration.changeStatus': 'none',
+    'registration.editObservation': 'none',
+
     // Insights
     'insights.view': 'read',
   },
