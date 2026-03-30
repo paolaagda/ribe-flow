@@ -122,7 +122,7 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
           {/* Parceiro */}
           <div className="space-y-1.5">
             <Label>Parceiro *</Label>
-            <Select value={partnerId} onValueChange={setPartnerId}>
+            <Select value={partnerId} onValueChange={setPartnerId} disabled={isEdit && !canEdit}>
               <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
                 {partners.map(p => (
