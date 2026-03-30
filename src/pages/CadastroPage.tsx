@@ -33,18 +33,6 @@ export default function CadastroPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
 
-  if (!canRead('registration.view')) {
-    return (
-      <PageTransition>
-        <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
-          <ShieldAlert className="h-16 w-16 text-muted-foreground/50" />
-          <h2 className="text-xl font-semibold text-foreground">Acesso Restrito</h2>
-          <p className="text-sm text-muted-foreground max-w-md">Você não tem permissão para acessar esta página.</p>
-        </div>
-      </PageTransition>
-    );
-  }
-
   const statuses = getActiveItems('registrationStatuses');
   const banks = getActiveItems('registrationBanks');
 
