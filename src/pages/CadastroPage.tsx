@@ -14,6 +14,7 @@ import { Registration } from '@/data/registrations';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 import { usePermission } from '@/hooks/usePermission';
 import { useToast } from '@/hooks/use-toast';
+import { useAuditLog } from '@/hooks/useAuditLog';
 
 const statusKpiConfig: Record<string, { icon: any; color: string }> = {
   'Não iniciado': { icon: FileText, color: 'text-muted-foreground' },
@@ -30,6 +31,7 @@ export default function CadastroPage() {
   const { getActiveItems } = useSystemData();
   const { canRead, canWrite } = usePermission();
   const { toast } = useToast();
+  const { addLog } = useAuditLog();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterBank, setFilterBank] = useState('all');
@@ -82,12 +84,29 @@ export default function CadastroPage() {
   const handleTogglePause = (reg: Registration) => {
     const newStatus = reg.status === 'Em pausa' ? 'Não iniciado' : 'Em pausa';
     updateRegistration(reg.id, { status: newStatus });
+    addLog({
+      module: 'Cadastro',
+      action: 'status_change',
+      entityId: reg.id,
+      entityLabel: `Cadastro - ${reg.bank}`,
+      field: 'Status',
+      oldValue: reg.status,
+      newValue: newStatus,
+      description: `Alterou status de "${reg.status}" para "${newStatus}"`,
+    });
     toast({ title: newStatus === 'Em pausa' ? 'Cadastro pausado' : 'Cadastro reativado' });
   };
 
   const handleConfirmDelete = () => {
     if (deleteTarget) {
       deleteRegistration(deleteTarget.id);
+      addLog({
+        module: 'Cadastro',
+        action: 'delete',
+        entityId: deleteTarget.id,
+        entityLabel: `Cadastro - ${deleteTarget.bank}`,
+        description: `Excluiu cadastro do banco ${deleteTarget.bank}`,
+      });
       toast({ title: 'Cadastro excluído' });
       setDeleteTarget(null);
     }

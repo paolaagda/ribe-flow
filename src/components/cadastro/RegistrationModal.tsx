@@ -8,11 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Registration, statusColors } from '@/data/registrations';
+import AuditTimeline from '@/components/shared/AuditTimeline';
 import { mockUsers } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useSystemData } from '@/hooks/useSystemData';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { useRegistrations } from '@/hooks/useRegistrations';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -32,6 +34,7 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
   const { getActiveItems } = useSystemData();
   const { getAvatar } = useUserAvatars();
   const { addRegistration, updateRegistration } = useRegistrations();
+  const { addLog, getLogsForEntity } = useAuditLog();
   const { toast } = useToast();
 
   const isEdit = !!registration;
@@ -79,29 +82,48 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
     }
 
     if (isEdit && registration) {
+      // Track field changes for audit
+      const changes: Array<{ field: string; old: string; new: string }> = [];
+      if (status !== registration.status) changes.push({ field: 'Status', old: registration.status, new: status });
+      if (observation !== registration.observation) changes.push({ field: 'Observação', old: registration.observation || '(vazio)', new: observation });
+      if (bank !== registration.bank) changes.push({ field: 'Banco', old: registration.bank, new: bank });
+      if (handlingWith !== registration.handlingWith) changes.push({ field: 'Tratando com', old: registration.handlingWith, new: handlingWith });
+      if (code !== registration.code) changes.push({ field: 'Código', old: registration.code || '(vazio)', new: code });
+
       updateRegistration(registration.id, {
-        partnerId,
-        bank,
+        partnerId, bank,
         cnpj: selectedPartner?.cnpj || '',
         commercialUserId: selectedPartner?.responsibleUserId || '',
-        status,
-        solicitation,
-        handlingWith,
-        observation,
-        code,
+        status, solicitation, handlingWith, observation, code,
       });
+
+      changes.forEach(c => {
+        addLog({
+          module: 'Cadastro',
+          action: c.field === 'Status' ? 'status_change' : 'edit',
+          entityId: registration.id,
+          entityLabel: `Cadastro - ${bank}`,
+          field: c.field,
+          oldValue: c.old,
+          newValue: c.new,
+          description: `${c.field === 'Status' ? 'Alterou status' : 'Editou ' + c.field.toLowerCase()} de "${c.old}" para "${c.new}"`,
+        });
+      });
+
       toast({ title: 'Cadastro atualizado' });
     } else {
-      addRegistration({
-        partnerId,
-        bank,
+      const newReg = addRegistration({
+        partnerId, bank,
         cnpj: selectedPartner?.cnpj || '',
         commercialUserId: selectedPartner?.responsibleUserId || '',
-        status,
-        solicitation,
-        handlingWith,
-        observation,
-        code,
+        status, solicitation, handlingWith, observation, code,
+      });
+      addLog({
+        module: 'Cadastro',
+        action: 'create',
+        entityId: newReg.id,
+        entityLabel: `Cadastro - ${bank}`,
+        description: `Criou cadastro para ${selectedPartner?.name || 'parceiro'} com banco ${bank}`,
       });
       toast({ title: 'Cadastro criado com sucesso' });
     }
@@ -235,31 +257,17 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
                   <span>{format(new Date(registration.completedAt), "dd/MM/yyyy", { locale: ptBR })}</span>
                 </div>
               )}
-              {registration.updates.length > 0 && (
-                <div className="space-y-1.5 pt-2">
-                  <span className="text-xs font-medium">Histórico de atualizações</span>
-                  <div className="space-y-1 max-h-32 overflow-y-auto">
-                    {[...registration.updates].reverse().map((upd, i) => {
-                      const updUser = mockUsers.find(u => u.id === upd.userId);
-                      return (
-                        <div key={i} className="flex items-start gap-2 text-[11px] text-muted-foreground">
-                          <Avatar className="h-4 w-4 mt-0.5 shrink-0">
-                            {getAvatar(upd.userId) && <AvatarImage src={getAvatar(upd.userId)} />}
-                            <AvatarFallback className="text-[7px]">
-                              {updUser?.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <span className="font-medium text-foreground">{updUser?.name.split(' ')[0]}</span>
-                            {' · '}{format(new Date(upd.date), "dd/MM/yy", { locale: ptBR })}
-                            <p className="text-muted-foreground">{upd.text}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
+              {(() => {
+                const entityLogs = getLogsForEntity(registration.id);
+                return entityLogs.length > 0 ? (
+                  <div className="space-y-1.5 pt-2">
+                    <span className="text-xs font-medium">Trilha de Auditoria</span>
+                    <div className="max-h-40 overflow-y-auto">
+                      <AuditTimeline logs={entityLogs} />
+                    </div>
                   </div>
-                </div>
-              )}
+                ) : null;
+              })()}
             </div>
           )}
         </div>

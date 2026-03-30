@@ -2,12 +2,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageTransition from '@/components/PageTransition';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePermission } from '@/hooks/usePermission';
-import { ShieldOff, Users, Trophy, Building2, Database, Store } from 'lucide-react';
+import { ShieldOff, Users, Trophy, Building2, Database, Store, ScrollText } from 'lucide-react';
 import UsersTab from '@/components/settings/UsersTab';
 import CampaignsTab from '@/components/settings/CampaignsTab';
 import PartnersTab from '@/components/settings/PartnersTab';
 import SystemDataTab from '@/components/settings/SystemDataTab';
 import StoresTab from '@/components/settings/StoresTab';
+import LogsTab from '@/components/settings/LogsTab';
 import PageHeader from '@/components/shared/PageHeader';
 
 export default function ConfiguracoesPage() {
@@ -43,6 +44,9 @@ export default function ConfiguracoesPage() {
           </TabsTrigger>
           <TabsTrigger value="dados" className="gap-1.5">
             <Database className="h-3.5 w-3.5" /> Dados do Sistema
+          </TabsTrigger>
+          <TabsTrigger value="logs" className="gap-1.5">
+            <ScrollText className="h-3.5 w-3.5" /> Logs
           </TabsTrigger>
         </TabsList>
 
@@ -84,6 +88,14 @@ export default function ConfiguracoesPage() {
           <Card>
             <CardContent className="p-5 md:p-7">
               <SystemDataTab />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="logs">
+          <Card>
+            <CardContent className="p-5 md:p-7">
+              <LogsTab />
             </CardContent>
           </Card>
         </TabsContent>
