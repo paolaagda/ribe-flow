@@ -45,6 +45,9 @@ export default function ConfiguracoesPage() {
           <TabsTrigger value="dados" className="gap-1.5">
             <Database className="h-3.5 w-3.5" /> Dados do Sistema
           </TabsTrigger>
+          <TabsTrigger value="logs" className="gap-1.5">
+            <ScrollText className="h-3.5 w-3.5" /> Logs
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="usuarios">
