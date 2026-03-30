@@ -382,8 +382,8 @@ export default function CampanhasPage() {
       {myStats && ranking.length > 0 && (
         <Card className="min-h-[100px] card-hover">
           <CardContent className="p-ds-md">
-            <p className="card-section-title mb-4">Você vs Média</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <p className="card-section-title mb-ds-sm">Você vs Média</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm">
               <div>
                 <div className="flex justify-between text-ds-xs mb-1">
                   <span>Você ({myPosition}º)</span>
