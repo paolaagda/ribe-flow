@@ -161,7 +161,7 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
           {/* Banco */}
           <div className="space-y-1.5">
             <Label>Banco *</Label>
-            <Select value={bank} onValueChange={setBank}>
+            <Select value={bank} onValueChange={setBank} disabled={isEdit && !canEdit}>
               <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
                 {banks.map(b => (
