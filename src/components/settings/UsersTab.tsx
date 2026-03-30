@@ -134,6 +134,23 @@ export default function UsersTab() {
     fileInputRef.current?.click();
   };
 
+  const handleCreateUser = () => {
+    if (!newUserForm.name || !newUserForm.email) return;
+    const newUser: User = {
+      id: `u${Date.now()}`,
+      name: newUserForm.name,
+      email: newUserForm.email,
+      role: newUserForm.role,
+      profile: newUserForm.profile,
+      bio: newUserForm.bio || 'Novo colaborador',
+      active: true,
+    };
+    setUsers(prev => [...prev, newUser]);
+    setShowNewUser(false);
+    setNewUserForm({ name: '', email: '', role: 'comercial', profile: 'nao_gestor', bio: '' });
+    toast({ title: 'Colaborador criado com sucesso!' });
+  };
+
   return (
     <div className="space-y-6">
       <input
