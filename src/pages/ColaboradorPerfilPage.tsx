@@ -12,13 +12,15 @@ import { usePartners } from '@/hooks/usePartners';
 import { useTasks } from '@/hooks/useTasks';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { useTeamFilter } from '@/hooks/useTeamFilter';
+import { useRegistrations } from '@/hooks/useRegistrations';
 import { cargoLabels, cargoColors, profileLabels, getPartnerById } from '@/data/mock-data';
+import { statusColors } from '@/data/registrations';
 import { format, parseISO, differenceInDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
   ArrowLeft, Mail, Briefcase, Shield, Calendar, CheckCircle2,
   Clock, Target, TrendingUp, Users2, MapPin, AlertTriangle,
-  Handshake, UserPlus, ListTodo
+  Handshake, UserPlus, ListTodo, FileText, Landmark, User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
