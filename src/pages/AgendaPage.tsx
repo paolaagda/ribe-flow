@@ -730,7 +730,7 @@ export default function AgendaPage() {
 
       {view === 'month' ? (
         <Card>
-          <CardContent className="p-2 sm:p-4">
+          <CardContent className="p-ds-xs sm:p-ds-sm">
             <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
               {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(d => (
                 <div key={d} className="bg-muted px-2 py-2 text-center text-xs font-medium text-muted-foreground">{d}</div>

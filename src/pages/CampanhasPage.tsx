@@ -434,7 +434,7 @@ export default function CampanhasPage() {
       {/* 8. Score History (detailed with date/time) */}
       {scoreHistory.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold mb-3">Histórico de Pontuação</h2>
+          <h2 className="text-ds-sm font-semibold mb-ds-xs">Histórico de Pontuação</h2>
           <Accordion type="multiple" className="space-y-2">
             {scoreHistory.map(entry => (
               <AccordionItem key={entry.user?.id} value={entry.user?.id || ''} className="border rounded-lg px-4">
