@@ -175,7 +175,7 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Solicitação *</Label>
-              <Select value={solicitation} onValueChange={setSolicitation}>
+              <Select value={solicitation} onValueChange={setSolicitation} disabled={isEdit && !canEdit}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   {solicitations.map(s => (
@@ -186,7 +186,7 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
             </div>
             <div className="space-y-1.5">
               <Label>Status</Label>
-              <Select value={status} onValueChange={setStatus}>
+              <Select value={status} onValueChange={setStatus} disabled={!canChangeStatus}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {statuses.map(s => (
