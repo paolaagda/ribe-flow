@@ -35,6 +35,10 @@ const initialData: Record<SystemCategory, SystemItem[]> = {
   cancelReasons: buildInitial(CANCEL_REASONS),
   storeStructures: buildInitial(STORE_STRUCTURES),
   periods: buildInitial(['Manhã', 'Tarde']),
+  registrationBanks: buildInitial(REGISTRATION_BANKS),
+  registrationStatuses: buildInitial(REGISTRATION_STATUSES),
+  registrationSolicitations: buildInitial(REGISTRATION_SOLICITATIONS),
+  registrationHandlers: buildInitial(REGISTRATION_HANDLERS),
 };
 
 export { categoryLabels };
