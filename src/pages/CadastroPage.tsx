@@ -185,7 +185,15 @@ export default function CadastroPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map(reg => (
-              <RegistrationCard key={reg.id} registration={reg} onClick={() => handleCardClick(reg)} />
+              <RegistrationCard
+                key={reg.id}
+                registration={reg}
+                onClick={() => handleCardClick(reg)}
+                onEdit={() => handleEdit(reg)}
+                onChangeStatus={() => handleEdit(reg)}
+                onTogglePause={() => handleTogglePause(reg)}
+                onDelete={() => setDeleteTarget(reg)}
+              />
             ))}
           </div>
         )}
@@ -198,6 +206,23 @@ export default function CadastroPage() {
           canChangeStatus={canWrite('registration.changeStatus')}
           canEditObservation={canWrite('registration.editObservation')}
         />
+
+        <AlertDialog open={!!deleteTarget} onOpenChange={open => !open && setDeleteTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir cadastro</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir este cadastro? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </PageTransition>
   );
