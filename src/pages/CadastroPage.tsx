@@ -4,13 +4,14 @@ import PageTransition from '@/components/PageTransition';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine } from 'lucide-react';
+import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine, ShieldAlert } from 'lucide-react';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useSystemData } from '@/hooks/useSystemData';
 import RegistrationCard from '@/components/cadastro/RegistrationCard';
 import RegistrationModal from '@/components/cadastro/RegistrationModal';
 import { Registration } from '@/data/registrations';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
+import { usePermission } from '@/hooks/usePermission';
 
 const statusKpiConfig: Record<string, { icon: any; color: string }> = {
   'Não iniciado': { icon: FileText, color: 'text-muted-foreground' },
