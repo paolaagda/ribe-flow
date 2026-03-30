@@ -354,7 +354,7 @@ export default function CampanhasPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 + idx * 0.15, type: 'spring', bounce: 0.35 }}
                     whileHover={{ scale: 1.05 }}
-                    className="flex flex-col items-center gap-1.5"
+                    className="flex flex-col items-center gap-2"
                   >
                     {isFirst && <Star className="h-5 w-5 text-yellow-500 fill-yellow-500 -mb-1" />}
                     <Avatar className={cn(avatarSize, ringColor, 'transition-all')}>
