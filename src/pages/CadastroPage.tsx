@@ -40,8 +40,19 @@ const statusKpiConfig: Record<string, { icon: any; color: string }> = {
 };
 
 type DateMode = 'none' | 'day' | 'period' | 'weekly' | 'monthly';
+type ViewMode = 'cards' | 'table';
+type SortField = 'partner' | 'status' | 'date' | 'bank' | 'none';
+type SortDir = 'asc' | 'desc';
 
-export default function CadastroPage() {
+const statusColorMap: Record<string, string> = {
+  'Não iniciado': 'bg-muted text-muted-foreground',
+  'Colhendo documentação': 'bg-info/15 text-info border-info/30',
+  'Em análise': 'bg-warning/15 text-warning border-warning/30',
+  'Colhendo assinaturas': 'bg-violet-500/15 text-violet-500 border-violet-500/30',
+  'Concluído': 'bg-success/15 text-success border-success/30',
+  'Em pausa': 'bg-orange-500/15 text-orange-500 border-orange-500/30',
+  'Cancelado': 'bg-destructive/15 text-destructive border-destructive/30',
+};
   const { registrations, updateRegistration, deleteRegistration } = useRegistrations();
   const { getActiveItems } = useSystemData();
   const { canRead, canWrite } = usePermission();
