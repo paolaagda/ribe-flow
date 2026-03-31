@@ -91,7 +91,7 @@ export const mockRegistrations: Registration[] = [
     id: 'reg3', partnerId: 'p4', bank: 'C6', cnpj: '45.678.901/0001-04', commercialUserId: 'u5',
     observation: 'Credenciamento finalizado com sucesso.',
     status: 'Concluído', solicitation: 'Substabelecido EGV', handlingWith: 'Cadastro', code: 'C6-088',
-    requestedAt: '2024-11-05', completedAt: '2025-01-02',
+    requestedAt: '2024-11-05', completedAt: '2025-01-02', contractConfirmed: true,
     updates: [{ date: '2025-01-02', time: '16:45', userId: 'u10', text: 'Código ativo no banco.' }],
   },
   {
