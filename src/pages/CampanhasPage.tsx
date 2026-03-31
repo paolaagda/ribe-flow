@@ -345,7 +345,7 @@ export default function CampanhasPage() {
                   : isSecond
                   ? 'bg-gradient-to-t from-slate-400/30 to-slate-200/10 border-slate-300/40'
                   : 'bg-gradient-to-t from-amber-700/30 to-amber-500/10 border-amber-600/40';
-                const fallbackColor = isFirst ? 'bg-yellow-100 text-yellow-700' : isSecond ? 'bg-slate-100 text-slate-600' : 'bg-amber-100 text-amber-700';
+                const fallbackColor = isFirst ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400' : isSecond ? 'bg-slate-100 text-slate-600 dark:bg-slate-500/20 dark:text-slate-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400';
 
                 return (
                   <motion.div
@@ -367,7 +367,7 @@ export default function CampanhasPage() {
                     <Badge variant={isFirst ? 'default' : 'secondary'} className="text-[11px]">{item.score} pts</Badge>
                     <div className={cn('w-16 md:w-20 rounded-t-lg border-x border-t', barGradient, barHeight)}>
                       <div className="flex items-center justify-center h-full">
-                        <span className={cn("font-bold", isFirst ? "text-lg text-yellow-600" : "text-muted-foreground")}>{pos}º</span>
+                        <span className={cn("font-bold", isFirst ? "text-lg text-yellow-600 dark:text-yellow-400" : "text-muted-foreground")}>{pos}º</span>
                       </div>
                     </div>
                   </motion.div>
