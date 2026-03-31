@@ -327,21 +327,47 @@ export default function CampanhasPage() {
         </Card>
       </motion.div>
 
-      {/* 5b. Podium — Classic Layout */}
+      {/* 5b. Podium — Animated & Fun */}
       {canRead('gamification.ranking') && podium.length >= 3 && (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden relative">
           <CardContent className="p-ds-md pb-0">
             <p className="text-ds-sm font-semibold mb-ds-sm flex items-center gap-2"><Trophy className="h-4 w-4 text-yellow-500" /> Pódio</p>
-            <div className="flex items-end justify-center gap-ds-sm md:gap-ds-md">
+            <div className="flex items-end justify-center gap-ds-sm md:gap-ds-md relative">
+              {/* Confetti particles around 1st place */}
+              {[...Array(8)].map((_, i) => (
+                <motion.span
+                  key={`confetti-${i}`}
+                  className="absolute w-1.5 h-1.5 rounded-full"
+                  style={{
+                    background: ['#facc15', '#f59e0b', '#fbbf24', '#eab308', '#d97706', '#fcd34d', '#fde68a', '#ca8a04'][i],
+                    left: `${45 + (Math.cos(i * 0.785) * 18)}%`,
+                    top: `${10 + (Math.sin(i * 0.785) * 15)}%`,
+                  }}
+                  animate={{
+                    y: [0, -12 - Math.random() * 10, 0],
+                    x: [0, (i % 2 === 0 ? 8 : -8), 0],
+                    opacity: [0.7, 1, 0.7],
+                    scale: [0.8, 1.2, 0.8],
+                  }}
+                  transition={{
+                    duration: 2 + Math.random() * 1.5,
+                    repeat: Infinity,
+                    delay: i * 0.25,
+                    ease: 'easeInOut',
+                  }}
+                />
+              ))}
+
               {podiumOrder.map((item, idx) => {
                 const pos = podium.indexOf(item) + 1;
                 const isFirst = pos === 1;
                 const isSecond = pos === 2;
                 const avatarSize = isFirst ? 'h-16 w-16' : 'h-12 w-12';
                 const barHeight = isFirst ? 'h-24' : isSecond ? 'h-16' : 'h-10';
-                const ringColor = isFirst ? 'ring-2 ring-yellow-400 shadow-lg shadow-yellow-400/20' : isSecond ? 'ring-2 ring-slate-300' : 'ring-2 ring-amber-600/60';
+                const barDelay = isFirst ? 0.4 : isSecond ? 0.2 : 0.6;
+                const ringColor = isFirst ? 'ring-2 ring-yellow-400' : isSecond ? 'ring-2 ring-slate-300' : 'ring-2 ring-amber-600/60';
                 const barGradient = isFirst
-                  ? 'bg-gradient-to-t from-yellow-500/40 to-yellow-300/10 border-yellow-400/50'
+                  ? 'bg-gradient-to-t from-yellow-500/40 to-yellow-300/10 border-yellow-400/50 podium-shimmer'
                   : isSecond
                   ? 'bg-gradient-to-t from-slate-400/30 to-slate-200/10 border-slate-300/40'
                   : 'bg-gradient-to-t from-amber-700/30 to-amber-500/10 border-amber-600/40';
@@ -350,26 +376,96 @@ export default function CampanhasPage() {
                 return (
                   <motion.div
                     key={item.user.id}
-                    initial={{ opacity: 0, y: 40 }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 + idx * 0.15, type: 'spring', bounce: 0.35 }}
-                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.5, delay: barDelay, type: 'spring', bounce: 0.4 }}
                     className="flex flex-col items-center gap-2"
                   >
-                    {isFirst && <Star className="h-5 w-5 text-yellow-500 fill-yellow-500 -mb-1" />}
-                    <Avatar className={cn(avatarSize, ringColor, 'transition-all')}>
-                      <AvatarFallback className={cn('font-bold', isFirst ? 'text-base' : 'text-sm', fallbackColor)}>
-                        {item.user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <p className={cn("font-medium", isFirst ? "text-sm" : "text-xs")}>{item.user.name.split(' ')[0]}</p>
-                    <p className="text-[10px] text-muted-foreground capitalize">{item.user.role}</p>
-                    <Badge variant={isFirst ? 'default' : 'secondary'} className="text-[11px]">{item.score} pts</Badge>
-                    <div className={cn('w-16 md:w-20 rounded-t-lg border-x border-t', barGradient, barHeight)}>
-                      <div className="flex items-center justify-center h-full">
-                        <span className={cn("font-bold", isFirst ? "text-lg text-yellow-600 dark:text-yellow-400" : "text-muted-foreground")}>{pos}º</span>
+                    {/* Star for 1st — rotating & pulsing */}
+                    {isFirst && (
+                      <motion.div
+                        animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                        className="-mb-1"
+                      >
+                        <Star className="h-6 w-6 text-yellow-500 fill-yellow-500 drop-shadow-[0_0_6px_rgba(234,179,8,0.5)]" />
+                      </motion.div>
+                    )}
+
+                    {/* Avatar with glow for 1st */}
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: barDelay + 0.2, type: 'spring', stiffness: 300, damping: 15 }}
+                      whileHover={{ scale: 1.12, y: -4 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="relative cursor-pointer"
+                    >
+                      {isFirst && (
+                        <motion.div
+                          className="absolute -inset-1.5 rounded-full"
+                          animate={{
+                            boxShadow: [
+                              '0 0 12px 2px rgba(234,179,8,0.25)',
+                              '0 0 24px 6px rgba(234,179,8,0.45)',
+                              '0 0 12px 2px rgba(234,179,8,0.25)',
+                            ],
+                          }}
+                          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                        />
+                      )}
+                      <Avatar className={cn(avatarSize, ringColor, 'transition-all relative z-10')}>
+                        <AvatarFallback className={cn('font-bold', isFirst ? 'text-base' : 'text-sm', fallbackColor)}>
+                          {item.user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </motion.div>
+
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: barDelay + 0.35 }}
+                      className={cn("font-medium", isFirst ? "text-sm" : "text-xs")}
+                    >
+                      {item.user.name.split(' ')[0]}
+                    </motion.p>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: barDelay + 0.4 }}
+                      className="text-[10px] text-muted-foreground capitalize"
+                    >
+                      {item.user.role}
+                    </motion.p>
+
+                    {/* Badge with bounce-in */}
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: barDelay + 0.5, type: 'spring', stiffness: 400, damping: 12 }}
+                    >
+                      <Badge variant={isFirst ? 'default' : 'secondary'} className="text-[11px]">{item.score} pts</Badge>
+                    </motion.div>
+
+                    {/* Bar growing from bottom */}
+                    <motion.div
+                      className={cn('w-16 md:w-20 rounded-t-lg border-x border-t overflow-hidden relative', barGradient)}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      transition={{ duration: 0.7, delay: barDelay, ease: [0.34, 1.56, 0.64, 1] }}
+                      whileHover={{ filter: 'brightness(1.15)' }}
+                    >
+                      <div className={cn('flex items-center justify-center', barHeight)}>
+                        <motion.span
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: barDelay + 0.6, type: 'spring', stiffness: 300 }}
+                          className={cn("font-bold", isFirst ? "text-lg text-yellow-600 dark:text-yellow-400" : "text-muted-foreground")}
+                        >
+                          {pos}º
+                        </motion.span>
                       </div>
-                    </div>
+                    </motion.div>
                   </motion.div>
                 );
               })}

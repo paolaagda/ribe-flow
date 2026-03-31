@@ -294,4 +294,29 @@
   .badge-potential-baixo {
     @apply text-muted-foreground border-border bg-muted/50;
   }
+
+  /* Podium shimmer effect for 1st place bar */
+  .podium-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .podium-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      hsl(45 93% 70% / 0.2) 45%,
+      hsl(45 93% 80% / 0.35) 50%,
+      hsl(45 93% 70% / 0.2) 55%,
+      transparent 70%
+    );
+    animation: podium-shimmer 3s ease-in-out infinite;
+  }
+
+  @keyframes podium-shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
 }
