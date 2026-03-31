@@ -481,13 +481,24 @@ export default function AgendaPage() {
 
   const handleConfirmRejectVisitInvite = useCallback((reason: string) => {
     if (!user || !rejectingVisitId) return;
+    const visit = visits.find(v => v.id === rejectingVisitId);
     setVisits(prev => prev.map(v =>
       v.id === rejectingVisitId ? { ...v, invitedUsers: v.invitedUsers.map(iu => iu.userId === user.id ? { ...iu, status: 'rejected' as const } : iu) } : v
     ));
+    addLog({
+      module: 'Agenda',
+      action: 'reject',
+      entityId: rejectingVisitId,
+      entityLabel: visit?.partnerName || 'Agenda',
+      field: 'Convite',
+      oldValue: 'Pendente',
+      newValue: `Rejeitado – ${reason}`,
+      description: `${user.name} rejeitou participação – motivo: ${reason}`,
+    });
     toast({ title: getRandomMessage('reject'), description: `Motivo: ${reason}` });
     setShowInviteRejectionModal(false);
     setRejectingVisitId(null);
-  }, [user, rejectingVisitId, toast]);
+  }, [user, rejectingVisitId, toast, visits, addLog]);
 
   const handleLeaveVisit = useCallback((visitId: string) => {
     if (!user) return;
