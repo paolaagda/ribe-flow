@@ -216,8 +216,9 @@ export default function CadastroPage() {
   }, []);
 
   const getPartnerName = useCallback((reg: Registration) => {
-    return reg.partnerId;
-  }, []);
+    const partner = getPartnerById(reg.partnerId);
+    return partner?.name || reg.partnerId;
+  }, [getPartnerById]);
 
   const getCommercialName = useCallback((userId: string) => {
     return mockUsers.find(u => u.id === userId)?.name || userId;
