@@ -175,14 +175,24 @@ export default function AgendaPage() {
       // Insight filters
       if (activeInsight === 'agenda_evolucao') {
         const d = parseISO(v.date);
-        const days = (new Date().getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
-        if (!(v.status === 'Concluída' && days >= 0 && days <= 30)) return false;
+        const ms = startOfMonth(new Date());
+        const me = endOfMonth(new Date());
+        if (!(v.status === 'Concluída' && isWithinInterval(d, { start: ms, end: me }))) return false;
       }
       if (activeInsight === 'agenda_valor_hoje') {
-        if (!(v.date === todayStr && (v.potentialValue || 0) > 0)) return false;
+        if (!(v.status === 'Planejada' && (v.potentialValue || 0) > 0)) return false;
+      }
+      if (activeInsight === 'agenda_tarefas_atrasadas') {
+        // No direct visit filter for tasks insight
       }
       if (activeInsight === 'agenda_taxa_conclusao') {
         if (v.status !== 'Concluída') return false;
+      }
+      if (activeInsight === 'agenda_cancelamentos') {
+        if (v.status !== 'Cancelada') return false;
+      }
+      if (activeInsight === 'agenda_prospeccoes') {
+        if (v.type !== 'prospecção') return false;
       }
       return true;
     });
