@@ -32,8 +32,6 @@ export const actionColors: Record<AuditAction, string> = {
   status_change: 'text-warning',
   permission_change: 'text-primary',
   reject: 'text-destructive',
-  status_change: 'text-info',
-  permission_change: 'text-warning',
 };
 
 export const moduleLabels: Record<AuditModule, string> = {
