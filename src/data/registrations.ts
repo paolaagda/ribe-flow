@@ -112,7 +112,7 @@ export const mockRegistrations: Registration[] = [
     observation: 'Cancelado por falta de documentação.',
     status: 'Cancelado', solicitation: 'IND - Migração de Promotora', handlingWith: 'Parceiro', code: '',
     requestedAt: '2024-10-10', completedAt: null,
-    updates: [{ date: '2024-11-20', userId: 'u10', text: 'Parceiro não enviou documentos no prazo.' }],
+    updates: [{ date: '2024-11-20', time: '15:30', userId: 'u10', text: 'Parceiro não enviou documentos no prazo.' }],
   },
   {
     id: 'reg7', partnerId: 'p11', bank: 'FINANTO', cnpj: '11.223.344/0001-11', commercialUserId: 'u5',
