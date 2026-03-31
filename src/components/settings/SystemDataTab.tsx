@@ -123,6 +123,10 @@ export default function SystemDataTab() {
           );
         })}
       </Accordion>
+
+      <div className="border-t pt-6 mt-6">
+        <InfoDataSection />
+      </div>
     </div>
   );
 }
