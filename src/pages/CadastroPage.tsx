@@ -174,6 +174,64 @@ export default function CadastroPage() {
     });
   }, [registrations, filterStatus, filterBank, filterCommercial, filterSolicitation, filterHandler, filterDateMode, filterDateFrom, filterDateTo, search]);
 
+  const sorted = useMemo(() => {
+    if (sortField === 'none') return filtered;
+    return [...filtered].sort((a, b) => {
+      let cmp = 0;
+      if (sortField === 'partner') cmp = a.partnerId.localeCompare(b.partnerId);
+      else if (sortField === 'status') cmp = a.status.localeCompare(b.status);
+      else if (sortField === 'bank') cmp = a.bank.localeCompare(b.bank);
+      else if (sortField === 'date') cmp = getLastUpdateDate(a).localeCompare(getLastUpdateDate(b));
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [filtered, sortField, sortDir]);
+
+  const toggleSort = useCallback((field: SortField) => {
+    if (sortField === field) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir('desc');
+    }
+  }, [sortField]);
+
+  const startEditing = useCallback((id: string, field: string, currentValue: string) => {
+    setEditingCell({ id, field });
+    setEditValue(currentValue);
+  }, []);
+
+  const commitEdit = useCallback(() => {
+    if (!editingCell) return;
+    const { id, field } = editingCell;
+    updateRegistration(id, { [field]: editValue });
+    setEditingCell(null);
+    setEditValue('');
+  }, [editingCell, editValue, updateRegistration]);
+
+  const cancelEdit = useCallback(() => {
+    setEditingCell(null);
+    setEditValue('');
+  }, []);
+
+  const getPartnerName = useCallback((reg: Registration) => {
+    return reg.partnerId;
+  }, []);
+
+  const getCommercialName = useCallback((userId: string) => {
+    return mockUsers.find(u => u.id === userId)?.name || userId;
+  }, []);
+
+  const getLastUpdater = useCallback((reg: Registration) => {
+    if (reg.updates.length === 0) return '';
+    const lastUpdate = reg.updates[reg.updates.length - 1];
+    return mockUsers.find(u => u.id === lastUpdate.userId)?.name || lastUpdate.userId;
+  }, []);
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
+    return sortDir === 'asc' ? <ArrowUp className="h-3 w-3 ml-1 text-primary" /> : <ArrowDown className="h-3 w-3 ml-1 text-primary" />;
+  };
+
   const handleCardClick = (reg: Registration) => navigate(`/cadastro/${reg.id}`);
   const handleNew = () => { setSelectedReg(null); setModalOpen(true); };
   const handleEdit = (reg: Registration) => { setSelectedReg(reg); setModalOpen(true); };
