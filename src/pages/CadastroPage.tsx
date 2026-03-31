@@ -694,21 +694,30 @@ export default function CadastroPage() {
                           )}
                         </TableCell>
                         
-                        {/* Atualização (data + hora + quem) */}
-                        <TableCell className="text-xs text-muted-foreground min-w-[180px]">
-                          {lastUpdate ? (
-                            <div className="space-y-0.5">
-                              <span className="block tabular-nums">
-                                {format(new Date(lastUpdate.date), 'dd/MM/yyyy', { locale: ptBR })}
-                                {lastUpdate.time ? ` às ${lastUpdate.time}` : ''}
+                        {/* Atualização (avatar + nome + data + hora) */}
+                        <TableCell className="text-xs text-muted-foreground min-w-[200px]">
+                          {lastUpdate && lastUpdateUser ? (
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-5 w-5 shrink-0">
+                                {getAvatar(lastUpdate.userId) && <AvatarImage src={getAvatar(lastUpdate.userId)} />}
+                                <AvatarFallback className="text-[7px] bg-muted">
+                                  {lastUpdateUser.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="truncate tabular-nums">
+                                {lastUpdateUser.name.split(' ')[0]} · {format(new Date(lastUpdate.date), 'dd/MM/yyyy', { locale: ptBR })}{lastUpdate.time ? ` · ${lastUpdate.time}` : ''}
                               </span>
-                              {lastUpdateUser && (
-                                <span className="block text-[10px] text-muted-foreground/70">
-                                  por {lastUpdateUser.name}
-                                </span>
-                              )}
                             </div>
                           ) : '—'}
+                        </TableCell>
+
+                        {/* Contrato */}
+                        <TableCell className="text-center" onClick={e => e.stopPropagation()}>
+                          <Checkbox
+                            checked={reg.contractConfirmed ?? false}
+                            onCheckedChange={(checked) => updateRegistration(reg.id, { contractConfirmed: !!checked })}
+                            className="mx-auto"
+                          />
                         </TableCell>
                         
                       </TableRow>
