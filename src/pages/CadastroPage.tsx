@@ -57,6 +57,7 @@ const statusColorMap: Record<string, string> = {
 
 export default function CadastroPage() {
   const { registrations, updateRegistration, deleteRegistration } = useRegistrations();
+  const { getPartnerById } = usePartners();
   const { getActiveItems } = useSystemData();
   const { canRead, canWrite } = usePermission();
   const { toast } = useToast();
