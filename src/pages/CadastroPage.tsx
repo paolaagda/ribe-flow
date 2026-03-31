@@ -613,9 +613,6 @@ export default function CadastroPage() {
                     <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[180px]" onClick={() => toggleSort('date')}>
                       <span className="flex items-center">Atualização <SortIcon field="date" /></span>
                     </TableHead>
-                    <TableHead className="whitespace-nowrap">Solicitado em</TableHead>
-                    <TableHead className="whitespace-nowrap">Concluído</TableHead>
-                    <TableHead className="whitespace-nowrap">Código</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
