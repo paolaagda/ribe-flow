@@ -77,6 +77,12 @@ export default function CadastroPage() {
   const [expandHandlers, setExpandHandlers] = useState(false);
   const [expandBanks, setExpandBanks] = useState(false);
 
+  const [viewMode, setViewMode] = useLocalStorage<ViewMode>('ribercred_cadastro_view', 'cards');
+  const [sortField, setSortField] = useState<SortField>('none');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [editingCell, setEditingCell] = useState<{ id: string; field: string } | null>(null);
+  const [editValue, setEditValue] = useState('');
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Registration | null>(null);
