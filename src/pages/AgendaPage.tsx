@@ -716,7 +716,7 @@ export default function AgendaPage() {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm pt-ds-xs">
               <TodayAgenda viewMode="personal" />
-              <VisitMap viewMode="personal" />
+              <VisitMap viewMode="personal" filteredVisits={filteredVisits} />
             </div>
             <div className="pt-ds-sm">
               <PendingTasksCard onOpenVisit={(visitId) => {
