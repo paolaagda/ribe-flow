@@ -29,6 +29,9 @@ export const actionColors: Record<AuditAction, string> = {
   create: 'text-success',
   edit: 'text-foreground',
   delete: 'text-destructive',
+  status_change: 'text-warning',
+  permission_change: 'text-primary',
+  reject: 'text-destructive',
   status_change: 'text-info',
   permission_change: 'text-warning',
 };
