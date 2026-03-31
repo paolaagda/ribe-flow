@@ -1,37 +1,35 @@
 
 
-# Pódio Animado e Divertido
+# Ajustar Layout dos Cards KPI
 
-## Objetivo
-Tornar o componente de pódio na página de Campanhas mais dinâmico, com animações elaboradas, efeitos visuais e microinterações que transmitam celebração.
+## Problema
+Atualmente os cards KPI usam layout horizontal (ícone à esquerda, dados à direita no desktop) e vertical centralizado no mobile. O usuário quer um layout consistente baseado na imagem de referência:
+- **Linha 1**: Ícone + valor (com secondaryValue) lado a lado, alinhados horizontalmente
+- **Linha 2**: Título/label abaixo
+- Responsivo: dados sempre visíveis, nunca transbordando
 
-## Alterações em `src/pages/CampanhasPage.tsx`
+## Alteração
 
-### Animações de entrada
-- **Barras do pódio**: animação de "crescimento" de baixo para cima (height de 0 ao valor final) com stagger entre 2º → 1º → 3º
-- **Avatares**: bounce com spring mais expressivo, entrada com scale de 0→1
-- **Estrela do 1º lugar**: animação de rotação + pulse contínuo
-- **Badge de pontos**: fade-in com delay após o avatar aparecer
-- **Posição (1º, 2º, 3º)**: counter animation, aparecendo após a barra crescer
+### `src/components/shared/AnimatedKpiCard.tsx`
 
-### Efeitos visuais contínuos
-- **1º lugar**: glow pulsante dourado ao redor do avatar (animate com keyframes de shadow)
-- **Estrela**: rotação lenta contínua + escala pulsante
-- **Barra do 1º**: shimmer/brilho sutil percorrendo (gradiente animado via CSS)
-- **Confetti particles**: partículas decorativas sutis (pequenos pontos dourados animados com framer-motion) ao redor do 1º lugar
+Refatorar o `CardContent` para usar layout vertical em todas as telas:
 
-### Interatividade
-- **Hover no avatar**: scale up + elevação (translateY negativo) + intensificação do glow
-- **Hover na barra**: leve aumento de brilho no gradiente
-- **Tap/click**: pequeno bounce de feedback
+```
+Linha 1:  [ícone]  1/3
+Linha 2:  AGENDAS HOJE
+```
 
-### Detalhes técnicos
-- Usar `motion.div` com `animate` para glow pulsante (loop infinito via `repeat: Infinity`)
-- CSS keyframes para shimmer na barra (via className inline ou index.css)
-- Confetti: 5-8 pequenos `motion.span` posicionados absolutamente com animações de float aleatórias
-- Manter responsividade existente
+Detalhes:
+- Layout sempre em coluna (`flex-col items-center text-center`)
+- Linha 1: `flex-row items-center gap-2` com ícone + valor+secondary
+- Linha 2: label abaixo, centralizado
+- Remover `whitespace-nowrap` do label — usar `text-center leading-tight` com wrap permitido para telas pequenas
+- Valor: usar `text-base sm:text-lg` ao invés de `text-lg sm:text-ds-xl` para caber melhor
+- Label: `text-[9px] sm:text-[10px]` uppercase, `line-clamp-2` como fallback
+- Padding compacto: `p-2.5 sm:p-3`
+- `min-h-[72px] sm:min-h-[80px]` para manter cards proporcionais
+- `overflow-hidden` no card para segurança
 
-### Arquivo afetado
-- `src/pages/CampanhasPage.tsx` — refatorar o bloco do pódio (linhas ~330-378)
-- `src/index.css` — adicionar keyframe `shimmer` para brilho na barra do 1º lugar
+### Páginas afetadas (sem alteração de código)
+O componente é reutilizado em AgendaPage, AnalisesPage, CadastroPage — todas herdarão o novo layout automaticamente.
 
