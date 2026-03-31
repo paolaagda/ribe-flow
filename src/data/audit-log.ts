@@ -22,6 +22,7 @@ export const actionLabels: Record<AuditAction, string> = {
   delete: 'Excluiu',
   status_change: 'Alterou status',
   permission_change: 'Alterou permissão',
+  reject: 'Rejeitou',
 };
 
 export const actionColors: Record<AuditAction, string> = {
