@@ -284,7 +284,7 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                             <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
                             <XAxis dataKey="name" tick={{ fontSize: 9 }} />
                             <YAxis tick={{ fontSize: 10 }} />
-                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <Tooltip content={<ChartTooltipContent />} />
                             <Line type="monotone" dataKey="pontuação" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
                             <Line type="monotone" dataKey="visitas" stroke="hsl(var(--info))" strokeWidth={2} dot={{ r: 4 }} />
                           </LineChart>
