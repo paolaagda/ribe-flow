@@ -4,30 +4,35 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, Navigation, Clock, Route } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { mockVisits } from '@/data/mock-data';
+import { mockVisits, Visit } from '@/data/mock-data';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePartners } from '@/hooks/usePartners';
 import { useTeamFilter } from '@/hooks/useTeamFilter';
 
 interface VisitMapProps {
   viewMode: 'personal' | 'team';
+  filteredVisits?: Visit[];
 }
 
-export default function VisitMap({ viewMode }: VisitMapProps) {
+export default function VisitMap({ viewMode, filteredVisits }: VisitMapProps) {
   const { user } = useAuth();
   const { getPartnerById } = usePartners();
   const { getVisibleUserIds } = useTeamFilter();
   const today = new Date().toISOString().split('T')[0];
 
   const todayVisits = useMemo(() => {
-    return mockVisits
+    const source = filteredVisits || mockVisits;
+    return source
       .filter(v => {
         if (v.date !== today) return false;
-        if (viewMode === 'personal') return v.userId === user?.id;
-        return getVisibleUserIds.includes(v.userId);
+        if (!filteredVisits) {
+          if (viewMode === 'personal') return v.userId === user?.id;
+          return getVisibleUserIds.includes(v.userId);
+        }
+        return true;
       })
       .sort((a, b) => a.time.localeCompare(b.time));
-  }, [today, user, viewMode, getVisibleUserIds]);
+  }, [today, user, viewMode, getVisibleUserIds, filteredVisits]);
 
   const points = useMemo(() => {
     if (todayVisits.length === 0) return [];
