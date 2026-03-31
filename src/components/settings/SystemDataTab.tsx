@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useSystemData, SystemCategory, categoryLabels } from '@/hooks/useSystemData';
 import { Plus, Landmark, Package, AlertTriangle, XCircle, Store, Clock, Building2, FileCheck, FileText, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import InfoDataSection from './InfoDataSection';
 
 const categoryIcons: Record<SystemCategory, React.ElementType> = {
   banks: Landmark,
