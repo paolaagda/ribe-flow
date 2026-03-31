@@ -63,28 +63,30 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
           onClick && 'group-hover:opacity-100',
         )} style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.03) 0%, transparent 60%)' }} />
         
-        <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center h-full min-h-[72px] sm:min-h-[80px] relative overflow-hidden">
-          <div className="flex flex-row items-center gap-2 mb-1">
+        <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center h-full min-h-[72px] sm:min-h-[80px] relative overflow-hidden gap-1.5">
+          {/* Linha 1: Ícone + Label (mais destaque) */}
+          <div className="flex flex-row items-center gap-1.5">
             <div className={cn(
               'icon-container-sm relative transition-transform duration-300 shrink-0',
               onClick && 'group-hover:scale-105',
               active ? 'icon-container-primary' : '',
               color
             )}>
-              <Icon className="h-[18px] w-[18px]" />
+              <Icon className="h-4 w-4" />
               {pulse && (
                 <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-destructive animate-pulse ring-2 ring-card" />
               )}
             </div>
-            <p className="text-base sm:text-lg font-bold tabular-nums leading-none tracking-tight">
-              {numericValue !== null ? displayValue : value}
-              {secondaryValue !== undefined && (
-                <span className="text-xs font-normal text-muted-foreground ml-0.5">/{secondaryValue}</span>
-              )}
-              {suffix && !secondaryValue && <span className="text-xs font-normal text-muted-foreground ml-0.5">{suffix}</span>}
-            </p>
+            <p className="text-[11px] sm:text-xs font-semibold text-foreground tracking-wide uppercase leading-tight line-clamp-1">{label}</p>
           </div>
-          <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium tracking-wide uppercase leading-tight line-clamp-2">{label}</p>
+          {/* Linha 2: Valores (menos destaque) */}
+          <p className="text-lg sm:text-xl font-bold tabular-nums leading-none tracking-tight text-muted-foreground">
+            {numericValue !== null ? displayValue : value}
+            {secondaryValue !== undefined && (
+              <span className="text-xs font-normal text-muted-foreground/70 ml-0.5">/ {secondaryValue}</span>
+            )}
+            {suffix && !secondaryValue && <span className="text-[10px] font-normal text-muted-foreground/70 ml-0.5">{suffix}</span>}
+          </p>
         </CardContent>
       </Card>
     </motion.div>
