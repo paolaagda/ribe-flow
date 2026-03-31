@@ -570,7 +570,7 @@ export default function AgendaPage() {
     <PageTransition className="space-y-ds-lg">
       <HeroSection />
 
-      <SmartInsights page="agenda" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
+      <SmartInsights page="agenda" activeFilter={activeInsight} onFilterClick={setActiveInsight} filterView={view} filterStatus={filterStatus} filterType={filterType} />
 
       {/* Title + Month nav + Filters toggle */}
       <div className="flex flex-col gap-2">
