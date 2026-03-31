@@ -40,6 +40,13 @@ const initialData: Record<SystemCategory, SystemItem[]> = {
   registrationStatuses: buildInitial(REGISTRATION_STATUSES),
   registrationSolicitations: buildInitial(REGISTRATION_SOLICITATIONS),
   registrationHandlers: buildInitial(REGISTRATION_HANDLERS),
+  inviteRejectionReasons: buildInitial([
+    'Conflito de agenda',
+    'Não é responsável pelo parceiro',
+    'Já estou em outra visita',
+    'Não faz parte da minha função',
+    'Sem necessidade de participação',
+  ]),
 };
 
 export { categoryLabels };
