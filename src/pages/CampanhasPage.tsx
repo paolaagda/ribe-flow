@@ -239,70 +239,68 @@ export default function CampanhasPage() {
       {kpis && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-ds-sm">
            <Card className="card-flat group overflow-hidden relative">
-            <CardContent className="p-ds-sm">
-              <div className="flex items-center gap-2.5 mb-2">
+            <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center min-h-[72px] sm:min-h-[80px] gap-1.5">
+              <div className="flex items-center gap-1.5">
                 <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--info) / 0.15) 0%, hsl(var(--info) / 0.05) 100%)' }}>
                   <Eye className="h-4 w-4 text-info" />
                 </div>
-                <p className="text-ds-xs text-muted-foreground">Visitas</p>
+                <p className="text-[11px] sm:text-xs font-semibold text-foreground tracking-wide uppercase leading-tight">Visitas</p>
               </div>
-              <div className="flex items-baseline gap-1 flex-wrap">
-                <span className="text-ds-xl font-bold">{kpis.totalVisits}</span>
-                <span className="text-ds-sm text-muted-foreground">/ {kpis.totalVisitGoal}</span>
-              </div>
-              <Progress value={kpis.totalVisitGoal > 0 ? Math.min(100, (kpis.totalVisits / kpis.totalVisitGoal) * 100) : 0} className="mt-2 h-1.5" />
+              <p className="text-lg sm:text-xl font-bold tabular-nums leading-none text-muted-foreground">
+                {kpis.totalVisits}<span className="text-xs font-normal text-muted-foreground/70 ml-0.5">/ {kpis.totalVisitGoal}</span>
+              </p>
+              <Progress value={kpis.totalVisitGoal > 0 ? Math.min(100, (kpis.totalVisits / kpis.totalVisitGoal) * 100) : 0} className="h-1.5 w-full" />
             </CardContent>
           </Card>
            <Card className="card-flat group overflow-hidden relative">
-            <CardContent className="p-ds-sm">
-              <div className="flex items-center gap-2.5 mb-2">
+            <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center min-h-[72px] sm:min-h-[80px] gap-1.5">
+              <div className="flex items-center gap-1.5">
                 <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--warning) / 0.15) 0%, hsl(var(--warning) / 0.05) 100%)' }}>
                   <Target className="h-4 w-4 text-warning" />
                 </div>
-                <p className="text-ds-xs text-muted-foreground">Prospecções</p>
+                <p className="text-[11px] sm:text-xs font-semibold text-foreground tracking-wide uppercase leading-tight">Prospecções</p>
               </div>
-              <div className="flex items-baseline gap-1 flex-wrap">
-                <span className="text-ds-xl font-bold">{kpis.totalProsp}</span>
-                <span className="text-ds-sm text-muted-foreground">/ {kpis.totalProspGoal}</span>
-              </div>
-              <Progress value={kpis.totalProspGoal > 0 ? Math.min(100, (kpis.totalProsp / kpis.totalProspGoal) * 100) : 0} className="mt-2 h-1.5" />
+              <p className="text-lg sm:text-xl font-bold tabular-nums leading-none text-muted-foreground">
+                {kpis.totalProsp}<span className="text-xs font-normal text-muted-foreground/70 ml-0.5">/ {kpis.totalProspGoal}</span>
+              </p>
+              <Progress value={kpis.totalProspGoal > 0 ? Math.min(100, (kpis.totalProsp / kpis.totalProspGoal) * 100) : 0} className="h-1.5 w-full" />
             </CardContent>
           </Card>
            <Card className="card-flat group overflow-hidden relative">
-            <CardContent className="p-ds-sm">
-              <div className="flex items-center gap-2.5 mb-2">
+            <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center min-h-[72px] sm:min-h-[80px] gap-1.5">
+              <div className="flex items-center gap-1.5">
                 <div className="icon-container-sm icon-container-primary">
                   <Star className="h-4 w-4 text-primary" />
                 </div>
-                <p className="text-ds-xs text-muted-foreground">Pontuação</p>
+                <p className="text-[11px] sm:text-xs font-semibold text-foreground tracking-wide uppercase leading-tight">Pontuação</p>
               </div>
-              <span className="text-ds-xl font-bold text-primary">{kpis.totalScore}</span>
-              <p className="text-ds-xs text-muted-foreground mt-1">pts acumulados</p>
+              <p className="text-lg sm:text-xl font-bold tabular-nums leading-none text-primary">{kpis.totalScore}</p>
+              <p className="text-[10px] text-muted-foreground/70">pts acumulados</p>
             </CardContent>
           </Card>
            <Card className="card-flat group overflow-hidden relative">
-            <CardContent className="p-ds-sm">
-              <div className="flex items-center gap-2.5 mb-2">
+            <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center min-h-[72px] sm:min-h-[80px] gap-1.5">
+              <div className="flex items-center gap-1.5">
                 <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--success) / 0.15) 0%, hsl(var(--success) / 0.05) 100%)' }}>
                   <CheckCircle2 className="h-4 w-4 text-success" />
                 </div>
-                <p className="text-ds-xs text-muted-foreground">Taxa de conclusão</p>
+                <p className="text-[11px] sm:text-xs font-semibold text-foreground tracking-wide uppercase leading-tight">Taxa de conclusão</p>
               </div>
-              <span className="text-ds-xl font-bold">{kpis.rate}%</span>
-              <Progress value={kpis.rate} className="mt-2 h-1.5" />
+              <p className="text-lg sm:text-xl font-bold tabular-nums leading-none text-muted-foreground">{kpis.rate}%</p>
+              <Progress value={kpis.rate} className="h-1.5 w-full" />
             </CardContent>
           </Card>
           <Card className="card-flat group overflow-hidden relative">
-            <CardContent className="p-ds-sm">
-              <div className="flex items-center gap-2.5 mb-2">
+            <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center min-h-[72px] sm:min-h-[80px] gap-1.5">
+              <div className="flex items-center gap-1.5">
                 <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--destructive) / 0.15) 0%, hsl(var(--destructive) / 0.05) 100%)' }}>
                   <Ban className="h-4 w-4 text-destructive" />
                 </div>
-                <p className="text-ds-xs text-muted-foreground">Cancelamentos</p>
+                <p className="text-[11px] sm:text-xs font-semibold text-foreground tracking-wide uppercase leading-tight">Cancelamentos</p>
               </div>
-              <span className={cn("text-ds-xl font-bold", kpis.totalCancel > 0 && "text-destructive")}>{kpis.totalCancel}</span>
+              <p className={cn("text-lg sm:text-xl font-bold tabular-nums leading-none text-muted-foreground", kpis.totalCancel > 0 && "text-destructive")}>{kpis.totalCancel}</p>
               {kpis.totalCancel > 0 && config && (
-                <p className="text-ds-xs text-destructive mt-1">{Math.abs(kpis.totalCancel * config.pointsPerCancellation)} pts perdidos</p>
+                <p className="text-[10px] text-destructive">{Math.abs(kpis.totalCancel * config.pointsPerCancellation)} pts perdidos</p>
               )}
             </CardContent>
           </Card>
