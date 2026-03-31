@@ -18,9 +18,9 @@ import {
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ChartContainer, ChartTooltip, ChartTooltipContent,
+  ChartContainer, ChartTooltipContent,
 } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LineChart, Line, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Tooltip } from 'recharts';
 
 interface Props {
   campaigns: Campaign[];
@@ -265,7 +265,7 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                             <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
                             <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
                             <YAxis tick={{ fontSize: 10 }} />
-                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <Tooltip content={<ChartTooltipContent />} />
                             <Bar dataKey="atual" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={28} />
                             <Bar dataKey="anterior" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} maxBarSize={28} />
                           </BarChart>
@@ -284,7 +284,7 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                             <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
                             <XAxis dataKey="name" tick={{ fontSize: 9 }} />
                             <YAxis tick={{ fontSize: 10 }} />
-                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <Tooltip content={<ChartTooltipContent />} />
                             <Line type="monotone" dataKey="pontuação" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
                             <Line type="monotone" dataKey="visitas" stroke="hsl(var(--info))" strokeWidth={2} dot={{ r: 4 }} />
                           </LineChart>
