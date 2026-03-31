@@ -9,7 +9,7 @@ export interface SystemItem {
   active: boolean;
 }
 
-export type SystemCategory = 'banks' | 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationBanks' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers';
+export type SystemCategory = 'banks' | 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationBanks' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers' | 'inviteRejectionReasons';
 
 const categoryLabels: Record<SystemCategory, string> = {
   banks: 'Bancos',
