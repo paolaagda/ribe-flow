@@ -53,6 +53,8 @@ const statusColorMap: Record<string, string> = {
   'Em pausa': 'bg-orange-500/15 text-orange-500 border-orange-500/30',
   'Cancelado': 'bg-destructive/15 text-destructive border-destructive/30',
 };
+
+export default function CadastroPage() {
   const { registrations, updateRegistration, deleteRegistration } = useRegistrations();
   const { getActiveItems } = useSystemData();
   const { canRead, canWrite } = usePermission();
