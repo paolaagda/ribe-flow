@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bell, CheckCheck, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -9,6 +9,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { useToast } from '@/hooks/use-toast';
 import { getRandomMessage } from '@/data/notification-messages';
 import InviteCard from './InviteCard';
+import InviteRejectionModal from '@/components/agenda/InviteRejectionModal';
 import { cn } from '@/lib/utils';
 import { getEmptyStateMessage } from '@/data/notification-messages';
 
