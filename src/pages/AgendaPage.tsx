@@ -175,14 +175,24 @@ export default function AgendaPage() {
       // Insight filters
       if (activeInsight === 'agenda_evolucao') {
         const d = parseISO(v.date);
-        const days = (new Date().getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
-        if (!(v.status === 'Concluída' && days >= 0 && days <= 30)) return false;
+        const ms = startOfMonth(new Date());
+        const me = endOfMonth(new Date());
+        if (!(v.status === 'Concluída' && isWithinInterval(d, { start: ms, end: me }))) return false;
       }
       if (activeInsight === 'agenda_valor_hoje') {
-        if (!(v.date === todayStr && (v.potentialValue || 0) > 0)) return false;
+        if (!(v.status === 'Planejada' && (v.potentialValue || 0) > 0)) return false;
+      }
+      if (activeInsight === 'agenda_tarefas_atrasadas') {
+        // No direct visit filter for tasks insight
       }
       if (activeInsight === 'agenda_taxa_conclusao') {
         if (v.status !== 'Concluída') return false;
+      }
+      if (activeInsight === 'agenda_cancelamentos') {
+        if (v.status !== 'Cancelada') return false;
+      }
+      if (activeInsight === 'agenda_prospeccoes') {
+        if (v.type !== 'prospecção') return false;
       }
       return true;
     });
@@ -570,7 +580,7 @@ export default function AgendaPage() {
     <PageTransition className="space-y-ds-lg">
       <HeroSection />
 
-      <SmartInsights page="agenda" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
+      <SmartInsights page="agenda" activeFilter={activeInsight} onFilterClick={setActiveInsight} filterView={view} filterStatus={filterStatus} filterType={filterType} />
 
       {/* Title + Month nav + Filters toggle */}
       <div className="flex flex-col gap-2">
@@ -787,18 +797,32 @@ export default function AgendaPage() {
                     onDragOver={(e) => handleDragOver(e, dayStr)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, day)}
+                    onClick={(e) => {
+                      // Only trigger if clicking the cell itself (not a visit item)
+                      if ((e.target as HTMLElement).closest('[data-visit-item]')) return;
+                      if (canWrite('agenda.create')) {
+                        setFormData(prev => ({ ...prev, date: dayStr }));
+                        setShowForm(true);
+                      }
+                    }}
                     className={cn(
-                      'bg-card min-h-[80px] sm:min-h-[100px] p-1.5 transition-colors',
+                      'bg-card min-h-[80px] sm:min-h-[100px] p-1.5 transition-colors group/day cursor-pointer',
                       !isCurrentMonth && 'opacity-40',
                       dragOverDay === dayStr && 'bg-primary/10 ring-2 ring-primary/30',
+                      canWrite('agenda.create') && 'hover:bg-muted/30',
                     )}
                   >
-                    <span className={cn(
-                      'text-xs font-medium inline-flex items-center justify-center w-6 h-6 rounded-full',
-                      isToday && 'bg-primary text-primary-foreground',
-                    )}>
-                      {format(day, 'd')}
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className={cn(
+                        'text-xs font-medium inline-flex items-center justify-center w-6 h-6 rounded-full',
+                        isToday && 'bg-primary text-primary-foreground',
+                      )}>
+                        {format(day, 'd')}
+                      </span>
+                      {canWrite('agenda.create') && dayVisits.length === 0 && (
+                        <Plus className="h-3 w-3 text-muted-foreground/0 group-hover/day:text-muted-foreground/60 transition-colors" />
+                      )}
+                    </div>
                     <div className="mt-1 space-y-0.5">
                       {dayVisits.slice(0, 3).map(v => {
                         const partner = getPartnerById(v.partnerId);
@@ -806,10 +830,11 @@ export default function AgendaPage() {
                         return (
                           <div
                             key={v.id}
+                            data-visit-item
                             draggable={canWrite('agenda.drag')}
                             onDragStart={(e) => canWrite('agenda.drag') && handleDragStart(e, v.id)}
                             onDragEnd={handleDragEnd}
-                            onClick={() => handleOpenDetail(v)}
+                            onClick={(e) => { e.stopPropagation(); handleOpenDetail(v); }}
                             className={cn(
                               'text-[10px] px-1.5 py-0.5 rounded truncate border cursor-pointer hover:ring-1 hover:ring-primary/40 flex items-center gap-1',
                               statusBgClasses[v.status],
