@@ -78,6 +78,8 @@ export default function AgendaPage() {
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [showTodayPanel, setShowTodayPanel] = useState(false);
   const [showTasksPanel, setShowTasksPanel] = useState(false);
+  const [showInviteRejectionModal, setShowInviteRejectionModal] = useState(false);
+  const [rejectingVisitId, setRejectingVisitId] = useState<string | null>(null);
   const [showTasksDrawer, setShowTasksDrawer] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
