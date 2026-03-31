@@ -297,4 +297,31 @@ export const initialCampaigns: Campaign[] = [
       },
     },
   },
+  {
+    id: 'camp4',
+    name: 'Campanha de Janeiro',
+    startDate: `${twoMonthsAgo}-01`,
+    endDate: `${twoMonthsAgo}-${lastDayOfMonth(twoMonthsAgo)}`,
+    participants: [
+      { userId: 'u4', visitGoal: 12, prospectionGoal: 6 },
+      { userId: 'u5', visitGoal: 10, prospectionGoal: 5 },
+      { userId: 'u6', visitGoal: 14, prospectionGoal: 8 },
+    ],
+    gamification: {
+      pointsPerVisit: 1,
+      pointsPerProspection: 2,
+      pointsPerCancellation: -0.5,
+      achievements: {
+        visitMilestone: 8,
+        visitReward: 6,
+        prospectionMilestone: 5,
+        prospectionReward: 10,
+        firstVisitReward: 2,
+        firstProspectionReward: 2,
+        fullVisitGoalReward: 6,
+        fullProspectionGoalReward: 6,
+        fullGoalReward: 15,
+      },
+    },
+  },
 ];
