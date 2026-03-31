@@ -165,8 +165,9 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
       return {
         name: c.name.replace('Campanha ', '').replace('de ', ''),
         pontuação: kpis.totalScore,
-        taxa: kpis.rate,
         visitas: kpis.totalVisits,
+        prospecções: kpis.totalProsp,
+        cancelamentos: kpis.totalCancel,
       };
     });
   }, [pastCampaigns, currentCampaign]);
