@@ -98,7 +98,7 @@ export const mockRegistrations: Registration[] = [
     id: 'reg4', partnerId: 'p6', bank: 'ICRED', cnpj: '67.890.123/0001-06', commercialUserId: 'u4',
     observation: 'Parceiro precisa assinar procuração.',
     status: 'Colhendo assinaturas', solicitation: 'SUB - Migração de Promotora', handlingWith: 'Jurídico RIBER', code: '',
-    requestedAt: '2025-02-01', completedAt: null,
+    requestedAt: '2025-02-01', completedAt: null, contractConfirmed: false,
     updates: [{ date: '2025-02-10', time: '11:20', userId: 'u10', text: 'Encaminhado modelo de procuração.' }],
   },
   {
