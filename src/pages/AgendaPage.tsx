@@ -473,11 +473,19 @@ export default function AgendaPage() {
 
   const handleRejectVisitInvite = useCallback((visitId: string) => {
     if (!user) return;
+    setRejectingVisitId(visitId);
+    setShowInviteRejectionModal(true);
+  }, [user]);
+
+  const handleConfirmRejectVisitInvite = useCallback((reason: string) => {
+    if (!user || !rejectingVisitId) return;
     setVisits(prev => prev.map(v =>
-      v.id === visitId ? { ...v, invitedUsers: v.invitedUsers.map(iu => iu.userId === user.id ? { ...iu, status: 'rejected' as const } : iu) } : v
+      v.id === rejectingVisitId ? { ...v, invitedUsers: v.invitedUsers.map(iu => iu.userId === user.id ? { ...iu, status: 'rejected' as const } : iu) } : v
     ));
-    toast({ title: getRandomMessage('reject') });
-  }, [user, toast]);
+    toast({ title: getRandomMessage('reject'), description: `Motivo: ${reason}` });
+    setShowInviteRejectionModal(false);
+    setRejectingVisitId(null);
+  }, [user, rejectingVisitId, toast]);
 
   const handleLeaveVisit = useCallback((visitId: string) => {
     if (!user) return;
