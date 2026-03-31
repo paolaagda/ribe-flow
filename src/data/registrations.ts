@@ -112,7 +112,7 @@ export const mockRegistrations: Registration[] = [
     id: 'reg6', partnerId: 'p3', bank: 'DIGIO', cnpj: '34.567.890/0001-03', commercialUserId: 'u5',
     observation: 'Cancelado por falta de documentação.',
     status: 'Cancelado', solicitation: 'IND - Migração de Promotora', handlingWith: 'Parceiro', code: '',
-    requestedAt: '2024-10-10', completedAt: null,
+    requestedAt: '2024-10-10', completedAt: null, contractConfirmed: false,
     updates: [{ date: '2024-11-20', time: '15:30', userId: 'u10', text: 'Parceiro não enviou documentos no prazo.' }],
   },
   {
