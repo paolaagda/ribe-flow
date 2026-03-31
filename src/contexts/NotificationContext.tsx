@@ -201,9 +201,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     ));
   }, []);
 
-  const rejectInvite = useCallback((notifId: string) => {
+  const rejectInvite = useCallback((notifId: string, reason: string) => {
     setAllNotifications(prev => prev.map(n =>
-      n.id === notifId ? { ...n, status: 'rejected' as InviteStatus, read: true } : n
+      n.id === notifId ? { ...n, status: 'rejected' as InviteStatus, read: true, rejectionReason: reason } : n
     ));
   }, []);
 
