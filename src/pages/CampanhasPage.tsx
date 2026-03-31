@@ -511,14 +511,12 @@ export default function CampanhasPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.2, delay: i * 0.03 }}
               >
-                <Card className={cn("transition-all text-center min-h-[120px] card-hover", a.done ? "border-primary/30 bg-primary/5" : "opacity-60")}>
+                <Card className={cn("transition-all text-center card-hover", a.done ? "border-primary/30 bg-primary/5" : "opacity-60")}>
                   <CardContent className="p-3 flex flex-col items-center gap-1.5">
                     <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", a.done ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
-                      {a.done ? <CheckCircle2 className="h-4 w-4" /> : a.icon}
+                      {a.icon}
                     </div>
                     <p className="text-ds-xs font-semibold leading-tight">{a.name}</p>
-                    <p className="text-ds-xs text-muted-foreground leading-tight opacity-70">{a.description}</p>
-                    {a.reward > 0 && <Badge variant="secondary" className="text-ds-xs px-1.5 py-0">+{a.reward}pts</Badge>}
                   </CardContent>
                 </Card>
               </motion.div>
