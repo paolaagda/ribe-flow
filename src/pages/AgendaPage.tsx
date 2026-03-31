@@ -489,7 +489,7 @@ export default function AgendaPage() {
       module: 'Agenda',
       action: 'reject',
       entityId: rejectingVisitId,
-      entityLabel: visit?.partnerName || 'Agenda',
+      entityLabel: partnerName,
       field: 'Convite',
       oldValue: 'Pendente',
       newValue: `Rejeitado – ${reason}`,
