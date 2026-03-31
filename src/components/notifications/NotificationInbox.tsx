@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { useToast } from '@/hooks/use-toast';
 import { getRandomMessage } from '@/data/notification-messages';
 import InviteCard from './InviteCard';
@@ -26,6 +27,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     ensureInitialized,
   } = useNotifications();
   const { toast } = useToast();
+  const { addLog } = useAuditLog();
 
   const prevCountRef = useRef(unreadCount);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
@@ -61,7 +63,18 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
 
   const handleConfirmReject = (reason: string) => {
     if (rejectingId) {
+      const notif = pendingInvites.find(n => n.id === rejectingId);
       rejectInvite(rejectingId, reason);
+      addLog({
+        module: 'Agenda',
+        action: 'reject',
+        entityId: notif?.visitId || rejectingId,
+        entityLabel: notif?.partnerName || 'Convite',
+        field: 'Convite',
+        oldValue: 'Pendente',
+        newValue: `Rejeitado – ${reason}`,
+        description: `Rejeitou participação – motivo: ${reason}`,
+      });
       toast({ title: getRandomMessage('reject'), description: `Motivo: ${reason}` });
     }
     setRejectModalOpen(false);

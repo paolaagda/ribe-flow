@@ -1,5 +1,5 @@
 export type AuditModule = 'Agenda' | 'Parceiros' | 'Campanhas' | 'Cadastro' | 'Colaboradores' | 'Configurações';
-export type AuditAction = 'create' | 'edit' | 'delete' | 'status_change' | 'permission_change';
+export type AuditAction = 'create' | 'edit' | 'delete' | 'status_change' | 'permission_change' | 'reject';
 
 export interface AuditLogEntry {
   id: string;
@@ -22,14 +22,16 @@ export const actionLabels: Record<AuditAction, string> = {
   delete: 'Excluiu',
   status_change: 'Alterou status',
   permission_change: 'Alterou permissão',
+  reject: 'Rejeitou',
 };
 
 export const actionColors: Record<AuditAction, string> = {
   create: 'text-success',
   edit: 'text-foreground',
   delete: 'text-destructive',
-  status_change: 'text-info',
-  permission_change: 'text-warning',
+  status_change: 'text-warning',
+  permission_change: 'text-primary',
+  reject: 'text-destructive',
 };
 
 export const moduleLabels: Record<AuditModule, string> = {

@@ -37,6 +37,7 @@ import SmartInsights from '@/components/shared/SmartInsights';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import { usePermission } from '@/hooks/usePermission';
 import { ShieldOff, FileText } from 'lucide-react';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -56,6 +57,7 @@ export default function AgendaPage() {
   const { visits, setVisits } = useVisits();
   const { getActiveItems } = useSystemData();
   const { registrations } = useRegistrations();
+  const { addLog } = useAuditLog();
 
   const hasActiveRegistration = useCallback((partnerId: string) => {
     return registrations.some(r => r.partnerId === partnerId && !['Concluído', 'Cancelado'].includes(r.status));
@@ -479,13 +481,25 @@ export default function AgendaPage() {
 
   const handleConfirmRejectVisitInvite = useCallback((reason: string) => {
     if (!user || !rejectingVisitId) return;
+    const foundVisit = visits.find(v => v.id === rejectingVisitId);
+    const partnerName = foundVisit ? (getPartnerById(foundVisit.partnerId)?.name || foundVisit.partnerId) : 'Agenda';
     setVisits(prev => prev.map(v =>
       v.id === rejectingVisitId ? { ...v, invitedUsers: v.invitedUsers.map(iu => iu.userId === user.id ? { ...iu, status: 'rejected' as const } : iu) } : v
     ));
+    addLog({
+      module: 'Agenda',
+      action: 'reject',
+      entityId: rejectingVisitId,
+      entityLabel: partnerName,
+      field: 'Convite',
+      oldValue: 'Pendente',
+      newValue: `Rejeitado – ${reason}`,
+      description: `${user.name} rejeitou participação – motivo: ${reason}`,
+    });
     toast({ title: getRandomMessage('reject'), description: `Motivo: ${reason}` });
     setShowInviteRejectionModal(false);
     setRejectingVisitId(null);
-  }, [user, rejectingVisitId, toast]);
+  }, [user, rejectingVisitId, toast, visits, addLog]);
 
   const handleLeaveVisit = useCallback((visitId: string) => {
     if (!user) return;
