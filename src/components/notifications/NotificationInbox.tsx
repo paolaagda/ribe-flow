@@ -28,6 +28,8 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   const { toast } = useToast();
 
   const prevCountRef = useRef(unreadCount);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
 
   useEffect(() => {
     ensureInitialized();
@@ -53,10 +55,17 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   };
 
   const handleReject = (id: string) => {
-    rejectInvite(id);
-    toast({
-      title: getRandomMessage('reject'),
-    });
+    setRejectingId(id);
+    setRejectModalOpen(true);
+  };
+
+  const handleConfirmReject = (reason: string) => {
+    if (rejectingId) {
+      rejectInvite(rejectingId, reason);
+      toast({ title: getRandomMessage('reject'), description: `Motivo: ${reason}` });
+    }
+    setRejectModalOpen(false);
+    setRejectingId(null);
   };
 
   return (
