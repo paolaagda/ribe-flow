@@ -286,6 +286,25 @@ export default function CadastroPage() {
       <div className="space-y-ds-lg">
         <PageHeader title="Cadastro" description="Gerencie o credenciamento de parceiros com bancos.">
           <div className="flex items-center gap-2">
+            {/* View toggle */}
+            <div className="flex items-center border border-border rounded-md overflow-hidden">
+              <Button
+                variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('cards')}
+                className="rounded-none h-8 px-2.5"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className="rounded-none h-8 px-2.5"
+              >
+                <TableIcon className="h-4 w-4" />
+              </Button>
+            </div>
             <Button
               variant={showFilters ? 'default' : 'outline'}
               size="sm"
