@@ -1,5 +1,5 @@
 export type AuditModule = 'Agenda' | 'Parceiros' | 'Campanhas' | 'Cadastro' | 'Colaboradores' | 'Configurações';
-export type AuditAction = 'create' | 'edit' | 'delete' | 'status_change' | 'permission_change';
+export type AuditAction = 'create' | 'edit' | 'delete' | 'status_change' | 'permission_change' | 'reject';
 
 export interface AuditLogEntry {
   id: string;
