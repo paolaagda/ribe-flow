@@ -34,7 +34,7 @@ interface NotificationContextValue {
   history: AppNotification[];
   addNotification: (notif: Omit<AppNotification, 'id' | 'createdAt' | 'read'>) => AppNotification;
   acceptInvite: (notifId: string) => void;
-  rejectInvite: (notifId: string) => void;
+  rejectInvite: (notifId: string, reason: string) => void;
   markAsRead: (notifId: string) => void;
   markAllAsRead: () => void;
   clearHistory: () => void;
