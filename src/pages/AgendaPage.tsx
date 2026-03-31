@@ -787,18 +787,32 @@ export default function AgendaPage() {
                     onDragOver={(e) => handleDragOver(e, dayStr)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, day)}
+                    onClick={(e) => {
+                      // Only trigger if clicking the cell itself (not a visit item)
+                      if ((e.target as HTMLElement).closest('[data-visit-item]')) return;
+                      if (canWrite('agenda.create')) {
+                        setFormData(prev => ({ ...prev, date: dayStr }));
+                        setShowForm(true);
+                      }
+                    }}
                     className={cn(
-                      'bg-card min-h-[80px] sm:min-h-[100px] p-1.5 transition-colors',
+                      'bg-card min-h-[80px] sm:min-h-[100px] p-1.5 transition-colors group/day cursor-pointer',
                       !isCurrentMonth && 'opacity-40',
                       dragOverDay === dayStr && 'bg-primary/10 ring-2 ring-primary/30',
+                      canWrite('agenda.create') && 'hover:bg-muted/30',
                     )}
                   >
-                    <span className={cn(
-                      'text-xs font-medium inline-flex items-center justify-center w-6 h-6 rounded-full',
-                      isToday && 'bg-primary text-primary-foreground',
-                    )}>
-                      {format(day, 'd')}
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className={cn(
+                        'text-xs font-medium inline-flex items-center justify-center w-6 h-6 rounded-full',
+                        isToday && 'bg-primary text-primary-foreground',
+                      )}>
+                        {format(day, 'd')}
+                      </span>
+                      {canWrite('agenda.create') && dayVisits.length === 0 && (
+                        <Plus className="h-3 w-3 text-muted-foreground/0 group-hover/day:text-muted-foreground/60 transition-colors" />
+                      )}
+                    </div>
                     <div className="mt-1 space-y-0.5">
                       {dayVisits.slice(0, 3).map(v => {
                         const partner = getPartnerById(v.partnerId);
