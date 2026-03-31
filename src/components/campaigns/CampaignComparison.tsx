@@ -329,9 +329,9 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                             <span className="text-[10px] font-semibold uppercase tracking-wide">{item.label}</span>
                           </div>
                           <div className="flex items-baseline gap-2">
-                            <span className="text-lg font-bold tabular-nums">{item.current}</span>
+                            <AnimatedNumber value={item.current} className="text-lg font-bold tabular-nums" />
                             <span className="text-xs text-muted-foreground">
-                              vs {item.prev}{selectedCampaigns.length > 1 && ' (média)'}
+                              vs <AnimatedNumber value={item.prev} className="text-xs font-bold tabular-nums" />{selectedCampaigns.length > 1 && ' (média)'}
                             </span>
                           </div>
                           <DiffIndicator current={item.current} previous={item.prev} invert={item.invert} />
