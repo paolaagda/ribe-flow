@@ -69,8 +69,7 @@ export default function CadastroPage() {
   }, [registrations, filterStatus, filterBank, search]);
 
   const handleCardClick = (reg: Registration) => {
-    setSelectedReg(reg);
-    setModalOpen(true);
+    navigate(`/cadastro/${reg.id}`);
   };
 
   const handleNew = () => {
