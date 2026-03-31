@@ -481,7 +481,7 @@ export default function AgendaPage() {
 
   const handleConfirmRejectVisitInvite = useCallback((reason: string) => {
     if (!user || !rejectingVisitId) return;
-    const visit = visits.find(v => v.id === rejectingVisitId);
+    const partnerName = visit ? (getPartnerById(visit.partnerId)?.name || visit.partnerId) : 'Agenda';
     setVisits(prev => prev.map(v =>
       v.id === rejectingVisitId ? { ...v, invitedUsers: v.invitedUsers.map(iu => iu.userId === user.id ? { ...iu, status: 'rejected' as const } : iu) } : v
     ));
