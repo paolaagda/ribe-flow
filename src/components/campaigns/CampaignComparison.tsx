@@ -174,6 +174,26 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
     return insights;
   }, [currentRanking, selectedRankings]);
 
+  // Average of selected for the KPI comparison (when multiple)
+  const avgKpis = useMemo(() => {
+    if (selectedKpis.length === 0) return null;
+    const sum = selectedKpis.reduce((acc, { kpis }) => ({
+      totalVisits: acc.totalVisits + kpis.totalVisits,
+      totalProsp: acc.totalProsp + kpis.totalProsp,
+      totalScore: acc.totalScore + kpis.totalScore,
+      totalCancel: acc.totalCancel + kpis.totalCancel,
+      rate: acc.rate + kpis.rate,
+    }), { totalVisits: 0, totalProsp: 0, totalScore: 0, totalCancel: 0, rate: 0 });
+    const n = selectedKpis.length;
+    return {
+      totalVisits: Math.round(sum.totalVisits / n),
+      totalProsp: Math.round(sum.totalProsp / n),
+      totalScore: Math.round(sum.totalScore / n * 10) / 10,
+      totalCancel: Math.round(sum.totalCancel / n),
+      rate: Math.round(sum.rate / n),
+    };
+  }, [selectedKpis]);
+
   if (pastCampaigns.length === 0) {
     return (
       <Card className="border-dashed">
@@ -195,24 +215,6 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
   selectedCampaigns.forEach((c, i) => {
     chartConfig[c.id] = { label: c.name, color: COMPARE_COLORS[i % COMPARE_COLORS.length] };
   });
-
-  // Average of selected for the KPI comparison (when multiple)
-  const avgKpis = useMemo(() => {
-    if (selectedKpis.length === 0) return null;
-    const sum = selectedKpis.reduce((acc, { kpis }) => ({
-      totalVisits: acc.totalVisits + kpis.totalVisits,
-      totalProsp: acc.totalProsp + kpis.totalProsp,
-      totalScore: acc.totalScore + kpis.totalScore,
-      totalCancel: acc.totalCancel + kpis.totalCancel,
-      rate: acc.rate + kpis.rate,
-    }), { totalVisits: 0, totalProsp: 0, totalScore: 0, totalCancel: 0, rate: 0 });
-    const n = selectedKpis.length;
-    return {
-      totalVisits: Math.round(sum.totalVisits / n),
-      totalProsp: Math.round(sum.totalProsp / n),
-      totalScore: Math.round(sum.totalScore / n * 10) / 10,
-      totalCancel: Math.round(sum.totalCancel / n),
-      rate: Math.round(sum.rate / n),
     };
   }, [selectedKpis]);
 
