@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { cn } from '@/lib/utils';
 import PageHeader from '@/components/shared/PageHeader';
 import PageTransition from '@/components/PageTransition';
 import { Button } from '@/components/ui/button';
@@ -6,12 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine, ShieldAlert } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useSystemData } from '@/hooks/useSystemData';
 import RegistrationCard from '@/components/cadastro/RegistrationCard';
 import RegistrationModal from '@/components/cadastro/RegistrationModal';
 import { Registration } from '@/data/registrations';
-import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
+import { motion } from 'framer-motion';
+import { Card } from '@/components/ui/card';
 import { usePermission } from '@/hooks/usePermission';
 import { useToast } from '@/hooks/use-toast';
 import { useAuditLog } from '@/hooks/useAuditLog';
@@ -136,29 +139,56 @@ export default function CadastroPage() {
           )}
         </PageHeader>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
-          <AnimatedKpiCard
-            icon={FileText}
-            label="Total"
-            value={registrations.length}
-            color="text-primary"
-            delay={0}
-            onClick={() => setFilterStatus('all')}
-            active={filterStatus === 'all'}
-          />
-          {Object.entries(statusKpiConfig).map(([status, config], i) => (
-            <AnimatedKpiCard
-              key={status}
-              icon={config.icon}
-              label={status}
-              value={statusCounts[status] || 0}
-              color={config.color}
-              delay={(i + 1) * 0.05}
-              onClick={() => setFilterStatus(filterStatus === status ? 'all' : status)}
-              active={filterStatus === status}
-              pulse={status === 'Em análise' && (statusCounts[status] || 0) > 0}
-            />
+        {/* KPIs - Compact icon + number with tooltip */}
+        <div className="flex flex-wrap gap-2">
+          {[
+            { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: registrations.length },
+            ...Object.entries(statusKpiConfig).map(([status, config]) => ({
+              status,
+              label: status,
+              icon: config.icon,
+              color: config.color,
+              count: statusCounts[status] || 0,
+            })),
+          ].map(({ status, label, icon: Icon, color, count }, i) => (
+            <Tooltip key={status}>
+              <TooltipTrigger asChild>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.04, duration: 0.3 }}
+                >
+                  <Card
+                    className={cn(
+                      'cursor-pointer border-border/50 overflow-hidden group transition-all duration-200',
+                      'hover:shadow-md hover:-translate-y-0.5',
+                      filterStatus === status
+                        ? 'ring-2 ring-primary/30 border-primary/20 card-glow'
+                        : 'card-interactive',
+                    )}
+                    onClick={() => setFilterStatus(filterStatus === status && status !== 'all' ? 'all' : status)}
+                  >
+                    <div className="flex flex-col items-center justify-center gap-1 p-3 min-w-[56px] sm:min-w-[64px]">
+                      <div className={cn(
+                        'relative transition-transform duration-200 group-hover:scale-110',
+                        color,
+                      )}>
+                        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                        {status === 'Em análise' && count > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                        )}
+                      </div>
+                      <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">
+                        {count}
+                      </span>
+                    </div>
+                  </Card>
+                </motion.div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs font-medium">
+                {label}
+              </TooltipContent>
+            </Tooltip>
           ))}
         </div>
 
