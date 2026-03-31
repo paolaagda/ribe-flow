@@ -39,7 +39,7 @@ export default function CampanhasPage() {
   const { toast } = useToast();
   const [campaigns] = useLocalStorage<Campaign[]>('ribercred_campaigns', initialCampaigns);
   const [unlockedBadges, setUnlockedBadges] = useLocalStorage<Record<string, string[]>>('ribercred_badges', {});
-  const confettiFired = useRef(false);
+  
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
 
   const selectableCampaigns = useMemo(() => campaigns.filter(c => getCampaignStatus(c) !== 'Futura'), [campaigns]);
