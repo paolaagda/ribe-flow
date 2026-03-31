@@ -367,7 +367,7 @@ export default function CampanhasPage() {
                     <Badge variant={isFirst ? 'default' : 'secondary'} className="text-[11px]">{item.score} pts</Badge>
                     <div className={cn('w-16 md:w-20 rounded-t-lg border-x border-t', barGradient, barHeight)}>
                       <div className="flex items-center justify-center h-full">
-                        <span className={cn("font-bold", isFirst ? "text-lg text-yellow-600" : "text-muted-foreground")}>{pos}º</span>
+                        <span className={cn("font-bold", isFirst ? "text-lg text-yellow-600 dark:text-yellow-400" : "text-muted-foreground")}>{pos}º</span>
                       </div>
                     </div>
                   </motion.div>

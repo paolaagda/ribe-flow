@@ -263,7 +263,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
           {/* Invite actions for current user */}
           {myInvite?.status === 'pending' && onAcceptInvite && onRejectInvite && (
             <div className="flex items-center gap-2 pt-1">
-              <Button size="sm" className="gap-1 bg-emerald-500 hover:bg-emerald-600 text-white" onClick={() => onAcceptInvite(visit.id)}>
+              <Button size="sm" className="gap-1 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => onAcceptInvite(visit.id)}>
                 <Check className="h-3.5 w-3.5" /> Aceitar convite
               </Button>
               <Button size="sm" variant="secondary" className="gap-1" onClick={() => onRejectInvite(visit.id)}>

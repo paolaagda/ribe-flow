@@ -807,7 +807,7 @@ export default function AgendaPage() {
                               <span className="flex gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
                                  <button
                                    aria-label="Aceitar convite"
-                                   className="h-3.5 w-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600"
+                                   className="h-3.5 w-3.5 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90"
                                    onClick={() => handleAcceptVisitInvite(v.id)}
                                  >
                                    <Check className="h-2 w-2" />

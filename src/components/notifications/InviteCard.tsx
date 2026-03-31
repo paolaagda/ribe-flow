@@ -86,7 +86,7 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
         <div className="flex items-center gap-2">
           <Button
             size="sm"
-            className="h-7 text-xs gap-1 bg-emerald-500 hover:bg-emerald-600 text-white"
+            className="h-7 text-xs gap-1 bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={() => onAccept(notification.id)}
           >
             <Check className="h-3 w-3" />
