@@ -557,7 +557,10 @@ export default function CampanhasPage() {
           </Accordion>
         </div>
       )}
+
+      {/* 9. Campaign Comparison */}
+      <CampaignComparison campaigns={campaigns} currentCampaignId={selectedCampaignId} />
+
       </AnimatedFilterContent>
     </div>
-  );
 }
