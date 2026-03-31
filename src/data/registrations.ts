@@ -77,7 +77,7 @@ export const mockRegistrations: Registration[] = [
     observation: 'Aguardando envio do contrato social atualizado.',
     status: 'Colhendo documentação', solicitation: 'Substabelecido', handlingWith: 'Parceiro', code: 'FNT-001',
     requestedAt: '2025-01-15', completedAt: null,
-    updates: [{ date: '2025-01-20', userId: 'u10', text: 'Solicitado documentação ao parceiro.' }],
+    updates: [{ date: '2025-01-20', time: '14:32', userId: 'u10', text: 'Solicitado documentação ao parceiro.' }],
   },
   {
     id: 'reg2', partnerId: 'p2', bank: 'BMG', cnpj: '23.456.789/0001-02', commercialUserId: 'u4',
