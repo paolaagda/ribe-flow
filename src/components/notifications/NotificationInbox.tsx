@@ -182,6 +182,12 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
         </Tabs>
       </PopoverContent>
     </Popover>
+    <InviteRejectionModal
+      open={rejectModalOpen}
+      onOpenChange={setRejectModalOpen}
+      onConfirm={handleConfirmReject}
+    />
+    </>
   );
 });
 NotificationInbox.displayName = 'NotificationInbox';
