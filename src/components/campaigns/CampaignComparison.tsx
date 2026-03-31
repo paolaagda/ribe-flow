@@ -426,6 +426,8 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                               <Legend wrapperStyle={{ fontSize: 10 }} />
                               <Line type="monotone" dataKey="pontuação" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
                               <Line type="monotone" dataKey="visitas" stroke="hsl(var(--info))" strokeWidth={2} dot={{ r: 4 }} />
+                              <Line type="monotone" dataKey="prospecções" stroke="hsl(var(--warning))" strokeWidth={2} dot={{ r: 4 }} />
+                              <Line type="monotone" dataKey="cancelamentos" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 4 }} />
                             </LineChart>
                           </ChartContainer>
                         </CardContent>
