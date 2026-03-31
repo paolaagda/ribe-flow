@@ -57,6 +57,7 @@ export default function AgendaPage() {
   const { visits, setVisits } = useVisits();
   const { getActiveItems } = useSystemData();
   const { registrations } = useRegistrations();
+  const { addLog } = useAuditLog();
 
   const hasActiveRegistration = useCallback((partnerId: string) => {
     return registrations.some(r => r.partnerId === partnerId && !['Concluído', 'Cancelado'].includes(r.status));
