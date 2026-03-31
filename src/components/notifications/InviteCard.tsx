@@ -57,6 +57,11 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
         {isRejected && (
           <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-destructive/10 text-destructive border-destructive/20">Recusado</Badge>
         )}
+        {isRejected && notification.rejectionReason && (
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-muted-foreground/20 text-muted-foreground">
+            {notification.rejectionReason}
+          </Badge>
+        )}
       </div>
 
       {/* Message */}

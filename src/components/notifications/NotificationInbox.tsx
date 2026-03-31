@@ -69,6 +69,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   };
 
   return (
+    <>
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative h-9 w-9">

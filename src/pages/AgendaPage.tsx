@@ -29,6 +29,7 @@ import AgendaDetailModal from '@/components/AgendaDetailModal';
 import TodayAgenda from '@/components/home/TodayAgenda';
 import VisitMap from '@/components/home/VisitMap';
 import JustificationModal from '@/components/agenda/JustificationModal';
+import InviteRejectionModal from '@/components/agenda/InviteRejectionModal';
 import PendingTasksCard from '@/components/agenda/PendingTasksCard';
 import TasksDrawer from '@/components/agenda/TasksDrawer';
 import AgendaMap from '@/components/agenda/AgendaMap';
