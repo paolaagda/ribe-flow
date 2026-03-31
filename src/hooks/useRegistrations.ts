@@ -13,6 +13,7 @@ export function useRegistrations() {
       id: `reg-${Date.now()}`,
       requestedAt: new Date().toISOString().split('T')[0],
       completedAt: reg.status === 'Concluído' ? new Date().toISOString().split('T')[0] : null,
+      contractConfirmed: reg.contractConfirmed ?? false,
       updates: reg.observation ? [{
         date: new Date().toISOString().split('T')[0],
         time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
