@@ -152,13 +152,17 @@ export default function CampanhasPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [achievements, user?.id]);
 
+  const isCurrentUserFirst = useMemo(() => {
+    return ranking.length > 0 && ranking[0]?.user?.id === user?.id;
+  }, [ranking, user?.id]);
+
   useEffect(() => {
-    if (confettiFired.current || ranking.length < 3) return;
+    if (confettiFired.current || ranking.length < 3 || !isCurrentUserFirst) return;
     confettiFired.current = true;
     setTimeout(() => {
-      confetti({ particleCount: 80, spread: 60, origin: { y: 0.4 }, colors: ['#FFD700', '#C0C0C0', '#CD7F32', '#4F46E5'] });
+      confetti({ particleCount: 80, spread: 60, origin: { x: 0.5, y: 0.35 }, colors: ['#FFD700', '#C0C0C0', '#CD7F32', '#4F46E5'] });
     }, 800);
-  }, [ranking]);
+  }, [ranking, isCurrentUserFirst]);
 
   // Score history
   const scoreHistory = useMemo(() => {
