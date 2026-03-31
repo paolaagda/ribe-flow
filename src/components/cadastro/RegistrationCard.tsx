@@ -86,7 +86,7 @@ export default function RegistrationCard({ registration, onClick, onEdit, onChan
               </AvatarFallback>
             </Avatar>
             <span className="text-[10px] text-muted-foreground truncate">
-              {lastUpdateUser.name.split(' ')[0]} · {format(new Date(lastUpdate.date), "dd/MM/yy", { locale: ptBR })}
+              {lastUpdateUser.name.split(' ')[0]} · {format(new Date(lastUpdate.date), "dd/MM/yy", { locale: ptBR })}{lastUpdate.time ? ` ${lastUpdate.time}` : ''}
             </span>
           </div>
         )}

@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
+import { usePartners } from '@/hooks/usePartners';
 import PageHeader from '@/components/shared/PageHeader';
 import PageTransition from '@/components/PageTransition';
 import { Button } from '@/components/ui/button';
@@ -56,6 +57,7 @@ const statusColorMap: Record<string, string> = {
 
 export default function CadastroPage() {
   const { registrations, updateRegistration, deleteRegistration } = useRegistrations();
+  const { getPartnerById } = usePartners();
   const { getActiveItems } = useSystemData();
   const { canRead, canWrite } = usePermission();
   const { toast } = useToast();
@@ -214,8 +216,9 @@ export default function CadastroPage() {
   }, []);
 
   const getPartnerName = useCallback((reg: Registration) => {
-    return reg.partnerId;
-  }, []);
+    const partner = getPartnerById(reg.partnerId);
+    return partner?.name || reg.partnerId;
+  }, [getPartnerById]);
 
   const getCommercialName = useCallback((userId: string) => {
     return mockUsers.find(u => u.id === userId)?.name || userId;
@@ -599,30 +602,26 @@ export default function CadastroPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="cursor-pointer select-none whitespace-nowrap" onClick={() => toggleSort('partner')}>
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[220px]" onClick={() => toggleSort('partner')}>
                       <span className="flex items-center">Parceiro <SortIcon field="partner" /></span>
                     </TableHead>
-                    <TableHead className="whitespace-nowrap">Código</TableHead>
-                    <TableHead className="whitespace-nowrap">CNPJ</TableHead>
-                    <TableHead className="cursor-pointer select-none whitespace-nowrap" onClick={() => toggleSort('bank')}>
-                      <span className="flex items-center">Banco <SortIcon field="bank" /></span>
-                    </TableHead>
-                    <TableHead className="whitespace-nowrap">Solicitação</TableHead>
                     <TableHead className="cursor-pointer select-none whitespace-nowrap" onClick={() => toggleSort('status')}>
                       <span className="flex items-center">Status <SortIcon field="status" /></span>
                     </TableHead>
                     <TableHead className="whitespace-nowrap">Tratando com</TableHead>
                     <TableHead className="min-w-[200px]">Observação</TableHead>
-                    <TableHead className="cursor-pointer select-none whitespace-nowrap" onClick={() => toggleSort('date')}>
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[180px]" onClick={() => toggleSort('date')}>
                       <span className="flex items-center">Atualização <SortIcon field="date" /></span>
                     </TableHead>
                     <TableHead className="whitespace-nowrap">Solicitado em</TableHead>
                     <TableHead className="whitespace-nowrap">Concluído</TableHead>
+                    <TableHead className="whitespace-nowrap">Código</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {sorted.map(reg => {
                     const lastUpdate = reg.updates.length > 0 ? reg.updates[reg.updates.length - 1] : null;
+                    const lastUpdateUser = lastUpdate ? mockUsers.find(u => u.id === lastUpdate.userId) : null;
                     const isEditing = (field: string) => editingCell?.id === reg.id && editingCell?.field === field;
                     
                     return (
@@ -631,41 +630,17 @@ export default function CadastroPage() {
                         className="cursor-pointer group"
                         onClick={() => handleCardClick(reg)}
                       >
-                        {/* Parceiro */}
-                        <TableCell className="font-medium whitespace-nowrap max-w-[200px] truncate">{getPartnerName(reg)}</TableCell>
-                        
-                        {/* Código */}
-                        <TableCell className="whitespace-nowrap tabular-nums text-muted-foreground">{reg.code || '—'}</TableCell>
-                        
-                        {/* CNPJ */}
-                        <TableCell className="whitespace-nowrap tabular-nums text-muted-foreground">{reg.cnpj || '—'}</TableCell>
-                        
-                        {/* Banco */}
-                        <TableCell className="whitespace-nowrap" onClick={e => e.stopPropagation()}>
-                          {isEditing('bank') ? (
-                            <Select value={editValue} onValueChange={v => { setEditValue(v); updateRegistration(reg.id, { bank: v }); setEditingCell(null); }}>
-                              <SelectTrigger className="h-7 w-[120px] text-xs"><SelectValue /></SelectTrigger>
-                              <SelectContent>{banks.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
-                            </Select>
-                          ) : (
-                            <Badge variant="outline" className="cursor-pointer text-xs font-semibold" onClick={() => startEditing(reg.id, 'bank', reg.bank)}>
-                              {reg.bank}
-                            </Badge>
-                          )}
-                        </TableCell>
-                        
-                        {/* Solicitação */}
-                        <TableCell className="whitespace-nowrap text-xs" onClick={e => e.stopPropagation()}>
-                          {isEditing('solicitation') ? (
-                            <Select value={editValue} onValueChange={v => { setEditValue(v); updateRegistration(reg.id, { solicitation: v }); setEditingCell(null); }}>
-                              <SelectTrigger className="h-7 w-[180px] text-xs"><SelectValue /></SelectTrigger>
-                              <SelectContent>{solicitations.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                            </Select>
-                          ) : (
-                            <span className="cursor-pointer hover:text-primary transition-colors" onClick={() => startEditing(reg.id, 'solicitation', reg.solicitation)}>
-                              {reg.solicitation}
-                            </span>
-                          )}
+                        {/* Parceiro (resumo: nome + CNPJ + banco + solicitação) */}
+                        <TableCell className="min-w-[220px]">
+                          <div className="space-y-1">
+                            <span className="font-semibold text-sm text-foreground block truncate">{getPartnerName(reg)}</span>
+                            <div className="flex flex-wrap items-center gap-1">
+                              <span className="text-[10px] tabular-nums text-muted-foreground">{reg.cnpj}</span>
+                              <span className="text-muted-foreground/40">·</span>
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">{reg.bank}</Badge>
+                              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">{reg.solicitation}</Badge>
+                            </div>
+                          </div>
                         </TableCell>
                         
                         {/* Status */}
@@ -717,20 +692,35 @@ export default function CadastroPage() {
                           )}
                         </TableCell>
                         
-                        {/* Atualização */}
-                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+                        {/* Atualização (data + hora + quem) */}
+                        <TableCell className="text-xs text-muted-foreground min-w-[180px]">
                           {lastUpdate ? (
-                            <div>
-                              <span>{lastUpdate.date}</span>
+                            <div className="space-y-0.5">
+                              <span className="block tabular-nums">
+                                {format(new Date(lastUpdate.date), 'dd/MM/yyyy', { locale: ptBR })}
+                                {lastUpdate.time ? ` às ${lastUpdate.time}` : ''}
+                              </span>
+                              {lastUpdateUser && (
+                                <span className="block text-[10px] text-muted-foreground/70">
+                                  por {lastUpdateUser.name}
+                                </span>
+                              )}
                             </div>
                           ) : '—'}
                         </TableCell>
                         
                         {/* Solicitado em */}
-                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{reg.requestedAt}</TableCell>
+                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground tabular-nums">
+                          {format(new Date(reg.requestedAt), 'dd/MM/yyyy', { locale: ptBR })}
+                        </TableCell>
                         
                         {/* Concluído */}
-                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{reg.completedAt || '—'}</TableCell>
+                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground tabular-nums">
+                          {reg.completedAt ? format(new Date(reg.completedAt), 'dd/MM/yyyy', { locale: ptBR }) : '—'}
+                        </TableCell>
+                        
+                        {/* Código (último pois só preenchido quando concluído) */}
+                        <TableCell className="whitespace-nowrap tabular-nums text-xs text-muted-foreground">{reg.code || '—'}</TableCell>
                       </TableRow>
                     );
                   })}
