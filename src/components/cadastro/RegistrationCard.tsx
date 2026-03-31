@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { PenLine, RefreshCw, Lock, Trash2 } from 'lucide-react';
+import { PenLine, RefreshCw, Lock, Trash2, FileCheck } from 'lucide-react';
 
 interface Props {
   registration: Registration;
@@ -79,15 +79,23 @@ export default function RegistrationCard({ registration, onClick, onEdit, onChan
         {/* Last update */}
         {lastUpdate && lastUpdateUser && (
           <div className="flex items-center gap-2 pt-1 border-t border-border">
-            <Avatar className="h-4 w-4">
+            <Avatar className="h-5 w-5 shrink-0">
               {getAvatar(lastUpdate.userId) && <AvatarImage src={getAvatar(lastUpdate.userId)} />}
               <AvatarFallback className="text-[7px] bg-muted">
                 {lastUpdateUser.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
               </AvatarFallback>
             </Avatar>
             <span className="text-[10px] text-muted-foreground truncate">
-              {lastUpdateUser.name.split(' ')[0]} · {format(new Date(lastUpdate.date), "dd/MM/yy", { locale: ptBR })}{lastUpdate.time ? ` ${lastUpdate.time}` : ''}
+              {lastUpdateUser.name.split(' ')[0]} · {format(new Date(lastUpdate.date), "dd/MM/yy", { locale: ptBR })}{lastUpdate.time ? ` · ${lastUpdate.time}` : ''}
             </span>
+          </div>
+        )}
+
+        {/* Contract indicator */}
+        {registration.contractConfirmed && (
+          <div className="flex items-center gap-1.5 text-success">
+            <FileCheck className="h-3.5 w-3.5" />
+            <span className="text-[10px] font-medium">Contrato confirmado</span>
           </div>
         )}
 

@@ -7,13 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine, ShieldAlert, Filter, Users, Building2, ChevronDown, CalendarIcon, X, LayoutGrid, Table as TableIcon, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine, ShieldAlert, Filter, Users, Building2, ChevronDown, CalendarIcon, X, LayoutGrid, Table as TableIcon, ArrowUpDown, ArrowUp, ArrowDown, FileCheck } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useSystemData } from '@/hooks/useSystemData';
 import RegistrationCard from '@/components/cadastro/RegistrationCard';
@@ -59,6 +62,7 @@ export default function CadastroPage() {
   const { registrations, updateRegistration, deleteRegistration } = useRegistrations();
   const { getPartnerById } = usePartners();
   const { getActiveItems } = useSystemData();
+  const { getAvatar } = useUserAvatars();
   const { canRead, canWrite } = usePermission();
   const { toast } = useToast();
   const { addLog } = useAuditLog();
@@ -610,9 +614,10 @@ export default function CadastroPage() {
                     </TableHead>
                     <TableHead className="whitespace-nowrap">Tratando com</TableHead>
                     <TableHead className="min-w-[200px]">Observação</TableHead>
-                    <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[180px]" onClick={() => toggleSort('date')}>
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[200px]" onClick={() => toggleSort('date')}>
                       <span className="flex items-center">Atualização <SortIcon field="date" /></span>
                     </TableHead>
+                    <TableHead className="whitespace-nowrap text-center">Contrato</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -689,21 +694,30 @@ export default function CadastroPage() {
                           )}
                         </TableCell>
                         
-                        {/* Atualização (data + hora + quem) */}
-                        <TableCell className="text-xs text-muted-foreground min-w-[180px]">
-                          {lastUpdate ? (
-                            <div className="space-y-0.5">
-                              <span className="block tabular-nums">
-                                {format(new Date(lastUpdate.date), 'dd/MM/yyyy', { locale: ptBR })}
-                                {lastUpdate.time ? ` às ${lastUpdate.time}` : ''}
+                        {/* Atualização (avatar + nome + data + hora) */}
+                        <TableCell className="text-xs text-muted-foreground min-w-[200px]">
+                          {lastUpdate && lastUpdateUser ? (
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-5 w-5 shrink-0">
+                                {getAvatar(lastUpdate.userId) && <AvatarImage src={getAvatar(lastUpdate.userId)} />}
+                                <AvatarFallback className="text-[7px] bg-muted">
+                                  {lastUpdateUser.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="truncate tabular-nums">
+                                {lastUpdateUser.name.split(' ')[0]} · {format(new Date(lastUpdate.date), 'dd/MM/yyyy', { locale: ptBR })}{lastUpdate.time ? ` · ${lastUpdate.time}` : ''}
                               </span>
-                              {lastUpdateUser && (
-                                <span className="block text-[10px] text-muted-foreground/70">
-                                  por {lastUpdateUser.name}
-                                </span>
-                              )}
                             </div>
                           ) : '—'}
+                        </TableCell>
+
+                        {/* Contrato */}
+                        <TableCell className="text-center" onClick={e => e.stopPropagation()}>
+                          <Checkbox
+                            checked={reg.contractConfirmed ?? false}
+                            onCheckedChange={(checked) => updateRegistration(reg.id, { contractConfirmed: !!checked })}
+                            className="mx-auto"
+                          />
                         </TableCell>
                         
                       </TableRow>
