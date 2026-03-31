@@ -232,8 +232,9 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
   const chartConfig: Record<string, { label: string; color: string }> = {
     atual: { label: currentCampaign?.name || 'Atual', color: 'hsl(var(--primary))' },
     pontuação: { label: 'Pontuação', color: 'hsl(var(--primary))' },
-    taxa: { label: 'Taxa %', color: 'hsl(var(--success))' },
     visitas: { label: 'Visitas', color: 'hsl(var(--info))' },
+    prospecções: { label: 'Prospecções', color: 'hsl(var(--warning))' },
+    cancelamentos: { label: 'Cancelamentos', color: 'hsl(var(--destructive))' },
   };
   selectedCampaigns.forEach((c, i) => {
     chartConfig[c.id] = { label: c.name, color: COMPARE_COLORS[i % COMPARE_COLORS.length] };
