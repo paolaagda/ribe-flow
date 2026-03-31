@@ -563,4 +563,5 @@ export default function CampanhasPage() {
 
       </AnimatedFilterContent>
     </div>
+  );
 }
