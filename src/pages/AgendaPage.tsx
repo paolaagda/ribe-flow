@@ -1239,6 +1239,12 @@ export default function AgendaPage() {
           if (v) { setSelectedVisit(v); setShowDetail(true); }
         }}
       />
+
+      <InviteRejectionModal
+        open={showInviteRejectionModal}
+        onOpenChange={setShowInviteRejectionModal}
+        onConfirm={handleConfirmRejectVisitInvite}
+      />
     </PageTransition>
   );
 }
