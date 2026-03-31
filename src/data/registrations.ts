@@ -84,7 +84,7 @@ export const mockRegistrations: Registration[] = [
     observation: 'Análise de compliance em andamento.',
     status: 'Em análise', solicitation: 'Indicado', handlingWith: 'Banco', code: 'BMG-012',
     requestedAt: '2025-01-10', completedAt: null,
-    updates: [{ date: '2025-01-18', userId: 'u10', text: 'Documentação enviada ao banco.' }],
+    updates: [{ date: '2025-01-18', time: '09:15', userId: 'u10', text: 'Documentação enviada ao banco.' }],
   },
   {
     id: 'reg3', partnerId: 'p4', bank: 'C6', cnpj: '45.678.901/0001-04', commercialUserId: 'u5',
