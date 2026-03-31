@@ -60,6 +60,15 @@ export default function AgendaPage() {
   const { registrations } = useRegistrations();
   const { addLog } = useAuditLog();
 
+  const rankingLeaderId = useMemo(() => {
+    const activeCampaign = initialCampaigns.find(c => getCampaignStatus(c) === 'Ativa');
+    if (!activeCampaign) return null;
+    const sorted = activeCampaign.participants
+      .map(p => ({ userId: p.userId, score: calculateUserScore(activeCampaign, p.userId) }))
+      .sort((a, b) => b.score - a.score);
+    return sorted.length > 0 && sorted[0].score > 0 ? sorted[0].userId : null;
+  }, []);
+
   const hasActiveRegistration = useCallback((partnerId: string) => {
     return registrations.some(r => r.partnerId === partnerId && !['Concluído', 'Cancelado'].includes(r.status));
   }, [registrations]);
