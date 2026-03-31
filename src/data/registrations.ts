@@ -126,6 +126,6 @@ export const mockRegistrations: Registration[] = [
     observation: 'Documentação completa, aguardando análise do banco.',
     status: 'Em análise', solicitation: 'Substabelecido EGV', handlingWith: 'Banco', code: 'BMG-099',
     requestedAt: '2025-02-15', completedAt: null,
-    updates: [{ date: '2025-02-20', userId: 'u10', text: 'Todos os documentos foram enviados.' }],
+    updates: [{ date: '2025-02-20', time: '08:50', userId: 'u10', text: 'Todos os documentos foram enviados.' }],
   },
 ];
