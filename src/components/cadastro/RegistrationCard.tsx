@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { PenLine, RefreshCw, Lock, Trash2 } from 'lucide-react';
+import { PenLine, RefreshCw, Lock, Trash2, FileCheck } from 'lucide-react';
 
 interface Props {
   registration: Registration;
