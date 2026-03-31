@@ -208,6 +208,7 @@ export function getUserScoreBreakdown(campaign: Campaign, userId: string): Score
 const today = new Date();
 const thisMonth = today.toISOString().slice(0, 7);
 const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().slice(0, 7);
+const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 1).toISOString().slice(0, 7);
 const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1).toISOString().slice(0, 7);
 
 function lastDayOfMonth(yearMonth: string): string {
@@ -293,6 +294,33 @@ export const initialCampaigns: Campaign[] = [
         fullVisitGoalReward: 12,
         fullProspectionGoalReward: 12,
         fullGoalReward: 30,
+      },
+    },
+  },
+  {
+    id: 'camp4',
+    name: 'Campanha de Janeiro',
+    startDate: `${twoMonthsAgo}-01`,
+    endDate: `${twoMonthsAgo}-${lastDayOfMonth(twoMonthsAgo)}`,
+    participants: [
+      { userId: 'u4', visitGoal: 12, prospectionGoal: 6 },
+      { userId: 'u5', visitGoal: 10, prospectionGoal: 5 },
+      { userId: 'u6', visitGoal: 14, prospectionGoal: 8 },
+    ],
+    gamification: {
+      pointsPerVisit: 1,
+      pointsPerProspection: 2,
+      pointsPerCancellation: -0.5,
+      achievements: {
+        visitMilestone: 8,
+        visitReward: 6,
+        prospectionMilestone: 5,
+        prospectionReward: 10,
+        firstVisitReward: 2,
+        firstProspectionReward: 2,
+        fullVisitGoalReward: 6,
+        fullProspectionGoalReward: 6,
+        fullGoalReward: 15,
       },
     },
   },
