@@ -98,7 +98,7 @@ export const mockRegistrations: Registration[] = [
     observation: 'Parceiro precisa assinar procuração.',
     status: 'Colhendo assinaturas', solicitation: 'SUB - Migração de Promotora', handlingWith: 'Jurídico RIBER', code: '',
     requestedAt: '2025-02-01', completedAt: null,
-    updates: [{ date: '2025-02-10', userId: 'u10', text: 'Encaminhado modelo de procuração.' }],
+    updates: [{ date: '2025-02-10', time: '11:20', userId: 'u10', text: 'Encaminhado modelo de procuração.' }],
   },
   {
     id: 'reg5', partnerId: 'p10', bank: 'PAN', cnpj: '01.234.567/0001-10', commercialUserId: 'u4',
