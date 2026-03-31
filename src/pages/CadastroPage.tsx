@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { cn } from '@/lib/utils';
 import PageHeader from '@/components/shared/PageHeader';
 import PageTransition from '@/components/PageTransition';
 import { Button } from '@/components/ui/button';
