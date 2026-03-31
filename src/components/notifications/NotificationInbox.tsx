@@ -27,6 +27,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     ensureInitialized,
   } = useNotifications();
   const { toast } = useToast();
+  const { addLog } = useAuditLog();
 
   const prevCountRef = useRef(unreadCount);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
