@@ -250,7 +250,7 @@ export default function CadastroDetalhePage() {
                             <div className="flex items-center gap-2">
                               <span className="text-xs font-medium">{updUser?.name.split(' ')[0] || 'Usuário'}</span>
                               <span className="text-[10px] text-muted-foreground">
-                                {format(new Date(upd.date), "dd/MM/yy", { locale: ptBR })}
+                                {format(new Date(upd.date), "dd/MM/yy", { locale: ptBR })}{upd.time ? ` · ${upd.time}` : ''}
                               </span>
                               {i === 0 && <Badge variant="secondary" className="text-[9px] px-1 py-0">Mais recente</Badge>}
                             </div>
