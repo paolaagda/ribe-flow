@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import PageHeader from '@/components/shared/PageHeader';
 import PageTransition from '@/components/PageTransition';
@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine, ShieldAlert, Filter, Users, Building2, ChevronDown, CalendarIcon, X } from 'lucide-react';
+import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine, ShieldAlert, Filter, Users, Building2, ChevronDown, CalendarIcon, X, LayoutGrid, Table as TableIcon, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useSystemData } from '@/hooks/useSystemData';
 import RegistrationCard from '@/components/cadastro/RegistrationCard';
@@ -23,6 +25,7 @@ import { usePermission } from '@/hooks/usePermission';
 import { useToast } from '@/hooks/use-toast';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useNavigate } from 'react-router-dom';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfDay, endOfDay, isWithinInterval, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -37,6 +40,19 @@ const statusKpiConfig: Record<string, { icon: any; color: string }> = {
 };
 
 type DateMode = 'none' | 'day' | 'period' | 'weekly' | 'monthly';
+type ViewMode = 'cards' | 'table';
+type SortField = 'partner' | 'status' | 'date' | 'bank' | 'none';
+type SortDir = 'asc' | 'desc';
+
+const statusColorMap: Record<string, string> = {
+  'Não iniciado': 'bg-muted text-muted-foreground',
+  'Colhendo documentação': 'bg-info/15 text-info border-info/30',
+  'Em análise': 'bg-warning/15 text-warning border-warning/30',
+  'Colhendo assinaturas': 'bg-violet-500/15 text-violet-500 border-violet-500/30',
+  'Concluído': 'bg-success/15 text-success border-success/30',
+  'Em pausa': 'bg-orange-500/15 text-orange-500 border-orange-500/30',
+  'Cancelado': 'bg-destructive/15 text-destructive border-destructive/30',
+};
 
 export default function CadastroPage() {
   const { registrations, updateRegistration, deleteRegistration } = useRegistrations();
@@ -60,6 +76,12 @@ export default function CadastroPage() {
   const [expandStatus, setExpandStatus] = useState(true);
   const [expandHandlers, setExpandHandlers] = useState(false);
   const [expandBanks, setExpandBanks] = useState(false);
+
+  const [viewMode, setViewMode] = useLocalStorage<ViewMode>('ribercred_cadastro_view', 'cards');
+  const [sortField, setSortField] = useState<SortField>('none');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [editingCell, setEditingCell] = useState<{ id: string; field: string } | null>(null);
+  const [editValue, setEditValue] = useState('');
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
@@ -152,6 +174,64 @@ export default function CadastroPage() {
     });
   }, [registrations, filterStatus, filterBank, filterCommercial, filterSolicitation, filterHandler, filterDateMode, filterDateFrom, filterDateTo, search]);
 
+  const sorted = useMemo(() => {
+    if (sortField === 'none') return filtered;
+    return [...filtered].sort((a, b) => {
+      let cmp = 0;
+      if (sortField === 'partner') cmp = a.partnerId.localeCompare(b.partnerId);
+      else if (sortField === 'status') cmp = a.status.localeCompare(b.status);
+      else if (sortField === 'bank') cmp = a.bank.localeCompare(b.bank);
+      else if (sortField === 'date') cmp = getLastUpdateDate(a).localeCompare(getLastUpdateDate(b));
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [filtered, sortField, sortDir]);
+
+  const toggleSort = useCallback((field: SortField) => {
+    if (sortField === field) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir('desc');
+    }
+  }, [sortField]);
+
+  const startEditing = useCallback((id: string, field: string, currentValue: string) => {
+    setEditingCell({ id, field });
+    setEditValue(currentValue);
+  }, []);
+
+  const commitEdit = useCallback(() => {
+    if (!editingCell) return;
+    const { id, field } = editingCell;
+    updateRegistration(id, { [field]: editValue });
+    setEditingCell(null);
+    setEditValue('');
+  }, [editingCell, editValue, updateRegistration]);
+
+  const cancelEdit = useCallback(() => {
+    setEditingCell(null);
+    setEditValue('');
+  }, []);
+
+  const getPartnerName = useCallback((reg: Registration) => {
+    return reg.partnerId;
+  }, []);
+
+  const getCommercialName = useCallback((userId: string) => {
+    return mockUsers.find(u => u.id === userId)?.name || userId;
+  }, []);
+
+  const getLastUpdater = useCallback((reg: Registration) => {
+    if (reg.updates.length === 0) return '';
+    const lastUpdate = reg.updates[reg.updates.length - 1];
+    return mockUsers.find(u => u.id === lastUpdate.userId)?.name || lastUpdate.userId;
+  }, []);
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
+    return sortDir === 'asc' ? <ArrowUp className="h-3 w-3 ml-1 text-primary" /> : <ArrowDown className="h-3 w-3 ml-1 text-primary" />;
+  };
+
   const handleCardClick = (reg: Registration) => navigate(`/cadastro/${reg.id}`);
   const handleNew = () => { setSelectedReg(null); setModalOpen(true); };
   const handleEdit = (reg: Registration) => { setSelectedReg(reg); setModalOpen(true); };
@@ -206,6 +286,25 @@ export default function CadastroPage() {
       <div className="space-y-ds-lg">
         <PageHeader title="Cadastro" description="Gerencie o credenciamento de parceiros com bancos.">
           <div className="flex items-center gap-2">
+            {/* View toggle */}
+            <div className="flex items-center border border-border rounded-md overflow-hidden">
+              <Button
+                variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('cards')}
+                className="rounded-none h-8 px-2.5"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className="rounded-none h-8 px-2.5"
+              >
+                <TableIcon className="h-4 w-4" />
+              </Button>
+            </div>
             <Button
               variant={showFilters ? 'default' : 'outline'}
               size="sm"
@@ -475,14 +574,14 @@ export default function CadastroPage() {
           </div>
         </CollapsibleSection>
 
-        {/* Grid */}
-        {filtered.length === 0 ? (
+        {/* Content - Cards or Table */}
+        {sorted.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <p className="text-sm">Nenhum cadastro encontrado.</p>
           </div>
-        ) : (
+        ) : viewMode === 'cards' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filtered.map(reg => (
+            {sorted.map(reg => (
               <RegistrationCard
                 key={reg.id}
                 registration={reg}
@@ -494,6 +593,151 @@ export default function CadastroPage() {
               />
             ))}
           </div>
+        ) : (
+          <Card className="overflow-hidden border-border/50">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap" onClick={() => toggleSort('partner')}>
+                      <span className="flex items-center">Parceiro <SortIcon field="partner" /></span>
+                    </TableHead>
+                    <TableHead className="whitespace-nowrap">Código</TableHead>
+                    <TableHead className="whitespace-nowrap">CNPJ</TableHead>
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap" onClick={() => toggleSort('bank')}>
+                      <span className="flex items-center">Banco <SortIcon field="bank" /></span>
+                    </TableHead>
+                    <TableHead className="whitespace-nowrap">Solicitação</TableHead>
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap" onClick={() => toggleSort('status')}>
+                      <span className="flex items-center">Status <SortIcon field="status" /></span>
+                    </TableHead>
+                    <TableHead className="whitespace-nowrap">Tratando com</TableHead>
+                    <TableHead className="min-w-[200px]">Observação</TableHead>
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap" onClick={() => toggleSort('date')}>
+                      <span className="flex items-center">Atualização <SortIcon field="date" /></span>
+                    </TableHead>
+                    <TableHead className="whitespace-nowrap">Solicitado em</TableHead>
+                    <TableHead className="whitespace-nowrap">Concluído</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sorted.map(reg => {
+                    const lastUpdate = reg.updates.length > 0 ? reg.updates[reg.updates.length - 1] : null;
+                    const isEditing = (field: string) => editingCell?.id === reg.id && editingCell?.field === field;
+                    
+                    return (
+                      <TableRow
+                        key={reg.id}
+                        className="cursor-pointer group"
+                        onClick={() => handleCardClick(reg)}
+                      >
+                        {/* Parceiro */}
+                        <TableCell className="font-medium whitespace-nowrap max-w-[200px] truncate">{getPartnerName(reg)}</TableCell>
+                        
+                        {/* Código */}
+                        <TableCell className="whitespace-nowrap tabular-nums text-muted-foreground">{reg.code || '—'}</TableCell>
+                        
+                        {/* CNPJ */}
+                        <TableCell className="whitespace-nowrap tabular-nums text-muted-foreground">{reg.cnpj || '—'}</TableCell>
+                        
+                        {/* Banco */}
+                        <TableCell className="whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                          {isEditing('bank') ? (
+                            <Select value={editValue} onValueChange={v => { setEditValue(v); updateRegistration(reg.id, { bank: v }); setEditingCell(null); }}>
+                              <SelectTrigger className="h-7 w-[120px] text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>{banks.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge variant="outline" className="cursor-pointer text-xs font-semibold" onClick={() => startEditing(reg.id, 'bank', reg.bank)}>
+                              {reg.bank}
+                            </Badge>
+                          )}
+                        </TableCell>
+                        
+                        {/* Solicitação */}
+                        <TableCell className="whitespace-nowrap text-xs" onClick={e => e.stopPropagation()}>
+                          {isEditing('solicitation') ? (
+                            <Select value={editValue} onValueChange={v => { setEditValue(v); updateRegistration(reg.id, { solicitation: v }); setEditingCell(null); }}>
+                              <SelectTrigger className="h-7 w-[180px] text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>{solicitations.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="cursor-pointer hover:text-primary transition-colors" onClick={() => startEditing(reg.id, 'solicitation', reg.solicitation)}>
+                              {reg.solicitation}
+                            </span>
+                          )}
+                        </TableCell>
+                        
+                        {/* Status */}
+                        <TableCell className="whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                          {isEditing('status') ? (
+                            <Select value={editValue} onValueChange={v => { setEditValue(v); updateRegistration(reg.id, { status: v }); setEditingCell(null); }}>
+                              <SelectTrigger className="h-7 w-[160px] text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>{statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge className={cn('cursor-pointer text-[10px] font-semibold border', statusColorMap[reg.status] || 'bg-muted')} onClick={() => startEditing(reg.id, 'status', reg.status)}>
+                              {reg.status}
+                            </Badge>
+                          )}
+                        </TableCell>
+                        
+                        {/* Tratando com */}
+                        <TableCell className="whitespace-nowrap text-xs" onClick={e => e.stopPropagation()}>
+                          {isEditing('handlingWith') ? (
+                            <Select value={editValue} onValueChange={v => { setEditValue(v); updateRegistration(reg.id, { handlingWith: v }); setEditingCell(null); }}>
+                              <SelectTrigger className="h-7 w-[120px] text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>{handlers.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="cursor-pointer hover:text-primary transition-colors" onClick={() => startEditing(reg.id, 'handlingWith', reg.handlingWith)}>
+                              {reg.handlingWith}
+                            </span>
+                          )}
+                        </TableCell>
+                        
+                        {/* Observação */}
+                        <TableCell className="max-w-[300px]" onClick={e => e.stopPropagation()}>
+                          {isEditing('observation') ? (
+                            <Input
+                              autoFocus
+                              value={editValue}
+                              onChange={e => setEditValue(e.target.value)}
+                              onBlur={commitEdit}
+                              onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') cancelEdit(); }}
+                              className="h-7 text-xs"
+                            />
+                          ) : (
+                            <p
+                              className="text-xs text-muted-foreground line-clamp-2 cursor-pointer hover:text-foreground transition-colors"
+                              onClick={() => startEditing(reg.id, 'observation', reg.observation)}
+                            >
+                              {reg.observation || '—'}
+                            </p>
+                          )}
+                        </TableCell>
+                        
+                        {/* Atualização */}
+                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+                          {lastUpdate ? (
+                            <div>
+                              <span>{lastUpdate.date}</span>
+                            </div>
+                          ) : '—'}
+                        </TableCell>
+                        
+                        {/* Solicitado em */}
+                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{reg.requestedAt}</TableCell>
+                        
+                        {/* Concluído */}
+                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{reg.completedAt || '—'}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
         )}
 
         <RegistrationModal
