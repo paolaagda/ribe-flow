@@ -84,7 +84,7 @@ export const mockRegistrations: Registration[] = [
     id: 'reg2', partnerId: 'p2', bank: 'BMG', cnpj: '23.456.789/0001-02', commercialUserId: 'u4',
     observation: 'Análise de compliance em andamento.',
     status: 'Em análise', solicitation: 'Indicado', handlingWith: 'Banco', code: 'BMG-012',
-    requestedAt: '2025-01-10', completedAt: null,
+    requestedAt: '2025-01-10', completedAt: null, contractConfirmed: false,
     updates: [{ date: '2025-01-18', time: '09:15', userId: 'u10', text: 'Documentação enviada ao banco.' }],
   },
   {
