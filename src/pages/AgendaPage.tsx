@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { initialCampaigns, getCampaignStatus, calculateUserScore } from '@/data/campaigns';
 import PageTransition from '@/components/PageTransition';
 import HeroSection from '@/components/home/HeroSection';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
@@ -21,7 +22,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { getRandomMessage } from '@/data/notification-messages';
 import { useTasks } from '@/hooks/useTasks';
-import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, DollarSign, Clock as ClockIcon, Handshake, UserPlus, CalendarRange, Filter } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, DollarSign, Clock as ClockIcon, Handshake, UserPlus, CalendarRange, Filter, Crown } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, addWeeks, subWeeks, isSameDay, isSameMonth, parseISO, isValid, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -58,6 +59,15 @@ export default function AgendaPage() {
   const { getActiveItems } = useSystemData();
   const { registrations } = useRegistrations();
   const { addLog } = useAuditLog();
+
+  const rankingLeaderId = useMemo(() => {
+    const activeCampaign = initialCampaigns.find(c => getCampaignStatus(c) === 'Ativa');
+    if (!activeCampaign) return null;
+    const sorted = activeCampaign.participants
+      .map(p => ({ userId: p.userId, score: calculateUserScore(activeCampaign, p.userId) }))
+      .sort((a, b) => b.score - a.score);
+    return sorted.length > 0 && sorted[0].score > 0 ? sorted[0].userId : null;
+  }, []);
 
   const hasActiveRegistration = useCallback((partnerId: string) => {
     return registrations.some(r => r.partnerId === partnerId && !['Concluído', 'Cancelado'].includes(r.status));
@@ -905,9 +915,14 @@ export default function AgendaPage() {
                                 {participants.slice(0, 4).map(p => (
                                   <Tooltip key={p.id}>
                                     <TooltipTrigger asChild>
-                                      <Avatar className="h-6 w-6 border-2 border-background">
-                                        <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">{p.name.charAt(0)}</AvatarFallback>
-                                      </Avatar>
+                                      <div className="relative">
+                                        {p.id === rankingLeaderId && (
+                                          <Crown className="h-3 w-3 text-yellow-500 fill-yellow-500 absolute -top-2 left-1/2 -translate-x-1/2 z-10" />
+                                        )}
+                                        <Avatar className="h-6 w-6 border-2 border-background">
+                                          <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">{p.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                      </div>
                                     </TooltipTrigger>
                                     <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
                                   </Tooltip>

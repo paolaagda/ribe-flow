@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -17,12 +17,12 @@ import {
   getCancelledVisitsForUser, calculateUserScore, getGamificationConfig,
   getUserScoreBreakdown,
 } from '@/data/campaigns';
-import { Trophy, Flame, Medal, Star, TrendingUp, ShieldOff, Award, Ban, CheckCircle2, Target, Calendar, XCircle, Eye } from 'lucide-react';
+import { Trophy, Flame, Medal, Star, TrendingUp, ShieldOff, Award, Ban, CheckCircle2, Target, Calendar, XCircle, Eye, Crown } from 'lucide-react';
 import SmartInsights from '@/components/shared/SmartInsights';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import confetti from 'canvas-confetti';
+
 import PageHeader from '@/components/shared/PageHeader';
 
 const podiumColors = [
@@ -39,7 +39,7 @@ export default function CampanhasPage() {
   const { toast } = useToast();
   const [campaigns] = useLocalStorage<Campaign[]>('ribercred_campaigns', initialCampaigns);
   const [unlockedBadges, setUnlockedBadges] = useLocalStorage<Record<string, string[]>>('ribercred_badges', {});
-  const confettiFired = useRef(false);
+  
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
 
   const selectableCampaigns = useMemo(() => campaigns.filter(c => getCampaignStatus(c) !== 'Futura'), [campaigns]);
@@ -156,13 +156,6 @@ export default function CampanhasPage() {
     return ranking.length > 0 && ranking[0]?.user?.id === user?.id;
   }, [ranking, user?.id]);
 
-  useEffect(() => {
-    if (confettiFired.current || ranking.length < 3 || !isCurrentUserFirst) return;
-    confettiFired.current = true;
-    setTimeout(() => {
-      confetti({ particleCount: 80, spread: 60, origin: { x: 0.5, y: 0.35 }, colors: ['#FFD700', '#C0C0C0', '#CD7F32', '#4F46E5'] });
-    }, 800);
-  }, [ranking, isCurrentUserFirst]);
 
   // Score history
   const scoreHistory = useMemo(() => {
@@ -361,38 +354,14 @@ export default function CampanhasPage() {
                     transition={{ duration: 0.5, delay: barDelay, type: 'spring', bounce: 0.4 }}
                     className="flex flex-col items-center gap-2 relative"
                   >
-                    {/* Confetti particles — only on 1st place */}
-                    {isFirst && [...Array(8)].map((_, i) => (
-                      <motion.span
-                        key={`confetti-${i}`}
-                        className="absolute w-1.5 h-1.5 rounded-full z-20 pointer-events-none"
-                        style={{
-                          background: ['#facc15', '#f59e0b', '#fbbf24', '#eab308', '#d97706', '#fcd34d', '#fde68a', '#ca8a04'][i],
-                          left: `${50 + (Math.cos(i * 0.785) * 35)}%`,
-                          top: `${5 + (Math.sin(i * 0.785) * 20)}%`,
-                        }}
-                        animate={{
-                          y: [0, -12 - Math.random() * 10, 0],
-                          x: [0, (i % 2 === 0 ? 8 : -8), 0],
-                          opacity: [0.7, 1, 0.7],
-                          scale: [0.8, 1.2, 0.8],
-                        }}
-                        transition={{
-                          duration: 2 + Math.random() * 1.5,
-                          repeat: Infinity,
-                          delay: i * 0.25,
-                          ease: 'easeInOut',
-                        }}
-                      />
-                    ))}
-                    {/* Star for 1st — rotating & pulsing */}
+                    {/* Crown for 1st place */}
                     {isFirst && (
                       <motion.div
-                        animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                        animate={{ scale: [1, 1.15, 1] }}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
                         className="-mb-1"
                       >
-                        <Star className="h-6 w-6 text-yellow-500 fill-yellow-500 drop-shadow-[0_0_6px_rgba(234,179,8,0.5)]" />
+                        <Crown className="h-6 w-6 text-yellow-500 fill-yellow-500 drop-shadow-[0_0_6px_rgba(234,179,8,0.5)]" />
                       </motion.div>
                     )}
 
