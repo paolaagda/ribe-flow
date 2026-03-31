@@ -165,8 +165,9 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
       return {
         name: c.name.replace('Campanha ', '').replace('de ', ''),
         pontuação: kpis.totalScore,
-        taxa: kpis.rate,
         visitas: kpis.totalVisits,
+        prospecções: kpis.totalProsp,
+        cancelamentos: kpis.totalCancel,
       };
     });
   }, [pastCampaigns, currentCampaign]);
@@ -231,8 +232,9 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
   const chartConfig: Record<string, { label: string; color: string }> = {
     atual: { label: currentCampaign?.name || 'Atual', color: 'hsl(var(--primary))' },
     pontuação: { label: 'Pontuação', color: 'hsl(var(--primary))' },
-    taxa: { label: 'Taxa %', color: 'hsl(var(--success))' },
     visitas: { label: 'Visitas', color: 'hsl(var(--info))' },
+    prospecções: { label: 'Prospecções', color: 'hsl(var(--warning))' },
+    cancelamentos: { label: 'Cancelamentos', color: 'hsl(var(--destructive))' },
   };
   selectedCampaigns.forEach((c, i) => {
     chartConfig[c.id] = { label: c.name, color: COMPARE_COLORS[i % COMPARE_COLORS.length] };
@@ -424,6 +426,8 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                               <Legend wrapperStyle={{ fontSize: 10 }} />
                               <Line type="monotone" dataKey="pontuação" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
                               <Line type="monotone" dataKey="visitas" stroke="hsl(var(--info))" strokeWidth={2} dot={{ r: 4 }} />
+                              <Line type="monotone" dataKey="prospecções" stroke="hsl(var(--warning))" strokeWidth={2} dot={{ r: 4 }} />
+                              <Line type="monotone" dataKey="cancelamentos" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 4 }} />
                             </LineChart>
                           </ChartContainer>
                         </CardContent>
