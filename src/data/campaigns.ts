@@ -208,6 +208,7 @@ export function getUserScoreBreakdown(campaign: Campaign, userId: string): Score
 const today = new Date();
 const thisMonth = today.toISOString().slice(0, 7);
 const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().slice(0, 7);
+const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 1).toISOString().slice(0, 7);
 const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1).toISOString().slice(0, 7);
 
 function lastDayOfMonth(yearMonth: string): string {
