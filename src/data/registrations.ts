@@ -119,7 +119,7 @@ export const mockRegistrations: Registration[] = [
     id: 'reg7', partnerId: 'p11', bank: 'FINANTO', cnpj: '11.223.344/0001-11', commercialUserId: 'u5',
     observation: 'Início do processo de credenciamento.',
     status: 'Não iniciado', solicitation: 'Substabelecido', handlingWith: 'Cadastro', code: '',
-    requestedAt: '2025-03-01', completedAt: null,
+    requestedAt: '2025-03-01', completedAt: null, contractConfirmed: false,
     updates: [],
   },
   {
