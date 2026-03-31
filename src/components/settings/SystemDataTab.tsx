@@ -20,6 +20,7 @@ const categoryIcons: Record<SystemCategory, React.ElementType> = {
   registrationStatuses: FileCheck,
   registrationSolicitations: FileText,
   registrationHandlers: Users,
+  inviteRejectionReasons: XCircle,
 };
 
 const categories: SystemCategory[] = ['banks', 'products', 'rescheduleReasons', 'cancelReasons', 'storeStructures', 'periods', 'registrationBanks', 'registrationStatuses', 'registrationSolicitations', 'registrationHandlers'];
