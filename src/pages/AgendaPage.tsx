@@ -820,10 +820,11 @@ export default function AgendaPage() {
                         return (
                           <div
                             key={v.id}
+                            data-visit-item
                             draggable={canWrite('agenda.drag')}
                             onDragStart={(e) => canWrite('agenda.drag') && handleDragStart(e, v.id)}
                             onDragEnd={handleDragEnd}
-                            onClick={() => handleOpenDetail(v)}
+                            onClick={(e) => { e.stopPropagation(); handleOpenDetail(v); }}
                             className={cn(
                               'text-[10px] px-1.5 py-0.5 rounded truncate border cursor-pointer hover:ring-1 hover:ring-primary/40 flex items-center gap-1',
                               statusBgClasses[v.status],
