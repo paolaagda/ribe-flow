@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMotionValue, useSpring, useTransform, motion as m, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -16,7 +17,7 @@ import {
   Trophy, Eye, Target, Star, Ban, Crown, ArrowUpRight, ArrowDownRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   ChartContainer, ChartTooltipContent,
 } from '@/components/ui/chart';
@@ -60,6 +61,27 @@ function getRanking(campaign: Campaign) {
     })
     .filter(Boolean)
     .sort((a, b) => b!.score - a!.score) as { user: { id: string; name: string; role: string }; score: number }[];
+}
+
+function AnimatedNumber({ value, className }: { value: number; className?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const motionValue = useMotionValue(0);
+  const spring = useSpring(motionValue, { stiffness: 100, damping: 20, mass: 0.5 });
+
+  useEffect(() => {
+    motionValue.set(value);
+  }, [value, motionValue]);
+
+  useEffect(() => {
+    const unsubscribe = spring.on('change', (v) => {
+      if (ref.current) {
+        ref.current.textContent = Math.round(v).toString();
+      }
+    });
+    return unsubscribe;
+  }, [spring]);
+
+  return <span ref={ref} className={className}>0</span>;
 }
 
 function DiffIndicator({ current, previous, suffix = '', invert = false }: { current: number; previous: number; suffix?: string; invert?: boolean }) {
@@ -307,9 +329,9 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                             <span className="text-[10px] font-semibold uppercase tracking-wide">{item.label}</span>
                           </div>
                           <div className="flex items-baseline gap-2">
-                            <span className="text-lg font-bold tabular-nums">{item.current}</span>
+                            <AnimatedNumber value={item.current} className="text-lg font-bold tabular-nums" />
                             <span className="text-xs text-muted-foreground">
-                              vs {item.prev}{selectedCampaigns.length > 1 && ' (média)'}
+                              vs <AnimatedNumber value={item.prev} className="text-xs font-bold tabular-nums" />{selectedCampaigns.length > 1 && ' (média)'}
                             </span>
                           </div>
                           <DiffIndicator current={item.current} previous={item.prev} invert={item.invert} />
