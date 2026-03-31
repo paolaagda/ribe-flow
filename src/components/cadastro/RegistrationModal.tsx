@@ -117,6 +117,7 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
         cnpj: selectedPartner?.cnpj || '',
         commercialUserId: selectedPartner?.responsibleUserId || '',
         status, solicitation, handlingWith, observation, code,
+        contractConfirmed: false,
       });
       addLog({
         module: 'Cadastro',
