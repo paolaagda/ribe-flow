@@ -9,7 +9,7 @@ export interface SystemItem {
   active: boolean;
 }
 
-export type SystemCategory = 'banks' | 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationBanks' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers';
+export type SystemCategory = 'banks' | 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationBanks' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers' | 'inviteRejectionReasons';
 
 const categoryLabels: Record<SystemCategory, string> = {
   banks: 'Bancos',
@@ -22,6 +22,7 @@ const categoryLabels: Record<SystemCategory, string> = {
   registrationStatuses: 'Status de Cadastro',
   registrationSolicitations: 'Tipos de Solicitação',
   registrationHandlers: 'Tratando Com',
+  inviteRejectionReasons: 'Justificativas de Rejeição de Convite',
 };
 
 function buildInitial(items: readonly string[]): SystemItem[] {
@@ -39,6 +40,13 @@ const initialData: Record<SystemCategory, SystemItem[]> = {
   registrationStatuses: buildInitial(REGISTRATION_STATUSES),
   registrationSolicitations: buildInitial(REGISTRATION_SOLICITATIONS),
   registrationHandlers: buildInitial(REGISTRATION_HANDLERS),
+  inviteRejectionReasons: buildInitial([
+    'Conflito de agenda',
+    'Não é responsável pelo parceiro',
+    'Já estou em outra visita',
+    'Não faz parte da minha função',
+    'Sem necessidade de participação',
+  ]),
 };
 
 export { categoryLabels };

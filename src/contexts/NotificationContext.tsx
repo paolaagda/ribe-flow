@@ -23,6 +23,7 @@ export interface AppNotification {
   status: InviteStatus;
   createdAt: string;
   message: string;
+  rejectionReason?: string;
 }
 
 interface NotificationContextValue {
@@ -33,7 +34,7 @@ interface NotificationContextValue {
   history: AppNotification[];
   addNotification: (notif: Omit<AppNotification, 'id' | 'createdAt' | 'read'>) => AppNotification;
   acceptInvite: (notifId: string) => void;
-  rejectInvite: (notifId: string) => void;
+  rejectInvite: (notifId: string, reason: string) => void;
   markAsRead: (notifId: string) => void;
   markAllAsRead: () => void;
   clearHistory: () => void;
@@ -200,9 +201,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     ));
   }, []);
 
-  const rejectInvite = useCallback((notifId: string) => {
+  const rejectInvite = useCallback((notifId: string, reason: string) => {
     setAllNotifications(prev => prev.map(n =>
-      n.id === notifId ? { ...n, status: 'rejected' as InviteStatus, read: true } : n
+      n.id === notifId ? { ...n, status: 'rejected' as InviteStatus, read: true, rejectionReason: reason } : n
     ));
   }, []);
 

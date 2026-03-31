@@ -29,6 +29,7 @@ import AgendaDetailModal from '@/components/AgendaDetailModal';
 import TodayAgenda from '@/components/home/TodayAgenda';
 import VisitMap from '@/components/home/VisitMap';
 import JustificationModal from '@/components/agenda/JustificationModal';
+import InviteRejectionModal from '@/components/agenda/InviteRejectionModal';
 import PendingTasksCard from '@/components/agenda/PendingTasksCard';
 import TasksDrawer from '@/components/agenda/TasksDrawer';
 import AgendaMap from '@/components/agenda/AgendaMap';
@@ -77,6 +78,8 @@ export default function AgendaPage() {
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [showTodayPanel, setShowTodayPanel] = useState(false);
   const [showTasksPanel, setShowTasksPanel] = useState(false);
+  const [showInviteRejectionModal, setShowInviteRejectionModal] = useState(false);
+  const [rejectingVisitId, setRejectingVisitId] = useState<string | null>(null);
   const [showTasksDrawer, setShowTasksDrawer] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
@@ -470,11 +473,19 @@ export default function AgendaPage() {
 
   const handleRejectVisitInvite = useCallback((visitId: string) => {
     if (!user) return;
+    setRejectingVisitId(visitId);
+    setShowInviteRejectionModal(true);
+  }, [user]);
+
+  const handleConfirmRejectVisitInvite = useCallback((reason: string) => {
+    if (!user || !rejectingVisitId) return;
     setVisits(prev => prev.map(v =>
-      v.id === visitId ? { ...v, invitedUsers: v.invitedUsers.map(iu => iu.userId === user.id ? { ...iu, status: 'rejected' as const } : iu) } : v
+      v.id === rejectingVisitId ? { ...v, invitedUsers: v.invitedUsers.map(iu => iu.userId === user.id ? { ...iu, status: 'rejected' as const } : iu) } : v
     ));
-    toast({ title: getRandomMessage('reject') });
-  }, [user, toast]);
+    toast({ title: getRandomMessage('reject'), description: `Motivo: ${reason}` });
+    setShowInviteRejectionModal(false);
+    setRejectingVisitId(null);
+  }, [user, rejectingVisitId, toast]);
 
   const handleLeaveVisit = useCallback((visitId: string) => {
     if (!user) return;
@@ -1227,6 +1238,12 @@ export default function AgendaPage() {
           const v = visits.find(vi => vi.id === visitId);
           if (v) { setSelectedVisit(v); setShowDetail(true); }
         }}
+      />
+
+      <InviteRejectionModal
+        open={showInviteRejectionModal}
+        onOpenChange={setShowInviteRejectionModal}
+        onConfirm={handleConfirmRejectVisitInvite}
       />
     </PageTransition>
   );

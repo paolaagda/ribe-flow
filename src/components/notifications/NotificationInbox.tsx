@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bell, CheckCheck, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -9,6 +9,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { useToast } from '@/hooks/use-toast';
 import { getRandomMessage } from '@/data/notification-messages';
 import InviteCard from './InviteCard';
+import InviteRejectionModal from '@/components/agenda/InviteRejectionModal';
 import { cn } from '@/lib/utils';
 import { getEmptyStateMessage } from '@/data/notification-messages';
 
@@ -27,6 +28,8 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   const { toast } = useToast();
 
   const prevCountRef = useRef(unreadCount);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
 
   useEffect(() => {
     ensureInitialized();
@@ -52,13 +55,21 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   };
 
   const handleReject = (id: string) => {
-    rejectInvite(id);
-    toast({
-      title: getRandomMessage('reject'),
-    });
+    setRejectingId(id);
+    setRejectModalOpen(true);
+  };
+
+  const handleConfirmReject = (reason: string) => {
+    if (rejectingId) {
+      rejectInvite(rejectingId, reason);
+      toast({ title: getRandomMessage('reject'), description: `Motivo: ${reason}` });
+    }
+    setRejectModalOpen(false);
+    setRejectingId(null);
   };
 
   return (
+    <>
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative h-9 w-9">
@@ -172,6 +183,12 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
         </Tabs>
       </PopoverContent>
     </Popover>
+    <InviteRejectionModal
+      open={rejectModalOpen}
+      onOpenChange={setRejectModalOpen}
+      onConfirm={handleConfirmReject}
+    />
+    </>
   );
 });
 NotificationInbox.displayName = 'NotificationInbox';
