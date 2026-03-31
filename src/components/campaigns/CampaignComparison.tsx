@@ -63,6 +63,27 @@ function getRanking(campaign: Campaign) {
     .sort((a, b) => b!.score - a!.score) as { user: { id: string; name: string; role: string }; score: number }[];
 }
 
+function AnimatedNumber({ value, className }: { value: number; className?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const motionValue = useMotionValue(0);
+  const spring = useSpring(motionValue, { stiffness: 100, damping: 20, mass: 0.5 });
+
+  useEffect(() => {
+    motionValue.set(value);
+  }, [value, motionValue]);
+
+  useEffect(() => {
+    const unsubscribe = spring.on('change', (v) => {
+      if (ref.current) {
+        ref.current.textContent = Math.round(v).toString();
+      }
+    });
+    return unsubscribe;
+  }, [spring]);
+
+  return <span ref={ref} className={className}>0</span>;
+}
+
 function DiffIndicator({ current, previous, suffix = '', invert = false }: { current: number; previous: number; suffix?: string; invert?: boolean }) {
   if (previous === 0 && current === 0) return <span className="text-[10px] text-muted-foreground">—</span>;
   const diff = current - previous;
