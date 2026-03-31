@@ -23,7 +23,7 @@ const categoryIcons: Record<SystemCategory, React.ElementType> = {
   inviteRejectionReasons: XCircle,
 };
 
-const categories: SystemCategory[] = ['banks', 'products', 'rescheduleReasons', 'cancelReasons', 'storeStructures', 'periods', 'registrationBanks', 'registrationStatuses', 'registrationSolicitations', 'registrationHandlers'];
+const categories: SystemCategory[] = ['banks', 'products', 'rescheduleReasons', 'cancelReasons', 'storeStructures', 'periods', 'registrationBanks', 'registrationStatuses', 'registrationSolicitations', 'registrationHandlers', 'inviteRejectionReasons'];
 
 export default function SystemDataTab() {
   const { getItems, addItem, toggleItem } = useSystemData();
