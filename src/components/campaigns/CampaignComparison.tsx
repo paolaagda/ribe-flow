@@ -17,7 +17,7 @@ import {
   Trophy, Eye, Target, Star, Ban, Crown, ArrowUpRight, ArrowDownRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   ChartContainer, ChartTooltipContent,
 } from '@/components/ui/chart';
