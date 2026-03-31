@@ -18,6 +18,7 @@ export interface Registration {
   code: string;
   requestedAt: string;
   completedAt: string | null;
+  contractConfirmed: boolean;
   updates: RegistrationUpdate[];
 }
 
