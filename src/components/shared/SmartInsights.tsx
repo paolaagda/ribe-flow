@@ -89,7 +89,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
 
       // 2. Day with highest potential value (instead of total)
       const dayValueMap: Record<string, number> = {};
-      thisMonth.filter(v => v.status === 'Planejada' && v.potentialValue).forEach(v => {
+      thisMonth.filter(v => v.potentialValue).forEach(v => {
         dayValueMap[v.date] = (dayValueMap[v.date] || 0) + (v.potentialValue || 0);
       });
       const topDay = Object.entries(dayValueMap).sort((a, b) => b[1] - a[1])[0];
