@@ -22,7 +22,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { getRandomMessage } from '@/data/notification-messages';
 import { useTasks } from '@/hooks/useTasks';
-import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, DollarSign, Clock as ClockIcon, Handshake, UserPlus, CalendarRange, Filter } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, DollarSign, Clock as ClockIcon, Handshake, UserPlus, CalendarRange, Filter, Crown } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, addWeeks, subWeeks, isSameDay, isSameMonth, parseISO, isValid, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
