@@ -915,9 +915,15 @@ export default function AgendaPage() {
                                 {participants.slice(0, 4).map(p => (
                                   <Tooltip key={p.id}>
                                     <TooltipTrigger asChild>
-                                      <Avatar className="h-6 w-6 border-2 border-background">
-                                        <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">{p.name.charAt(0)}</AvatarFallback>
-                                      </Avatar>
+                                      <div className="relative">
+                                        {p.id === rankingLeaderId && (
+                                          <Crown className="h-3 w-3 text-yellow-500 fill-yellow-500 absolute -top-2 left-1/2 -translate-x-1/2 z-10" />
+                                        )}
+                                        <Avatar className="h-6 w-6 border-2 border-background">
+                                          <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">{p.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                      </div>
+                                    </TooltipTrigger>
                                     </TooltipTrigger>
                                     <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
                                   </Tooltip>
