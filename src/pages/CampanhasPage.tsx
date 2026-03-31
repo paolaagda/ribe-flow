@@ -337,30 +337,6 @@ export default function CampanhasPage() {
           <CardContent className="p-ds-md pb-0">
             <p className="text-ds-sm font-semibold mb-ds-sm flex items-center gap-2"><Trophy className="h-4 w-4 text-yellow-500" /> Pódio</p>
             <div className="flex items-end justify-center gap-ds-sm md:gap-ds-md relative">
-              {/* Confetti particles around 1st place */}
-              {[...Array(8)].map((_, i) => (
-                <motion.span
-                  key={`confetti-${i}`}
-                  className="absolute w-1.5 h-1.5 rounded-full"
-                  style={{
-                    background: ['#facc15', '#f59e0b', '#fbbf24', '#eab308', '#d97706', '#fcd34d', '#fde68a', '#ca8a04'][i],
-                    left: `${45 + (Math.cos(i * 0.785) * 18)}%`,
-                    top: `${10 + (Math.sin(i * 0.785) * 15)}%`,
-                  }}
-                  animate={{
-                    y: [0, -12 - Math.random() * 10, 0],
-                    x: [0, (i % 2 === 0 ? 8 : -8), 0],
-                    opacity: [0.7, 1, 0.7],
-                    scale: [0.8, 1.2, 0.8],
-                  }}
-                  transition={{
-                    duration: 2 + Math.random() * 1.5,
-                    repeat: Infinity,
-                    delay: i * 0.25,
-                    ease: 'easeInOut',
-                  }}
-                />
-              ))}
 
               {podiumOrder.map((item, idx) => {
                 const pos = podium.indexOf(item) + 1;
