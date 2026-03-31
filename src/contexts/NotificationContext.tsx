@@ -23,6 +23,7 @@ export interface AppNotification {
   status: InviteStatus;
   createdAt: string;
   message: string;
+  rejectionReason?: string;
 }
 
 interface NotificationContextValue {
