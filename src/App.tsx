@@ -16,6 +16,7 @@ import CadastroPage from "@/pages/CadastroPage";
 import CadastroDetalhePage from "@/pages/CadastroDetalhePage";
 import ColaboradorPerfilPage from "@/pages/ColaboradorPerfilPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
+import InformacoesUteisPage from "@/pages/InformacoesUteisPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
