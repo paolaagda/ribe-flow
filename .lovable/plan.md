@@ -1,35 +1,46 @@
 
 
-# Ajustar Layout dos Cards KPI
+# Ajustes da Página de Cadastro
 
-## Problema
-Atualmente os cards KPI usam layout horizontal (ícone à esquerda, dados à direita no desktop) e vertical centralizado no mobile. O usuário quer um layout consistente baseado na imagem de referência:
-- **Linha 1**: Ícone + valor (com secondaryValue) lado a lado, alinhados horizontalmente
-- **Linha 2**: Título/label abaixo
-- Responsivo: dados sempre visíveis, nunca transbordando
+## Resumo
+Adicionar filtros expandíveis, filtro de data com múltiplos modos, e cards indicadores para "Tratando Com" e "Bancos" — todos com seções colapsáveis.
 
-## Alteração
+## Alterações em `src/pages/CadastroPage.tsx`
 
-### `src/components/shared/AnimatedKpiCard.tsx`
+### 1. Filtros expandíveis (padrão Agenda)
+- Adicionar estado `showFilters` com botão "Filtros" ao lado do título (mesmo padrão da AgendaPage com `Filter` icon + badge de filtros ativos)
+- Mover os selects existentes (Status, Banco) para dentro do painel expansível
+- Manter o campo de busca sempre visível fora do painel
 
-Refatorar o `CardContent` para usar layout vertical em todas as telas:
+### 2. Novos filtros dentro do painel
+- **Comercial**: Select com lista de usuários comerciais (`mockUsers.filter(u => u.role === 'comercial')`) filtrando por `commercialUserId`
+- **Solicitação**: Select com `getActiveItems('registrationSolicitations')` filtrando por `solicitation`
+- **Tratando com**: Select com `getActiveItems('registrationHandlers')` filtrando por `handlingWith`
+- **Data de atualização**: Popover com Calendar + modos (dia específico, período com data inicial/final, e presets mensal/semanal/diário). Filtra pela data do último update ou `requestedAt`
 
+### 3. Cards indicadores de "Tratando Com" (com título visível)
+- Novo bloco de cards similar aos status KPIs mas com **título textual** visível (não tooltip)
+- Conta registrations por `handlingWith`
+- Ícone genérico (ex: `Users`) + contagem + label abaixo
+- Clicável para filtrar
+
+### 4. Cards indicadores de "Bancos" (com título visível)
+- Mesmo padrão: cards com ícone `Building2` + contagem + label do banco
+- Clicável para filtrar por banco
+
+### 5. Seções colapsáveis para indicadores
+- Wrap cada grupo de cards (Status, Tratando Com, Bancos) em um `Collapsible` com título de seção
+- Estado individual por grupo (`expandStatus`, `expandHandlers`, `expandBanks`)
+- Animação suave com `AnimatePresence` + `motion.div`
+
+### Estados novos
 ```
-Linha 1:  [ícone]  1/3
-Linha 2:  AGENDAS HOJE
+filterCommercial, filterSolicitation, filterHandler, filterDateMode, filterDateFrom, filterDateTo, showFilters, expandStatus, expandHandlers, expandBanks
 ```
 
-Detalhes:
-- Layout sempre em coluna (`flex-col items-center text-center`)
-- Linha 1: `flex-row items-center gap-2` com ícone + valor+secondary
-- Linha 2: label abaixo, centralizado
-- Remover `whitespace-nowrap` do label — usar `text-center leading-tight` com wrap permitido para telas pequenas
-- Valor: usar `text-base sm:text-lg` ao invés de `text-lg sm:text-ds-xl` para caber melhor
-- Label: `text-[9px] sm:text-[10px]` uppercase, `line-clamp-2` como fallback
-- Padding compacto: `p-2.5 sm:p-3`
-- `min-h-[72px] sm:min-h-[80px]` para manter cards proporcionais
-- `overflow-hidden` no card para segurança
+### Lógica de filtro `filtered` (useMemo)
+Acrescentar verificações para os novos filtros: `commercialUserId`, `solicitation`, `handlingWith`, e data (verificar `updates[last].date` ou `requestedAt`).
 
-### Páginas afetadas (sem alteração de código)
-O componente é reutilizado em AgendaPage, AnalisesPage, CadastroPage — todas herdarão o novo layout automaticamente.
+### Arquivo afetado
+- `src/pages/CadastroPage.tsx` — único arquivo modificado
 
