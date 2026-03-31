@@ -15,6 +15,7 @@ import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 import { usePermission } from '@/hooks/usePermission';
 import { useToast } from '@/hooks/use-toast';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useNavigate } from 'react-router-dom';
 
 const statusKpiConfig: Record<string, { icon: any; color: string }> = {
   'Não iniciado': { icon: FileText, color: 'text-muted-foreground' },
@@ -32,6 +33,7 @@ export default function CadastroPage() {
   const { canRead, canWrite } = usePermission();
   const { toast } = useToast();
   const { addLog } = useAuditLog();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterBank, setFilterBank] = useState('all');
@@ -67,8 +69,7 @@ export default function CadastroPage() {
   }, [registrations, filterStatus, filterBank, search]);
 
   const handleCardClick = (reg: Registration) => {
-    setSelectedReg(reg);
-    setModalOpen(true);
+    navigate(`/cadastro/${reg.id}`);
   };
 
   const handleNew = () => {
