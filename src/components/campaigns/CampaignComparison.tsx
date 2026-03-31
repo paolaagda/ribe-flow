@@ -215,8 +215,6 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
   selectedCampaigns.forEach((c, i) => {
     chartConfig[c.id] = { label: c.name, color: COMPARE_COLORS[i % COMPARE_COLORS.length] };
   });
-    };
-  }, [selectedKpis]);
 
   const comparisonLabel = selectedCampaigns.length === 1
     ? selectedCampaigns[0].name
