@@ -1,35 +1,37 @@
 
 
-# Ajustar Cor das Barras de Rolagem no Modo Escuro
+# Pódio Animado e Divertido
 
-## Problema
-As scrollbars (tanto as customizadas `.scrollbar-thin` quanto as do Radix ScrollArea) estão muito claras/destacadas no modo escuro.
+## Objetivo
+Tornar o componente de pódio na página de Campanhas mais dinâmico, com animações elaboradas, efeitos visuais e microinterações que transmitam celebração.
 
-## Alterações
+## Alterações em `src/pages/CampanhasPage.tsx`
 
-### 1. `src/index.css` — scrollbar-thin no dark mode
-Adicionar regra `.dark .scrollbar-thin` com cores mais escuras para track e thumb.
+### Animações de entrada
+- **Barras do pódio**: animação de "crescimento" de baixo para cima (height de 0 ao valor final) com stagger entre 2º → 1º → 3º
+- **Avatares**: bounce com spring mais expressivo, entrada com scale de 0→1
+- **Estrela do 1º lugar**: animação de rotação + pulse contínuo
+- **Badge de pontos**: fade-in com delay após o avatar aparecer
+- **Posição (1º, 2º, 3º)**: counter animation, aparecendo após a barra crescer
 
-### 2. `src/components/ui/scroll-area.tsx` — ScrollAreaThumb
-Atualmente usa `bg-muted-foreground/25` e hover `bg-muted-foreground/40`. No dark mode, `muted-foreground` é `215 12% 55%` — relativamente claro. Ajustar para usar opacidades menores no dark mode via classes condicionais: `dark:bg-muted-foreground/15 dark:hover:bg-muted-foreground/25`.
+### Efeitos visuais contínuos
+- **1º lugar**: glow pulsante dourado ao redor do avatar (animate com keyframes de shadow)
+- **Estrela**: rotação lenta contínua + escala pulsante
+- **Barra do 1º**: shimmer/brilho sutil percorrendo (gradiente animado via CSS)
+- **Confetti particles**: partículas decorativas sutis (pequenos pontos dourados animados com framer-motion) ao redor do 1º lugar
 
-### Detalhes Técnicos
+### Interatividade
+- **Hover no avatar**: scale up + elevação (translateY negativo) + intensificação do glow
+- **Hover na barra**: leve aumento de brilho no gradiente
+- **Tap/click**: pequeno bounce de feedback
 
-**index.css** — após o bloco `.scrollbar-thin`, adicionar:
-```css
-.dark .scrollbar-thin {
-  scrollbar-color: hsl(var(--muted-foreground) / 0.12) transparent;
-}
-.dark .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--muted-foreground) / 0.12);
-}
-.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(var(--muted-foreground) / 0.25);
-}
-```
+### Detalhes técnicos
+- Usar `motion.div` com `animate` para glow pulsante (loop infinito via `repeat: Infinity`)
+- CSS keyframes para shimmer na barra (via className inline ou index.css)
+- Confetti: 5-8 pequenos `motion.span` posicionados absolutamente com animações de float aleatórias
+- Manter responsividade existente
 
-**scroll-area.tsx** — ScrollAreaThumb:
-```
-bg-muted-foreground/25 hover:bg-muted-foreground/40 dark:bg-muted-foreground/15 dark:hover:bg-muted-foreground/25
-```
+### Arquivo afetado
+- `src/pages/CampanhasPage.tsx` — refatorar o bloco do pódio (linhas ~330-378)
+- `src/index.css` — adicionar keyframe `shimmer` para brilho na barra do 1º lugar
 
