@@ -1,5 +1,6 @@
 export interface RegistrationUpdate {
   date: string;
+  time: string;
   userId: string;
   text: string;
 }
