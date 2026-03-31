@@ -126,7 +126,7 @@ export const mockRegistrations: Registration[] = [
     id: 'reg8', partnerId: 'p15', bank: 'BMG', cnpj: '55.667.788/0001-15', commercialUserId: 'u6',
     observation: 'Documentação completa, aguardando análise do banco.',
     status: 'Em análise', solicitation: 'Substabelecido EGV', handlingWith: 'Banco', code: 'BMG-099',
-    requestedAt: '2025-02-15', completedAt: null,
+    requestedAt: '2025-02-15', completedAt: null, contractConfirmed: false,
     updates: [{ date: '2025-02-20', time: '08:50', userId: 'u10', text: 'Todos os documentos foram enviados.' }],
   },
 ];
