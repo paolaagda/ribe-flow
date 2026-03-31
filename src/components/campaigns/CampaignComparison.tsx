@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Campaign, getCampaignStatus,
@@ -20,12 +20,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChartContainer, ChartTooltipContent,
 } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Tooltip } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Tooltip, Legend } from 'recharts';
 
 interface Props {
   campaigns: Campaign[];
   currentCampaignId: string;
 }
+
+const COMPARE_COLORS = [
+  'hsl(var(--muted-foreground))',
+  'hsl(var(--warning))',
+  'hsl(var(--info))',
+  'hsl(var(--destructive))',
+];
 
 function getCampaignKpis(campaign: Campaign) {
   let totalVisits = 0, totalVisitGoal = 0, totalProsp = 0, totalProspGoal = 0, totalCancel = 0, totalScore = 0;
@@ -81,34 +88,57 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
     [campaigns, currentCampaignId]
   );
 
-  const [compareCampaignId, setCompareCampaignId] = useState<string>(pastCampaigns[0]?.id || '');
+  const [selectedIds, setSelectedIds] = useState<string[]>(() =>
+    pastCampaigns.length > 0 ? [pastCampaigns[0].id] : []
+  );
+
+  const toggleCampaign = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
 
   const currentCampaign = campaigns.find(c => c.id === currentCampaignId);
-  const compareCampaign = campaigns.find(c => c.id === compareCampaignId);
+  const selectedCampaigns = useMemo(() =>
+    selectedIds.map(id => campaigns.find(c => c.id === id)).filter(Boolean) as Campaign[],
+    [selectedIds, campaigns]
+  );
 
   const currentKpis = useMemo(() => currentCampaign ? getCampaignKpis(currentCampaign) : null, [currentCampaign]);
-  const compareKpis = useMemo(() => compareCampaign ? getCampaignKpis(compareCampaign) : null, [compareCampaign]);
+  const selectedKpis = useMemo(() =>
+    selectedCampaigns.map(c => ({ campaign: c, kpis: getCampaignKpis(c) })),
+    [selectedCampaigns]
+  );
 
   const currentRanking = useMemo(() => currentCampaign ? getRanking(currentCampaign) : [], [currentCampaign]);
-  const compareRanking = useMemo(() => compareCampaign ? getRanking(compareCampaign) : [], [compareCampaign]);
+  const selectedRankings = useMemo(() =>
+    selectedCampaigns.map(c => ({ campaign: c, ranking: getRanking(c) })),
+    [selectedCampaigns]
+  );
 
-  // Bar chart data
+  // Bar chart data — one group per metric, one bar per campaign
   const barData = useMemo(() => {
-    if (!currentKpis || !compareKpis || !currentCampaign || !compareCampaign) return [];
-    return [
-      { metric: 'Visitas', atual: currentKpis.totalVisits, anterior: compareKpis.totalVisits },
-      { metric: 'Prospecções', atual: currentKpis.totalProsp, anterior: compareKpis.totalProsp },
-      { metric: 'Pontuação', atual: currentKpis.totalScore, anterior: compareKpis.totalScore },
-      { metric: 'Cancelamentos', atual: currentKpis.totalCancel, anterior: compareKpis.totalCancel },
+    if (!currentKpis || selectedKpis.length === 0) return [];
+    const metrics = [
+      { key: 'Visitas', getCurrent: () => currentKpis.totalVisits, getPrev: (k: ReturnType<typeof getCampaignKpis>) => k.totalVisits },
+      { key: 'Prospecções', getCurrent: () => currentKpis.totalProsp, getPrev: (k: ReturnType<typeof getCampaignKpis>) => k.totalProsp },
+      { key: 'Pontuação', getCurrent: () => currentKpis.totalScore, getPrev: (k: ReturnType<typeof getCampaignKpis>) => k.totalScore },
+      { key: 'Cancelamentos', getCurrent: () => currentKpis.totalCancel, getPrev: (k: ReturnType<typeof getCampaignKpis>) => k.totalCancel },
     ];
-  }, [currentKpis, compareKpis, currentCampaign, compareCampaign]);
+    return metrics.map(m => {
+      const row: Record<string, string | number> = { metric: m.key, atual: m.getCurrent() };
+      selectedKpis.forEach(({ campaign, kpis }) => {
+        row[campaign.id] = m.getPrev(kpis);
+      });
+      return row;
+    });
+  }, [currentKpis, selectedKpis]);
 
-  // Line chart: score evolution across all past campaigns
+  // Evolution line chart — all campaigns sorted by date
   const evolutionData = useMemo(() => {
-    const sorted = [...pastCampaigns]
-      .sort((a, b) => a.startDate.localeCompare(b.startDate));
-    if (currentCampaign) sorted.push(currentCampaign);
-    return sorted.map(c => {
+    const allCampaigns = [...pastCampaigns].sort((a, b) => a.startDate.localeCompare(b.startDate));
+    if (currentCampaign) allCampaigns.push(currentCampaign);
+    return allCampaigns.map(c => {
       const kpis = getCampaignKpis(c);
       return {
         name: c.name.replace('Campanha ', '').replace('de ', ''),
@@ -119,9 +149,11 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
     });
   }, [pastCampaigns, currentCampaign]);
 
-  // Podium comparison highlights
+  // Podium insights comparing current vs first selected
   const podiumInsights = useMemo(() => {
-    if (currentRanking.length === 0 || compareRanking.length === 0) return [];
+    if (currentRanking.length === 0 || selectedRankings.length === 0) return [];
+    const compareRanking = selectedRankings[0].ranking;
+    if (compareRanking.length === 0) return [];
     const insights: { label: string; type: 'up' | 'down' | 'new' }[] = [];
 
     const currentFirst = currentRanking[0];
@@ -140,7 +172,27 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
     });
 
     return insights;
-  }, [currentRanking, compareRanking]);
+  }, [currentRanking, selectedRankings]);
+
+  // Average of selected for the KPI comparison (when multiple)
+  const avgKpis = useMemo(() => {
+    if (selectedKpis.length === 0) return null;
+    const sum = selectedKpis.reduce((acc, { kpis }) => ({
+      totalVisits: acc.totalVisits + kpis.totalVisits,
+      totalProsp: acc.totalProsp + kpis.totalProsp,
+      totalScore: acc.totalScore + kpis.totalScore,
+      totalCancel: acc.totalCancel + kpis.totalCancel,
+      rate: acc.rate + kpis.rate,
+    }), { totalVisits: 0, totalProsp: 0, totalScore: 0, totalCancel: 0, rate: 0 });
+    const n = selectedKpis.length;
+    return {
+      totalVisits: Math.round(sum.totalVisits / n),
+      totalProsp: Math.round(sum.totalProsp / n),
+      totalScore: Math.round(sum.totalScore / n * 10) / 10,
+      totalCancel: Math.round(sum.totalCancel / n),
+      rate: Math.round(sum.rate / n),
+    };
+  }, [selectedKpis]);
 
   if (pastCampaigns.length === 0) {
     return (
@@ -153,13 +205,20 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
     );
   }
 
-  const chartConfig = {
+  // Dynamic chart config
+  const chartConfig: Record<string, { label: string; color: string }> = {
     atual: { label: currentCampaign?.name || 'Atual', color: 'hsl(var(--primary))' },
-    anterior: { label: compareCampaign?.name || 'Anterior', color: 'hsl(var(--muted-foreground))' },
     pontuação: { label: 'Pontuação', color: 'hsl(var(--primary))' },
     taxa: { label: 'Taxa %', color: 'hsl(var(--success))' },
     visitas: { label: 'Visitas', color: 'hsl(var(--info))' },
   };
+  selectedCampaigns.forEach((c, i) => {
+    chartConfig[c.id] = { label: c.name, color: COMPARE_COLORS[i % COMPARE_COLORS.length] };
+  });
+
+  const comparisonLabel = selectedCampaigns.length === 1
+    ? selectedCampaigns[0].name
+    : `Média de ${selectedCampaigns.length} campanhas`;
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -169,8 +228,11 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
             <div className="flex items-center gap-2">
               <GitCompareArrows className="h-5 w-5 text-primary" />
               <span className="text-sm font-semibold">Comparativo de Campanhas</span>
-              {!isOpen && currentKpis && compareKpis && (
-                <DiffIndicator current={currentKpis.totalScore} previous={compareKpis.totalScore} suffix=" pts" />
+              {selectedCampaigns.length > 0 && (
+                <Badge variant="secondary" className="text-[10px]">{selectedCampaigns.length} selecionada{selectedCampaigns.length > 1 ? 's' : ''}</Badge>
+              )}
+              {!isOpen && currentKpis && avgKpis && (
+                <DiffIndicator current={currentKpis.totalScore} previous={avgKpis.totalScore} suffix=" pts" />
               )}
             </div>
             <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", isOpen && "rotate-180")} />
@@ -187,29 +249,56 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                 transition={{ duration: 0.3 }}
                 className="px-ds-md pb-ds-md space-y-ds-md"
               >
-                {/* Campaign selector */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs text-muted-foreground">Comparar com:</span>
-                  <Select value={compareCampaignId} onValueChange={setCompareCampaignId}>
-                    <SelectTrigger className="w-48 h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {pastCampaigns.map(c => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                {/* Multi-campaign selector */}
+                <div className="space-y-2">
+                  <span className="text-xs text-muted-foreground font-medium">Comparar com:</span>
+                  <div className="flex flex-wrap gap-3">
+                    {pastCampaigns.map((c, i) => {
+                      const checked = selectedIds.includes(c.id);
+                      const colorIdx = selectedIds.indexOf(c.id);
+                      return (
+                        <label
+                          key={c.id}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-all text-xs",
+                            checked ? "bg-primary/5 border-primary/30" : "border-border hover:bg-muted/30"
+                          )}
+                        >
+                          <Checkbox
+                            checked={checked}
+                            onCheckedChange={() => toggleCampaign(c.id)}
+                            className="h-3.5 w-3.5"
+                          />
+                          {checked && (
+                            <div
+                              className="w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{ backgroundColor: COMPARE_COLORS[colorIdx % COMPARE_COLORS.length] }}
+                            />
+                          )}
+                          <span className={cn(checked && "font-medium")}>{c.name}</span>
+                          <Badge variant="outline" className="text-[9px] px-1.5">
+                            {getCampaignStatus(c)}
+                          </Badge>
+                        </label>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                {/* Comparison KPI cards */}
-                {currentKpis && compareKpis && (
+                {selectedCampaigns.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    Selecione ao menos uma campanha para comparar
+                  </div>
+                )}
+
+                {/* KPI Comparison cards */}
+                {currentKpis && avgKpis && selectedCampaigns.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-ds-sm">
                     {[
-                      { label: 'Visitas', icon: Eye, current: currentKpis.totalVisits, prev: compareKpis.totalVisits, color: 'info' },
-                      { label: 'Prospecções', icon: Target, current: currentKpis.totalProsp, prev: compareKpis.totalProsp, color: 'warning' },
-                      { label: 'Pontuação', icon: Star, current: currentKpis.totalScore, prev: compareKpis.totalScore, color: 'primary' },
-                      { label: 'Cancelamentos', icon: Ban, current: currentKpis.totalCancel, prev: compareKpis.totalCancel, color: 'destructive', invert: true },
+                      { label: 'Visitas', icon: Eye, current: currentKpis.totalVisits, prev: avgKpis.totalVisits, color: 'info' },
+                      { label: 'Prospecções', icon: Target, current: currentKpis.totalProsp, prev: avgKpis.totalProsp, color: 'warning' },
+                      { label: 'Pontuação', icon: Star, current: currentKpis.totalScore, prev: avgKpis.totalScore, color: 'primary' },
+                      { label: 'Cancelamentos', icon: Ban, current: currentKpis.totalCancel, prev: avgKpis.totalCancel, color: 'destructive', invert: true },
                     ].map(item => (
                       <Card key={item.label} className="card-flat">
                         <CardContent className="p-3 flex flex-col items-center text-center gap-1.5">
@@ -219,7 +308,9 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                           </div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-lg font-bold tabular-nums">{item.current}</span>
-                            <span className="text-xs text-muted-foreground">vs {item.prev}</span>
+                            <span className="text-xs text-muted-foreground">
+                              vs {item.prev}{selectedCampaigns.length > 1 && ' (média)'}
+                            </span>
                           </div>
                           <DiffIndicator current={item.current} previous={item.prev} invert={item.invert} />
                         </CardContent>
@@ -228,8 +319,8 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                   </div>
                 )}
 
-                {/* Progress comparison */}
-                {currentKpis && compareKpis && (
+                {/* Progress comparison — all selected */}
+                {currentKpis && selectedKpis.length > 0 && (
                   <Card className="card-flat">
                     <CardContent className="p-3 space-y-2">
                       <p className="text-xs font-semibold">Taxa de Conclusão</p>
@@ -241,73 +332,104 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                           </div>
                           <Progress value={currentKpis.rate} className="h-2" />
                         </div>
-                        <div>
-                          <div className="flex justify-between text-[11px] mb-0.5">
-                            <span className="text-muted-foreground">{compareCampaign?.name}</span>
-                            <span className="font-semibold">{compareKpis.rate}%</span>
+                        {selectedKpis.map(({ campaign, kpis }, i) => (
+                          <div key={campaign.id}>
+                            <div className="flex justify-between text-[11px] mb-0.5">
+                              <div className="flex items-center gap-1.5">
+                                <div
+                                  className="w-2 h-2 rounded-full shrink-0"
+                                  style={{ backgroundColor: COMPARE_COLORS[i % COMPARE_COLORS.length] }}
+                                />
+                                <span className="text-muted-foreground">{campaign.name}</span>
+                              </div>
+                              <span className="font-semibold">{kpis.rate}%</span>
+                            </div>
+                            <Progress
+                              value={kpis.rate}
+                              className="h-2"
+                              style={{ ['--progress-color' as string]: COMPARE_COLORS[i % COMPARE_COLORS.length] }}
+                            />
                           </div>
-                          <Progress value={compareKpis.rate} className="h-2 [&>div]:bg-muted-foreground" />
-                        </div>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
                 )}
 
-                {/* Charts side by side */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm">
-                  {/* Bar chart */}
-                  {barData.length > 0 && (
-                    <Card className="card-flat">
-                      <CardContent className="p-3">
-                        <p className="text-xs font-semibold mb-2">Comparativo por Métrica</p>
-                        <ChartContainer config={chartConfig} className="h-[200px] w-full">
-                          <BarChart data={barData} barGap={4}>
-                            <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
-                            <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
-                            <YAxis tick={{ fontSize: 10 }} />
-                            <Tooltip content={<ChartTooltipContent />} />
-                            <Bar dataKey="atual" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={28} />
-                            <Bar dataKey="anterior" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} maxBarSize={28} />
-                          </BarChart>
-                        </ChartContainer>
-                      </CardContent>
-                    </Card>
-                  )}
+                {/* Charts */}
+                {selectedCampaigns.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm">
+                    {/* Bar chart */}
+                    {barData.length > 0 && (
+                      <Card className="card-flat">
+                        <CardContent className="p-3">
+                          <p className="text-xs font-semibold mb-2">Comparativo por Métrica</p>
+                          <ChartContainer config={chartConfig} className="h-[220px] w-full">
+                            <BarChart data={barData} barGap={2}>
+                              <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                              <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
+                              <YAxis tick={{ fontSize: 10 }} />
+                              <Tooltip content={<ChartTooltipContent />} />
+                              <Legend wrapperStyle={{ fontSize: 10 }} />
+                              <Bar dataKey="atual" name={currentCampaign?.name} fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} maxBarSize={24} />
+                              {selectedCampaigns.map((c, i) => (
+                                <Bar
+                                  key={c.id}
+                                  dataKey={c.id}
+                                  name={c.name}
+                                  fill={COMPARE_COLORS[i % COMPARE_COLORS.length]}
+                                  radius={[3, 3, 0, 0]}
+                                  maxBarSize={24}
+                                />
+                              ))}
+                            </BarChart>
+                          </ChartContainer>
+                        </CardContent>
+                      </Card>
+                    )}
 
-                  {/* Evolution line chart */}
-                  {evolutionData.length > 1 && (
-                    <Card className="card-flat">
-                      <CardContent className="p-3">
-                        <p className="text-xs font-semibold mb-2">Evolução entre Campanhas</p>
-                        <ChartContainer config={chartConfig} className="h-[200px] w-full">
-                          <LineChart data={evolutionData}>
-                            <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
-                            <XAxis dataKey="name" tick={{ fontSize: 9 }} />
-                            <YAxis tick={{ fontSize: 10 }} />
-                            <Tooltip content={<ChartTooltipContent />} />
-                            <Line type="monotone" dataKey="pontuação" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
-                            <Line type="monotone" dataKey="visitas" stroke="hsl(var(--info))" strokeWidth={2} dot={{ r: 4 }} />
-                          </LineChart>
-                        </ChartContainer>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
+                    {/* Evolution line chart */}
+                    {evolutionData.length > 1 && (
+                      <Card className="card-flat">
+                        <CardContent className="p-3">
+                          <p className="text-xs font-semibold mb-2">Evolução entre Campanhas</p>
+                          <ChartContainer config={chartConfig} className="h-[220px] w-full">
+                            <LineChart data={evolutionData}>
+                              <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                              <XAxis dataKey="name" tick={{ fontSize: 9 }} />
+                              <YAxis tick={{ fontSize: 10 }} />
+                              <Tooltip content={<ChartTooltipContent />} />
+                              <Legend wrapperStyle={{ fontSize: 10 }} />
+                              <Line type="monotone" dataKey="pontuação" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
+                              <Line type="monotone" dataKey="visitas" stroke="hsl(var(--info))" strokeWidth={2} dot={{ r: 4 }} />
+                            </LineChart>
+                          </ChartContainer>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                )}
 
-                {/* Podium comparison */}
-                {currentRanking.length >= 3 && compareRanking.length >= 3 && (
+                {/* Podium comparison — current + all selected */}
+                {currentRanking.length >= 3 && selectedRankings.some(r => r.ranking.length >= 3) && (
                   <Card className="card-flat">
                     <CardContent className="p-3">
                       <p className="text-xs font-semibold mb-3 flex items-center gap-1.5">
                         <Trophy className="h-4 w-4 text-yellow-500" /> Pódio Comparativo
                       </p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm">
+                      <div className={cn(
+                        "grid gap-ds-sm",
+                        selectedCampaigns.length === 1 ? "grid-cols-1 md:grid-cols-2" :
+                        selectedCampaigns.length === 2 ? "grid-cols-1 md:grid-cols-3" :
+                        "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+                      )}>
                         {/* Current */}
                         <div>
                           <p className="text-[10px] font-medium text-primary mb-2">{currentCampaign?.name}</p>
                           <div className="space-y-1.5">
                             {currentRanking.slice(0, 3).map((entry, idx) => {
-                              const prevIdx = compareRanking.findIndex(r => r.user.id === entry.user.id);
+                              const firstCompare = selectedRankings[0]?.ranking || [];
+                              const prevIdx = firstCompare.findIndex(r => r.user.id === entry.user.id);
                               const posChange = prevIdx >= 0 ? prevIdx - idx : null;
                               return (
                                 <div key={entry.user.id} className="flex items-center gap-2 text-xs">
@@ -332,26 +454,36 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                             })}
                           </div>
                         </div>
-                        {/* Previous */}
-                        <div>
-                          <p className="text-[10px] font-medium text-muted-foreground mb-2">{compareCampaign?.name}</p>
-                          <div className="space-y-1.5">
-                            {compareRanking.slice(0, 3).map((entry, idx) => (
-                              <div key={entry.user.id} className="flex items-center gap-2 text-xs opacity-70">
-                                <span className={cn("font-bold w-5", idx === 0 ? "text-yellow-500" : idx === 1 ? "text-slate-400" : "text-amber-700")}>
-                                  {idx + 1}º
-                                </span>
-                                <Avatar className="h-6 w-6">
-                                  <AvatarFallback className="text-[9px] bg-muted text-muted-foreground font-bold">
-                                    {entry.user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span className="font-medium flex-1 truncate">{entry.user.name.split(' ')[0]}</span>
-                                <Badge variant="outline" className="text-[10px]">{entry.score} pts</Badge>
+                        {/* Each selected campaign */}
+                        {selectedRankings.map(({ campaign, ranking }, ci) => (
+                          ranking.length >= 3 && (
+                            <div key={campaign.id}>
+                              <div className="flex items-center gap-1.5 mb-2">
+                                <div
+                                  className="w-2 h-2 rounded-full shrink-0"
+                                  style={{ backgroundColor: COMPARE_COLORS[ci % COMPARE_COLORS.length] }}
+                                />
+                                <p className="text-[10px] font-medium text-muted-foreground">{campaign.name}</p>
                               </div>
-                            ))}
-                          </div>
-                        </div>
+                              <div className="space-y-1.5">
+                                {ranking.slice(0, 3).map((entry, idx) => (
+                                  <div key={entry.user.id} className="flex items-center gap-2 text-xs opacity-70">
+                                    <span className={cn("font-bold w-5", idx === 0 ? "text-yellow-500" : idx === 1 ? "text-slate-400" : "text-amber-700")}>
+                                      {idx + 1}º
+                                    </span>
+                                    <Avatar className="h-6 w-6">
+                                      <AvatarFallback className="text-[9px] bg-muted text-muted-foreground font-bold">
+                                        {entry.user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span className="font-medium flex-1 truncate">{entry.user.name.split(' ')[0]}</span>
+                                    <Badge variant="outline" className="text-[10px]">{entry.score} pts</Badge>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        ))}
                       </div>
 
                       {/* Insights */}
@@ -381,7 +513,7 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                 )}
 
                 {/* Overall insight */}
-                {currentKpis && compareKpis && (
+                {currentKpis && avgKpis && selectedCampaigns.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -389,27 +521,27 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                   >
                     <Card className={cn(
                       "border-l-4",
-                      currentKpis.totalScore > compareKpis.totalScore ? "border-l-success" : currentKpis.totalScore < compareKpis.totalScore ? "border-l-destructive" : "border-l-muted-foreground"
+                      currentKpis.totalScore > avgKpis.totalScore ? "border-l-success" : currentKpis.totalScore < avgKpis.totalScore ? "border-l-destructive" : "border-l-muted-foreground"
                     )}>
                       <CardContent className="p-3 flex items-center gap-3">
-                        {currentKpis.totalScore > compareKpis.totalScore ? (
+                        {currentKpis.totalScore > avgKpis.totalScore ? (
                           <TrendingUp className="h-5 w-5 text-success shrink-0" />
-                        ) : currentKpis.totalScore < compareKpis.totalScore ? (
+                        ) : currentKpis.totalScore < avgKpis.totalScore ? (
                           <TrendingDown className="h-5 w-5 text-destructive shrink-0" />
                         ) : (
                           <Minus className="h-5 w-5 text-muted-foreground shrink-0" />
                         )}
                         <div className="text-xs">
                           <p className="font-semibold">
-                            {currentKpis.totalScore > compareKpis.totalScore
-                              ? `+${Math.round(((currentKpis.totalScore - compareKpis.totalScore) / (compareKpis.totalScore || 1)) * 100)}% em relação à ${compareCampaign?.name}`
-                              : currentKpis.totalScore < compareKpis.totalScore
-                              ? `${Math.round(((currentKpis.totalScore - compareKpis.totalScore) / (compareKpis.totalScore || 1)) * 100)}% em relação à ${compareCampaign?.name}`
-                              : `Desempenho igual à ${compareCampaign?.name}`
+                            {currentKpis.totalScore > avgKpis.totalScore
+                              ? `+${Math.round(((currentKpis.totalScore - avgKpis.totalScore) / (avgKpis.totalScore || 1)) * 100)}% em relação ${selectedCampaigns.length > 1 ? 'à média' : `à ${comparisonLabel}`}`
+                              : currentKpis.totalScore < avgKpis.totalScore
+                              ? `${Math.round(((currentKpis.totalScore - avgKpis.totalScore) / (avgKpis.totalScore || 1)) * 100)}% em relação ${selectedCampaigns.length > 1 ? 'à média' : `à ${comparisonLabel}`}`
+                              : `Desempenho igual ${selectedCampaigns.length > 1 ? 'à média' : `à ${comparisonLabel}`}`
                             }
                           </p>
                           <p className="text-muted-foreground mt-0.5">
-                            {currentKpis.totalScore} pts (atual) vs {compareKpis.totalScore} pts (anterior)
+                            {currentKpis.totalScore} pts (atual) vs {avgKpis.totalScore} pts ({selectedCampaigns.length > 1 ? 'média' : 'anterior'})
                           </p>
                         </div>
                       </CardContent>
