@@ -19,6 +19,7 @@ import {
 } from '@/data/campaigns';
 import { Trophy, Flame, Medal, Star, TrendingUp, ShieldOff, Award, Ban, CheckCircle2, Target, Calendar, XCircle, Eye, Crown } from 'lucide-react';
 import SmartInsights from '@/components/shared/SmartInsights';
+import CampaignComparison from '@/components/campaigns/CampaignComparison';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
