@@ -265,7 +265,7 @@ export default function CampaignComparison({ campaigns, currentCampaignId }: Pro
                             <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
                             <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
                             <YAxis tick={{ fontSize: 10 }} />
-                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <Tooltip content={<ChartTooltipContent />} />
                             <Bar dataKey="atual" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={28} />
                             <Bar dataKey="anterior" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} maxBarSize={28} />
                           </BarChart>
