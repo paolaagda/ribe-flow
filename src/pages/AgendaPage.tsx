@@ -924,7 +924,6 @@ export default function AgendaPage() {
                                         </Avatar>
                                       </div>
                                     </TooltipTrigger>
-                                    </TooltipTrigger>
                                     <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
                                   </Tooltip>
                                 ))}
