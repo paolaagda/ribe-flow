@@ -359,8 +359,32 @@ export default function CampanhasPage() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: barDelay, type: 'spring', bounce: 0.4 }}
-                    className="flex flex-col items-center gap-2"
+                    className="flex flex-col items-center gap-2 relative"
                   >
+                    {/* Confetti particles — only on 1st place */}
+                    {isFirst && [...Array(8)].map((_, i) => (
+                      <motion.span
+                        key={`confetti-${i}`}
+                        className="absolute w-1.5 h-1.5 rounded-full z-20 pointer-events-none"
+                        style={{
+                          background: ['#facc15', '#f59e0b', '#fbbf24', '#eab308', '#d97706', '#fcd34d', '#fde68a', '#ca8a04'][i],
+                          left: `${50 + (Math.cos(i * 0.785) * 35)}%`,
+                          top: `${5 + (Math.sin(i * 0.785) * 20)}%`,
+                        }}
+                        animate={{
+                          y: [0, -12 - Math.random() * 10, 0],
+                          x: [0, (i % 2 === 0 ? 8 : -8), 0],
+                          opacity: [0.7, 1, 0.7],
+                          scale: [0.8, 1.2, 0.8],
+                        }}
+                        transition={{
+                          duration: 2 + Math.random() * 1.5,
+                          repeat: Infinity,
+                          delay: i * 0.25,
+                          ease: 'easeInOut',
+                        }}
+                      />
+                    ))}
                     {/* Star for 1st — rotating & pulsing */}
                     {isFirst && (
                       <motion.div
