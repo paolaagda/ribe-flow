@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { initialCampaigns, getCampaignStatus, calculateUserScore } from '@/data/campaigns';
 import PageTransition from '@/components/PageTransition';
 import HeroSection from '@/components/home/HeroSection';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
