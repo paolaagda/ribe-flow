@@ -105,7 +105,7 @@ export const mockRegistrations: Registration[] = [
     observation: 'Processo pausado a pedido do parceiro.',
     status: 'Em pausa', solicitation: 'Indicado', handlingWith: 'Comercial', code: 'PAN-045',
     requestedAt: '2024-12-20', completedAt: null,
-    updates: [{ date: '2025-01-15', userId: 'u4', text: 'Parceiro solicitou pausa temporária.' }],
+    updates: [{ date: '2025-01-15', time: '10:05', userId: 'u4', text: 'Parceiro solicitou pausa temporária.' }],
   },
   {
     id: 'reg6', partnerId: 'p3', bank: 'DIGIO', cnpj: '34.567.890/0001-03', commercialUserId: 'u5',
