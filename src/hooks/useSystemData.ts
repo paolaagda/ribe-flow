@@ -22,6 +22,7 @@ const categoryLabels: Record<SystemCategory, string> = {
   registrationStatuses: 'Status de Cadastro',
   registrationSolicitations: 'Tipos de Solicitação',
   registrationHandlers: 'Tratando Com',
+  inviteRejectionReasons: 'Justificativas de Rejeição de Convite',
 };
 
 function buildInitial(items: readonly string[]): SystemItem[] {
