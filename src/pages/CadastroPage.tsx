@@ -613,9 +613,6 @@ export default function CadastroPage() {
                     <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[180px]" onClick={() => toggleSort('date')}>
                       <span className="flex items-center">Atualização <SortIcon field="date" /></span>
                     </TableHead>
-                    <TableHead className="whitespace-nowrap">Solicitado em</TableHead>
-                    <TableHead className="whitespace-nowrap">Concluído</TableHead>
-                    <TableHead className="whitespace-nowrap">Código</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -709,18 +706,6 @@ export default function CadastroPage() {
                           ) : '—'}
                         </TableCell>
                         
-                        {/* Solicitado em */}
-                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground tabular-nums">
-                          {format(new Date(reg.requestedAt), 'dd/MM/yyyy', { locale: ptBR })}
-                        </TableCell>
-                        
-                        {/* Concluído */}
-                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground tabular-nums">
-                          {reg.completedAt ? format(new Date(reg.completedAt), 'dd/MM/yyyy', { locale: ptBR }) : '—'}
-                        </TableCell>
-                        
-                        {/* Código (último pois só preenchido quando concluído) */}
-                        <TableCell className="whitespace-nowrap tabular-nums text-xs text-muted-foreground">{reg.code || '—'}</TableCell>
                       </TableRow>
                     );
                   })}
