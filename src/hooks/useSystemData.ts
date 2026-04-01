@@ -9,16 +9,14 @@ export interface SystemItem {
   active: boolean;
 }
 
-export type SystemCategory = 'banks' | 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationBanks' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers' | 'inviteRejectionReasons';
+export type SystemCategory = 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers' | 'inviteRejectionReasons';
 
 const categoryLabels: Record<SystemCategory, string> = {
-  banks: 'Bancos',
   products: 'Produtos',
   rescheduleReasons: 'Justificativas de Reagendamento',
   cancelReasons: 'Justificativas de Cancelamento',
   storeStructures: 'Tipos de Loja',
   periods: 'Períodos da Agenda',
-  registrationBanks: 'Bancos (Cadastro)',
   registrationStatuses: 'Status de Cadastro',
   registrationSolicitations: 'Tipos de Solicitação',
   registrationHandlers: 'Tratando Com',
