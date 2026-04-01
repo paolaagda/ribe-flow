@@ -17,6 +17,8 @@ import { Button } from '@/components/ui/button';
 import { differenceInDays, parseISO } from 'date-fns';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import PageHeader from '@/components/shared/PageHeader';
+import { usePagination } from '@/hooks/usePagination';
+import PaginationControls from '@/components/shared/PaginationControls';
 
 export default function ParceirosPage() {
   const [search, setSearch] = useState('');
