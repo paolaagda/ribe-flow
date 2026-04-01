@@ -356,8 +356,6 @@ export default function InfoDataSection() {
     </div>
   );
 }
-  const { toast } = useToast();
-  const {
     getBanks, addBank, updateBank, toggleBank,
     getDocuments, addDocument, updateDocument, toggleDocument,
     getLinks, addLink, updateLink, deleteLink, getActiveBanks,
