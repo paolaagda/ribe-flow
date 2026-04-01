@@ -107,7 +107,7 @@ export default function AgendaPage() {
     if (panel === 'today') {
       setShowTodayPanel(prev => !prev);
     } else {
-      setShowTasksDrawer(true);
+      setShowTasksPanel(prev => !prev);
     }
   };
 
