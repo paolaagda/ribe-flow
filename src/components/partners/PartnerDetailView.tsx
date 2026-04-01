@@ -21,6 +21,7 @@ import PartnerCharts from './PartnerCharts';
 import PartnerInsights from './PartnerInsights';
 import PartnerTasksSection from './PartnerTasksSection';
 import PartnerRegistrations from './PartnerRegistrations';
+import PartnerDocuments from './PartnerDocuments';
 import { useStores } from '@/hooks/useStores';
 import { Store } from 'lucide-react';
 
@@ -201,6 +202,10 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
 
       {/* Insights */}
       <PartnerInsights partner={partner} visits={partnerVisits} stats={stats} />
+
+      {/* Registrations */}
+      {/* Documents */}
+      <PartnerDocuments partnerId={partnerId} />
 
       {/* Registrations */}
       <PartnerRegistrations partnerId={partnerId} />
