@@ -181,6 +181,7 @@
 
 .dark * {
   scrollbar-color: hsl(var(--muted-foreground) / 0.1) transparent;
+}
 
 
   .notification-new {
