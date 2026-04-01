@@ -111,7 +111,7 @@ const AppSidebarContent = React.forwardRef<HTMLDivElement>(function AppSidebarCo
       <div className={cn("mt-auto border-t border-border transition-all duration-200", collapsed ? "p-2" : "p-4")}>
         <div className={cn("flex items-center transition-all duration-200", collapsed ? "justify-center" : "gap-3")}>
           <Avatar className="h-8 w-8">
-            {user && getAvatar(user.id) && <AvatarImage src={getAvatar(user.id)} />}
+            {user && (getAvatar(user.id) || user.avatar) && <AvatarImage src={getAvatar(user.id) || user.avatar} />}
             <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
               {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
             </AvatarFallback>
