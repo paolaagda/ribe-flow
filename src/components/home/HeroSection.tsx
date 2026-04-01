@@ -59,7 +59,7 @@ export default function HeroSection() {
         <div className="absolute bottom-0 left-1/3 w-24 h-24 rounded-full bg-primary/3 translate-y-1/2 blur-xl pointer-events-none" />
         
         <CardContent className="p-ds-md relative">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-ds-sm">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-ds-sm">
             <motion.div whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
               <Avatar className="h-16 w-16 border-2 border-primary/15 shadow-[var(--shadow-lg)] ring-4 ring-primary/5">
                 <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
