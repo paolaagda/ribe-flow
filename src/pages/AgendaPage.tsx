@@ -149,6 +149,7 @@ export default function AgendaPage() {
     setFormStep(0);
     setShowBankRegistration(false);
     setBankRegistrations([]);
+    setPendingAutoTasks([]);
   };
 
   // Visibility filter: comercial only sees visits they participate in
