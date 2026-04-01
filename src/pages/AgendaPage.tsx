@@ -32,7 +32,7 @@ import TodayAgenda from '@/components/home/TodayAgenda';
 import VisitMap from '@/components/home/VisitMap';
 import JustificationModal from '@/components/agenda/JustificationModal';
 import InviteRejectionModal from '@/components/agenda/InviteRejectionModal';
-import PendingTasksCard from '@/components/agenda/PendingTasksCard';
+
 import TasksDrawer from '@/components/agenda/TasksDrawer';
 import AgendaMap from '@/components/agenda/AgendaMap';
 import BankRegistrationFlow from '@/components/agenda/BankRegistrationFlow';
@@ -93,7 +93,7 @@ export default function AgendaPage() {
   const [showJustificationModal, setShowJustificationModal] = useState(false);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [showTodayPanel, setShowTodayPanel] = useState(false);
-  const [showTasksPanel, setShowTasksPanel] = useState(false);
+  const [showTasksPanel] = useState(false);
   const [showInviteRejectionModal, setShowInviteRejectionModal] = useState(false);
   const [rejectingVisitId, setRejectingVisitId] = useState<string | null>(null);
   const [showTasksDrawer, setShowTasksDrawer] = useState(false);
@@ -106,10 +106,8 @@ export default function AgendaPage() {
   const togglePanel = (panel: 'today' | 'tasks') => {
     if (panel === 'today') {
       setShowTodayPanel(prev => !prev);
-      setShowTasksPanel(false);
     } else {
-      setShowTasksPanel(prev => !prev);
-      setShowTodayPanel(false);
+      setShowTasksDrawer(true);
     }
   };
 
@@ -746,46 +744,10 @@ export default function AgendaPage() {
               <TodayAgenda viewMode="personal" />
               <VisitMap viewMode="personal" filteredVisits={filteredVisits} />
             </div>
-            <div className="pt-ds-sm">
-              <PendingTasksCard onOpenVisit={(visitId) => {
-                const v = visits.find(vi => vi.id === visitId);
-                if (v) { setSelectedVisit(v); setShowDetail(true); }
-              }} />
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {showTasksPanel && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
-          >
-            <Card className="mt-1">
-              <CardContent className="p-ds-sm">
-                <div className="flex items-center justify-between mb-ds-xs">
-                  <div className="flex items-center gap-2">
-                    <ListTodo className="h-4 w-4 text-warning" />
-                    <span className="text-sm font-semibold">Tarefas</span>
-                    <Badge variant="secondary" className="text-xs">{pendingTasks.length + completedTasks.length}</Badge>
-                  </div>
-                  <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setShowTasksDrawer(true)}>
-                    Ver todas
-                  </Button>
-                </div>
-                <PendingTasksCard onOpenVisit={(visitId) => {
-                  const v = visits.find(vi => vi.id === visitId);
-                  if (v) { setSelectedVisit(v); setShowDetail(true); }
-                }} />
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {view === 'month' ? (
         <Card>
