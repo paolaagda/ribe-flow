@@ -510,7 +510,7 @@ export default function CadastroPage() {
           </TabsList>
 
           <TabsContent value="status" className="mt-3">
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {[
                 { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: registrations.length },
                 ...Object.entries(statusKpiConfig).map(([status, config]) => ({
@@ -558,7 +558,7 @@ export default function CadastroPage() {
           </TabsContent>
 
           <TabsContent value="handlers" className="mt-3">
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
               {handlers.filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
                 const count = handlerCounts[handler];
                 const isActive = filterHandlers.includes(handler);
@@ -587,7 +587,7 @@ export default function CadastroPage() {
           </TabsContent>
 
           <TabsContent value="banks" className="mt-3">
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
               {banks.filter(b => (bankCounts[b] || 0) > 0).map((bank, i) => {
                 const count = bankCounts[bank];
                 const isActive = filterBanks.includes(bank);
