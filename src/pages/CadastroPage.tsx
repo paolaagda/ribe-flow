@@ -544,8 +544,8 @@ export default function CadastroPage() {
 
           <TabsContent value="handlers" className="mt-3">
             <div className="flex flex-wrap gap-2">
-              {handlers.map((handler, i) => {
-                const count = handlerCounts[handler] || 0;
+              {handlers.filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
+                const count = handlerCounts[handler];
                 const isActive = filterHandler === handler;
                 return (
                   <motion.div key={handler} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
