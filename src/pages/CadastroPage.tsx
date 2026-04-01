@@ -265,11 +265,11 @@ export default function CadastroPage() {
   };
 
   const clearFilters = () => {
-    setFilterStatus('all');
-    setFilterBank('all');
+    setFilterStatuses([]);
+    setFilterBanks([]);
     setFilterCommercial('all');
     setFilterSolicitation('all');
-    setFilterHandler('all');
+    setFilterHandlers([]);
     setFilterDateMode('none');
     setFilterDateFrom(undefined);
     setFilterDateTo(undefined);
