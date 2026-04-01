@@ -246,7 +246,12 @@ function generateVisits(): Visit[] {
       observations: status === 'Concluída' ? 'Reunião produtiva com o parceiro.' : '',
       summary: status === 'Concluída' ? 'Parceiro demonstrou interesse nos produtos apresentados.' : '',
       potentialValue,
-      comments: [],
+      comments: i % 7 === 0 ? [
+        { id: `c-gen-${i}-1`, userId: user.id, text: 'Verificar documentação pendente do parceiro.', type: 'observation' as const, createdAt: d.toISOString() },
+        { id: `c-gen-${i}-2`, userId: user.id, text: 'Coletar assinatura no contrato', type: 'task' as const, taskCompleted: isPast, taskCategory: 'general' as const, createdAt: d.toISOString() },
+      ] : i % 5 === 0 ? [
+        { id: `c-gen-${i}-1`, userId: user.id, text: 'Parceiro solicitou informações sobre FGTS.', type: 'observation' as const, createdAt: d.toISOString() },
+      ] : [],
     });
   }
 
