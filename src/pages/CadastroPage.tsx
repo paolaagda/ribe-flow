@@ -775,32 +775,3 @@ export default function CadastroPage() {
   );
 }
 
-// Collapsible section sub-component
-function CollapsibleSection({ title, count, open, onToggle, children }: {
-  title: string; count: number; open: boolean; onToggle: () => void; children: React.ReactNode;
-}) {
-  return (
-    <Collapsible open={open} onOpenChange={onToggle}>
-      <CollapsibleTrigger asChild>
-        <button className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors w-full group">
-          <ChevronDown className={cn('h-3.5 w-3.5 transition-transform duration-200', open && 'rotate-0', !open && '-rotate-90')} />
-          {title}
-          <span className="text-[10px] font-normal text-muted-foreground/70">({count})</span>
-        </button>
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="pt-2"
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
-      </CollapsibleContent>
-    </Collapsible>
-  );
-}
