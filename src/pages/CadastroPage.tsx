@@ -183,7 +183,7 @@ export default function CadastroPage() {
       }
       return true;
     });
-  }, [registrations, filterStatus, filterBank, filterCommercial, filterSolicitation, filterHandler, filterDateMode, filterDateFrom, filterDateTo, search]);
+  }, [registrations, filterStatuses, filterBanks, filterCommercial, filterSolicitation, filterHandlers, filterDateMode, filterDateFrom, filterDateTo, search]);
 
   const sorted = useMemo(() => {
     if (sortField === 'none') return filtered;
