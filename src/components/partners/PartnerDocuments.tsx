@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useInfoData } from '@/hooks/useInfoData';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useVisits } from '@/hooks/useVisits';
 import { FileCheck, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -13,6 +14,7 @@ interface Props {
 export default function PartnerDocuments({ partnerId }: Props) {
   const { getActiveDocuments } = useInfoData();
   const documents = getActiveDocuments();
+  const { visits, setVisits } = useVisits();
 
   const [checkedDocs, setCheckedDocs] = useLocalStorage<Record<string, string[]>>(
     'ribercred_partner_docs_v1',
@@ -22,6 +24,7 @@ export default function PartnerDocuments({ partnerId }: Props) {
   const partnerChecked = checkedDocs[partnerId] || [];
 
   const toggleDoc = (docId: string) => {
+    const isNowChecked = !partnerChecked.includes(docId);
     setCheckedDocs(prev => {
       const current = prev[partnerId] || [];
       const updated = current.includes(docId)
@@ -29,6 +32,23 @@ export default function PartnerDocuments({ partnerId }: Props) {
         : [...current, docId];
       return { ...prev, [partnerId]: updated };
     });
+
+    // Sync: auto-complete/uncomplete document tasks linked to this doc
+    if (isNowChecked) {
+      setVisits(prev => prev.map(v => {
+        if (v.partnerId !== partnerId) return v;
+        const hasMatch = v.comments.some(c => c.type === 'task' && c.taskCategory === 'document' && c.taskSourceId === docId && !c.taskCompleted);
+        if (!hasMatch) return v;
+        return {
+          ...v,
+          comments: v.comments.map(c =>
+            c.type === 'task' && c.taskCategory === 'document' && c.taskSourceId === docId
+              ? { ...c, taskCompleted: true }
+              : c
+          ),
+        };
+      }));
+    }
   };
 
   if (documents.length === 0) return null;

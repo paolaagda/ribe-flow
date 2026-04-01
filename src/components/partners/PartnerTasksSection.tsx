@@ -66,6 +66,14 @@ export default function PartnerTasksSection({ partnerId }: Props) {
               <div className="flex-1 min-w-0">
                 <p className="text-sm">{item.task.text}</p>
                 <div className="flex items-center gap-2 mt-1 flex-wrap text-[10px] text-muted-foreground">
+                  {item.task.taskCategory && (
+                    <Badge variant="outline" className={cn(
+                      'text-[9px] px-1 py-0',
+                      item.task.taskCategory === 'document' ? 'bg-primary/10 text-primary border-primary/20' : 'bg-accent text-accent-foreground border-accent'
+                    )}>
+                      {item.task.taskCategory === 'document' ? 'Documento' : 'Dado'}
+                    </Badge>
+                  )}
                   <span className="flex items-center gap-0.5">
                     <Calendar className="h-2.5 w-2.5" />
                     {format(parseISO(item.visit.date), "dd/MM/yy", { locale: ptBR })}
