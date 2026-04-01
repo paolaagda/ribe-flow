@@ -17,6 +17,9 @@ interface BankRegistrationData {
   bankId: string;
   bankName: string;
   pendingDocs: string[];
+  pendingDocIds: string[];
+  unfilledFieldIds: string[];
+  unfilledFieldNames: string[];
   fieldValues: Record<string, string>;
 }
 
