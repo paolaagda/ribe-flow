@@ -149,6 +149,8 @@ export default function AgendaPage() {
       invitedUserIds: [], rescheduleReason: '', cancelReason: '',
     });
     setFormStep(0);
+    setShowBankRegistration(false);
+    setBankRegistrations([]);
   };
 
   // Visibility filter: comercial only sees visits they participate in
