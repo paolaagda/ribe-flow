@@ -94,7 +94,7 @@ export default function CadastroPage() {
   const [deleteTarget, setDeleteTarget] = useState<Registration | null>(null);
 
   const statuses = getActiveItems('registrationStatuses');
-  const banks = getActiveItems('registrationBanks');
+  const banks = infoBanks.map(b => b.name);
   const solicitations = getActiveItems('registrationSolicitations');
   const handlers = getActiveItems('registrationHandlers');
   const commercialUsers = mockUsers.filter(u => u.role === 'comercial' && u.active);

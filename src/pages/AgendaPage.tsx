@@ -16,6 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { mockUsers, getUserById, Visit, VisitStatus, VisitType, VisitPeriod, VisitComment, statusBgClasses, getPartnerById as getPartnerByIdGlobal, allCargos, cargoLabels } from '@/data/mock-data';
 import { useSystemData } from '@/hooks/useSystemData';
+import { useInfoData } from '@/hooks/useInfoData';
 import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';

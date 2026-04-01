@@ -70,7 +70,7 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
   const selectedPartner = partners.find(p => p.id === partnerId);
   const commercial = selectedPartner ? mockUsers.find(u => u.id === selectedPartner.responsibleUserId) : null;
 
-  const banks = getActiveItems('registrationBanks');
+  const banks = infoBanks.map(b => b.name);
   const statuses = getActiveItems('registrationStatuses');
   const solicitations = getActiveItems('registrationSolicitations');
   const handlers = getActiveItems('registrationHandlers');
