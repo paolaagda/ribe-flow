@@ -796,3 +796,5 @@ export default function CadastroPage() {
   );
 }
 
+  const cadastroListRef = useRef<HTMLDivElement>(null);
+
