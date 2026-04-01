@@ -77,7 +77,7 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
                 <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-destructive animate-pulse ring-2 ring-card" />
               )}
             </div>
-            <p className="text-[11px] sm:text-xs font-semibold text-foreground tracking-wide uppercase leading-tight line-clamp-1">{label}</p>
+            <p className="text-[10px] sm:text-[11px] font-semibold text-foreground tracking-wide uppercase leading-tight line-clamp-2">{label}</p>
           </div>
           {/* Linha 2: Valores (menos destaque) */}
           <p className="text-lg sm:text-xl font-bold tabular-nums leading-none tracking-tight text-muted-foreground">
