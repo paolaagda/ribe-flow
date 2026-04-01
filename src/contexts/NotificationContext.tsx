@@ -24,6 +24,8 @@ export interface AppNotification {
   createdAt: string;
   message: string;
   rejectionReason?: string;
+  registrationId?: string;
+  bankName?: string;
 }
 
 interface NotificationContextValue {
