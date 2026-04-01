@@ -164,10 +164,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, [allNotifications, user]);
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
-  const pendingInvites = useMemo(() => notifications.filter(n => n.type === 'invite' && n.status === 'pending'), [notifications]);
+  const pendingInvites = useMemo(() => notifications.filter(n => (n.type === 'invite' || n.type === 'registration_approval') && n.status === 'pending'), [notifications]);
   const recentNotifications = useMemo(() =>
     notifications
-      .filter(n => n.type !== 'invite' || n.status !== 'pending')
+      .filter(n => !((n.type === 'invite' || n.type === 'registration_approval') && n.status === 'pending'))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 20),
     [notifications]
