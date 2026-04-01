@@ -370,7 +370,7 @@ export default function CadastroPage() {
                   )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <Select value={filterStatuses.length === 0 ? 'all' : filterStatuses[0]} onValueChange={v => setFilterStatuses(v === 'all' ? [] : [v])}>
                     <SelectTrigger className="h-9">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
@@ -380,7 +380,7 @@ export default function CadastroPage() {
                     </SelectContent>
                   </Select>
 
-                  <Select value={filterBank} onValueChange={setFilterBank}>
+                  <Select value={filterBanks.length === 0 ? 'all' : filterBanks[0]} onValueChange={v => setFilterBanks(v === 'all' ? [] : [v])}>
                     <SelectTrigger className="h-9">
                       <SelectValue placeholder="Banco" />
                     </SelectTrigger>
@@ -410,7 +410,7 @@ export default function CadastroPage() {
                     </SelectContent>
                   </Select>
 
-                  <Select value={filterHandler} onValueChange={(v) => { setFilterHandler(v); }}>
+                  <Select value={filterHandlers.length === 0 ? 'all' : filterHandlers[0]} onValueChange={v => setFilterHandlers(v === 'all' ? [] : [v])}>
                     <SelectTrigger className="h-9">
                       <SelectValue placeholder="Tratando com" />
                     </SelectTrigger>
