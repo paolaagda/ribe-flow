@@ -35,6 +35,7 @@ import InviteRejectionModal from '@/components/agenda/InviteRejectionModal';
 import PendingTasksCard from '@/components/agenda/PendingTasksCard';
 import TasksDrawer from '@/components/agenda/TasksDrawer';
 import AgendaMap from '@/components/agenda/AgendaMap';
+import BankRegistrationFlow from '@/components/agenda/BankRegistrationFlow';
 import SmartInsights from '@/components/shared/SmartInsights';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import { usePermission } from '@/hooks/usePermission';
