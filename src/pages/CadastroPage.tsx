@@ -571,8 +571,8 @@ export default function CadastroPage() {
 
           <TabsContent value="banks" className="mt-3">
             <div className="flex flex-wrap gap-2">
-              {banks.map((bank, i) => {
-                const count = bankCounts[bank] || 0;
+              {banks.filter(b => (bankCounts[b] || 0) > 0).map((bank, i) => {
+                const count = bankCounts[bank];
                 const isActive = filterBank === bank;
                 return (
                   <motion.div key={bank} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
