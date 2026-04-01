@@ -512,7 +512,7 @@ export default function CadastroPage() {
                 ...Object.entries(statusKpiConfig).map(([status, config]) => ({
                   status, label: status, icon: config.icon, color: config.color, count: statusCounts[status] || 0,
                 })),
-              ].map(({ status, label, icon: Icon, color, count }, i) => (
+              ].filter(({ status, count }) => status === 'all' || count > 0).map(({ status, label, icon: Icon, color, count }, i) => (
                 <Tooltip key={status}>
                   <TooltipTrigger asChild>
                     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
