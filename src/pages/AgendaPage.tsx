@@ -1219,7 +1219,7 @@ export default function AgendaPage() {
               <div className="space-y-2">
                 <Label>Bancos</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  {getActiveItems('banks').map(b => (
+                  {infoBankNames.map(b => (
                     <label key={b} className="flex items-center gap-2 text-sm cursor-pointer">
                       <Checkbox checked={formData.banks.includes(b)} onCheckedChange={() => setFormData({...formData, banks: toggleArray(formData.banks, b)})} />
                       {b}
