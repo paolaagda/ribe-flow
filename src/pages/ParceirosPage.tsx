@@ -83,6 +83,10 @@ export default function ParceirosPage() {
 
   const potentialBadgeClass: Record<string, string> = { alto: 'badge-potential-alto', médio: 'badge-potential-medio', baixo: 'badge-potential-baixo' };
 
+  const listRef = useRef<HTMLDivElement>(null);
+  const partnersPagination = usePagination(filtered, { pageSize: 9, scrollToTopRef: listRef as React.RefObject<HTMLElement> });
+  const storesPagination = usePagination(filteredStores, { pageSize: 9, scrollToTopRef: listRef as React.RefObject<HTMLElement> });
+
   if (!canRead('partners.list')) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-muted-foreground gap-3">
