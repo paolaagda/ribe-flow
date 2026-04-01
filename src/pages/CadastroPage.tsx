@@ -82,9 +82,7 @@ export default function CadastroPage() {
   const [filterDateTo, setFilterDateTo] = useState<Date | undefined>();
 
   const [showFilters, setShowFilters] = useState(false);
-  const [expandStatus, setExpandStatus] = useState(true);
-  const [expandHandlers, setExpandHandlers] = useState(false);
-  const [expandBanks, setExpandBanks] = useState(false);
+  const [kpiTab, setKpiTab] = useState('status');
 
   const [viewMode, setViewMode] = useLocalStorage<ViewMode>('ribercred_cadastro_view', 'cards');
   const [sortField, setSortField] = useState<SortField>('none');
