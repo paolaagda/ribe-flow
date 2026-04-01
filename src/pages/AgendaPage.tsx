@@ -33,7 +33,7 @@ import VisitMap from '@/components/home/VisitMap';
 import JustificationModal from '@/components/agenda/JustificationModal';
 import InviteRejectionModal from '@/components/agenda/InviteRejectionModal';
 
-import TasksDrawer from '@/components/agenda/TasksDrawer';
+import InlineTasksPanel from '@/components/agenda/InlineTasksPanel';
 import AgendaMap from '@/components/agenda/AgendaMap';
 import BankRegistrationFlow from '@/components/agenda/BankRegistrationFlow';
 import SmartInsights from '@/components/shared/SmartInsights';
