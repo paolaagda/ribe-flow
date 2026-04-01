@@ -167,11 +167,11 @@ export default function CadastroPage() {
 
   const filtered = useMemo(() => {
     return registrations.filter(r => {
-      if (filterStatus !== 'all' && r.status !== filterStatus) return false;
-      if (filterBank !== 'all' && r.bank !== filterBank) return false;
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
       if (filterCommercial !== 'all' && r.commercialUserId !== filterCommercial) return false;
       if (filterSolicitation !== 'all' && r.solicitation !== filterSolicitation) return false;
-      if (filterHandler !== 'all' && r.handlingWith !== filterHandler) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
       if (!isDateInRange(getLastUpdateDate(r))) return false;
       if (search) {
         const q = search.toLowerCase();
