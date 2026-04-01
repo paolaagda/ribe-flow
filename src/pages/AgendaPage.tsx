@@ -106,10 +106,8 @@ export default function AgendaPage() {
   const togglePanel = (panel: 'today' | 'tasks') => {
     if (panel === 'today') {
       setShowTodayPanel(prev => !prev);
-      setShowTasksPanel(false);
     } else {
-      setShowTasksPanel(prev => !prev);
-      setShowTodayPanel(false);
+      setShowTasksDrawer(true);
     }
   };
 
