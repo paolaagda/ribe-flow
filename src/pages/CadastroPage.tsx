@@ -96,6 +96,7 @@ export default function CadastroPage() {
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Registration | null>(null);
 
+  const cadastroListRef = useRef<HTMLDivElement>(null);
   const statuses = getActiveItems('registrationStatuses');
   const banks = infoBanks.map(b => b.name);
   const solicitations = getActiveItems('registrationSolicitations');
