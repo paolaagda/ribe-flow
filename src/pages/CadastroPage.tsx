@@ -510,7 +510,7 @@ export default function CadastroPage() {
           </TabsList>
 
           <TabsContent value="status" className="mt-3">
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
               {[
                 { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: registrations.length },
                 ...Object.entries(statusKpiConfig).map(([status, config]) => ({
