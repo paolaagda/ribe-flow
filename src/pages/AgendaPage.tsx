@@ -58,6 +58,8 @@ export default function AgendaPage() {
   const { addNotification } = useNotifications();
   const { visits, setVisits } = useVisits();
   const { getActiveItems } = useSystemData();
+  const { getActiveBanks } = useInfoData();
+  const infoBankNames = getActiveBanks().map(b => b.name);
   const { registrations } = useRegistrations();
   const { addLog } = useAuditLog();
 
