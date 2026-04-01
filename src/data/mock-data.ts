@@ -246,7 +246,12 @@ function generateVisits(): Visit[] {
       observations: status === 'Concluída' ? 'Reunião produtiva com o parceiro.' : '',
       summary: status === 'Concluída' ? 'Parceiro demonstrou interesse nos produtos apresentados.' : '',
       potentialValue,
-      comments: [],
+      comments: i % 7 === 0 ? [
+        { id: `c-gen-${i}-1`, userId: user.id, text: 'Verificar documentação pendente do parceiro.', type: 'observation' as const, createdAt: d.toISOString() },
+        { id: `c-gen-${i}-2`, userId: user.id, text: 'Coletar assinatura no contrato', type: 'task' as const, taskCompleted: isPast, taskCategory: 'general' as const, createdAt: d.toISOString() },
+      ] : i % 5 === 0 ? [
+        { id: `c-gen-${i}-1`, userId: user.id, text: 'Parceiro solicitou informações sobre FGTS.', type: 'observation' as const, createdAt: d.toISOString() },
+      ] : [],
     });
   }
 
@@ -259,35 +264,80 @@ function generateVisits(): Visit[] {
       date: todayStr, time: '09:00', period: 'manhã', type: 'visita', medio: 'presencial', status: 'Concluída',
       structures: ['Help', 'Loja balcão'], banks: ['Riber Seguros', 'Itaú'], products: ['INSS', 'FGTS'],
       observations: 'Reunião produtiva, parceiro satisfeito.', summary: 'Alinhamento sobre metas do trimestre.',
-      potentialValue: 1500000, comments: [],
+      potentialValue: 1500000, comments: [
+        { id: 'ct1-1', userId: 'u4', text: 'Parceiro muito receptivo, demonstrou interesse em ampliar portfólio.', type: 'observation' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 15).toISOString() },
+        { id: 'ct1-2', userId: 'u2', text: 'Confirmar renovação do contrato até sexta-feira.', type: 'task' as const, taskCompleted: false, taskCategory: 'general' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 30).toISOString() },
+        { id: 'ct1-3', userId: 'u4', text: 'Enviar proposta comercial atualizada por e-mail.', type: 'task' as const, taskCompleted: true, taskCategory: 'general' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 45).toISOString() },
+        { id: 'ct1-4', userId: 'u3', text: 'Material de marketing entregue ao parceiro.', type: 'observation' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 0).toISOString() },
+      ],
     },
     {
       id: 'vt2', partnerId: 'p2', userId: 'u4', createdBy: 'u4', invitedUsers: [{ userId: 'u5', status: 'pending' }, { userId: 'u9', status: 'accepted' }],
       date: todayStr, time: '10:30', period: 'manhã', type: 'prospecção', medio: 'remoto', status: 'Planejada',
       structures: ['Venda Online'], banks: ['Finanto', 'C6'], products: ['Veículos', 'CLT'],
       observations: '', summary: '',
-      potentialValue: 2500000, prospectEmail: 'contato@express.com', comments: [],
+      potentialValue: 2500000, prospectEmail: 'contato@express.com', comments: [
+        { id: 'ct2-1', userId: 'u4', text: '📄 Enviar: Cartão CNPJ', type: 'task' as const, taskCompleted: false, taskCategory: 'document' as const, taskSourceId: 'doc-1', taskBankName: 'Finanto', createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 8, 0).toISOString() },
+        { id: 'ct2-2', userId: 'u4', text: '📄 Enviar: Contrato Social', type: 'task' as const, taskCompleted: false, taskCategory: 'document' as const, taskSourceId: 'doc-2', taskBankName: 'Finanto', createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 8, 0).toISOString() },
+        { id: 'ct2-3', userId: 'u4', text: '🧾 Preencher: Chave PIX', type: 'task' as const, taskCompleted: false, taskCategory: 'data' as const, taskSourceId: 'op-1', taskBankName: 'Finanto', createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 8, 0).toISOString() },
+        { id: 'ct2-4', userId: 'u4', text: 'Preparar apresentação dos produtos para prospecção.', type: 'task' as const, taskCompleted: false, taskCategory: 'general' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 8, 30).toISOString() },
+      ],
     },
     {
       id: 'vt3', partnerId: 'p3', userId: 'u5', createdBy: 'u5', invitedUsers: [{ userId: 'u4', status: 'pending' }],
       date: todayStr, time: '11:00', period: 'manhã', type: 'visita', medio: 'presencial', status: 'Planejada',
       structures: ['Loja balcão'], banks: ['Daycoval'], products: ['Imobiliário'],
       observations: '', summary: '',
-      comments: [],
+      comments: [
+        { id: 'ct3-1', userId: 'u5', text: '📄 Enviar: RG / CNH dos Sócios', type: 'task' as const, taskCompleted: true, taskCategory: 'document' as const, taskSourceId: 'doc-3', taskBankName: 'Daycoval', createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 7, 0).toISOString() },
+        { id: 'ct3-2', userId: 'u5', text: '📄 Enviar: Comprovante de Endereço', type: 'task' as const, taskCompleted: false, taskCategory: 'document' as const, taskSourceId: 'doc-4', taskBankName: 'Daycoval', createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 7, 0).toISOString() },
+        { id: 'ct3-3', userId: 'u5', text: '🧾 Preencher: Regra de Repasse', type: 'task' as const, taskCompleted: false, taskCategory: 'data' as const, taskSourceId: 'op-2', taskBankName: 'Daycoval', createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 7, 0).toISOString() },
+        { id: 'ct3-4', userId: 'u5', text: 'Levar material impresso da tabela de comissões.', type: 'observation' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 7, 30).toISOString() },
+      ],
     },
     {
       id: 'vt4', partnerId: 'p4', userId: 'u6', createdBy: 'u6', invitedUsers: [],
       date: todayStr, time: '14:00', period: 'tarde', type: 'visita', medio: 'presencial', status: 'Reagendada',
       structures: ['Help', 'Call-center'], banks: ['BMG', 'Icred'], products: ['Cartão Benefício/Consignado'],
       observations: 'Parceiro pediu reagendamento.', summary: '',
-      rescheduleReason: 'Cliente não disponível', comments: [],
+      rescheduleReason: 'Cliente solicitou nova data', comments: [
+        { id: 'ct4-1', userId: 'u6', text: 'Parceiro viajou, remarcar para próxima semana.', type: 'observation' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 13, 0).toISOString() },
+        { id: 'ct4-2', userId: 'u6', text: 'Ligar para o parceiro para confirmar nova data.', type: 'task' as const, taskCompleted: false, taskCategory: 'general' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 13, 30).toISOString() },
+      ],
     },
     {
       id: 'vt5', partnerId: 'p6', userId: 'u4', createdBy: 'u4', invitedUsers: [{ userId: 'u7', status: 'accepted' }, { userId: 'u6', status: 'pending' }],
       date: todayStr, time: '16:00', period: 'tarde', type: 'visita', medio: 'presencial', status: 'Planejada',
       structures: ['Venda Online', 'Help'], banks: ['Riber Seguros'], products: ['Seguros', 'CNC'],
       observations: '', summary: '',
-      potentialValue: 3200000, comments: [],
+      potentialValue: 3200000, comments: [
+        { id: 'ct5-1', userId: 'u4', text: '📄 Enviar: Alvará de Funcionamento', type: 'task' as const, taskCompleted: false, taskCategory: 'document' as const, taskSourceId: 'doc-6', taskBankName: 'Riber Seguros', createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0).toISOString() },
+        { id: 'ct5-2', userId: 'u4', text: '📄 Enviar: Foto da Fachada', type: 'task' as const, taskCompleted: false, taskCategory: 'document' as const, taskSourceId: 'doc-8', taskBankName: 'Riber Seguros', createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0).toISOString() },
+        { id: 'ct5-3', userId: 'u4', text: '🧾 Preencher: Forma de Pagamento', type: 'task' as const, taskCompleted: true, taskCategory: 'data' as const, taskSourceId: 'op-4', taskBankName: 'Riber Seguros', createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0).toISOString() },
+        { id: 'ct5-4', userId: 'u7', text: 'Alinhar estratégia de vendas de seguros com o parceiro.', type: 'observation' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 14, 0).toISOString() },
+        { id: 'ct5-5', userId: 'u4', text: 'Negociar condições especiais para CNC.', type: 'task' as const, taskCompleted: false, taskCategory: 'general' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 14, 30).toISOString() },
+      ],
+    },
+    // Visita cancelada de hoje
+    {
+      id: 'vt6', partnerId: 'p7', userId: 'u6', createdBy: 'u6', invitedUsers: [{ userId: 'u5', status: 'rejected' }],
+      date: todayStr, time: '15:00', period: 'tarde', type: 'visita', medio: 'presencial', status: 'Cancelada',
+      structures: ['Loja balcão', 'Call-center'], banks: ['C6'], products: ['FGTS', 'CLT'],
+      observations: 'Parceiro informou que não pode mais atender.', summary: '',
+      cancelReason: 'Cliente não respondeu', comments: [
+        { id: 'ct6-1', userId: 'u6', text: 'Tentei contato 3 vezes, parceiro não atendeu.', type: 'observation' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 14, 45).toISOString() },
+      ],
+    },
+    // Prospecção concluída de hoje
+    {
+      id: 'vt7', partnerId: 'p11', userId: 'u5', createdBy: 'u5', invitedUsers: [],
+      date: todayStr, time: '08:30', period: 'manhã', type: 'prospecção', medio: 'remoto', status: 'Concluída',
+      structures: ['Call-center', 'Venda Online'], banks: ['BMG', 'PAN'], products: ['INSS', 'Cartão Benefício/Consignado'],
+      observations: 'Prospecção bem-sucedida, lead qualificado.', summary: 'Parceiro em potencial demonstrou forte interesse. Agendar visita presencial.',
+      potentialValue: 4500000, prospectEmail: 'capital@consig.com', comments: [
+        { id: 'ct7-1', userId: 'u5', text: 'Lead muito qualificado, já opera com consignado.', type: 'observation' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 8, 45).toISOString() },
+        { id: 'ct7-2', userId: 'u5', text: 'Agendar visita presencial para próxima semana.', type: 'task' as const, taskCompleted: false, taskCategory: 'general' as const, createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 0).toISOString() },
+      ],
     },
   );
 
