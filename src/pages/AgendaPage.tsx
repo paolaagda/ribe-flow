@@ -93,7 +93,6 @@ export default function AgendaPage() {
   const [showJustificationModal, setShowJustificationModal] = useState(false);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [showTodayPanel, setShowTodayPanel] = useState(false);
-  const [showTasksPanel] = useState(false);
   const [showInviteRejectionModal, setShowInviteRejectionModal] = useState(false);
   const [rejectingVisitId, setRejectingVisitId] = useState<string | null>(null);
   const [showTasksPanel, setShowTasksPanel] = useState(false);
