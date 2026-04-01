@@ -59,10 +59,14 @@ export default function BankRegistrationFlow({ partnerId, partnerName, onComplet
 
   const handleComplete = () => {
     if (!selectedBank) return;
+    const unfilledFields = operationalFields.filter(f => !fieldValues[f.id]?.trim());
     onComplete({
       bankId: selectedBankId,
       bankName: selectedBank.name,
       pendingDocs: pendingDocs.map(d => d.name),
+      pendingDocIds: pendingDocs.map(d => d.id),
+      unfilledFieldIds: unfilledFields.map(f => f.id),
+      unfilledFieldNames: unfilledFields.map(f => f.name),
       fieldValues,
     });
   };
