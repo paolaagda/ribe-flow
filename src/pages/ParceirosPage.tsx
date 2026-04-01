@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import PageTransition from '@/components/PageTransition';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,8 @@ import { Button } from '@/components/ui/button';
 import { differenceInDays, parseISO } from 'date-fns';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import PageHeader from '@/components/shared/PageHeader';
+import { usePagination } from '@/hooks/usePagination';
+import PaginationControls from '@/components/shared/PaginationControls';
 
 export default function ParceirosPage() {
   const [search, setSearch] = useState('');
@@ -28,6 +30,8 @@ export default function ParceirosPage() {
   const { partners } = usePartners();
   const { stores } = useStores();
   const { visits } = useVisits();
+
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Filter partners by role: comercial only sees their own partners
   const visiblePartners = useMemo(() => {
@@ -46,7 +50,6 @@ export default function ParceirosPage() {
     const today = new Date();
     let base = visiblePartners;
 
-    // Apply insight filter
     if (activeInsight === 'parc_alto_potencial') {
       base = base.filter(p => p.potential === 'alto');
     } else if (activeInsight === 'parc_sem_visita_30d') {
@@ -80,6 +83,9 @@ export default function ParceirosPage() {
   }, [search, visibleStores, partners, activeInsight, filtered]);
 
   const potentialBadgeClass: Record<string, string> = { alto: 'badge-potential-alto', médio: 'badge-potential-medio', baixo: 'badge-potential-baixo' };
+
+  const partnersPagination = usePagination(filtered, { pageSize: 9, scrollToTopRef: listRef as React.RefObject<HTMLElement> });
+  const storesPagination = usePagination(filteredStores, { pageSize: 9, scrollToTopRef: listRef as React.RefObject<HTMLElement> });
 
   if (!canRead('partners.list')) {
     return (
@@ -129,96 +135,117 @@ export default function ParceirosPage() {
         </div>
       </div>
 
+      <div ref={listRef} />
       <AnimatedFilterContent filterKey={activeInsight}>
       {viewMode === 'parceiros' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-ds-sm">
-          {filtered.map(p => {
-            const responsible = getUserById(p.responsibleUserId);
-            return (
-              <Card
-                key={p.id}
-                className={cn(
-                  canRead('partners.details') ? 'card-interactive cursor-pointer' : 'card-flat',
-                  'group overflow-hidden relative'
-                )}
-                onClick={() => canRead('partners.details') && setSelectedId(p.id)}
-              >
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gradient-primary" />
-                <CardContent className="p-ds-sm space-y-0 divide-y divide-border/40 relative min-w-0">
-                  <div className="flex items-start justify-between gap-2 pb-3">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="icon-container-sm icon-container-primary transition-transform duration-300 group-hover:scale-105 shrink-0">
-                        <Building2 className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-ds-sm font-semibold truncate">{p.name}</p>
-                        <p className="text-ds-xs text-muted-foreground truncate">{p.cnpj}</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className={cn('text-ds-xs capitalize shrink-0', potentialBadgeClass[p.potential])}>
-                      {p.potential}
-                    </Badge>
-                  </div>
-                  <div className="py-2.5 space-y-2">
-                    <p className="text-ds-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3 shrink-0" />{p.address}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {p.structures.map(s => <Badge key={s} variant="secondary" className="text-ds-xs">{s}</Badge>)}
-                    </div>
-                  </div>
-                  <div className="pt-2.5">
-                    <p className="text-ds-xs text-muted-foreground flex items-center gap-1">
-                      <User className="h-3 w-3" /> {responsible?.name}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-          {filtered.length === 0 && (
-            <div className="col-span-full text-center py-12 text-muted-foreground">
-              <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>Nenhum parceiro encontrado</p>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-ds-sm">
-          {filteredStores.map(store => {
-            const partner = partners.find(p => p.id === store.partnerId);
-            return (
-              <Card key={store.id} className="card-flat group overflow-hidden relative hover:shadow-[var(--shadow-md)] transition-all duration-300 hover:-translate-y-0.5">
-                <CardContent className="p-ds-sm space-y-3.5">
-                  <div className="flex items-center gap-3">
-                     <div className="icon-container-sm">
-                       <StoreIcon className="h-4 w-4 text-muted-foreground" />
-                     </div>
-                    <div className="min-w-0">
-                       <p className="text-ds-sm font-semibold truncate">{store.name}</p>
-                       <p className="text-ds-xs text-muted-foreground">Centro de custo</p>
-                    </div>
-                  </div>
-                  <p className="text-ds-xs text-muted-foreground flex items-center gap-1 truncate">
-                    <MapPin className="h-3 w-3 shrink-0" /> {store.address}
-                  </p>
-                  <p className="text-ds-xs text-muted-foreground flex items-center gap-1">
-                    <Phone className="h-3 w-3 shrink-0" /> {store.phone} — {store.contact}
-                  </p>
-                  {partner && (
-                    <p className="text-ds-xs text-muted-foreground flex items-center gap-1">
-                      <Building2 className="h-3 w-3" /> Parceiro: <span className="font-medium text-foreground">{partner.name}</span>
-                    </p>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-ds-sm">
+            {partnersPagination.paginatedItems.map(p => {
+              const responsible = getUserById(p.responsibleUserId);
+              return (
+                <Card
+                  key={p.id}
+                  className={cn(
+                    canRead('partners.details') ? 'card-interactive cursor-pointer' : 'card-flat',
+                    'group overflow-hidden relative'
                   )}
-                </CardContent>
-              </Card>
-            );
-          })}
-          {filteredStores.length === 0 && (
-            <div className="col-span-full text-center py-12 text-muted-foreground">
-              <StoreIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>Nenhuma loja encontrada</p>
-            </div>
+                  onClick={() => canRead('partners.details') && setSelectedId(p.id)}
+                >
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gradient-primary" />
+                  <CardContent className="p-ds-sm space-y-0 divide-y divide-border/40 relative min-w-0">
+                    <div className="flex items-start justify-between gap-2 pb-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="icon-container-sm icon-container-primary transition-transform duration-300 group-hover:scale-105 shrink-0">
+                          <Building2 className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-ds-sm font-semibold truncate">{p.name}</p>
+                          <p className="text-ds-xs text-muted-foreground truncate">{p.cnpj}</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className={cn('text-ds-xs capitalize shrink-0', potentialBadgeClass[p.potential])}>
+                        {p.potential}
+                      </Badge>
+                    </div>
+                    <div className="py-2.5 space-y-2">
+                      <p className="text-ds-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3 shrink-0" />{p.address}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {p.structures.map(s => <Badge key={s} variant="secondary" className="text-ds-xs">{s}</Badge>)}
+                      </div>
+                    </div>
+                    <div className="pt-2.5">
+                      <p className="text-ds-xs text-muted-foreground flex items-center gap-1">
+                        <User className="h-3 w-3" /> {responsible?.name}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+            {filtered.length === 0 && (
+              <div className="col-span-full text-center py-12 text-muted-foreground">
+                <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>Nenhum parceiro encontrado</p>
+              </div>
+            )}
+          </div>
+          {partnersPagination.showPagination && (
+            <PaginationControls
+              currentPage={partnersPagination.currentPage}
+              totalPages={partnersPagination.totalPages}
+              totalItems={partnersPagination.totalItems}
+              onPageChange={partnersPagination.goToPage}
+            />
           )}
-        </div>
+        </>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-ds-sm">
+            {storesPagination.paginatedItems.map(store => {
+              const partner = partners.find(p => p.id === store.partnerId);
+              return (
+                <Card key={store.id} className="card-flat group overflow-hidden relative hover:shadow-[var(--shadow-md)] transition-all duration-300 hover:-translate-y-0.5">
+                  <CardContent className="p-ds-sm space-y-3.5">
+                    <div className="flex items-center gap-3">
+                       <div className="icon-container-sm">
+                         <StoreIcon className="h-4 w-4 text-muted-foreground" />
+                       </div>
+                      <div className="min-w-0">
+                         <p className="text-ds-sm font-semibold truncate">{store.name}</p>
+                         <p className="text-ds-xs text-muted-foreground">Centro de custo</p>
+                      </div>
+                    </div>
+                    <p className="text-ds-xs text-muted-foreground flex items-center gap-1 truncate">
+                      <MapPin className="h-3 w-3 shrink-0" /> {store.address}
+                    </p>
+                    <p className="text-ds-xs text-muted-foreground flex items-center gap-1">
+                      <Phone className="h-3 w-3 shrink-0" /> {store.phone} — {store.contact}
+                    </p>
+                    {partner && (
+                      <p className="text-ds-xs text-muted-foreground flex items-center gap-1">
+                        <Building2 className="h-3 w-3" /> Parceiro: <span className="font-medium text-foreground">{partner.name}</span>
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+            {filteredStores.length === 0 && (
+              <div className="col-span-full text-center py-12 text-muted-foreground">
+                <StoreIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>Nenhuma loja encontrada</p>
+              </div>
+            )}
+          </div>
+          {storesPagination.showPagination && (
+            <PaginationControls
+              currentPage={storesPagination.currentPage}
+              totalPages={storesPagination.totalPages}
+              totalItems={storesPagination.totalItems}
+              onPageChange={storesPagination.goToPage}
+            />
+          )}
+        </>
       )}
       </AnimatedFilterContent>
 

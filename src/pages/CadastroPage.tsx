@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { usePartners } from '@/hooks/usePartners';
 import PageHeader from '@/components/shared/PageHeader';
@@ -33,6 +33,8 @@ import { useNavigate } from 'react-router-dom';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfDay, endOfDay, isWithinInterval, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { usePagination } from '@/hooks/usePagination';
+import PaginationControls from '@/components/shared/PaginationControls';
 
 const statusKpiConfig: Record<string, { icon: any; color: string }> = {
   'Não iniciado': { icon: FileText, color: 'text-muted-foreground' },
@@ -94,6 +96,7 @@ export default function CadastroPage() {
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Registration | null>(null);
 
+  const cadastroListRef = useRef<HTMLDivElement>(null);
   const statuses = getActiveItems('registrationStatuses');
   const banks = infoBanks.map(b => b.name);
   const solicitations = getActiveItems('registrationSolicitations');
@@ -196,6 +199,8 @@ export default function CadastroPage() {
       return sortDir === 'asc' ? cmp : -cmp;
     });
   }, [filtered, sortField, sortDir]);
+
+  const cadastroPagination = usePagination(sorted, { pageSize: viewMode === "cards" ? 12 : 15, scrollToTopRef: cadastroListRef as React.RefObject<HTMLElement> });
 
   const toggleSort = useCallback((field: SortField) => {
     if (sortField === field) {
@@ -616,6 +621,7 @@ export default function CadastroPage() {
           </TabsContent>
         </Tabs>
 
+        <div ref={cadastroListRef} />
         {/* Content - Cards or Table */}
         {sorted.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
@@ -623,7 +629,7 @@ export default function CadastroPage() {
           </div>
         ) : viewMode === 'cards' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {sorted.map(reg => (
+            {cadastroPagination.paginatedItems.map(reg => (
               <RegistrationCard
                 key={reg.id}
                 registration={reg}
@@ -656,7 +662,7 @@ export default function CadastroPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sorted.map(reg => {
+                  {cadastroPagination.paginatedItems.map(reg => {
                     const lastUpdate = reg.updates.length > 0 ? reg.updates[reg.updates.length - 1] : null;
                     const lastUpdateUser = lastUpdate ? mockUsers.find(u => u.id === lastUpdate.userId) : null;
                     const isEditing = (field: string) => editingCell?.id === reg.id && editingCell?.field === field;
@@ -764,6 +770,15 @@ export default function CadastroPage() {
           </Card>
         )}
 
+        {cadastroPagination.showPagination && (
+          <PaginationControls
+            currentPage={cadastroPagination.currentPage}
+            totalPages={cadastroPagination.totalPages}
+            totalItems={cadastroPagination.totalItems}
+            onPageChange={cadastroPagination.goToPage}
+          />
+        )}
+
         <RegistrationModal
           open={modalOpen}
           onOpenChange={setModalOpen}
@@ -793,4 +808,3 @@ export default function CadastroPage() {
     </PageTransition>
   );
 }
-
