@@ -494,7 +494,7 @@ export default function CadastroPage() {
 
         {/* Status / Tratando Com / Bancos - Tabs */}
         <Tabs value={kpiTab} onValueChange={setKpiTab} className="w-full">
-          <TabsList className="w-full justify-start">
+          <TabsList className="w-full justify-center">
             <TabsTrigger value="status" className="gap-1.5">
               <FileCheck className="h-3.5 w-3.5" /> Status
               <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{registrations.length}</Badge>
@@ -510,58 +510,71 @@ export default function CadastroPage() {
           </TabsList>
 
           <TabsContent value="status" className="mt-3">
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {[
                 { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: registrations.length },
                 ...Object.entries(statusKpiConfig).map(([status, config]) => ({
                   status, label: status, icon: config.icon, color: config.color, count: statusCounts[status] || 0,
                 })),
-              ].filter(({ status, count }) => status === 'all' || count > 0).map(({ status, label, icon: Icon, color, count }, i) => (
-                <Tooltip key={status}>
-                  <TooltipTrigger asChild>
-                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
-                      <Card
-                        className={cn(
-                          'cursor-pointer border-border/50 overflow-hidden group transition-all duration-200',
-                          'hover:shadow-md hover:-translate-y-0.5',
-                          filterStatus === status ? 'ring-2 ring-primary/30 border-primary/20 card-glow' : 'card-interactive',
-                        )}
-                        onClick={() => setFilterStatus(filterStatus === status && status !== 'all' ? 'all' : status)}
-                      >
-                        <div className="flex flex-col items-center justify-center gap-1 p-3 min-w-[56px] sm:min-w-[64px]">
-                          <div className={cn('relative transition-transform duration-200 group-hover:scale-110', color)}>
-                            <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                            {status === 'Em análise' && count > 0 && (
-                              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive animate-pulse" />
-                            )}
+              ].filter(({ status, count }) => status === 'all' || count > 0).map(({ status, label, icon: Icon, color, count }, i) => {
+                const isSelected = status === 'all' ? filterStatuses.length === 0 : filterStatuses.includes(status);
+                return (
+                  <Tooltip key={status}>
+                    <TooltipTrigger asChild>
+                      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
+                        <Card
+                          className={cn(
+                            'cursor-pointer overflow-hidden group transition-all duration-200',
+                            'hover:shadow-md hover:-translate-y-0.5',
+                            isSelected
+                              ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
+                              : 'border-border/50 card-interactive',
+                          )}
+                          onClick={() => {
+                            if (status === 'all') {
+                              setFilterStatuses([]);
+                            } else {
+                              toggleFilter(filterStatuses, status, setFilterStatuses);
+                            }
+                          }}
+                        >
+                          <div className="flex flex-col items-center justify-center gap-1 p-3">
+                            <div className={cn('relative transition-transform duration-200 group-hover:scale-110', color)}>
+                              <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                              {status === 'Em análise' && count > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                              )}
+                            </div>
+                            <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
                           </div>
-                          <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs font-medium">{label}</TooltipContent>
-                </Tooltip>
-              ))}
+                        </Card>
+                      </motion.div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs font-medium">{label}</TooltipContent>
+                  </Tooltip>
+                );
+              })}
             </div>
           </TabsContent>
 
           <TabsContent value="handlers" className="mt-3">
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
               {handlers.filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
                 const count = handlerCounts[handler];
-                const isActive = filterHandler === handler;
+                const isActive = filterHandlers.includes(handler);
                 return (
                   <motion.div key={handler} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
                     <Card
                       className={cn(
-                        'cursor-pointer border-border/50 overflow-hidden group transition-all duration-200',
+                        'cursor-pointer overflow-hidden group transition-all duration-200',
                         'hover:shadow-md hover:-translate-y-0.5',
-                        isActive ? 'ring-2 ring-primary/30 border-primary/20 card-glow' : 'card-interactive',
+                        isActive
+                          ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
+                          : 'border-border/50 card-interactive',
                       )}
-                      onClick={() => setFilterHandler(isActive ? 'all' : handler)}
+                      onClick={() => toggleFilter(filterHandlers, handler, setFilterHandlers)}
                     >
-                      <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3 min-w-[64px] sm:min-w-[72px]">
+                      <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3">
                         <Users className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
                         <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
                         <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{handler}</span>
@@ -574,21 +587,23 @@ export default function CadastroPage() {
           </TabsContent>
 
           <TabsContent value="banks" className="mt-3">
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
               {banks.filter(b => (bankCounts[b] || 0) > 0).map((bank, i) => {
                 const count = bankCounts[bank];
-                const isActive = filterBank === bank;
+                const isActive = filterBanks.includes(bank);
                 return (
                   <motion.div key={bank} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
                     <Card
                       className={cn(
-                        'cursor-pointer border-border/50 overflow-hidden group transition-all duration-200',
+                        'cursor-pointer overflow-hidden group transition-all duration-200',
                         'hover:shadow-md hover:-translate-y-0.5',
-                        isActive ? 'ring-2 ring-primary/30 border-primary/20 card-glow' : 'card-interactive',
+                        isActive
+                          ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
+                          : 'border-border/50 card-interactive',
                       )}
-                      onClick={() => setFilterBank(isActive ? 'all' : bank)}
+                      onClick={() => toggleFilter(filterBanks, bank, setFilterBanks)}
                     >
-                      <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3 min-w-[64px] sm:min-w-[72px]">
+                      <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3">
                         <Building2 className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
                         <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
                         <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{bank}</span>
