@@ -76,7 +76,7 @@ export default function CadastroPage() {
   const [filterBanks, setFilterBanks] = useState<string[]>([]);
   const [filterCommercial, setFilterCommercial] = useState('all');
   const [filterSolicitation, setFilterSolicitation] = useState('all');
-  const [filterHandler, setFilterHandler] = useState('all');
+  const [filterHandlers, setFilterHandlers] = useState<string[]>([]);
   const [filterDateMode, setFilterDateMode] = useState<DateMode>('none');
   const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>();
   const [filterDateTo, setFilterDateTo] = useState<Date | undefined>();
