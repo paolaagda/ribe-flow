@@ -1290,10 +1290,9 @@ export default function AgendaPage() {
               partnerName={formData.type === 'visita' ? (getPartnerById(formData.partnerId)?.name || '') : (formData.prospectPartner || '')}
               onComplete={(data) => {
                 setBankRegistrations(prev => [...prev, { bankName: data.bankName, pendingDocs: data.pendingDocs }]);
-                // Create registration entry
-                const partnerName = formData.type === 'visita' ? (getPartnerById(formData.partnerId)?.name || '') : (formData.prospectPartner || '');
+                const pName = formData.type === 'visita' ? (getPartnerById(formData.partnerId)?.name || '') : (formData.prospectPartner || '');
                 const details = Object.entries(data.fieldValues).map(([, v]) => v).filter(Boolean).join(' | ');
-                addRegistration({
+                const newReg = addRegistration({
                   partnerId: formData.partnerId || '',
                   bank: data.bankName,
                   cnpj: formData.type === 'visita' ? (getPartnerById(formData.partnerId)?.cnpj || '') : (formData.prospectCnpj || ''),
@@ -1305,8 +1304,26 @@ export default function AgendaPage() {
                   code: '',
                   contractConfirmed: false,
                 });
+                // Send approval notification to all managers
+                const managers = mockUsers.filter(u => u.profile === 'gestor' && u.active && u.id !== user?.id);
+                managers.forEach(manager => {
+                  addNotification({
+                    type: 'registration_approval',
+                    visitId: '',
+                    fromUserId: user?.id || '',
+                    toUserId: manager.id,
+                    partnerId: formData.partnerId || '',
+                    partnerName: pName,
+                    date: format(new Date(), 'yyyy-MM-dd'),
+                    time: '',
+                    status: 'pending',
+                    message: `📋 ${user?.name || 'Comercial'} solicita aprovação de cadastro no banco ${data.bankName} para ${pName}.${data.pendingDocs.length > 0 ? ` (${data.pendingDocs.length} docs pendentes)` : ''}`,
+                    registrationId: newReg.id,
+                    bankName: data.bankName,
+                  });
+                });
                 setShowBankRegistration(false);
-                toast({ title: 'Cadastro solicitado', description: `Cadastro no banco ${data.bankName} foi registrado com sucesso.` });
+                toast({ title: 'Cadastro solicitado', description: `Solicitação enviada para aprovação do gerente.` });
               }}
               onCancel={() => setShowBankRegistration(false)}
             />

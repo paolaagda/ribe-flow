@@ -6,7 +6,7 @@ import { getUserById } from '@/data/mock-data';
 import { format, parseISO, isToday, isTomorrow, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Check, X, Eye, CalendarIcon, Clock, User } from 'lucide-react';
+import { Check, X, Eye, CalendarIcon, Clock, User, Landmark, FileCheck } from 'lucide-react';
 
 interface InviteCardProps {
   notification: AppNotification;
@@ -26,6 +26,9 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
   const isAccepted = notification.status === 'accepted';
   const isRejected = notification.status === 'rejected';
 
+  const isRegistrationApproval = notification.type === 'registration_approval';
+  const isRegistrationResult = notification.type === 'registration_approved' || notification.type === 'registration_rejected';
+
   // Highlight if created within last 5 seconds
   const isNew = useMemo(() => {
     const created = new Date(notification.createdAt).getTime();
@@ -36,26 +39,53 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
     <div
       className={cn(
         'rounded-lg border p-3 transition-all duration-200',
-        isPending && 'bg-card hover:shadow-md hover:-translate-y-0.5 border-primary/20',
+        isPending && !isRegistrationApproval && 'bg-card hover:shadow-md hover:-translate-y-0.5 border-primary/20',
+        isPending && isRegistrationApproval && 'bg-card hover:shadow-md hover:-translate-y-0.5 border-warning/30 bg-warning/5',
         isAccepted && 'bg-muted/30 border-border',
         isRejected && 'bg-muted/20 border-border opacity-60',
-        !notification.read && isPending && 'ring-1 ring-primary/30',
+        !notification.read && isPending && !isRegistrationApproval && 'ring-1 ring-primary/30',
+        !notification.read && isPending && isRegistrationApproval && 'ring-1 ring-warning/40',
+        isRegistrationResult && !notification.read && 'bg-card border-primary/20',
         isNew && 'notification-new',
       )}
     >
       {/* Tags */}
       <div className="flex items-center gap-1.5 mb-2">
-        {isDateToday && (
-          <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-destructive text-destructive-foreground">Hoje</Badge>
+        {isRegistrationApproval && isPending && (
+          <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-warning text-foreground">Aprovação Pendente</Badge>
         )}
-        {isDateTomorrow && (
-          <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-warning text-foreground">Amanhã</Badge>
+        {isRegistrationApproval && isAccepted && (
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-success/10 text-success border-success/20">Aprovado</Badge>
         )}
-        {isAccepted && (
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-success/10 text-success border-success/20">Confirmado</Badge>
-        )}
-        {isRejected && (
+        {isRegistrationApproval && isRejected && (
           <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-destructive/10 text-destructive border-destructive/20">Recusado</Badge>
+        )}
+        {notification.type === 'registration_approved' && (
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-success/10 text-success border-success/20">Cadastro Aprovado</Badge>
+        )}
+        {notification.type === 'registration_rejected' && (
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-destructive/10 text-destructive border-destructive/20">Cadastro Recusado</Badge>
+        )}
+        {notification.bankName && (
+          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 gap-1">
+            <Landmark className="h-2.5 w-2.5" /> {notification.bankName}
+          </Badge>
+        )}
+        {!isRegistrationApproval && !isRegistrationResult && (
+          <>
+            {isDateToday && (
+              <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-destructive text-destructive-foreground">Hoje</Badge>
+            )}
+            {isDateTomorrow && (
+              <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-warning text-foreground">Amanhã</Badge>
+            )}
+            {isAccepted && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-success/10 text-success border-success/20">Confirmado</Badge>
+            )}
+            {isRejected && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-destructive/10 text-destructive border-destructive/20">Recusado</Badge>
+            )}
+          </>
         )}
         {isRejected && notification.rejectionReason && (
           <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-muted-foreground/20 text-muted-foreground">
@@ -72,14 +102,18 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
 
       {/* Meta */}
       <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-3">
-        <span className="flex items-center gap-1">
-          <CalendarIcon className="h-3 w-3" />
-          {validDate ? format(visitDate, "dd/MM/yyyy", { locale: ptBR }) : 'Data indefinida'}
-        </span>
-        <span className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          {notification.time}
-        </span>
+        {validDate && (
+          <span className="flex items-center gap-1">
+            <CalendarIcon className="h-3 w-3" />
+            {format(visitDate, "dd/MM/yyyy", { locale: ptBR })}
+          </span>
+        )}
+        {notification.time && (
+          <span className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {notification.time}
+          </span>
+        )}
         <span className="flex items-center gap-1">
           <User className="h-3 w-3" />
           {fromUser?.name}
@@ -87,7 +121,29 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
       </div>
 
       {/* Actions */}
-      {isPending && (
+      {isPending && isRegistrationApproval && (
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            className="h-7 text-xs gap-1 bg-success hover:bg-success/90 text-success-foreground"
+            onClick={() => onAccept(notification.id)}
+          >
+            <FileCheck className="h-3 w-3" />
+            Aprovar
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-7 text-xs gap-1"
+            onClick={() => onReject(notification.id)}
+          >
+            <X className="h-3 w-3" />
+            Recusar
+          </Button>
+        </div>
+      )}
+
+      {isPending && !isRegistrationApproval && notification.type === 'invite' && (
         <div className="flex items-center gap-2">
           <Button
             size="sm"

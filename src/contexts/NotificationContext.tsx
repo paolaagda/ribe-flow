@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 
-export type NotificationType = 'invite' | 'accept' | 'reject' | 'remove' | 'update' | 'task_overdue';
+export type NotificationType = 'invite' | 'accept' | 'reject' | 'remove' | 'update' | 'task_overdue' | 'registration_approval' | 'registration_approved' | 'registration_rejected';
 export type InviteStatus = 'pending' | 'accepted' | 'rejected';
 
 export interface AppNotification {
@@ -24,6 +24,8 @@ export interface AppNotification {
   createdAt: string;
   message: string;
   rejectionReason?: string;
+  registrationId?: string;
+  bankName?: string;
 }
 
 interface NotificationContextValue {
@@ -162,10 +164,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, [allNotifications, user]);
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
-  const pendingInvites = useMemo(() => notifications.filter(n => n.type === 'invite' && n.status === 'pending'), [notifications]);
+  const pendingInvites = useMemo(() => notifications.filter(n => (n.type === 'invite' || n.type === 'registration_approval') && n.status === 'pending'), [notifications]);
   const recentNotifications = useMemo(() =>
     notifications
-      .filter(n => n.type !== 'invite' || n.status !== 'pending')
+      .filter(n => !((n.type === 'invite' || n.type === 'registration_approval') && n.status === 'pending'))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 20),
     [notifications]
