@@ -35,10 +35,11 @@ import InviteRejectionModal from '@/components/agenda/InviteRejectionModal';
 import PendingTasksCard from '@/components/agenda/PendingTasksCard';
 import TasksDrawer from '@/components/agenda/TasksDrawer';
 import AgendaMap from '@/components/agenda/AgendaMap';
+import BankRegistrationFlow from '@/components/agenda/BankRegistrationFlow';
 import SmartInsights from '@/components/shared/SmartInsights';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import { usePermission } from '@/hooks/usePermission';
-import { ShieldOff, FileText } from 'lucide-react';
+import { ShieldOff, FileText, Landmark as LandmarkIcon } from 'lucide-react';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
@@ -60,7 +61,7 @@ export default function AgendaPage() {
   const { getActiveItems } = useSystemData();
   const { getActiveBanks } = useInfoData();
   const infoBankNames = getActiveBanks().map(b => b.name);
-  const { registrations } = useRegistrations();
+  const { registrations, addRegistration } = useRegistrations();
   const { addLog } = useAuditLog();
 
   const rankingLeaderId = useMemo(() => {
@@ -98,6 +99,8 @@ export default function AgendaPage() {
   const [showTasksDrawer, setShowTasksDrawer] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
+  const [showBankRegistration, setShowBankRegistration] = useState(false);
+  const [bankRegistrations, setBankRegistrations] = useState<Array<{ bankName: string; pendingDocs: string[] }>>([]);
 
   // Exclusive toggle: close other panels when opening one
   const togglePanel = (panel: 'today' | 'tasks') => {
@@ -146,6 +149,8 @@ export default function AgendaPage() {
       invitedUserIds: [], rescheduleReason: '', cancelReason: '',
     });
     setFormStep(0);
+    setShowBankRegistration(false);
+    setBankRegistrations([]);
   };
 
   // Visibility filter: comercial only sees visits they participate in
@@ -1241,23 +1246,82 @@ export default function AgendaPage() {
             </div>
           )}
 
-          {formStep === 2 && (
+          {formStep === 2 && !showBankRegistration && (
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Resumo da visita</Label>
                 <Textarea value={formData.summary} onChange={e => setFormData({...formData, summary: e.target.value})} placeholder="Resumo geral da visita..." />
               </div>
+
+              {/* Bank Registrations added */}
+              {bankRegistrations.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Cadastros de banco solicitados:</Label>
+                  {bankRegistrations.map((br, i) => (
+                    <div key={i} className="flex items-center gap-2 rounded-md bg-primary/10 border border-primary/20 px-3 py-2">
+                      <LandmarkIcon className="h-4 w-4 text-primary shrink-0" />
+                      <span className="text-sm font-medium">{br.bankName}</span>
+                      {br.pendingDocs.length > 0 && (
+                        <Badge variant="outline" className="text-[10px] ml-auto">{br.pendingDocs.length} docs pendentes</Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Cadastrar Banco button */}
+              {(formData.partnerId || formData.prospectPartner) && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full gap-2 border-dashed border-primary/40 text-primary hover:bg-primary/5"
+                  onClick={() => setShowBankRegistration(true)}
+                >
+                  <LandmarkIcon className="h-4 w-4" />
+                  Cadastrar Banco
+                </Button>
+              )}
             </div>
           )}
 
-          <DialogFooter className="flex gap-2">
-            {formStep > 0 && <Button variant="outline" onClick={() => setFormStep(formStep - 1)}>Voltar</Button>}
-            {formStep < 2 ? (
-              <Button onClick={() => setFormStep(formStep + 1)} disabled={formStep === 0 && !canProceedStep1}>Próximo</Button>
-            ) : (
-              <Button onClick={handleSave}>Salvar agenda</Button>
-            )}
-          </DialogFooter>
+          {formStep === 2 && showBankRegistration && (
+            <BankRegistrationFlow
+              partnerId={formData.partnerId || `prospect-${formData.prospectCnpj}`}
+              partnerName={formData.type === 'visita' ? (getPartnerById(formData.partnerId)?.name || '') : (formData.prospectPartner || '')}
+              onComplete={(data) => {
+                setBankRegistrations(prev => [...prev, { bankName: data.bankName, pendingDocs: data.pendingDocs }]);
+                // Create registration entry
+                const partnerName = formData.type === 'visita' ? (getPartnerById(formData.partnerId)?.name || '') : (formData.prospectPartner || '');
+                const details = Object.entries(data.fieldValues).map(([, v]) => v).filter(Boolean).join(' | ');
+                addRegistration({
+                  partnerId: formData.partnerId || '',
+                  bank: data.bankName,
+                  cnpj: formData.type === 'visita' ? (getPartnerById(formData.partnerId)?.cnpj || '') : (formData.prospectCnpj || ''),
+                  commercialUserId: user?.id || '',
+                  observation: `Solicitação via agenda. ${details ? `Dados: ${details}` : ''}${data.pendingDocs.length > 0 ? ` | Docs pendentes: ${data.pendingDocs.join(', ')}` : ''}`,
+                  status: 'Não iniciado',
+                  solicitation: 'Substabelecido',
+                  handlingWith: 'Comercial',
+                  code: '',
+                  contractConfirmed: false,
+                });
+                setShowBankRegistration(false);
+                toast({ title: 'Cadastro solicitado', description: `Cadastro no banco ${data.bankName} foi registrado com sucesso.` });
+              }}
+              onCancel={() => setShowBankRegistration(false)}
+            />
+          )}
+
+          {!showBankRegistration && (
+            <DialogFooter className="flex gap-2">
+              {formStep > 0 && <Button variant="outline" onClick={() => setFormStep(formStep - 1)}>Voltar</Button>}
+              {formStep < 2 ? (
+                <Button onClick={() => setFormStep(formStep + 1)} disabled={formStep === 0 && !canProceedStep1}>Próximo</Button>
+              ) : (
+                <Button onClick={handleSave}>Salvar agenda</Button>
+              )}
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
 
