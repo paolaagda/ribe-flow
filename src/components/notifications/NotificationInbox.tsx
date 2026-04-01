@@ -254,7 +254,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
           </TabsContent>
 
           <TabsContent value="history" className="mt-0">
-            <ScrollArea className="max-h-[400px]">
+            <div className="max-h-[400px] overflow-y-auto overscroll-contain">
               {history.length === 0 ? (
                 <div className="py-8 text-center">
                   <p className="text-sm text-muted-foreground">Histórico limpo</p>
@@ -271,7 +271,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
                   ))}
                 </div>
               )}
-            </ScrollArea>
+            </div>
             {history.length > 0 && (
               <div className="px-3 py-2 border-t border-border">
                 <Button variant="ghost" size="sm" className="w-full h-7 text-xs gap-1 text-muted-foreground" onClick={clearHistory}>
