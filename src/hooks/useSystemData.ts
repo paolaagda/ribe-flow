@@ -28,13 +28,11 @@ function buildInitial(items: readonly string[]): SystemItem[] {
 }
 
 const initialData: Record<SystemCategory, SystemItem[]> = {
-  banks: buildInitial(BANKS),
   products: buildInitial(PRODUCTS),
   rescheduleReasons: buildInitial(RESCHEDULE_REASONS),
   cancelReasons: buildInitial(CANCEL_REASONS),
   storeStructures: buildInitial(STORE_STRUCTURES),
   periods: buildInitial(['Manhã', 'Tarde']),
-  registrationBanks: buildInitial(REGISTRATION_BANKS),
   registrationStatuses: buildInitial(REGISTRATION_STATUSES),
   registrationSolicitations: buildInitial(REGISTRATION_SOLICITATIONS),
   registrationHandlers: buildInitial(REGISTRATION_HANDLERS),
