@@ -101,12 +101,16 @@ export default function CadastroPage() {
   const commercialUsers = mockUsers.filter(u => u.role === 'comercial' && u.active);
 
   // Count active filters (excluding search)
+  const toggleFilter = (arr: string[], val: string, setter: (v: string[]) => void) => {
+    setter(arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]);
+  };
+
   const activeFilterCount = [
-    filterStatus !== 'all',
-    filterBank !== 'all',
+    filterStatuses.length > 0,
+    filterBanks.length > 0,
     filterCommercial !== 'all',
     filterSolicitation !== 'all',
-    filterHandler !== 'all',
+    filterHandlers.length > 0,
     filterDateMode !== 'none',
   ].filter(Boolean).length;
 
