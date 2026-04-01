@@ -33,7 +33,7 @@ import VisitMap from '@/components/home/VisitMap';
 import JustificationModal from '@/components/agenda/JustificationModal';
 import InviteRejectionModal from '@/components/agenda/InviteRejectionModal';
 
-import TasksDrawer from '@/components/agenda/TasksDrawer';
+import InlineTasksPanel from '@/components/agenda/InlineTasksPanel';
 import AgendaMap from '@/components/agenda/AgendaMap';
 import BankRegistrationFlow from '@/components/agenda/BankRegistrationFlow';
 import SmartInsights from '@/components/shared/SmartInsights';
@@ -93,10 +93,9 @@ export default function AgendaPage() {
   const [showJustificationModal, setShowJustificationModal] = useState(false);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [showTodayPanel, setShowTodayPanel] = useState(false);
-  const [showTasksPanel] = useState(false);
   const [showInviteRejectionModal, setShowInviteRejectionModal] = useState(false);
   const [rejectingVisitId, setRejectingVisitId] = useState<string | null>(null);
-  const [showTasksDrawer, setShowTasksDrawer] = useState(false);
+  const [showTasksPanel, setShowTasksPanel] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
   const [showBankRegistration, setShowBankRegistration] = useState(false);
@@ -107,7 +106,7 @@ export default function AgendaPage() {
     if (panel === 'today') {
       setShowTodayPanel(prev => !prev);
     } else {
-      setShowTasksDrawer(true);
+      setShowTasksPanel(prev => !prev);
     }
   };
 
@@ -1331,14 +1330,6 @@ export default function AgendaPage() {
         onConfirm={handleJustificationConfirm}
       />
 
-      <TasksDrawer
-        open={showTasksDrawer}
-        onOpenChange={setShowTasksDrawer}
-        onOpenVisit={(visitId) => {
-          const v = visits.find(vi => vi.id === visitId);
-          if (v) { setSelectedVisit(v); setShowDetail(true); }
-        }}
-      />
 
       <InviteRejectionModal
         open={showInviteRejectionModal}
