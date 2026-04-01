@@ -356,7 +356,6 @@ export default function InfoDataSection() {
     </div>
   );
 }
-    getBanks, addBank, updateBank, toggleBank,
     getDocuments, addDocument, updateDocument, toggleDocument,
     getLinks, addLink, updateLink, deleteLink, getActiveBanks,
   } = useInfoData();
