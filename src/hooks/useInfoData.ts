@@ -36,6 +36,13 @@ export interface InfoLink {
   active: boolean;
 }
 
+export interface InfoOperationalField {
+  id: string;
+  name: string;
+  active: boolean;
+  bankIds: string[];
+}
+
 // ============ INITIAL DATA ============
 
 const bankLogos: Record<string, string> = {
@@ -131,6 +138,15 @@ const initialLinks: InfoLink[] = [
   { id: 'link-3', name: 'Tabela de Comissões', url: 'https://example.com/comissoes', icon: 'Table', active: true },
 ];
 
+const initialOperationalFields: InfoOperationalField[] = [
+  { id: 'op-1', name: 'Chave PIX', active: true, bankIds: [] },
+  { id: 'op-2', name: 'Regra de Repasse', active: true, bankIds: [] },
+  { id: 'op-3', name: 'Prazo de Pagamento', active: true, bankIds: [] },
+  { id: 'op-4', name: 'Forma de Pagamento', active: true, bankIds: [] },
+  { id: 'op-5', name: 'Contato', active: true, bankIds: [] },
+  { id: 'op-6', name: 'Observações', active: true, bankIds: [] },
+];
+
 // ============ HOOK ============
 
 interface InfoDataState {
@@ -138,6 +154,7 @@ interface InfoDataState {
   documents: InfoDocument[];
   userProcesses: InfoUserProcess[];
   links: InfoLink[];
+  operationalFields: InfoOperationalField[];
 }
 
 const initialState: InfoDataState = {
@@ -145,10 +162,11 @@ const initialState: InfoDataState = {
   documents: initialDocuments,
   userProcesses: initialUserProcesses,
   links: initialLinks,
+  operationalFields: initialOperationalFields,
 };
 
 export function useInfoData() {
-  const [state, setState] = useLocalStorage<InfoDataState>('ribercred_info_data_v2', initialState);
+  const [state, setState] = useLocalStorage<InfoDataState>('ribercred_info_data_v3', initialState);
 
   // === Banks ===
   const getBanks = useCallback(() => state.banks, [state.banks]);
@@ -243,10 +261,40 @@ export function useInfoData() {
     }));
   }, [setState]);
 
+  // === Operational Fields ===
+  const getOperationalFields = useCallback(() => state.operationalFields || [], [state.operationalFields]);
+  const getActiveOperationalFields = useCallback(() => (state.operationalFields || []).filter(f => f.active), [state.operationalFields]);
+
+  const getOperationalFieldsForBank = useCallback((bankId: string) => {
+    return (state.operationalFields || []).filter(f => f.active && f.bankIds.includes(bankId));
+  }, [state.operationalFields]);
+
+  const addOperationalField = useCallback((name: string, bankIds: string[]) => {
+    setState(prev => ({
+      ...prev,
+      operationalFields: [...(prev.operationalFields || []), { id: `op-${Date.now()}`, name, active: true, bankIds }],
+    }));
+  }, [setState]);
+
+  const updateOperationalField = useCallback((id: string, updates: Partial<Pick<InfoOperationalField, 'name' | 'bankIds'>>) => {
+    setState(prev => ({
+      ...prev,
+      operationalFields: (prev.operationalFields || []).map(f => f.id === id ? { ...f, ...updates } : f),
+    }));
+  }, [setState]);
+
+  const toggleOperationalField = useCallback((id: string) => {
+    setState(prev => ({
+      ...prev,
+      operationalFields: (prev.operationalFields || []).map(f => f.id === id ? { ...f, active: !f.active } : f),
+    }));
+  }, [setState]);
+
   return {
     getBanks, getActiveBanks, addBank, updateBank, toggleBank,
     getDocuments, getActiveDocuments, getDocumentsForBank, getAllActiveDocuments, addDocument, updateDocument, toggleDocument,
     getUserProcesses, updateUserProcess,
     getLinks, getActiveLinks, addLink, updateLink, deleteLink,
+    getOperationalFields, getActiveOperationalFields, getOperationalFieldsForBank, addOperationalField, updateOperationalField, toggleOperationalField,
   };
 }

@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { useInfoData, InfoBank, InfoDocument, InfoLink } from '@/hooks/useInfoData';
-import { Plus, Landmark, FileText, Link as LinkIcon, Pencil, Save, X } from 'lucide-react';
+import { useInfoData } from '@/hooks/useInfoData';
+import { Plus, Landmark, FileText, Link as LinkIcon, Pencil, Save, X, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function InfoDataSection() {
@@ -16,12 +16,14 @@ export default function InfoDataSection() {
     getBanks, addBank, updateBank, toggleBank,
     getDocuments, addDocument, updateDocument, toggleDocument,
     getLinks, addLink, updateLink, deleteLink, getActiveBanks,
+    getOperationalFields, addOperationalField, updateOperationalField, toggleOperationalField,
   } = useInfoData();
 
   const banks = getBanks();
   const documents = getDocuments();
   const links = getLinks();
   const activeBanks = getActiveBanks();
+  const operationalFields = getOperationalFields();
 
   // === Bank form ===
   const [newBankName, setNewBankName] = useState('');
@@ -75,6 +77,28 @@ export default function InfoDataSection() {
     setList(list.includes(bankId) ? list.filter(id => id !== bankId) : [...list, bankId]);
   };
 
+  // === Operational Field form ===
+  const [newOpName, setNewOpName] = useState('');
+  const [newOpBanks, setNewOpBanks] = useState<string[]>([]);
+  const [editingOp, setEditingOp] = useState<string | null>(null);
+  const [editOpName, setEditOpName] = useState('');
+  const [editOpBanks, setEditOpBanks] = useState<string[]>([]);
+
+  const handleAddOp = () => {
+    const name = newOpName.trim();
+    if (!name) return;
+    addOperationalField(name, newOpBanks);
+    setNewOpName('');
+    setNewOpBanks([]);
+    toast({ title: 'Campo operacional adicionado' });
+  };
+
+  const handleSaveOp = (id: string) => {
+    updateOperationalField(id, { name: editOpName, bankIds: editOpBanks });
+    setEditingOp(null);
+    toast({ title: 'Campo operacional atualizado' });
+  };
+
   // === Link form ===
   const [newLinkName, setNewLinkName] = useState('');
   const [newLinkUrl, setNewLinkUrl] = useState('');
@@ -93,7 +117,7 @@ export default function InfoDataSection() {
     <div className="space-y-4">
       <div>
         <h3 className="text-lg font-semibold">Informações Úteis</h3>
-        <p className="text-sm text-muted-foreground">Gerencie bancos, documentação e links que aparecem na página Informações Úteis.</p>
+        <p className="text-sm text-muted-foreground">Gerencie bancos, documentação, campos operacionais e links que aparecem na página Informações Úteis.</p>
       </div>
 
       <Accordion type="multiple" className="space-y-2">
@@ -209,6 +233,79 @@ export default function InfoDataSection() {
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground">{doc.active ? 'Ativo' : 'Inativo'}</span>
                           <Switch checked={doc.active} onCheckedChange={() => { toggleDocument(doc.id); toast({ title: doc.active ? 'Documento inativado' : 'Documento ativado' }); }} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* OPERATIONAL FIELDS */}
+        <AccordionItem value="info-ops" className="border rounded-lg px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-3">
+              <Settings2 className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">Campos Operacionais</span>
+              <Badge variant="secondary" className="text-xs">
+                {operationalFields.filter(f => f.active).length}/{operationalFields.length}
+              </Badge>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input placeholder="Nome do campo" value={newOpName} onChange={e => setNewOpName(e.target.value)} className="h-9" />
+                  <Button size="sm" onClick={handleAddOp} className="h-9 gap-1.5 shrink-0">
+                    <Plus className="h-3.5 w-3.5" /> Adicionar
+                  </Button>
+                </div>
+                {newOpName.trim() && (
+                  <div className="flex flex-wrap gap-2 p-2 rounded-md bg-muted/30">
+                    <span className="text-xs text-muted-foreground w-full mb-1">Vincular a bancos:</span>
+                    {activeBanks.map(bank => (
+                      <label key={bank.id} className="flex items-center gap-1.5 text-xs cursor-pointer">
+                        <Checkbox checked={newOpBanks.includes(bank.id)} onCheckedChange={() => toggleBankInList(bank.id, newOpBanks, setNewOpBanks)} />
+                        {bank.name}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-1">
+                {operationalFields.map(field => (
+                  <div key={field.id} className={cn('rounded-md px-3 py-2 transition-colors', field.active ? 'bg-muted/50' : 'bg-muted/20 opacity-60')}>
+                    {editingOp === field.id ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Input value={editOpName} onChange={e => setEditOpName(e.target.value)} className="h-7 text-sm" />
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleSaveOp(field.id)}><Save className="h-3.5 w-3.5" /></Button>
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setEditingOp(null)}><X className="h-3.5 w-3.5" /></Button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {activeBanks.map(bank => (
+                            <label key={bank.id} className="flex items-center gap-1.5 text-xs cursor-pointer">
+                              <Checkbox checked={editOpBanks.includes(bank.id)} onCheckedChange={() => toggleBankInList(bank.id, editOpBanks, setEditOpBanks)} />
+                              {bank.name}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className={cn('text-sm', !field.active && 'line-through text-muted-foreground')}>{field.name}</span>
+                          {field.bankIds.length > 0 && <Badge variant="outline" className="text-[10px]">{field.bankIds.length} bancos</Badge>}
+                          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => { setEditingOp(field.id); setEditOpName(field.name); setEditOpBanks([...field.bankIds]); }}>
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">{field.active ? 'Ativo' : 'Inativo'}</span>
+                          <Switch checked={field.active} onCheckedChange={() => { toggleOperationalField(field.id); toast({ title: field.active ? 'Campo inativado' : 'Campo ativado' }); }} />
                         </div>
                       </div>
                     )}
