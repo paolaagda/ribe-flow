@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Search, FileText, Clock, CheckCircle2, AlertCircle, PauseCircle, XCircle, PenLine, ShieldAlert, Filter, Users, Building2, ChevronDown, CalendarIcon, X, LayoutGrid, Table as TableIcon, ArrowUpDown, ArrowUp, ArrowDown, FileCheck } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
@@ -82,9 +82,7 @@ export default function CadastroPage() {
   const [filterDateTo, setFilterDateTo] = useState<Date | undefined>();
 
   const [showFilters, setShowFilters] = useState(false);
-  const [expandStatus, setExpandStatus] = useState(true);
-  const [expandHandlers, setExpandHandlers] = useState(false);
-  const [expandBanks, setExpandBanks] = useState(false);
+  const [kpiTab, setKpiTab] = useState('status');
 
   const [viewMode, setViewMode] = useLocalStorage<ViewMode>('ribercred_cadastro_view', 'cards');
   const [sortField, setSortField] = useState<SortField>('none');
@@ -490,99 +488,114 @@ export default function CadastroPage() {
           )}
         </AnimatePresence>
 
-        {/* Status KPIs - collapsible */}
-        <CollapsibleSection title="Status" count={registrations.length} open={expandStatus} onToggle={() => setExpandStatus(!expandStatus)}>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: registrations.length },
-              ...Object.entries(statusKpiConfig).map(([status, config]) => ({
-                status, label: status, icon: config.icon, color: config.color, count: statusCounts[status] || 0,
-              })),
-            ].map(({ status, label, icon: Icon, color, count }, i) => (
-              <Tooltip key={status}>
-                <TooltipTrigger asChild>
-                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
+        {/* Status / Tratando Com / Bancos - Tabs */}
+        <Tabs value={kpiTab} onValueChange={setKpiTab} className="w-full">
+          <TabsList className="w-full justify-start">
+            <TabsTrigger value="status" className="gap-1.5">
+              <FileCheck className="h-3.5 w-3.5" /> Status
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{registrations.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="handlers" className="gap-1.5">
+              <Users className="h-3.5 w-3.5" /> Tratando Com
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(handlerCounts).length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="banks" className="gap-1.5">
+              <Building2 className="h-3.5 w-3.5" /> Bancos
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(bankCounts).length}</Badge>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="status" className="mt-3">
+            <div className="flex flex-wrap gap-2">
+              {[
+                { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: registrations.length },
+                ...Object.entries(statusKpiConfig).map(([status, config]) => ({
+                  status, label: status, icon: config.icon, color: config.color, count: statusCounts[status] || 0,
+                })),
+              ].map(({ status, label, icon: Icon, color, count }, i) => (
+                <Tooltip key={status}>
+                  <TooltipTrigger asChild>
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
+                      <Card
+                        className={cn(
+                          'cursor-pointer border-border/50 overflow-hidden group transition-all duration-200',
+                          'hover:shadow-md hover:-translate-y-0.5',
+                          filterStatus === status ? 'ring-2 ring-primary/30 border-primary/20 card-glow' : 'card-interactive',
+                        )}
+                        onClick={() => setFilterStatus(filterStatus === status && status !== 'all' ? 'all' : status)}
+                      >
+                        <div className="flex flex-col items-center justify-center gap-1 p-3 min-w-[56px] sm:min-w-[64px]">
+                          <div className={cn('relative transition-transform duration-200 group-hover:scale-110', color)}>
+                            <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                            {status === 'Em análise' && count > 0 && (
+                              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                            )}
+                          </div>
+                          <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs font-medium">{label}</TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="handlers" className="mt-3">
+            <div className="flex flex-wrap gap-2">
+              {handlers.map((handler, i) => {
+                const count = handlerCounts[handler] || 0;
+                const isActive = filterHandler === handler;
+                return (
+                  <motion.div key={handler} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
                     <Card
                       className={cn(
                         'cursor-pointer border-border/50 overflow-hidden group transition-all duration-200',
                         'hover:shadow-md hover:-translate-y-0.5',
-                        filterStatus === status ? 'ring-2 ring-primary/30 border-primary/20 card-glow' : 'card-interactive',
+                        isActive ? 'ring-2 ring-primary/30 border-primary/20 card-glow' : 'card-interactive',
                       )}
-                      onClick={() => setFilterStatus(filterStatus === status && status !== 'all' ? 'all' : status)}
+                      onClick={() => setFilterHandler(isActive ? 'all' : handler)}
                     >
-                      <div className="flex flex-col items-center justify-center gap-1 p-3 min-w-[56px] sm:min-w-[64px]">
-                        <div className={cn('relative transition-transform duration-200 group-hover:scale-110', color)}>
-                          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                          {status === 'Em análise' && count > 0 && (
-                            <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive animate-pulse" />
-                          )}
-                        </div>
+                      <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3 min-w-[64px] sm:min-w-[72px]">
+                        <Users className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
                         <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
+                        <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{handler}</span>
                       </div>
                     </Card>
                   </motion.div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-xs font-medium">{label}</TooltipContent>
-              </Tooltip>
-            ))}
-          </div>
-        </CollapsibleSection>
+                );
+              })}
+            </div>
+          </TabsContent>
 
-        {/* Tratando Com - collapsible */}
-        <CollapsibleSection title="Tratando Com" count={Object.keys(handlerCounts).length} open={expandHandlers} onToggle={() => setExpandHandlers(!expandHandlers)}>
-          <div className="flex flex-wrap gap-2">
-            {handlers.map((handler, i) => {
-              const count = handlerCounts[handler] || 0;
-              const isActive = filterHandler === handler;
-              return (
-                <motion.div key={handler} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
-                  <Card
-                    className={cn(
-                      'cursor-pointer border-border/50 overflow-hidden group transition-all duration-200',
-                      'hover:shadow-md hover:-translate-y-0.5',
-                      isActive ? 'ring-2 ring-primary/30 border-primary/20 card-glow' : 'card-interactive',
-                    )}
-                    onClick={() => setFilterHandler(isActive ? 'all' : handler)}
-                  >
-                    <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3 min-w-[64px] sm:min-w-[72px]">
-                      <Users className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
-                      <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
-                      <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{handler}</span>
-                    </div>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
-        </CollapsibleSection>
-
-        {/* Bancos - collapsible */}
-        <CollapsibleSection title="Bancos" count={Object.keys(bankCounts).length} open={expandBanks} onToggle={() => setExpandBanks(!expandBanks)}>
-          <div className="flex flex-wrap gap-2">
-            {banks.map((bank, i) => {
-              const count = bankCounts[bank] || 0;
-              const isActive = filterBank === bank;
-              return (
-                <motion.div key={bank} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
-                  <Card
-                    className={cn(
-                      'cursor-pointer border-border/50 overflow-hidden group transition-all duration-200',
-                      'hover:shadow-md hover:-translate-y-0.5',
-                      isActive ? 'ring-2 ring-primary/30 border-primary/20 card-glow' : 'card-interactive',
-                    )}
-                    onClick={() => setFilterBank(isActive ? 'all' : bank)}
-                  >
-                    <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3 min-w-[64px] sm:min-w-[72px]">
-                      <Building2 className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
-                      <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
-                      <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{bank}</span>
-                    </div>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
-        </CollapsibleSection>
+          <TabsContent value="banks" className="mt-3">
+            <div className="flex flex-wrap gap-2">
+              {banks.map((bank, i) => {
+                const count = bankCounts[bank] || 0;
+                const isActive = filterBank === bank;
+                return (
+                  <motion.div key={bank} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
+                    <Card
+                      className={cn(
+                        'cursor-pointer border-border/50 overflow-hidden group transition-all duration-200',
+                        'hover:shadow-md hover:-translate-y-0.5',
+                        isActive ? 'ring-2 ring-primary/30 border-primary/20 card-glow' : 'card-interactive',
+                      )}
+                      onClick={() => setFilterBank(isActive ? 'all' : bank)}
+                    >
+                      <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3 min-w-[64px] sm:min-w-[72px]">
+                        <Building2 className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
+                        <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
+                        <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{bank}</span>
+                      </div>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Content - Cards or Table */}
         {sorted.length === 0 ? (
@@ -762,32 +775,3 @@ export default function CadastroPage() {
   );
 }
 
-// Collapsible section sub-component
-function CollapsibleSection({ title, count, open, onToggle, children }: {
-  title: string; count: number; open: boolean; onToggle: () => void; children: React.ReactNode;
-}) {
-  return (
-    <Collapsible open={open} onOpenChange={onToggle}>
-      <CollapsibleTrigger asChild>
-        <button className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors w-full group">
-          <ChevronDown className={cn('h-3.5 w-3.5 transition-transform duration-200', open && 'rotate-0', !open && '-rotate-90')} />
-          {title}
-          <span className="text-[10px] font-normal text-muted-foreground/70">({count})</span>
-        </button>
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="pt-2"
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
-      </CollapsibleContent>
-    </Collapsible>
-  );
-}
