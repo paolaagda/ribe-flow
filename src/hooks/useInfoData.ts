@@ -166,7 +166,7 @@ const initialState: InfoDataState = {
 };
 
 export function useInfoData() {
-  const [state, setState] = useLocalStorage<InfoDataState>('ribercred_info_data_v2', initialState);
+  const [state, setState] = useLocalStorage<InfoDataState>('ribercred_info_data_v3', initialState);
 
   // === Banks ===
   const getBanks = useCallback(() => state.banks, [state.banks]);
