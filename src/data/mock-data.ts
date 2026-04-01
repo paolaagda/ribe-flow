@@ -44,12 +44,17 @@ export interface InvitedUser {
   status: 'pending' | 'accepted' | 'rejected';
 }
 
+export type TaskCategory = 'document' | 'data' | 'general';
+
 export interface VisitComment {
   id: string;
   userId: string;
   text: string;
   type: 'observation' | 'task';
   taskCompleted?: boolean;
+  taskCategory?: TaskCategory;
+  taskSourceId?: string; // doc id or field id for sync
+  taskBankName?: string;
   parentId?: string;
   createdAt: string;
 }
