@@ -72,11 +72,11 @@ export default function CadastroPage() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterBank, setFilterBank] = useState('all');
+  const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
+  const [filterBanks, setFilterBanks] = useState<string[]>([]);
   const [filterCommercial, setFilterCommercial] = useState('all');
   const [filterSolicitation, setFilterSolicitation] = useState('all');
-  const [filterHandler, setFilterHandler] = useState('all');
+  const [filterHandlers, setFilterHandlers] = useState<string[]>([]);
   const [filterDateMode, setFilterDateMode] = useState<DateMode>('none');
   const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>();
   const [filterDateTo, setFilterDateTo] = useState<Date | undefined>();
@@ -101,12 +101,16 @@ export default function CadastroPage() {
   const commercialUsers = mockUsers.filter(u => u.role === 'comercial' && u.active);
 
   // Count active filters (excluding search)
+  const toggleFilter = (arr: string[], val: string, setter: (v: string[]) => void) => {
+    setter(arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]);
+  };
+
   const activeFilterCount = [
-    filterStatus !== 'all',
-    filterBank !== 'all',
+    filterStatuses.length > 0,
+    filterBanks.length > 0,
     filterCommercial !== 'all',
     filterSolicitation !== 'all',
-    filterHandler !== 'all',
+    filterHandlers.length > 0,
     filterDateMode !== 'none',
   ].filter(Boolean).length;
 
@@ -163,11 +167,11 @@ export default function CadastroPage() {
 
   const filtered = useMemo(() => {
     return registrations.filter(r => {
-      if (filterStatus !== 'all' && r.status !== filterStatus) return false;
-      if (filterBank !== 'all' && r.bank !== filterBank) return false;
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
       if (filterCommercial !== 'all' && r.commercialUserId !== filterCommercial) return false;
       if (filterSolicitation !== 'all' && r.solicitation !== filterSolicitation) return false;
-      if (filterHandler !== 'all' && r.handlingWith !== filterHandler) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
       if (!isDateInRange(getLastUpdateDate(r))) return false;
       if (search) {
         const q = search.toLowerCase();
@@ -179,7 +183,7 @@ export default function CadastroPage() {
       }
       return true;
     });
-  }, [registrations, filterStatus, filterBank, filterCommercial, filterSolicitation, filterHandler, filterDateMode, filterDateFrom, filterDateTo, search]);
+  }, [registrations, filterStatuses, filterBanks, filterCommercial, filterSolicitation, filterHandlers, filterDateMode, filterDateFrom, filterDateTo, search]);
 
   const sorted = useMemo(() => {
     if (sortField === 'none') return filtered;
@@ -261,11 +265,11 @@ export default function CadastroPage() {
   };
 
   const clearFilters = () => {
-    setFilterStatus('all');
-    setFilterBank('all');
+    setFilterStatuses([]);
+    setFilterBanks([]);
     setFilterCommercial('all');
     setFilterSolicitation('all');
-    setFilterHandler('all');
+    setFilterHandlers([]);
     setFilterDateMode('none');
     setFilterDateFrom(undefined);
     setFilterDateTo(undefined);
@@ -366,7 +370,7 @@ export default function CadastroPage() {
                   )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <Select value={filterStatuses.length === 0 ? 'all' : filterStatuses[0]} onValueChange={v => setFilterStatuses(v === 'all' ? [] : [v])}>
                     <SelectTrigger className="h-9">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
@@ -376,7 +380,7 @@ export default function CadastroPage() {
                     </SelectContent>
                   </Select>
 
-                  <Select value={filterBank} onValueChange={setFilterBank}>
+                  <Select value={filterBanks.length === 0 ? 'all' : filterBanks[0]} onValueChange={v => setFilterBanks(v === 'all' ? [] : [v])}>
                     <SelectTrigger className="h-9">
                       <SelectValue placeholder="Banco" />
                     </SelectTrigger>
@@ -406,7 +410,7 @@ export default function CadastroPage() {
                     </SelectContent>
                   </Select>
 
-                  <Select value={filterHandler} onValueChange={(v) => { setFilterHandler(v); }}>
+                  <Select value={filterHandlers.length === 0 ? 'all' : filterHandlers[0]} onValueChange={v => setFilterHandlers(v === 'all' ? [] : [v])}>
                     <SelectTrigger className="h-9">
                       <SelectValue placeholder="Tratando com" />
                     </SelectTrigger>
@@ -490,7 +494,7 @@ export default function CadastroPage() {
 
         {/* Status / Tratando Com / Bancos - Tabs */}
         <Tabs value={kpiTab} onValueChange={setKpiTab} className="w-full">
-          <TabsList className="w-full justify-start">
+          <TabsList className="w-full justify-center">
             <TabsTrigger value="status" className="gap-1.5">
               <FileCheck className="h-3.5 w-3.5" /> Status
               <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{registrations.length}</Badge>
@@ -506,58 +510,71 @@ export default function CadastroPage() {
           </TabsList>
 
           <TabsContent value="status" className="mt-3">
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {[
                 { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: registrations.length },
                 ...Object.entries(statusKpiConfig).map(([status, config]) => ({
                   status, label: status, icon: config.icon, color: config.color, count: statusCounts[status] || 0,
                 })),
-              ].filter(({ status, count }) => status === 'all' || count > 0).map(({ status, label, icon: Icon, color, count }, i) => (
-                <Tooltip key={status}>
-                  <TooltipTrigger asChild>
-                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
-                      <Card
-                        className={cn(
-                          'cursor-pointer border-border/50 overflow-hidden group transition-all duration-200',
-                          'hover:shadow-md hover:-translate-y-0.5',
-                          filterStatus === status ? 'ring-2 ring-primary/30 border-primary/20 card-glow' : 'card-interactive',
-                        )}
-                        onClick={() => setFilterStatus(filterStatus === status && status !== 'all' ? 'all' : status)}
-                      >
-                        <div className="flex flex-col items-center justify-center gap-1 p-3 min-w-[56px] sm:min-w-[64px]">
-                          <div className={cn('relative transition-transform duration-200 group-hover:scale-110', color)}>
-                            <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                            {status === 'Em análise' && count > 0 && (
-                              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive animate-pulse" />
-                            )}
+              ].filter(({ status, count }) => status === 'all' || count > 0).map(({ status, label, icon: Icon, color, count }, i) => {
+                const isSelected = status === 'all' ? filterStatuses.length === 0 : filterStatuses.includes(status);
+                return (
+                  <Tooltip key={status}>
+                    <TooltipTrigger asChild>
+                      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
+                        <Card
+                          className={cn(
+                            'cursor-pointer overflow-hidden group transition-all duration-200',
+                            'hover:shadow-md hover:-translate-y-0.5',
+                            isSelected
+                              ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
+                              : 'border-border/50 card-interactive',
+                          )}
+                          onClick={() => {
+                            if (status === 'all') {
+                              setFilterStatuses([]);
+                            } else {
+                              toggleFilter(filterStatuses, status, setFilterStatuses);
+                            }
+                          }}
+                        >
+                          <div className="flex flex-col items-center justify-center gap-1 p-3">
+                            <div className={cn('relative transition-transform duration-200 group-hover:scale-110', color)}>
+                              <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                              {status === 'Em análise' && count > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                              )}
+                            </div>
+                            <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
                           </div>
-                          <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs font-medium">{label}</TooltipContent>
-                </Tooltip>
-              ))}
+                        </Card>
+                      </motion.div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs font-medium">{label}</TooltipContent>
+                  </Tooltip>
+                );
+              })}
             </div>
           </TabsContent>
 
           <TabsContent value="handlers" className="mt-3">
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
               {handlers.filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
                 const count = handlerCounts[handler];
-                const isActive = filterHandler === handler;
+                const isActive = filterHandlers.includes(handler);
                 return (
                   <motion.div key={handler} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
                     <Card
                       className={cn(
-                        'cursor-pointer border-border/50 overflow-hidden group transition-all duration-200',
+                        'cursor-pointer overflow-hidden group transition-all duration-200',
                         'hover:shadow-md hover:-translate-y-0.5',
-                        isActive ? 'ring-2 ring-primary/30 border-primary/20 card-glow' : 'card-interactive',
+                        isActive
+                          ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
+                          : 'border-border/50 card-interactive',
                       )}
-                      onClick={() => setFilterHandler(isActive ? 'all' : handler)}
+                      onClick={() => toggleFilter(filterHandlers, handler, setFilterHandlers)}
                     >
-                      <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3 min-w-[64px] sm:min-w-[72px]">
+                      <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3">
                         <Users className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
                         <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
                         <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{handler}</span>
@@ -570,21 +587,23 @@ export default function CadastroPage() {
           </TabsContent>
 
           <TabsContent value="banks" className="mt-3">
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
               {banks.filter(b => (bankCounts[b] || 0) > 0).map((bank, i) => {
                 const count = bankCounts[bank];
-                const isActive = filterBank === bank;
+                const isActive = filterBanks.includes(bank);
                 return (
                   <motion.div key={bank} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
                     <Card
                       className={cn(
-                        'cursor-pointer border-border/50 overflow-hidden group transition-all duration-200',
+                        'cursor-pointer overflow-hidden group transition-all duration-200',
                         'hover:shadow-md hover:-translate-y-0.5',
-                        isActive ? 'ring-2 ring-primary/30 border-primary/20 card-glow' : 'card-interactive',
+                        isActive
+                          ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
+                          : 'border-border/50 card-interactive',
                       )}
-                      onClick={() => setFilterBank(isActive ? 'all' : bank)}
+                      onClick={() => toggleFilter(filterBanks, bank, setFilterBanks)}
                     >
-                      <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3 min-w-[64px] sm:min-w-[72px]">
+                      <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3">
                         <Building2 className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
                         <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
                         <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{bank}</span>
