@@ -770,6 +770,15 @@ export default function CadastroPage() {
           </Card>
         )}
 
+        {cadastroPagination.showPagination && (
+          <PaginationControls
+            currentPage={cadastroPagination.currentPage}
+            totalPages={cadastroPagination.totalPages}
+            totalItems={cadastroPagination.totalItems}
+            onPageChange={cadastroPagination.goToPage}
+          />
+        )}
+
         <RegistrationModal
           open={modalOpen}
           onOpenChange={setModalOpen}
