@@ -33,6 +33,8 @@ interface Props {
 export default function RegistrationModal({ open, onOpenChange, registration, canEdit = true, canChangeStatus = true, canEditObservation = true }: Props) {
   const { partners } = usePartners();
   const { getActiveItems } = useSystemData();
+  const { getActiveBanks } = useInfoData();
+  const infoBanks = getActiveBanks();
   const { getAvatar } = useUserAvatars();
   const { addRegistration, updateRegistration } = useRegistrations();
   const { addLog, getLogsForEntity } = useAuditLog();

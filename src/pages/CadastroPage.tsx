@@ -63,6 +63,8 @@ export default function CadastroPage() {
   const { registrations, updateRegistration, deleteRegistration } = useRegistrations();
   const { getPartnerById } = usePartners();
   const { getActiveItems } = useSystemData();
+  const { getActiveBanks } = useInfoData();
+  const infoBanks = getActiveBanks();
   const { getAvatar } = useUserAvatars();
   const { canRead, canWrite } = usePermission();
   const { toast } = useToast();
