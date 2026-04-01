@@ -1276,6 +1276,39 @@ export default function AgendaPage() {
                 setBankRegistrations(prev => [...prev, { bankName: data.bankName, pendingDocs: data.pendingDocs }]);
                 const pName = formData.type === 'visita' ? (getPartnerById(formData.partnerId)?.name || '') : (formData.prospectPartner || '');
                 const details = Object.entries(data.fieldValues).map(([, v]) => v).filter(Boolean).join(' | ');
+
+                // Auto-generate tasks for pending docs
+                const now = new Date().toISOString();
+                const autoTasks: VisitComment[] = [];
+                data.pendingDocIds.forEach((docId, i) => {
+                  autoTasks.push({
+                    id: `auto-doc-${Date.now()}-${i}`,
+                    userId: user?.id || '',
+                    text: `📄 Enviar: ${data.pendingDocs[i]} (${data.bankName})`,
+                    type: 'task',
+                    taskCompleted: false,
+                    taskCategory: 'document',
+                    taskSourceId: docId,
+                    taskBankName: data.bankName,
+                    createdAt: now,
+                  });
+                });
+                // Auto-generate tasks for unfilled operational fields
+                data.unfilledFieldIds.forEach((fieldId, i) => {
+                  autoTasks.push({
+                    id: `auto-field-${Date.now()}-${i}`,
+                    userId: user?.id || '',
+                    text: `🧾 Preencher: ${data.unfilledFieldNames[i]} (${data.bankName})`,
+                    type: 'task',
+                    taskCompleted: false,
+                    taskCategory: 'data',
+                    taskSourceId: fieldId,
+                    taskBankName: data.bankName,
+                    createdAt: now,
+                  });
+                });
+                setPendingAutoTasks(prev => [...prev, ...autoTasks]);
+
                 const newReg = addRegistration({
                   partnerId: formData.partnerId || '',
                   bank: data.bankName,
@@ -1288,7 +1321,6 @@ export default function AgendaPage() {
                   code: '',
                   contractConfirmed: false,
                 });
-                // Send approval notification to all managers
                 const managers = mockUsers.filter(u => u.profile === 'gestor' && u.active && u.id !== user?.id);
                 managers.forEach(manager => {
                   addNotification({
@@ -1307,7 +1339,8 @@ export default function AgendaPage() {
                   });
                 });
                 setShowBankRegistration(false);
-                toast({ title: 'Cadastro solicitado', description: `Solicitação enviada para aprovação do gerente.` });
+                const totalTasks = autoTasks.length;
+                toast({ title: 'Cadastro solicitado', description: `Aprovação enviada ao gerente.${totalTasks > 0 ? ` ${totalTasks} tarefa(s) gerada(s) automaticamente.` : ''}` });
               }}
               onCancel={() => setShowBankRegistration(false)}
             />
