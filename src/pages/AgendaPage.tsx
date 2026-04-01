@@ -99,6 +99,8 @@ export default function AgendaPage() {
   const [showTasksDrawer, setShowTasksDrawer] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
+  const [showBankRegistration, setShowBankRegistration] = useState(false);
+  const [bankRegistrations, setBankRegistrations] = useState<Array<{ bankName: string; pendingDocs: string[] }>>([]);
 
   // Exclusive toggle: close other panels when opening one
   const togglePanel = (panel: 'today' | 'tasks') => {
