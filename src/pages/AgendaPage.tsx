@@ -16,6 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { mockUsers, getUserById, Visit, VisitStatus, VisitType, VisitPeriod, VisitComment, statusBgClasses, getPartnerById as getPartnerByIdGlobal, allCargos, cargoLabels } from '@/data/mock-data';
 import { useSystemData } from '@/hooks/useSystemData';
+import { useInfoData } from '@/hooks/useInfoData';
 import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
@@ -57,6 +58,8 @@ export default function AgendaPage() {
   const { addNotification } = useNotifications();
   const { visits, setVisits } = useVisits();
   const { getActiveItems } = useSystemData();
+  const { getActiveBanks } = useInfoData();
+  const infoBankNames = getActiveBanks().map(b => b.name);
   const { registrations } = useRegistrations();
   const { addLog } = useAuditLog();
 
@@ -1216,7 +1219,7 @@ export default function AgendaPage() {
               <div className="space-y-2">
                 <Label>Bancos</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  {getActiveItems('banks').map(b => (
+                  {infoBankNames.map(b => (
                     <label key={b} className="flex items-center gap-2 text-sm cursor-pointer">
                       <Checkbox checked={formData.banks.includes(b)} onCheckedChange={() => setFormData({...formData, banks: toggleArray(formData.banks, b)})} />
                       {b}

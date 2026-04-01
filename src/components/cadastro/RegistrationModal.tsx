@@ -12,6 +12,7 @@ import AuditTimeline from '@/components/shared/AuditTimeline';
 import { mockUsers } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useSystemData } from '@/hooks/useSystemData';
+import { useInfoData } from '@/hooks/useInfoData';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useAuditLog } from '@/hooks/useAuditLog';
@@ -32,6 +33,8 @@ interface Props {
 export default function RegistrationModal({ open, onOpenChange, registration, canEdit = true, canChangeStatus = true, canEditObservation = true }: Props) {
   const { partners } = usePartners();
   const { getActiveItems } = useSystemData();
+  const { getActiveBanks } = useInfoData();
+  const infoBanks = getActiveBanks();
   const { getAvatar } = useUserAvatars();
   const { addRegistration, updateRegistration } = useRegistrations();
   const { addLog, getLogsForEntity } = useAuditLog();
@@ -70,7 +73,7 @@ export default function RegistrationModal({ open, onOpenChange, registration, ca
   const selectedPartner = partners.find(p => p.id === partnerId);
   const commercial = selectedPartner ? mockUsers.find(u => u.id === selectedPartner.responsibleUserId) : null;
 
-  const banks = getActiveItems('registrationBanks');
+  const banks = infoBanks.map(b => b.name);
   const statuses = getActiveItems('registrationStatuses');
   const solicitations = getActiveItems('registrationSolicitations');
   const handlers = getActiveItems('registrationHandlers');

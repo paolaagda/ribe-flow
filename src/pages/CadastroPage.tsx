@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useSystemData } from '@/hooks/useSystemData';
+import { useInfoData } from '@/hooks/useInfoData';
 import RegistrationCard from '@/components/cadastro/RegistrationCard';
 import RegistrationModal from '@/components/cadastro/RegistrationModal';
 import { Registration } from '@/data/registrations';
@@ -62,6 +63,8 @@ export default function CadastroPage() {
   const { registrations, updateRegistration, deleteRegistration } = useRegistrations();
   const { getPartnerById } = usePartners();
   const { getActiveItems } = useSystemData();
+  const { getActiveBanks } = useInfoData();
+  const infoBanks = getActiveBanks();
   const { getAvatar } = useUserAvatars();
   const { canRead, canWrite } = usePermission();
   const { toast } = useToast();
@@ -94,7 +97,7 @@ export default function CadastroPage() {
   const [deleteTarget, setDeleteTarget] = useState<Registration | null>(null);
 
   const statuses = getActiveItems('registrationStatuses');
-  const banks = getActiveItems('registrationBanks');
+  const banks = infoBanks.map(b => b.name);
   const solicitations = getActiveItems('registrationSolicitations');
   const handlers = getActiveItems('registrationHandlers');
   const commercialUsers = mockUsers.filter(u => u.role === 'comercial' && u.active);
