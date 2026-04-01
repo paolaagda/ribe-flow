@@ -808,6 +808,3 @@ export default function CadastroPage() {
     </PageTransition>
   );
 }
-
-  const cadastroListRef = useRef<HTMLDivElement>(null);
-
