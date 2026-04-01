@@ -558,7 +558,7 @@ export default function CadastroPage() {
           </TabsContent>
 
           <TabsContent value="handlers" className="mt-3">
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
               {handlers.filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
                 const count = handlerCounts[handler];
                 const isActive = filterHandlers.includes(handler);
