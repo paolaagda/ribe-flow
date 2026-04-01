@@ -7,12 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useRegistrations } from '@/hooks/useRegistrations';
 import { useToast } from '@/hooks/use-toast';
 import { getRandomMessage } from '@/data/notification-messages';
 import InviteCard from './InviteCard';
 import InviteRejectionModal from '@/components/agenda/InviteRejectionModal';
 import { cn } from '@/lib/utils';
 import { getEmptyStateMessage } from '@/data/notification-messages';
+import { useAuth } from '@/contexts/AuthContext';
 
 const NotificationInbox = React.forwardRef<HTMLDivElement>(function NotificationInbox(_props, ref) {
   const {
@@ -22,12 +24,15 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     unreadCount,
     acceptInvite,
     rejectInvite,
+    addNotification,
     markAllAsRead,
     clearHistory,
     ensureInitialized,
   } = useNotifications();
   const { toast } = useToast();
   const { addLog } = useAuditLog();
+  const { updateRegistration } = useRegistrations();
+  const { user } = useAuth();
 
   const prevCountRef = useRef(unreadCount);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
@@ -42,18 +47,58 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   useEffect(() => {
     if (unreadCount > prevCountRef.current && badgeRef.current) {
       badgeRef.current.classList.remove('badge-bounce');
-      void badgeRef.current.offsetWidth; // force reflow
+      void badgeRef.current.offsetWidth;
       badgeRef.current.classList.add('badge-bounce');
     }
     prevCountRef.current = unreadCount;
   }, [unreadCount]);
 
   const handleAccept = (id: string) => {
-    acceptInvite(id);
-    toast({
-      title: getRandomMessage('accept'),
-      description: getRandomMessage('toast_invite'),
-    });
+    const notif = pendingInvites.find(n => n.id === id);
+    if (!notif) return;
+
+    if (notif.type === 'registration_approval') {
+      // Approve registration
+      acceptInvite(id);
+      if (notif.registrationId) {
+        updateRegistration(notif.registrationId, {
+          status: 'Em análise',
+          observation: `Cadastro aprovado pelo gerente ${user?.name || ''}.`,
+        });
+      }
+      // Notify the commercial user
+      addNotification({
+        type: 'registration_approved',
+        visitId: notif.visitId,
+        fromUserId: user?.id || '',
+        toUserId: notif.fromUserId,
+        partnerId: notif.partnerId,
+        partnerName: notif.partnerName,
+        date: notif.date,
+        time: '',
+        status: 'accepted',
+        message: `✅ Cadastro no banco ${notif.bankName || ''} para ${notif.partnerName} foi aprovado por ${user?.name || 'o gerente'}.`,
+        bankName: notif.bankName,
+      });
+      addLog({
+        module: 'Cadastro',
+        action: 'approve',
+        entityId: notif.registrationId || id,
+        entityLabel: `${notif.partnerName} - ${notif.bankName}`,
+        field: 'Status',
+        oldValue: 'Não iniciado',
+        newValue: 'Em análise',
+        description: `${user?.name} aprovou cadastro no banco ${notif.bankName}`,
+      });
+      toast({ title: 'Cadastro aprovado', description: `Cadastro de ${notif.partnerName} no banco ${notif.bankName} foi aprovado.` });
+    } else {
+      // Regular invite accept
+      acceptInvite(id);
+      toast({
+        title: getRandomMessage('accept'),
+        description: getRandomMessage('toast_invite'),
+      });
+    }
   };
 
   const handleReject = (id: string) => {
@@ -62,21 +107,62 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   };
 
   const handleConfirmReject = (reason: string) => {
-    if (rejectingId) {
-      const notif = pendingInvites.find(n => n.id === rejectingId);
-      rejectInvite(rejectingId, reason);
-      addLog({
-        module: 'Agenda',
-        action: 'reject',
-        entityId: notif?.visitId || rejectingId,
-        entityLabel: notif?.partnerName || 'Convite',
-        field: 'Convite',
-        oldValue: 'Pendente',
-        newValue: `Rejeitado – ${reason}`,
-        description: `Rejeitou participação – motivo: ${reason}`,
+    if (!rejectingId) { setRejectModalOpen(false); return; }
+
+    const notif = pendingInvites.find(n => n.id === rejectingId);
+    rejectInvite(rejectingId, reason);
+
+    if (notif?.type === 'registration_approval') {
+      // Reject registration
+      if (notif.registrationId) {
+        updateRegistration(notif.registrationId, {
+          status: 'Cancelado',
+          observation: `Cadastro recusado pelo gerente ${user?.name || ''}. Motivo: ${reason}`,
+        });
+      }
+      // Notify the commercial user
+      addNotification({
+        type: 'registration_rejected',
+        visitId: notif.visitId,
+        fromUserId: user?.id || '',
+        toUserId: notif.fromUserId,
+        partnerId: notif.partnerId,
+        partnerName: notif.partnerName,
+        date: notif.date,
+        time: '',
+        status: 'rejected',
+        message: `❌ Cadastro no banco ${notif.bankName || ''} para ${notif.partnerName} foi recusado. Motivo: ${reason}`,
+        rejectionReason: reason,
+        bankName: notif.bankName,
       });
+      addLog({
+        module: 'Cadastro',
+        action: 'reject',
+        entityId: notif.registrationId || rejectingId,
+        entityLabel: `${notif.partnerName} - ${notif.bankName}`,
+        field: 'Status',
+        oldValue: 'Não iniciado',
+        newValue: 'Cancelado',
+        description: `${user?.name} recusou cadastro – motivo: ${reason}`,
+      });
+      toast({ title: 'Cadastro recusado', description: `Motivo: ${reason}` });
+    } else {
+      // Regular invite rejection
+      if (notif) {
+        addLog({
+          module: 'Agenda',
+          action: 'reject',
+          entityId: notif.visitId || rejectingId,
+          entityLabel: notif.partnerName || 'Convite',
+          field: 'Convite',
+          oldValue: 'Pendente',
+          newValue: `Rejeitado – ${reason}`,
+          description: `Rejeitou participação – motivo: ${reason}`,
+        });
+      }
       toast({ title: getRandomMessage('reject'), description: `Motivo: ${reason}` });
     }
+
     setRejectModalOpen(false);
     setRejectingId(null);
   };
