@@ -747,6 +747,27 @@ export default function AgendaPage() {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {showTasksPanel && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="pt-ds-xs">
+              <InlineTasksPanel onOpenVisit={(visitId) => {
+                const visit = visits.find(v => v.id === visitId);
+                if (visit) {
+                  setSelectedVisit(visit);
+                  setShowDetail(true);
+                }
+              }} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {view === 'month' ? (
         <Card>
