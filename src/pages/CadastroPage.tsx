@@ -200,6 +200,8 @@ export default function CadastroPage() {
     });
   }, [filtered, sortField, sortDir]);
 
+  const cadastroPagination = usePagination(sorted, { pageSize: viewMode === "cards" ? 12 : 15, scrollToTopRef: cadastroListRef as React.RefObject<HTMLElement> });
+
   const toggleSort = useCallback((field: SortField) => {
     if (sortField === field) {
       setSortDir(d => d === 'asc' ? 'desc' : 'asc');
