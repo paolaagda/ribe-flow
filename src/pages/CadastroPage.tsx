@@ -621,6 +621,7 @@ export default function CadastroPage() {
           </TabsContent>
         </Tabs>
 
+        <div ref={cadastroListRef} />
         {/* Content - Cards or Table */}
         {sorted.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
@@ -628,7 +629,7 @@ export default function CadastroPage() {
           </div>
         ) : viewMode === 'cards' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {sorted.map(reg => (
+            {cadastroPagination.paginatedItems.map(reg => (
               <RegistrationCard
                 key={reg.id}
                 registration={reg}
@@ -661,7 +662,7 @@ export default function CadastroPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sorted.map(reg => {
+                  {cadastroPagination.paginatedItems.map(reg => {
                     const lastUpdate = reg.updates.length > 0 ? reg.updates[reg.updates.length - 1] : null;
                     const lastUpdateUser = lastUpdate ? mockUsers.find(u => u.id === lastUpdate.userId) : null;
                     const isEditing = (field: string) => editingCell?.id === reg.id && editingCell?.field === field;
