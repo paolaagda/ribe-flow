@@ -138,6 +138,15 @@ const initialLinks: InfoLink[] = [
   { id: 'link-3', name: 'Tabela de Comissões', url: 'https://example.com/comissoes', icon: 'Table', active: true },
 ];
 
+const initialOperationalFields: InfoOperationalField[] = [
+  { id: 'op-1', name: 'Chave PIX', active: true, bankIds: [] },
+  { id: 'op-2', name: 'Regra de Repasse', active: true, bankIds: [] },
+  { id: 'op-3', name: 'Prazo de Pagamento', active: true, bankIds: [] },
+  { id: 'op-4', name: 'Forma de Pagamento', active: true, bankIds: [] },
+  { id: 'op-5', name: 'Contato', active: true, bankIds: [] },
+  { id: 'op-6', name: 'Observações', active: true, bankIds: [] },
+];
+
 // ============ HOOK ============
 
 interface InfoDataState {
@@ -145,6 +154,7 @@ interface InfoDataState {
   documents: InfoDocument[];
   userProcesses: InfoUserProcess[];
   links: InfoLink[];
+  operationalFields: InfoOperationalField[];
 }
 
 const initialState: InfoDataState = {
@@ -152,6 +162,7 @@ const initialState: InfoDataState = {
   documents: initialDocuments,
   userProcesses: initialUserProcesses,
   links: initialLinks,
+  operationalFields: initialOperationalFields,
 };
 
 export function useInfoData() {
