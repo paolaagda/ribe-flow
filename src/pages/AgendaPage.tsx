@@ -61,7 +61,7 @@ export default function AgendaPage() {
   const { getActiveItems } = useSystemData();
   const { getActiveBanks } = useInfoData();
   const infoBankNames = getActiveBanks().map(b => b.name);
-  const { registrations } = useRegistrations();
+  const { registrations, addRegistration } = useRegistrations();
   const { addLog } = useAuditLog();
 
   const rankingLeaderId = useMemo(() => {
