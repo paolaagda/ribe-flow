@@ -423,7 +423,7 @@ export default function AgendaPage() {
         prospectAddress: formData.prospectAddress,
         prospectPhone: formData.prospectPhone,
         prospectContact: formData.prospectContact,
-        comments: [],
+        comments: [...pendingAutoTasks],
       };
       setVisits(prev => [...prev, newVisit]);
 
