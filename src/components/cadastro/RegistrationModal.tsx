@@ -12,6 +12,7 @@ import AuditTimeline from '@/components/shared/AuditTimeline';
 import { mockUsers } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useSystemData } from '@/hooks/useSystemData';
+import { useInfoData } from '@/hooks/useInfoData';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useAuditLog } from '@/hooks/useAuditLog';
