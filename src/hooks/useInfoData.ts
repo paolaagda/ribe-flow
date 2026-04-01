@@ -36,6 +36,13 @@ export interface InfoLink {
   active: boolean;
 }
 
+export interface InfoOperationalField {
+  id: string;
+  name: string;
+  active: boolean;
+  bankIds: string[];
+}
+
 // ============ INITIAL DATA ============
 
 const bankLogos: Record<string, string> = {
