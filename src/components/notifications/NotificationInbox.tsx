@@ -212,7 +212,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
           </TabsList>
 
           <TabsContent value="invites" className="mt-0">
-            <ScrollArea className="max-h-[400px]">
+            <div className="max-h-[400px] overflow-y-auto overscroll-contain">
               {pendingInvites.length === 0 ? (
                 <div className="py-8 text-center">
                   <p className="text-sm text-muted-foreground">{getEmptyStateMessage()}</p>
@@ -229,7 +229,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
                   ))}
                 </div>
               )}
-            </ScrollArea>
+            </div>
           </TabsContent>
 
           <TabsContent value="recent" className="mt-0">
