@@ -261,7 +261,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
                 </div>
               ) : (
                 <div className="p-3 space-y-2">
-                  {history.map(n => (
+                  {history.slice(0, 20).map(n => (
                     <InviteCard
                       key={n.id}
                       notification={n}
@@ -269,6 +269,11 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
                       onReject={handleReject}
                     />
                   ))}
+                  {history.length > 20 && (
+                    <p className="text-center text-xs text-muted-foreground py-2">
+                      Mostrando 20 de {history.length}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
