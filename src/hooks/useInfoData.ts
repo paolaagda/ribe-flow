@@ -261,10 +261,40 @@ export function useInfoData() {
     }));
   }, [setState]);
 
+  // === Operational Fields ===
+  const getOperationalFields = useCallback(() => state.operationalFields || [], [state.operationalFields]);
+  const getActiveOperationalFields = useCallback(() => (state.operationalFields || []).filter(f => f.active), [state.operationalFields]);
+
+  const getOperationalFieldsForBank = useCallback((bankId: string) => {
+    return (state.operationalFields || []).filter(f => f.active && f.bankIds.includes(bankId));
+  }, [state.operationalFields]);
+
+  const addOperationalField = useCallback((name: string, bankIds: string[]) => {
+    setState(prev => ({
+      ...prev,
+      operationalFields: [...(prev.operationalFields || []), { id: `op-${Date.now()}`, name, active: true, bankIds }],
+    }));
+  }, [setState]);
+
+  const updateOperationalField = useCallback((id: string, updates: Partial<Pick<InfoOperationalField, 'name' | 'bankIds'>>) => {
+    setState(prev => ({
+      ...prev,
+      operationalFields: (prev.operationalFields || []).map(f => f.id === id ? { ...f, ...updates } : f),
+    }));
+  }, [setState]);
+
+  const toggleOperationalField = useCallback((id: string) => {
+    setState(prev => ({
+      ...prev,
+      operationalFields: (prev.operationalFields || []).map(f => f.id === id ? { ...f, active: !f.active } : f),
+    }));
+  }, [setState]);
+
   return {
     getBanks, getActiveBanks, addBank, updateBank, toggleBank,
     getDocuments, getActiveDocuments, getDocumentsForBank, getAllActiveDocuments, addDocument, updateDocument, toggleDocument,
     getUserProcesses, updateUserProcess,
     getLinks, getActiveLinks, addLink, updateLink, deleteLink,
+    getOperationalFields, getActiveOperationalFields, getOperationalFieldsForBank, addOperationalField, updateOperationalField, toggleOperationalField,
   };
 }
