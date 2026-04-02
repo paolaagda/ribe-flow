@@ -29,8 +29,11 @@ export default function ProcessosCadastroTab() {
             className="cursor-pointer overflow-hidden group hover:shadow-lg transition-all duration-300 border-primary/30 bg-primary/5"
             onClick={() => setShowGeneral(true)}
           >
-            <div className="aspect-[4/3] flex items-center justify-center bg-primary/10 group-hover:bg-primary/15 transition-colors">
-              <FileText className="h-12 w-12 text-primary" />
+            <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 group-hover:from-primary/30 group-hover:to-accent/30 transition-all">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <FileText className="h-12 w-12 text-primary drop-shadow-sm" />
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-card/80 to-transparent" />
             </div>
             <div className="p-3 text-center">
               <p className="text-sm font-semibold text-foreground truncate">Documentação Geral</p>
