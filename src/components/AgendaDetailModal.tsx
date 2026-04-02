@@ -239,7 +239,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Avatar className="h-6 w-6">
-                              {getAvatar(iu.userId) && <AvatarImage src={getAvatar(iu.userId)} />}
+                              {(getAvatar(iu.userId) || invitedUserData?.avatar) && <AvatarImage src={getAvatar(iu.userId) || invitedUserData?.avatar} />}
                               <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
                                 {initials}
                               </AvatarFallback>

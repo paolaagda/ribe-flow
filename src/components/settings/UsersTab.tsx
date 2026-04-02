@@ -196,7 +196,7 @@ export default function UsersTab() {
                   <div className="flex items-start gap-3">
                     <div className="relative group">
                       <Avatar className="h-10 w-10">
-                        {getAvatar(user.id) && <AvatarImage src={getAvatar(user.id)} />}
+                        {(getAvatar(user.id) || user.avatar) && <AvatarImage src={getAvatar(user.id) || user.avatar} />}
                         <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
                           {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </AvatarFallback>
