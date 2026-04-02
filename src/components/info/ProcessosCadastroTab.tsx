@@ -61,17 +61,23 @@ export default function ProcessosCadastroTab() {
                 className="cursor-pointer overflow-hidden group hover:shadow-lg transition-all duration-300"
                 onClick={() => setSelectedBank(bank)}
               >
-                <div className="aspect-[4/3] flex items-center justify-center bg-muted/50 group-hover:bg-muted/80 transition-colors p-4">
+                <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-muted/60 via-muted/30 to-accent/10 group-hover:from-muted/80 group-hover:to-accent/20 transition-all">
                   {bank.imageUrl ? (
                     <img
                       src={bank.imageUrl}
                       alt={bank.name}
-                      className="max-h-full max-w-full object-contain"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={(e) => { 
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).parentElement?.classList.add('fallback-active');
+                      }}
                     />
                   ) : (
-                    <Landmark className="h-10 w-10 text-muted-foreground" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Landmark className="h-10 w-10 text-muted-foreground" />
+                    </div>
                   )}
+                  <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-card/80 to-transparent" />
                 </div>
                 <div className="p-3 text-center">
                   <p className="text-sm font-medium text-foreground truncate">{bank.name}</p>
