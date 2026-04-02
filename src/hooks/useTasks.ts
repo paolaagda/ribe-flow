@@ -64,15 +64,59 @@ export function useTasks() {
   [allTasks]);
 
   const toggleTask = useCallback((visitId: string, commentId: string) => {
-    setVisits(prev => prev.map(v => {
-      if (v.id !== visitId) return v;
-      return {
-        ...v,
-        comments: v.comments.map(c =>
-          c.id === commentId ? { ...c, taskCompleted: !c.taskCompleted } : c
-        ),
-      };
-    }));
+    // Find the task to check if it's a document task
+    let docSynced = false;
+    setVisits(prev => {
+      const updated = prev.map(v => {
+        if (v.id !== visitId) return v;
+        return {
+          ...v,
+          comments: v.comments.map(c =>
+            c.id === commentId ? { ...c, taskCompleted: !c.taskCompleted } : c
+          ),
+        };
+      });
+
+      // Sync document checkbox in localStorage
+      const visit = updated.find(v => v.id === visitId);
+      const task = visit?.comments.find(c => c.id === commentId);
+      if (task && task.taskCategory === 'document' && task.taskSourceId && visit) {
+        const STORAGE_KEY = 'ribercred_partner_docs_v1';
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const checkedDocs: Record<string, string[]> = raw ? JSON.parse(raw) : {};
+          const partnerId = visit.partnerId;
+          const current = checkedDocs[partnerId] || [];
+
+          if (task.taskCompleted) {
+            // Task was just completed → mark document as received
+            if (!current.includes(task.taskSourceId)) {
+              checkedDocs[partnerId] = [...current, task.taskSourceId];
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedDocs));
+              docSynced = true;
+            }
+          } else {
+            // Task was uncompleted → unmark document
+            if (current.includes(task.taskSourceId)) {
+              checkedDocs[partnerId] = current.filter(id => id !== task.taskSourceId);
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedDocs));
+              docSynced = true;
+            }
+          }
+        } catch { /* ignore parse errors */ }
+      }
+
+      return updated;
+    });
+
+    // Show feedback after state update
+    setTimeout(() => {
+      if (docSynced) {
+        toast.success('Documento atualizado automaticamente', {
+          description: 'A documentação do parceiro foi sincronizada com a tarefa.',
+        });
+      }
+    }, 100);
   }, [setVisits]);
 
   const getDaysPending = useCallback((createdAt: string) => {
