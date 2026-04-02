@@ -6,7 +6,6 @@ import { useVisits } from '@/hooks/useVisits';
 import { FileCheck, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
 
 interface Props {
   partnerId: string;
@@ -34,35 +33,21 @@ export default function PartnerDocuments({ partnerId }: Props) {
       return { ...prev, [partnerId]: updated };
     });
 
-    // Bidirectional sync with tasks
-    let synced = false;
-    setVisits(prev => prev.map(v => {
-      if (v.partnerId !== partnerId) return v;
-      const hasMatch = v.comments.some(c =>
-        c.type === 'task' && c.taskCategory === 'document' && c.taskSourceId === docId &&
-        (isNowChecked ? !c.taskCompleted : c.taskCompleted)
-      );
-      if (!hasMatch) return v;
-      synced = true;
-      return {
-        ...v,
-        comments: v.comments.map(c =>
-          c.type === 'task' && c.taskCategory === 'document' && c.taskSourceId === docId
-            ? { ...c, taskCompleted: isNowChecked }
-            : c
-        ),
-      };
-    }));
-
-    if (synced) {
-      toast.success(
-        isNowChecked ? 'Documento recebido' : 'Documento desmarcado',
-        {
-          description: isNowChecked
-            ? 'Tarefa correspondente concluída automaticamente.'
-            : 'Tarefa correspondente reaberta automaticamente.',
-        }
-      );
+    // Sync: auto-complete/uncomplete document tasks linked to this doc
+    if (isNowChecked) {
+      setVisits(prev => prev.map(v => {
+        if (v.partnerId !== partnerId) return v;
+        const hasMatch = v.comments.some(c => c.type === 'task' && c.taskCategory === 'document' && c.taskSourceId === docId && !c.taskCompleted);
+        if (!hasMatch) return v;
+        return {
+          ...v,
+          comments: v.comments.map(c =>
+            c.type === 'task' && c.taskCategory === 'document' && c.taskSourceId === docId
+              ? { ...c, taskCompleted: true }
+              : c
+          ),
+        };
+      }));
     }
   };
 
