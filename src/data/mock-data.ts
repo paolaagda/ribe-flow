@@ -139,16 +139,16 @@ export const allCargos: CompanyCargo[] = ['diretor', 'gerente', 'ascom', 'comerc
 
 // ============ MOCK USERS ============
 export const mockUsers: User[] = [
-  { id: 'u1', name: 'Carlos Silva', email: 'carlos@ribercred.com', avatar: '', bio: 'Gestor geral da equipe comercial', role: 'diretor', profile: 'gestor', active: true },
-  { id: 'u9', name: 'Lucas Ribeiro', email: 'lucas@ribercred.com', avatar: '', bio: 'Diretor comercial — estratégia e expansão', role: 'diretor', profile: 'gestor', active: true },
-  { id: 'u2', name: 'Ana Oliveira', email: 'ana@ribercred.com', avatar: '', bio: 'Gerente regional Sul', role: 'gerente', profile: 'nao_gestor', active: true },
-  { id: 'u3', name: 'Pedro Santos', email: 'pedro@ribercred.com', avatar: '', bio: 'Assessor de comunicação', role: 'ascom', profile: 'nao_gestor', active: true },
-  { id: 'u4', name: 'Maria Souza', email: 'maria@ribercred.com', avatar: '', bio: 'Comercial sênior — 5 anos de experiência', role: 'comercial', profile: 'nao_gestor', active: true },
-  { id: 'u5', name: 'João Costa', email: 'joao@ribercred.com', avatar: '', bio: 'Comercial pleno', role: 'comercial', profile: 'nao_gestor', active: true },
-  { id: 'u6', name: 'Fernanda Lima', email: 'fernanda@ribercred.com', avatar: '', bio: 'Comercial júnior', role: 'comercial', profile: 'nao_gestor', active: true },
-  { id: 'u7', name: 'Ricardo Alves', email: 'ricardo@ribercred.com', avatar: '', bio: 'Gerente regional Norte', role: 'gerente', profile: 'nao_gestor', active: true },
-  { id: 'u8', name: 'Juliana Mendes', email: 'juliana@ribercred.com', avatar: '', bio: 'Comercial pleno — foco INSS', role: 'comercial', profile: 'nao_gestor', active: false },
-  { id: 'u10', name: 'Tatiana Freitas', email: 'tatiana@ribercred.com', avatar: '', bio: 'Responsável por credenciamento bancário', role: 'cadastro', profile: 'nao_gestor', active: true },
+  { id: 'u1', name: 'Carlos Silva', email: 'carlos@ribercred.com', avatar: 'https://ui-avatars.com/api/?name=Carlos+Silva&background=6366f1&color=fff&size=128&bold=true', bio: 'Gestor geral da equipe comercial', role: 'diretor', profile: 'gestor', active: true },
+  { id: 'u9', name: 'Lucas Ribeiro', email: 'lucas@ribercred.com', avatar: 'https://ui-avatars.com/api/?name=Lucas+Ribeiro&background=8b5cf6&color=fff&size=128&bold=true', bio: 'Diretor comercial — estratégia e expansão', role: 'diretor', profile: 'gestor', active: true },
+  { id: 'u2', name: 'Ana Oliveira', email: 'ana@ribercred.com', avatar: 'https://ui-avatars.com/api/?name=Ana+Oliveira&background=ec4899&color=fff&size=128&bold=true', bio: 'Gerente regional Sul', role: 'gerente', profile: 'nao_gestor', active: true },
+  { id: 'u3', name: 'Pedro Santos', email: 'pedro@ribercred.com', avatar: 'https://ui-avatars.com/api/?name=Pedro+Santos&background=f59e0b&color=fff&size=128&bold=true', bio: 'Assessor de comunicação', role: 'ascom', profile: 'nao_gestor', active: true },
+  { id: 'u4', name: 'Maria Souza', email: 'maria@ribercred.com', avatar: 'https://ui-avatars.com/api/?name=Maria+Souza&background=10b981&color=fff&size=128&bold=true', bio: 'Comercial sênior — 5 anos de experiência', role: 'comercial', profile: 'nao_gestor', active: true },
+  { id: 'u5', name: 'João Costa', email: 'joao@ribercred.com', avatar: 'https://ui-avatars.com/api/?name=Joao+Costa&background=3b82f6&color=fff&size=128&bold=true', bio: 'Comercial pleno', role: 'comercial', profile: 'nao_gestor', active: true },
+  { id: 'u6', name: 'Fernanda Lima', email: 'fernanda@ribercred.com', avatar: 'https://ui-avatars.com/api/?name=Fernanda+Lima&background=f43f5e&color=fff&size=128&bold=true', bio: 'Comercial júnior', role: 'comercial', profile: 'nao_gestor', active: true },
+  { id: 'u7', name: 'Ricardo Alves', email: 'ricardo@ribercred.com', avatar: 'https://ui-avatars.com/api/?name=Ricardo+Alves&background=0ea5e9&color=fff&size=128&bold=true', bio: 'Gerente regional Norte', role: 'gerente', profile: 'nao_gestor', active: true },
+  { id: 'u8', name: 'Juliana Mendes', email: 'juliana@ribercred.com', avatar: 'https://ui-avatars.com/api/?name=Juliana+Mendes&background=a855f7&color=fff&size=128&bold=true', bio: 'Comercial pleno — foco INSS', role: 'comercial', profile: 'nao_gestor', active: false },
+  { id: 'u10', name: 'Tatiana Freitas', email: 'tatiana@ribercred.com', avatar: 'https://ui-avatars.com/api/?name=Tatiana+Freitas&background=14b8a6&color=fff&size=128&bold=true', bio: 'Responsável por credenciamento bancário', role: 'cadastro', profile: 'nao_gestor', active: true },
 ];
 
 // ============ STORE (LOJA) ============

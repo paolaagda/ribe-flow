@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Handshake, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockVisits } from '@/data/mock-data';
@@ -62,6 +62,7 @@ export default function HeroSection() {
           <div className="flex flex-col md:flex-row items-start md:items-center gap-ds-sm">
             <motion.div whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
               <Avatar className="h-16 w-16 border-2 border-primary/15 shadow-[var(--shadow-lg)] ring-4 ring-primary/5">
+                {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
                 <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
                   {initials}
                 </AvatarFallback>

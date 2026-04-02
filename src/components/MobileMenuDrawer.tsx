@@ -80,7 +80,7 @@ const MobileMenuDrawer = React.forwardRef<HTMLDivElement, MobileMenuDrawerProps>
 
           <div className="px-4 pb-6 flex items-center gap-3">
             <Avatar className="h-9 w-9">
-              {user && getAvatar(user.id) && <AvatarImage src={getAvatar(user.id)} />}
+              {user && (getAvatar(user.id) || user.avatar) && <AvatarImage src={getAvatar(user.id) || user.avatar} />}
               <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                 {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
               </AvatarFallback>

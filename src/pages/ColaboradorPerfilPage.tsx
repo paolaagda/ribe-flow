@@ -118,7 +118,7 @@ export default function ColaboradorPerfilPage() {
   }
 
   const initials = user.name.split(' ').map(n => n[0]).join('').slice(0, 2);
-  const avatarUrl = getAvatar(user.id);
+  const avatarUrl = getAvatar(user.id) || user.avatar;
 
   return (
     <PageTransition className="space-y-6">
