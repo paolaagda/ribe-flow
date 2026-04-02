@@ -6,6 +6,7 @@ import { useVisits } from '@/hooks/useVisits';
 import { FileCheck, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 interface Props {
   partnerId: string;
