@@ -80,7 +80,7 @@ export default function RegistrationCard({ registration, onClick, onEdit, onChan
         {lastUpdate && lastUpdateUser && (
           <div className="flex items-center gap-2 pt-1 border-t border-border">
             <Avatar className="h-5 w-5 shrink-0">
-              {getAvatar(lastUpdate.userId) && <AvatarImage src={getAvatar(lastUpdate.userId)} />}
+              {(getAvatar(lastUpdate.userId) || lastUpdateUser?.avatar) && <AvatarImage src={getAvatar(lastUpdate.userId) || lastUpdateUser?.avatar} />}
               <AvatarFallback className="text-[7px] bg-muted">
                 {lastUpdateUser.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
               </AvatarFallback>
