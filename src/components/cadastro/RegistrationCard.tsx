@@ -48,7 +48,7 @@ export default function RegistrationCard({ registration, onClick, onEdit, onChan
         {commercial && (
           <div className="flex items-center gap-2">
             <Avatar className="h-5 w-5">
-              {getAvatar(commercial.id) && <AvatarImage src={getAvatar(commercial.id)} />}
+              {(getAvatar(commercial.id) || commercial.avatar) && <AvatarImage src={getAvatar(commercial.id) || commercial.avatar} />}
               <AvatarFallback className="text-[8px] bg-primary/10 text-primary">
                 {commercial.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
               </AvatarFallback>
