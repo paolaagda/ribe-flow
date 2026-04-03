@@ -66,6 +66,8 @@ export default function AgendaPage() {
   const { registrations, addRegistration } = useRegistrations();
   const { addLog } = useAuditLog();
 
+  const [teams] = useLocalStorage<Team[]>('ribercred_teams', initialTeams);
+
   const rankingLeaderId = useMemo(() => {
     const activeCampaign = initialCampaigns.find(c => getCampaignStatus(c) === 'Ativa');
     if (!activeCampaign) return null;
