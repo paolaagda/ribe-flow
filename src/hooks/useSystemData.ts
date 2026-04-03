@@ -44,6 +44,14 @@ const initialData: Record<SystemCategory, SystemItem[]> = {
     'Não faz parte da minha função',
     'Sem necessidade de participação',
   ]),
+  registrationRejectionReasons: buildInitial([
+    'Documentação incompleta',
+    'Parceiro não atende requisitos mínimos',
+    'Região sem potencial comercial',
+    'Parceiro já cadastrado em outra promotora',
+    'Dados inconsistentes',
+    'Fora da área de atuação',
+  ]),
 };
 
 export { categoryLabels };
