@@ -38,7 +38,7 @@ const sections: CategorySection[] = [
   {
     title: 'Cadastro',
     description: 'Dados utilizados nos formulários e filtros da página Cadastro.',
-    categories: ['registrationStatuses', 'registrationSolicitations', 'registrationHandlers'],
+    categories: ['registrationStatuses', 'registrationSolicitations', 'registrationHandlers', 'registrationRejectionReasons'],
   },
   {
     title: 'Geral',
