@@ -1,11 +1,11 @@
 import * as React from "react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/hooks/useTheme";
 import { Toaster as Sonner, toast } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = React.forwardRef<HTMLDivElement, ToasterProps>(({ ...props }, ref) => {
-  const { theme = "system" } = useTheme();
+  const { theme } = useTheme();
 
   return (
     <div ref={ref}>
