@@ -2,6 +2,7 @@ import { useMemo, useCallback } from 'react';
 import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { VisitComment, Visit, Partner } from '@/data/mock-data';
 
 export interface TaskItem {
@@ -16,6 +17,10 @@ export function useTasks() {
   const { visits, setVisits } = useVisits();
   const { getPartnerById } = usePartners();
   const { user, profile } = useAuth();
+  const [checkedDocs, setCheckedDocs] = useLocalStorage<Record<string, string[]>>(
+    'ribercred_partner_docs_v1',
+    {}
+  );
 
   const allTasks = useMemo<TaskItem[]>(() => {
     const tasks: TaskItem[] = [];
@@ -64,16 +69,45 @@ export function useTasks() {
   [allTasks]);
 
   const toggleTask = useCallback((visitId: string, commentId: string) => {
-    setVisits(prev => prev.map(v => {
-      if (v.id !== visitId) return v;
-      return {
-        ...v,
-        comments: v.comments.map(c =>
-          c.id === commentId ? { ...c, taskCompleted: !c.taskCompleted } : c
-        ),
-      };
-    }));
-  }, [setVisits]);
+    setVisits(prev => {
+      const visit = prev.find(v => v.id === visitId);
+      if (!visit) return prev;
+      
+      const comment = visit.comments.find(c => c.id === commentId);
+      if (!comment) return prev;
+
+      const isNowCompleted = !comment.taskCompleted;
+
+      // Sync: if it's a document task being completed, mark doc as received in partner checklist
+      if (comment.taskCategory === 'document' && comment.taskSourceId && isNowCompleted) {
+        const partnerId = visit.partnerId;
+        setCheckedDocs(prevDocs => {
+          const current = prevDocs[partnerId] || [];
+          if (current.includes(comment.taskSourceId!)) return prevDocs;
+          return { ...prevDocs, [partnerId]: [...current, comment.taskSourceId!] };
+        });
+      }
+
+      // Sync: if it's a document task being uncompleted, remove doc from partner checklist
+      if (comment.taskCategory === 'document' && comment.taskSourceId && !isNowCompleted) {
+        const partnerId = visit.partnerId;
+        setCheckedDocs(prevDocs => {
+          const current = prevDocs[partnerId] || [];
+          return { ...prevDocs, [partnerId]: current.filter(id => id !== comment.taskSourceId) };
+        });
+      }
+
+      return prev.map(v => {
+        if (v.id !== visitId) return v;
+        return {
+          ...v,
+          comments: v.comments.map(c =>
+            c.id === commentId ? { ...c, taskCompleted: !c.taskCompleted } : c
+          ),
+        };
+      });
+    });
+  }, [setVisits, setCheckedDocs]);
 
   const getDaysPending = useCallback((createdAt: string) => {
     return Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
