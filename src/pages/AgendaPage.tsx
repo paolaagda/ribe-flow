@@ -1321,13 +1321,21 @@ export default function AgendaPage() {
                   code: '',
                   contractConfirmed: false,
                 });
-                const managers = mockUsers.filter(u => u.profile === 'gestor' && u.active && u.id !== user?.id);
-                managers.forEach(manager => {
+                // Send approval notification to the team manager (gerente), not all gestors
+                const userTeam = teams.find(t =>
+                  t.commercialIds.includes(user?.id || '') ||
+                  t.ascomIds.includes(user?.id || '') ||
+                  t.managerId === user?.id ||
+                  t.directorId === user?.id ||
+                  (t.cadastroIds || []).includes(user?.id || '')
+                );
+                const managerId = userTeam?.managerId;
+                if (managerId && managerId !== user?.id) {
                   addNotification({
                     type: 'registration_approval',
                     visitId: '',
                     fromUserId: user?.id || '',
-                    toUserId: manager.id,
+                    toUserId: managerId,
                     partnerId: formData.partnerId || '',
                     partnerName: pName,
                     date: format(new Date(), 'yyyy-MM-dd'),
@@ -1337,7 +1345,7 @@ export default function AgendaPage() {
                     registrationId: newReg.id,
                     bankName: data.bankName,
                   });
-                });
+                }
                 setShowBankRegistration(false);
                 const totalTasks = autoTasks.length;
                 toast({ title: 'Cadastro solicitado', description: `Aprovação enviada ao gerente.${totalTasks > 0 ? ` ${totalTasks} tarefa(s) gerada(s) automaticamente.` : ''}` });
