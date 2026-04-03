@@ -1,4 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { Team, initialTeams } from '@/data/teams';
 import { initialCampaigns, getCampaignStatus, calculateUserScore } from '@/data/campaigns';
 import PageTransition from '@/components/PageTransition';
 import HeroSection from '@/components/home/HeroSection';
