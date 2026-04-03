@@ -34,21 +34,19 @@ export default function PartnerDocuments({ partnerId }: Props) {
     });
 
     // Sync: auto-complete/uncomplete document tasks linked to this doc
-    if (isNowChecked) {
-      setVisits(prev => prev.map(v => {
-        if (v.partnerId !== partnerId) return v;
-        const hasMatch = v.comments.some(c => c.type === 'task' && c.taskCategory === 'document' && c.taskSourceId === docId && !c.taskCompleted);
-        if (!hasMatch) return v;
-        return {
-          ...v,
-          comments: v.comments.map(c =>
-            c.type === 'task' && c.taskCategory === 'document' && c.taskSourceId === docId
-              ? { ...c, taskCompleted: true }
-              : c
-          ),
-        };
-      }));
-    }
+    setVisits(prev => prev.map(v => {
+      if (v.partnerId !== partnerId) return v;
+      const hasMatch = v.comments.some(c => c.type === 'task' && c.taskCategory === 'document' && c.taskSourceId === docId && c.taskCompleted !== isNowChecked);
+      if (!hasMatch) return v;
+      return {
+        ...v,
+        comments: v.comments.map(c =>
+          c.type === 'task' && c.taskCategory === 'document' && c.taskSourceId === docId
+            ? { ...c, taskCompleted: isNowChecked }
+            : c
+        ),
+      };
+    }));
   };
 
   if (documents.length === 0) return null;
