@@ -9,7 +9,7 @@ export interface SystemItem {
   active: boolean;
 }
 
-export type SystemCategory = 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers' | 'inviteRejectionReasons';
+export type SystemCategory = 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers' | 'inviteRejectionReasons' | 'registrationRejectionReasons';
 
 const categoryLabels: Record<SystemCategory, string> = {
   products: 'Produtos',
@@ -21,6 +21,7 @@ const categoryLabels: Record<SystemCategory, string> = {
   registrationSolicitations: 'Tipos de Solicitação',
   registrationHandlers: 'Tratando Com',
   inviteRejectionReasons: 'Justificativas de Rejeição de Convite',
+  registrationRejectionReasons: 'Justificativas de Recusa de Cadastro',
 };
 
 function buildInitial(items: readonly string[]): SystemItem[] {
@@ -42,6 +43,14 @@ const initialData: Record<SystemCategory, SystemItem[]> = {
     'Já estou em outra visita',
     'Não faz parte da minha função',
     'Sem necessidade de participação',
+  ]),
+  registrationRejectionReasons: buildInitial([
+    'Documentação incompleta',
+    'Parceiro não atende requisitos mínimos',
+    'Região sem potencial comercial',
+    'Parceiro já cadastrado em outra promotora',
+    'Dados inconsistentes',
+    'Fora da área de atuação',
   ]),
 };
 

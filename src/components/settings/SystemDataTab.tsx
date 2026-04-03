@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useSystemData, SystemCategory, categoryLabels } from '@/hooks/useSystemData';
-import { Plus, Package, AlertTriangle, XCircle, Store, Clock, FileCheck, FileText, Users } from 'lucide-react';
+import { Plus, Package, AlertTriangle, XCircle, Store, Clock, FileCheck, FileText, Users, ShieldX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import InfoDataSection from './InfoDataSection';
 
@@ -20,6 +20,7 @@ const categoryIcons: Record<string, React.ElementType> = {
   registrationSolicitations: FileText,
   registrationHandlers: Users,
   inviteRejectionReasons: XCircle,
+  registrationRejectionReasons: ShieldX,
 };
 
 interface CategorySection {
@@ -37,7 +38,7 @@ const sections: CategorySection[] = [
   {
     title: 'Cadastro',
     description: 'Dados utilizados nos formulários e filtros da página Cadastro.',
-    categories: ['registrationStatuses', 'registrationSolicitations', 'registrationHandlers'],
+    categories: ['registrationStatuses', 'registrationSolicitations', 'registrationHandlers', 'registrationRejectionReasons'],
   },
   {
     title: 'Geral',
