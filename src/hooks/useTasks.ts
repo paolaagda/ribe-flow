@@ -17,6 +17,10 @@ export function useTasks() {
   const { visits, setVisits } = useVisits();
   const { getPartnerById } = usePartners();
   const { user, profile } = useAuth();
+  const [checkedDocs, setCheckedDocs] = useLocalStorage<Record<string, string[]>>(
+    'ribercred_partner_docs_v1',
+    {}
+  );
 
   const allTasks = useMemo<TaskItem[]>(() => {
     const tasks: TaskItem[] = [];
