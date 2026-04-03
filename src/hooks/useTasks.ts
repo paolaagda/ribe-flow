@@ -2,6 +2,7 @@ import { useMemo, useCallback } from 'react';
 import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { VisitComment, Visit, Partner } from '@/data/mock-data';
 
 export interface TaskItem {
