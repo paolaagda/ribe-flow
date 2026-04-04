@@ -1,57 +1,99 @@
-import { useState, useMemo, useCallback } from 'react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { Team, initialTeams } from '@/data/teams';
-import { initialCampaigns, getCampaignStatus, calculateUserScore } from '@/data/campaigns';
-import PageTransition from '@/components/PageTransition';
-import HeroSection from '@/components/home/HeroSection';
-import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
-import { CalendarDays, CheckCircle, ListTodo } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useToast } from '@/hooks/use-toast';
-import { mockUsers, getUserById, Visit, VisitStatus, VisitType, VisitPeriod, VisitComment, statusBgClasses, getPartnerById as getPartnerByIdGlobal, allCargos, cargoLabels } from '@/data/mock-data';
-import { useSystemData } from '@/hooks/useSystemData';
-import { useInfoData } from '@/hooks/useInfoData';
-import { useVisits } from '@/hooks/useVisits';
-import { usePartners } from '@/hooks/usePartners';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNotifications } from '@/hooks/useNotifications';
-import { getRandomMessage } from '@/data/notification-messages';
-import { useTasks } from '@/hooks/useTasks';
-import { Plus, ChevronLeft, ChevronRight, CalendarIcon, Check, X, DollarSign, Clock as ClockIcon, Handshake, UserPlus, CalendarRange, Filter, Crown } from 'lucide-react';
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, addWeeks, subWeeks, isSameDay, isSameMonth, parseISO, isValid, isWithinInterval } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
-import AgendaDetailModal from '@/components/AgendaDetailModal';
-import TodayAgenda from '@/components/home/TodayAgenda';
-import VisitMap from '@/components/home/VisitMap';
-import JustificationModal from '@/components/agenda/JustificationModal';
-import InviteRejectionModal from '@/components/agenda/InviteRejectionModal';
+import { useState, useMemo, useCallback } from "react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { Team, initialTeams } from "@/data/teams";
+import { initialCampaigns, getCampaignStatus, calculateUserScore } from "@/data/campaigns";
+import PageTransition from "@/components/PageTransition";
+import HeroSection from "@/components/home/HeroSection";
+import AnimatedKpiCard from "@/components/shared/AnimatedKpiCard";
+import { CalendarDays, CheckCircle, ListTodo } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import {
+  mockUsers,
+  getUserById,
+  Visit,
+  VisitStatus,
+  VisitType,
+  VisitPeriod,
+  VisitComment,
+  statusBgClasses,
+  getPartnerById as getPartnerByIdGlobal,
+  allCargos,
+  cargoLabels,
+} from "@/data/mock-data";
+import { useSystemData } from "@/hooks/useSystemData";
+import { useInfoData } from "@/hooks/useInfoData";
+import { useVisits } from "@/hooks/useVisits";
+import { usePartners } from "@/hooks/usePartners";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNotifications } from "@/hooks/useNotifications";
+import { getRandomMessage } from "@/data/notification-messages";
+import { useTasks } from "@/hooks/useTasks";
+import {
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  CalendarIcon,
+  Check,
+  X,
+  DollarSign,
+  Clock as ClockIcon,
+  Handshake,
+  UserPlus,
+  CalendarRange,
+  Filter,
+  Crown,
+} from "lucide-react";
+import {
+  format,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  addMonths,
+  subMonths,
+  addWeeks,
+  subWeeks,
+  isSameDay,
+  isSameMonth,
+  parseISO,
+  isValid,
+  isWithinInterval,
+} from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import AgendaDetailModal from "@/components/AgendaDetailModal";
+import TodayAgenda from "@/components/home/TodayAgenda";
+import VisitMap from "@/components/home/VisitMap";
+import JustificationModal from "@/components/agenda/JustificationModal";
+import InviteRejectionModal from "@/components/agenda/InviteRejectionModal";
 
-import InlineTasksPanel from '@/components/agenda/InlineTasksPanel';
-import AgendaMap from '@/components/agenda/AgendaMap';
-import BankRegistrationFlow from '@/components/agenda/BankRegistrationFlow';
-import SmartInsights from '@/components/shared/SmartInsights';
-import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
-import { usePermission } from '@/hooks/usePermission';
-import { ShieldOff, FileText, Landmark as LandmarkIcon } from 'lucide-react';
-import { useAuditLog } from '@/hooks/useAuditLog';
-import { useRegistrations } from '@/hooks/useRegistrations';
-import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
+import InlineTasksPanel from "@/components/agenda/InlineTasksPanel";
+import AgendaMap from "@/components/agenda/AgendaMap";
+import BankRegistrationFlow from "@/components/agenda/BankRegistrationFlow";
+import SmartInsights from "@/components/shared/SmartInsights";
+import AnimatedFilterContent from "@/components/shared/AnimatedFilterContent";
+import { usePermission } from "@/hooks/usePermission";
+import { ShieldOff, FileText, Landmark as LandmarkIcon } from "lucide-react";
+import { useAuditLog } from "@/hooks/useAuditLog";
+import { useRegistrations } from "@/hooks/useRegistrations";
+import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from "@/lib/currency";
+import { AnimatePresence, motion } from "framer-motion";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
-type ViewMode = 'day' | 'week' | 'month';
+type ViewMode = "day" | "week" | "month";
 
 export default function AgendaPage() {
   const { canRead, canWrite } = usePermission();
@@ -62,38 +104,41 @@ export default function AgendaPage() {
   const { visits, setVisits } = useVisits();
   const { getActiveItems } = useSystemData();
   const { getActiveBanks } = useInfoData();
-  const infoBankNames = getActiveBanks().map(b => b.name);
+  const infoBankNames = getActiveBanks().map((b) => b.name);
   const { registrations, addRegistration } = useRegistrations();
   const { addLog } = useAuditLog();
 
-  const [teams] = useLocalStorage<Team[]>('ribercred_teams', initialTeams);
+  const [teams] = useLocalStorage<Team[]>("ribercred_teams", initialTeams);
 
   const rankingLeaderId = useMemo(() => {
-    const activeCampaign = initialCampaigns.find(c => getCampaignStatus(c) === 'Ativa');
+    const activeCampaign = initialCampaigns.find((c) => getCampaignStatus(c) === "Ativa");
     if (!activeCampaign) return null;
     const sorted = activeCampaign.participants
-      .map(p => ({ userId: p.userId, score: calculateUserScore(activeCampaign, p.userId) }))
+      .map((p) => ({ userId: p.userId, score: calculateUserScore(activeCampaign, p.userId) }))
       .sort((a, b) => b.score - a.score);
     return sorted.length > 0 && sorted[0].score > 0 ? sorted[0].userId : null;
   }, []);
 
-  const hasActiveRegistration = useCallback((partnerId: string) => {
-    return registrations.some(r => r.partnerId === partnerId && !['Concluído', 'Cancelado'].includes(r.status));
-  }, [registrations]);
-  const [view, setView] = useState<ViewMode>('month');
+  const hasActiveRegistration = useCallback(
+    (partnerId: string) => {
+      return registrations.some((r) => r.partnerId === partnerId && !["Concluído", "Cancelado"].includes(r.status));
+    },
+    [registrations],
+  );
+  const [view, setView] = useState<ViewMode>("month");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showForm, setShowForm] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterType, setFilterType] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterType, setFilterType] = useState<string>("all");
   const [draggedVisitId, setDraggedVisitId] = useState<string | null>(null);
   const [dragOverDay, setDragOverDay] = useState<string | null>(null);
-  const [filterUser, setFilterUser] = useState<string>('all');
+  const [filterUser, setFilterUser] = useState<string>("all");
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [editingVisit, setEditingVisit] = useState<Visit | null>(null);
   const [hasDragged, setHasDragged] = useState(false);
   const [pendingDrop, setPendingDrop] = useState<{ visitId: string; newDate: string; day: Date } | null>(null);
-  const [pendingFormStatus, setPendingFormStatus] = useState<'Reagendada' | 'Cancelada' | null>(null);
+  const [pendingFormStatus, setPendingFormStatus] = useState<"Reagendada" | "Cancelada" | null>(null);
   const [showJustificationModal, setShowJustificationModal] = useState(false);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [showTodayPanel, setShowTodayPanel] = useState(false);
@@ -107,48 +152,63 @@ export default function AgendaPage() {
   const [pendingAutoTasks, setPendingAutoTasks] = useState<VisitComment[]>([]);
 
   // Exclusive toggle: close other panels when opening one
-  const togglePanel = (panel: 'today' | 'tasks') => {
-    if (panel === 'today') {
-      setShowTodayPanel(prev => !prev);
+  const togglePanel = (panel: "today" | "tasks") => {
+    if (panel === "today") {
+      setShowTodayPanel((prev) => !prev);
     } else {
-      setShowTasksPanel(prev => !prev);
+      setShowTasksPanel((prev) => !prev);
     }
   };
 
   // Form state
   const [formStep, setFormStep] = useState(0);
   const [formData, setFormData] = useState({
-    partnerId: '',
-    date: format(new Date(), 'yyyy-MM-dd'),
-    time: '',
-    period: '' as VisitPeriod | '',
-    type: 'visita' as VisitType,
-    medio: 'presencial' as 'presencial' | 'remoto',
-    status: 'Planejada' as VisitStatus,
+    partnerId: "",
+    date: format(new Date(), "yyyy-MM-dd"),
+    time: "",
+    period: "" as VisitPeriod | "",
+    type: "visita" as VisitType,
+    medio: "presencial" as "presencial" | "remoto",
+    status: "Planejada" as VisitStatus,
     structures: [] as string[],
     banks: [] as string[],
     products: [] as string[],
-    summary: '',
-    potentialValue: '',
-    prospectEmail: '',
-    prospectPartner: '',
-    prospectCnpj: '',
-    prospectAddress: '',
-    prospectPhone: '',
-    prospectContact: '',
+    summary: "",
+    potentialValue: "",
+    prospectEmail: "",
+    prospectPartner: "",
+    prospectCnpj: "",
+    prospectAddress: "",
+    prospectPhone: "",
+    prospectContact: "",
     invitedUserIds: [] as string[],
-    rescheduleReason: '',
-    cancelReason: '',
+    rescheduleReason: "",
+    cancelReason: "",
   });
 
   const resetForm = () => {
     setFormData({
-      partnerId: '', date: format(new Date(), 'yyyy-MM-dd'), time: '', period: '',
-      type: 'visita', medio: 'presencial', status: 'Planejada',
-      structures: [], banks: [], products: [], summary: '',
-      potentialValue: '', prospectEmail: '',
-      prospectPartner: '', prospectCnpj: '', prospectAddress: '', prospectPhone: '', prospectContact: '',
-      invitedUserIds: [], rescheduleReason: '', cancelReason: '',
+      partnerId: "",
+      date: format(new Date(), "yyyy-MM-dd"),
+      time: "",
+      period: "",
+      type: "visita",
+      medio: "presencial",
+      status: "Planejada",
+      structures: [],
+      banks: [],
+      products: [],
+      summary: "",
+      potentialValue: "",
+      prospectEmail: "",
+      prospectPartner: "",
+      prospectCnpj: "",
+      prospectAddress: "",
+      prospectPhone: "",
+      prospectContact: "",
+      invitedUserIds: [],
+      rescheduleReason: "",
+      cancelReason: "",
     });
     setFormStep(0);
     setShowBankRegistration(false);
@@ -159,23 +219,24 @@ export default function AgendaPage() {
   // Visibility filter: comercial only sees visits they participate in
   const visibleVisits = useMemo(() => {
     if (!user || !profile) return visits;
-    if (profile === 'nao_gestor') {
-      return visits.filter(v =>
-        v.userId === user.id ||
-        v.createdBy === user.id ||
-        v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted')
+    if (profile === "nao_gestor") {
+      return visits.filter(
+        (v) =>
+          v.userId === user.id ||
+          v.createdBy === user.id ||
+          v.invitedUsers?.some((iu) => iu.userId === user.id && iu.status === "accepted"),
       );
     }
     return visits;
   }, [visits, user, profile]);
 
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const todayStr = format(new Date(), "yyyy-MM-dd");
 
   const filteredVisits = useMemo(() => {
-    return visibleVisits.filter(v => {
-      if (filterStatus !== 'all' && v.status !== filterStatus) return false;
-      if (filterType !== 'all' && v.type !== filterType) return false;
-      if (filterUser !== 'all' && v.userId !== filterUser) return false;
+    return visibleVisits.filter((v) => {
+      if (filterStatus !== "all" && v.status !== filterStatus) return false;
+      if (filterType !== "all" && v.type !== filterType) return false;
+      if (filterUser !== "all" && v.userId !== filterUser) return false;
       if (dateRange.from && dateRange.to) {
         const vDate = parseISO(v.date);
         if (!isWithinInterval(vDate, { start: dateRange.from, end: dateRange.to })) return false;
@@ -184,26 +245,26 @@ export default function AgendaPage() {
         if (vDate < dateRange.from) return false;
       }
       // Insight filters
-      if (activeInsight === 'agenda_evolucao') {
+      if (activeInsight === "agenda_evolucao") {
         const d = parseISO(v.date);
         const ms = startOfMonth(new Date());
         const me = endOfMonth(new Date());
-        if (!(v.status === 'Concluída' && isWithinInterval(d, { start: ms, end: me }))) return false;
+        if (!(v.status === "Concluída" && isWithinInterval(d, { start: ms, end: me }))) return false;
       }
-      if (activeInsight === 'agenda_valor_hoje') {
-        if (!(v.status === 'Planejada' && (v.potentialValue || 0) > 0)) return false;
+      if (activeInsight === "agenda_valor_hoje") {
+        if (!(v.status === "Planejada" && (v.potentialValue || 0) > 0)) return false;
       }
-      if (activeInsight === 'agenda_tarefas_atrasadas') {
+      if (activeInsight === "agenda_tarefas_atrasadas") {
         // No direct visit filter for tasks insight
       }
-      if (activeInsight === 'agenda_taxa_conclusao') {
-        if (v.status !== 'Concluída') return false;
+      if (activeInsight === "agenda_taxa_conclusao") {
+        if (v.status !== "Concluída") return false;
       }
-      if (activeInsight === 'agenda_cancelamentos') {
-        if (v.status !== 'Cancelada') return false;
+      if (activeInsight === "agenda_cancelamentos") {
+        if (v.status !== "Cancelada") return false;
       }
-      if (activeInsight === 'agenda_prospeccoes') {
-        if (v.type !== 'prospecção') return false;
+      if (activeInsight === "agenda_prospeccoes") {
+        if (v.type !== "prospecção") return false;
       }
       return true;
     });
@@ -214,8 +275,8 @@ export default function AgendaPage() {
     const participants: { id: string; name: string; cargo: string }[] = [];
     const owner = getUserById(v.userId);
     if (owner) participants.push({ id: owner.id, name: owner.name, cargo: cargoLabels[owner.role] || owner.role });
-    v.invitedUsers?.forEach(iu => {
-      if (iu.status === 'accepted' && iu.userId !== v.userId) {
+    v.invitedUsers?.forEach((iu) => {
+      if (iu.status === "accepted" && iu.userId !== v.userId) {
         const u = getUserById(iu.userId);
         if (u) participants.push({ id: u.id, name: u.name, cargo: cargoLabels[u.role] || u.role });
       }
@@ -224,25 +285,25 @@ export default function AgendaPage() {
   }, []);
 
   // Performance indicators
-  
+
   const indicators = useMemo(() => {
-    const visitas = filteredVisits.filter(v => v.type === 'visita');
-    const prospecoes = filteredVisits.filter(v => v.type === 'prospecção');
+    const visitas = filteredVisits.filter((v) => v.type === "visita");
+    const prospecoes = filteredVisits.filter((v) => v.type === "prospecção");
     return {
       visitasCriadas: visitas.length,
-      visitasConcluidas: visitas.filter(v => v.status === 'Concluída').length,
+      visitasConcluidas: visitas.filter((v) => v.status === "Concluída").length,
       prospecoesCriadas: prospecoes.length,
-      prospecoesConcluidas: prospecoes.filter(v => v.status === 'Concluída').length,
+      prospecoesConcluidas: prospecoes.filter((v) => v.status === "Concluída").length,
       totalAgendas: filteredVisits.length,
-      totalConcluidas: filteredVisits.filter(v => v.status === 'Concluída').length,
+      totalConcluidas: filteredVisits.filter((v) => v.status === "Concluída").length,
     };
   }, [filteredVisits]);
 
   const todayIndicators = useMemo(() => {
-    const todayVisits = visibleVisits.filter(v => v.date === todayStr);
+    const todayVisits = visibleVisits.filter((v) => v.date === todayStr);
     return {
       total: todayVisits.length,
-      concluidas: todayVisits.filter(v => v.status === 'Concluída').length,
+      concluidas: todayVisits.filter((v) => v.status === "Concluída").length,
     };
   }, [visibleVisits, todayStr]);
 
@@ -251,27 +312,32 @@ export default function AgendaPage() {
   const handleDragStart = (e: React.DragEvent, visitId: string) => {
     setDraggedVisitId(visitId);
     setHasDragged(true);
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.effectAllowed = "move";
   };
 
   const handleDragOver = (e: React.DragEvent, dayStr: string) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.dropEffect = "move";
     setDragOverDay(dayStr);
   };
 
-  const handleDragLeave = () => { setDragOverDay(null); };
+  const handleDragLeave = () => {
+    setDragOverDay(null);
+  };
 
   const handleDrop = (e: React.DragEvent, day: Date) => {
     e.preventDefault();
     setDragOverDay(null);
     if (!draggedVisitId) return;
-    const newDate = format(day, 'yyyy-MM-dd');
-    const visit = visits.find(v => v.id === draggedVisitId);
-    if (!visit || visit.date === newDate) { setDraggedVisitId(null); return; }
+    const newDate = format(day, "yyyy-MM-dd");
+    const visit = visits.find((v) => v.id === draggedVisitId);
+    if (!visit || visit.date === newDate) {
+      setDraggedVisitId(null);
+      return;
+    }
     // Intercept: open justification modal for reschedule
     setPendingDrop({ visitId: draggedVisitId, newDate, day });
-    setPendingFormStatus('Reagendada');
+    setPendingFormStatus("Reagendada");
     setShowJustificationModal(true);
     setDraggedVisitId(null);
   };
@@ -279,24 +345,34 @@ export default function AgendaPage() {
   const handleJustificationConfirm = (reason: string) => {
     if (pendingDrop) {
       // Drag-and-drop reschedule
-      setVisits(prev => prev.map(v =>
-        v.id === pendingDrop.visitId ? {
-          ...v,
-          date: pendingDrop.newDate,
-          status: 'Reagendada' as VisitStatus,
-          rescheduleReason: reason,
-          statusChangedAt: new Date().toISOString(),
-        } : v
-      ));
-      const visit = visits.find(v => v.id === pendingDrop.visitId);
-      const label = visit?.type === 'visita' ? 'Visita' : 'Prospecção';
-      toast({ title: 'Reagendamento registrado com sucesso', description: `${label} reagendada para ${format(pendingDrop.day, "dd 'de' MMMM", { locale: ptBR })}` });
+      setVisits((prev) =>
+        prev.map((v) =>
+          v.id === pendingDrop.visitId
+            ? {
+                ...v,
+                date: pendingDrop.newDate,
+                status: "Reagendada" as VisitStatus,
+                rescheduleReason: reason,
+                statusChangedAt: new Date().toISOString(),
+              }
+            : v,
+        ),
+      );
+      const visit = visits.find((v) => v.id === pendingDrop.visitId);
+      const label = visit?.type === "visita" ? "Visita" : "Prospecção";
+      toast({
+        title: "Reagendamento registrado com sucesso",
+        description: `${label} reagendada para ${format(pendingDrop.day, "dd 'de' MMMM", { locale: ptBR })}`,
+      });
       setPendingDrop(null);
     } else if (pendingFormStatus) {
       // Form status change
-      const reasonField = pendingFormStatus === 'Reagendada' ? 'rescheduleReason' : 'cancelReason';
-      setFormData(prev => ({ ...prev, status: pendingFormStatus as VisitStatus, [reasonField]: reason }));
-      const msg = pendingFormStatus === 'Reagendada' ? 'Reagendamento registrado com sucesso' : 'Cancelamento registrado com sucesso';
+      const reasonField = pendingFormStatus === "Reagendada" ? "rescheduleReason" : "cancelReason";
+      setFormData((prev) => ({ ...prev, status: pendingFormStatus as VisitStatus, [reasonField]: reason }));
+      const msg =
+        pendingFormStatus === "Reagendada"
+          ? "Reagendamento registrado com sucesso"
+          : "Cancelamento registrado com sucesso";
       toast({ title: msg });
     }
     setPendingFormStatus(null);
@@ -309,26 +385,29 @@ export default function AgendaPage() {
     setShowJustificationModal(false);
   };
 
-  const handleDragEnd = () => { setDraggedVisitId(null); setDragOverDay(null); };
+  const handleDragEnd = () => {
+    setDraggedVisitId(null);
+    setDragOverDay(null);
+  };
 
-  const navigateCalendar = (dir: 'prev' | 'next') => {
-    if (view === 'month') setCurrentDate(dir === 'next' ? addMonths(currentDate, 1) : subMonths(currentDate, 1));
-    else if (view === 'week') setCurrentDate(dir === 'next' ? addWeeks(currentDate, 1) : subWeeks(currentDate, 1));
+  const navigateCalendar = (dir: "prev" | "next") => {
+    if (view === "month") setCurrentDate(dir === "next" ? addMonths(currentDate, 1) : subMonths(currentDate, 1));
+    else if (view === "week") setCurrentDate(dir === "next" ? addWeeks(currentDate, 1) : subWeeks(currentDate, 1));
     else {
       const d = new Date(currentDate);
-      d.setDate(d.getDate() + (dir === 'next' ? 1 : -1));
+      d.setDate(d.getDate() + (dir === "next" ? 1 : -1));
       setCurrentDate(d);
     }
   };
 
   const days = useMemo(() => {
-    if (view === 'month') {
+    if (view === "month") {
       const start = startOfMonth(currentDate);
       const end = endOfMonth(currentDate);
       const weekStart = startOfWeek(start, { locale: ptBR });
       const weekEnd = endOfWeek(end, { locale: ptBR });
       return eachDayOfInterval({ start: weekStart, end: weekEnd });
-    } else if (view === 'week') {
+    } else if (view === "week") {
       const start = startOfWeek(currentDate, { locale: ptBR });
       const end = endOfWeek(currentDate, { locale: ptBR });
       return eachDayOfInterval({ start, end });
@@ -337,75 +416,93 @@ export default function AgendaPage() {
   }, [view, currentDate]);
 
   const getVisitsForDay = (day: Date) => {
-    const dateStr = format(day, 'yyyy-MM-dd');
-    return filteredVisits.filter(v => v.date === dateStr);
+    const dateStr = format(day, "yyyy-MM-dd");
+    return filteredVisits.filter((v) => v.date === dateStr);
   };
 
   // Step 1 validation
   const canProceedStep1 = useMemo(() => {
     if (!formData.period) return false;
     if (!formData.date) return false;
-    if (formData.type === 'visita' && !formData.partnerId) return false;
-    if (formData.type === 'prospecção' && !formData.prospectPartner) return false;
-    if (formData.type === 'prospecção' && !formData.prospectEmail) return false;
+    if (formData.type === "visita" && !formData.partnerId) return false;
+    if (formData.type === "prospecção" && !formData.prospectPartner) return false;
+    if (formData.type === "prospecção" && !formData.prospectEmail) return false;
     // Status-specific validations
-    if (formData.status === 'Reagendada' && !formData.rescheduleReason) return false;
-    if (formData.status === 'Cancelada' && !formData.cancelReason) return false;
+    if (formData.status === "Reagendada" && !formData.rescheduleReason) return false;
+    if (formData.status === "Cancelada" && !formData.cancelReason) return false;
     return true;
   }, [formData]);
 
   const handleSave = () => {
     if (!formData.date || !isValid(parseISO(formData.date))) {
-      toast({ title: 'Data inválida', description: 'Selecione uma data válida para a agenda.', variant: 'destructive' });
+      toast({
+        title: "Data inválida",
+        description: "Selecione uma data válida para a agenda.",
+        variant: "destructive",
+      });
       return;
     }
-    const invitedUsers = formData.invitedUserIds.map(uid => ({ userId: uid, status: 'pending' as const }));
+    const invitedUsers = formData.invitedUserIds.map((uid) => ({ userId: uid, status: "pending" as const }));
 
-    if (user && profile === 'gestor' && formData.type === 'visita' && formData.partnerId) {
+    if (user && profile === "gestor" && formData.type === "visita" && formData.partnerId) {
       const partner = getPartnerById(formData.partnerId);
-      if (partner && !formData.invitedUserIds.includes(partner.responsibleUserId) && partner.responsibleUserId !== user.id) {
-        invitedUsers.push({ userId: partner.responsibleUserId, status: 'pending' });
+      if (
+        partner &&
+        !formData.invitedUserIds.includes(partner.responsibleUserId) &&
+        partner.responsibleUserId !== user.id
+      ) {
+        invitedUsers.push({ userId: partner.responsibleUserId, status: "pending" });
       }
     }
 
     const potentialValue = formData.potentialValue ? parseCurrencyToNumber(formData.potentialValue) : undefined;
 
     if (editingVisit) {
-      setVisits(prev => prev.map(v =>
-        v.id === editingVisit.id ? {
-          ...v,
-          partnerId: formData.partnerId,
-          date: formData.date,
-          time: formData.time,
-          period: formData.period as VisitPeriod,
-          type: formData.type,
-          medio: formData.medio,
-          status: formData.status,
-          structures: formData.structures,
-          banks: formData.banks,
-          products: formData.products,
-          summary: formData.summary,
-          potentialValue,
-          prospectEmail: formData.prospectEmail || undefined,
-          rescheduleReason: formData.rescheduleReason || undefined,
-          cancelReason: formData.cancelReason || undefined,
-          statusChangedAt: (formData.status === 'Reagendada' || formData.status === 'Cancelada') ? new Date().toISOString() : v.statusChangedAt,
-          prospectPartner: formData.prospectPartner,
-          prospectCnpj: formData.prospectCnpj,
-          prospectAddress: formData.prospectAddress,
-          prospectPhone: formData.prospectPhone,
-          prospectContact: formData.prospectContact,
-          invitedUsers: [...(v.invitedUsers || []), ...invitedUsers.filter(iu => !v.invitedUsers?.some(e => e.userId === iu.userId))],
-        } : v
-      ));
-      const label = formData.type === 'visita' ? 'Visita' : 'Prospecção';
+      setVisits((prev) =>
+        prev.map((v) =>
+          v.id === editingVisit.id
+            ? {
+                ...v,
+                partnerId: formData.partnerId,
+                date: formData.date,
+                time: formData.time,
+                period: formData.period as VisitPeriod,
+                type: formData.type,
+                medio: formData.medio,
+                status: formData.status,
+                structures: formData.structures,
+                banks: formData.banks,
+                products: formData.products,
+                summary: formData.summary,
+                potentialValue,
+                prospectEmail: formData.prospectEmail || undefined,
+                rescheduleReason: formData.rescheduleReason || undefined,
+                cancelReason: formData.cancelReason || undefined,
+                statusChangedAt:
+                  formData.status === "Reagendada" || formData.status === "Cancelada"
+                    ? new Date().toISOString()
+                    : v.statusChangedAt,
+                prospectPartner: formData.prospectPartner,
+                prospectCnpj: formData.prospectCnpj,
+                prospectAddress: formData.prospectAddress,
+                prospectPhone: formData.prospectPhone,
+                prospectContact: formData.prospectContact,
+                invitedUsers: [
+                  ...(v.invitedUsers || []),
+                  ...invitedUsers.filter((iu) => !v.invitedUsers?.some((e) => e.userId === iu.userId)),
+                ],
+              }
+            : v,
+        ),
+      );
+      const label = formData.type === "visita" ? "Visita" : "Prospecção";
       toast({ title: `${label} atualizada!`, description: `A ${label.toLowerCase()} foi atualizada com sucesso.` });
     } else {
       const newVisit: Visit = {
         id: `v${Date.now()}`,
         partnerId: formData.partnerId,
-        userId: user?.id || '',
-        createdBy: user?.id || '',
+        userId: user?.id || "",
+        createdBy: user?.id || "",
         invitedUsers,
         date: formData.date,
         time: formData.time,
@@ -416,7 +513,7 @@ export default function AgendaPage() {
         structures: formData.structures,
         banks: formData.banks,
         products: formData.products,
-        observations: '',
+        observations: "",
         summary: formData.summary,
         potentialValue,
         prospectEmail: formData.prospectEmail || undefined,
@@ -429,31 +526,37 @@ export default function AgendaPage() {
         prospectContact: formData.prospectContact,
         comments: [...pendingAutoTasks],
       };
-      setVisits(prev => [...prev, newVisit]);
+      setVisits((prev) => [...prev, newVisit]);
 
-      const partnerName = formData.type === 'visita' ? (getPartnerById(formData.partnerId)?.name || '') : (formData.prospectPartner || '');
-      invitedUsers.forEach(iu => {
+      const partnerName =
+        formData.type === "visita" ? getPartnerById(formData.partnerId)?.name || "" : formData.prospectPartner || "";
+      invitedUsers.forEach((iu) => {
         addNotification({
-          type: 'invite',
+          type: "invite",
           visitId: newVisit.id,
-          fromUserId: user?.id || '',
+          fromUserId: user?.id || "",
           toUserId: iu.userId,
           partnerId: formData.partnerId,
           partnerName,
           date: formData.date,
           time: formData.time,
-          status: 'pending',
-          message: getRandomMessage('invite_detail', {
+          status: "pending",
+          message: getRandomMessage("invite_detail", {
             parceiro: partnerName,
-            nome: user?.name || '',
+            nome: user?.name || "",
             data: formData.date,
             hora: formData.time,
           }),
         });
       });
 
-      const label = formData.type === 'visita' ? 'Visita' : 'Prospecção';
-      toast({ title: `${label} salva!`, description: potentialValue ? `Potencial: ${formatCentavos(potentialValue)}` : `A ${label.toLowerCase()} foi adicionada à agenda.` });
+      const label = formData.type === "visita" ? "Visita" : "Prospecção";
+      toast({
+        title: `${label} salva!`,
+        description: potentialValue
+          ? `Potencial: ${formatCentavos(potentialValue)}`
+          : `A ${label.toLowerCase()} foi adicionada à agenda.`,
+      });
     }
     setShowForm(false);
     setEditingVisit(null);
@@ -461,7 +564,10 @@ export default function AgendaPage() {
   };
 
   const handleOpenDetail = (visit: Visit) => {
-    if (hasDragged) { setHasDragged(false); return; }
+    if (hasDragged) {
+      setHasDragged(false);
+      return;
+    }
     setSelectedVisit(visit);
     setShowDetail(true);
   };
@@ -473,7 +579,7 @@ export default function AgendaPage() {
       partnerId: visit.partnerId,
       date: visit.date,
       time: visit.time,
-      period: visit.period || '',
+      period: visit.period || "",
       type: visit.type,
       medio: visit.medio,
       status: visit.status,
@@ -481,103 +587,152 @@ export default function AgendaPage() {
       banks: [...visit.banks],
       products: [...visit.products],
       summary: visit.summary,
-      potentialValue: visit.potentialValue ? formatCentavos(visit.potentialValue) : '',
-      prospectEmail: visit.prospectEmail || '',
-      prospectPartner: visit.prospectPartner || '',
-      prospectCnpj: visit.prospectCnpj || '',
-      prospectAddress: visit.prospectAddress || '',
-      prospectPhone: visit.prospectPhone || '',
-      prospectContact: visit.prospectContact || '',
-      invitedUserIds: visit.invitedUsers?.map(iu => iu.userId) || [],
-      rescheduleReason: visit.rescheduleReason || '',
-      cancelReason: visit.cancelReason || '',
+      potentialValue: visit.potentialValue ? formatCentavos(visit.potentialValue) : "",
+      prospectEmail: visit.prospectEmail || "",
+      prospectPartner: visit.prospectPartner || "",
+      prospectCnpj: visit.prospectCnpj || "",
+      prospectAddress: visit.prospectAddress || "",
+      prospectPhone: visit.prospectPhone || "",
+      prospectContact: visit.prospectContact || "",
+      invitedUserIds: visit.invitedUsers?.map((iu) => iu.userId) || [],
+      rescheduleReason: visit.rescheduleReason || "",
+      cancelReason: visit.cancelReason || "",
     });
     setFormStep(0);
     setShowForm(true);
   };
 
-  const handleAcceptVisitInvite = useCallback((visitId: string) => {
-    if (!user) return;
-    setVisits(prev => prev.map(v =>
-      v.id === visitId ? { ...v, invitedUsers: v.invitedUsers.map(iu => iu.userId === user.id ? { ...iu, status: 'accepted' as const } : iu) } : v
-    ));
-    toast({ title: getRandomMessage('accept') });
-  }, [user, toast]);
+  const handleAcceptVisitInvite = useCallback(
+    (visitId: string) => {
+      if (!user) return;
+      setVisits((prev) =>
+        prev.map((v) =>
+          v.id === visitId
+            ? {
+                ...v,
+                invitedUsers: v.invitedUsers.map((iu) =>
+                  iu.userId === user.id ? { ...iu, status: "accepted" as const } : iu,
+                ),
+              }
+            : v,
+        ),
+      );
+      toast({ title: getRandomMessage("accept") });
+    },
+    [user, toast],
+  );
 
-  const handleRejectVisitInvite = useCallback((visitId: string) => {
-    if (!user) return;
-    setRejectingVisitId(visitId);
-    setShowInviteRejectionModal(true);
-  }, [user]);
+  const handleRejectVisitInvite = useCallback(
+    (visitId: string) => {
+      if (!user) return;
+      setRejectingVisitId(visitId);
+      setShowInviteRejectionModal(true);
+    },
+    [user],
+  );
 
-  const handleConfirmRejectVisitInvite = useCallback((reason: string) => {
-    if (!user || !rejectingVisitId) return;
-    const foundVisit = visits.find(v => v.id === rejectingVisitId);
-    const partnerName = foundVisit ? (getPartnerById(foundVisit.partnerId)?.name || foundVisit.partnerId) : 'Agenda';
-    setVisits(prev => prev.map(v =>
-      v.id === rejectingVisitId ? { ...v, invitedUsers: v.invitedUsers.map(iu => iu.userId === user.id ? { ...iu, status: 'rejected' as const } : iu) } : v
-    ));
-    addLog({
-      module: 'Agenda',
-      action: 'reject',
-      entityId: rejectingVisitId,
-      entityLabel: partnerName,
-      field: 'Convite',
-      oldValue: 'Pendente',
-      newValue: `Rejeitado – ${reason}`,
-      description: `${user.name} rejeitou participação – motivo: ${reason}`,
-    });
-    toast({ title: getRandomMessage('reject'), description: `Motivo: ${reason}` });
-    setShowInviteRejectionModal(false);
-    setRejectingVisitId(null);
-  }, [user, rejectingVisitId, toast, visits, addLog]);
+  const handleConfirmRejectVisitInvite = useCallback(
+    (reason: string) => {
+      if (!user || !rejectingVisitId) return;
+      const foundVisit = visits.find((v) => v.id === rejectingVisitId);
+      const partnerName = foundVisit ? getPartnerById(foundVisit.partnerId)?.name || foundVisit.partnerId : "Agenda";
+      setVisits((prev) =>
+        prev.map((v) =>
+          v.id === rejectingVisitId
+            ? {
+                ...v,
+                invitedUsers: v.invitedUsers.map((iu) =>
+                  iu.userId === user.id ? { ...iu, status: "rejected" as const } : iu,
+                ),
+              }
+            : v,
+        ),
+      );
+      addLog({
+        module: "Agenda",
+        action: "reject",
+        entityId: rejectingVisitId,
+        entityLabel: partnerName,
+        field: "Convite",
+        oldValue: "Pendente",
+        newValue: `Rejeitado – ${reason}`,
+        description: `${user.name} rejeitou participação – motivo: ${reason}`,
+      });
+      toast({ title: getRandomMessage("reject"), description: `Motivo: ${reason}` });
+      setShowInviteRejectionModal(false);
+      setRejectingVisitId(null);
+    },
+    [user, rejectingVisitId, toast, visits, addLog],
+  );
 
-  const handleLeaveVisit = useCallback((visitId: string) => {
-    if (!user) return;
-    setVisits(prev => prev.map(v =>
-      v.id === visitId ? { ...v, invitedUsers: v.invitedUsers.filter(iu => iu.userId !== user.id) } : v
-    ));
-    toast({ title: getRandomMessage('remove') });
-  }, [user, toast]);
+  const handleLeaveVisit = useCallback(
+    (visitId: string) => {
+      if (!user) return;
+      setVisits((prev) =>
+        prev.map((v) =>
+          v.id === visitId ? { ...v, invitedUsers: v.invitedUsers.filter((iu) => iu.userId !== user.id) } : v,
+        ),
+      );
+      toast({ title: getRandomMessage("remove") });
+    },
+    [user, toast],
+  );
 
   // Comment handlers
-  const handleAddComment = useCallback((visitId: string, text: string, type: 'observation' | 'task', parentId?: string) => {
-    const comment: VisitComment = {
-      id: `c${Date.now()}`,
-      userId: user?.id || '',
-      text,
-      type,
-      taskCompleted: false,
-      parentId,
-      createdAt: new Date().toISOString(),
-    };
-    setVisits(prev => prev.map(v =>
-      v.id === visitId ? { ...v, comments: [...(v.comments || []), comment] } : v
-    ));
-    // Update selectedVisit if open
-    setSelectedVisit(prev => prev?.id === visitId ? { ...prev, comments: [...(prev.comments || []), comment] } : prev);
-  }, [user]);
+  const handleAddComment = useCallback(
+    (visitId: string, text: string, type: "observation" | "task", parentId?: string) => {
+      const comment: VisitComment = {
+        id: `c${Date.now()}`,
+        userId: user?.id || "",
+        text,
+        type,
+        taskCompleted: false,
+        parentId,
+        createdAt: new Date().toISOString(),
+      };
+      setVisits((prev) =>
+        prev.map((v) => (v.id === visitId ? { ...v, comments: [...(v.comments || []), comment] } : v)),
+      );
+      // Update selectedVisit if open
+      setSelectedVisit((prev) =>
+        prev?.id === visitId ? { ...prev, comments: [...(prev.comments || []), comment] } : prev,
+      );
+    },
+    [user],
+  );
 
   const handleToggleTask = useCallback((visitId: string, commentId: string) => {
-    setVisits(prev => prev.map(v =>
-      v.id === visitId ? {
-        ...v,
-        comments: (v.comments || []).map(c => c.id === commentId ? { ...c, taskCompleted: !c.taskCompleted } : c),
-      } : v
-    ));
-    setSelectedVisit(prev => prev?.id === visitId ? {
-      ...prev,
-      comments: (prev.comments || []).map(c => c.id === commentId ? { ...c, taskCompleted: !c.taskCompleted } : c),
-    } : prev);
+    setVisits((prev) =>
+      prev.map((v) =>
+        v.id === visitId
+          ? {
+              ...v,
+              comments: (v.comments || []).map((c) =>
+                c.id === commentId ? { ...c, taskCompleted: !c.taskCompleted } : c,
+              ),
+            }
+          : v,
+      ),
+    );
+    setSelectedVisit((prev) =>
+      prev?.id === visitId
+        ? {
+            ...prev,
+            comments: (prev.comments || []).map((c) =>
+              c.id === commentId ? { ...c, taskCompleted: !c.taskCompleted } : c,
+            ),
+          }
+        : prev,
+    );
   }, []);
 
   const toggleArray = (arr: string[], item: string) =>
-    arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item];
+    arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 
-  const invitableUsers = mockUsers.filter(u => u.active && u.id !== user?.id);
+  const invitableUsers = mockUsers.filter((u) => u.active && u.id !== user?.id);
   const today = new Date();
 
-  if (!canRead('agenda.view')) {
+  if (!canRead("agenda.view")) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-muted-foreground gap-3">
         <ShieldOff className="h-12 w-12" />
@@ -591,7 +746,14 @@ export default function AgendaPage() {
     <PageTransition className="space-y-ds-lg">
       <HeroSection />
 
-      <SmartInsights page="agenda" activeFilter={activeInsight} onFilterClick={setActiveInsight} filterView={view} filterStatus={filterStatus} filterType={filterType} />
+      <SmartInsights
+        page="agenda"
+        activeFilter={activeInsight}
+        onFilterClick={setActiveInsight}
+        filterView={view}
+        filterStatus={filterStatus}
+        filterType={filterType}
+      />
 
       {/* Title + Month nav + Filters toggle */}
       <div className="flex flex-col gap-2">
@@ -599,30 +761,36 @@ export default function AgendaPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-ds-xl font-bold shrink-0">Agenda</h1>
             <div className="flex items-center gap-1">
-              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar('prev')}>
+              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar("prev")}>
                 <ChevronLeft className="h-3.5 w-3.5" />
               </Button>
               <span className="text-ds-xs font-medium min-w-[100px] text-center capitalize">
-                {view === 'day' ? format(currentDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) :
-                 view === 'week' ? `${format(startOfWeek(currentDate, { locale: ptBR }), 'dd/MM')} — ${format(endOfWeek(currentDate, { locale: ptBR }), 'dd/MM/yyyy')}` :
-                 format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
+                {view === "day"
+                  ? format(currentDate, "dd 'de' MMMM, yyyy", { locale: ptBR })
+                  : view === "week"
+                    ? `${format(startOfWeek(currentDate, { locale: ptBR }), "dd/MM")} — ${format(endOfWeek(currentDate, { locale: ptBR }), "dd/MM/yyyy")}`
+                    : format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
               </span>
-              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar('next')}>
+              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar("next")}>
                 <ChevronRight className="h-3.5 w-3.5" />
               </Button>
-              <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => setCurrentDate(new Date())}>Hoje</Button>
+              <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => setCurrentDate(new Date())}>
+                Hoje
+              </Button>
             </div>
           </div>
           <Button
-            variant={showFilters ? 'secondary' : 'ghost'}
+            variant={showFilters ? "secondary" : "ghost"}
             size="sm"
             className="h-7 text-xs gap-1.5 relative shrink-0"
             onClick={() => setShowFilters(!showFilters)}
           >
             <Filter className="h-3.5 w-3.5" />
             Filtros
-            {(filterStatus !== 'all' || filterType !== 'all' || dateRange.from || dateRange.to) && (
-              <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary text-[9px] text-primary-foreground flex items-center justify-center">!</span>
+            {(filterStatus !== "all" || filterType !== "all" || dateRange.from || dateRange.to) && (
+              <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary text-[9px] text-primary-foreground flex items-center justify-center">
+                !
+              </span>
             )}
           </Button>
         </div>
@@ -631,13 +799,15 @@ export default function AgendaPage() {
           {showFilters && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
+              animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
               <div className="flex items-center gap-2 flex-wrap py-2">
                 <Select value={view} onValueChange={(v) => setView(v as ViewMode)}>
-                  <SelectTrigger className="w-24 h-7 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="w-24 h-7 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="day">Diário</SelectItem>
                     <SelectItem value="week">Semanal</SelectItem>
@@ -645,7 +815,9 @@ export default function AgendaPage() {
                   </SelectContent>
                 </Select>
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="w-28 h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
+                  <SelectTrigger className="w-28 h-7 text-xs">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos status</SelectItem>
                     <SelectItem value="Planejada">Planejada</SelectItem>
@@ -655,7 +827,9 @@ export default function AgendaPage() {
                   </SelectContent>
                 </Select>
                 <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="w-28 h-7 text-xs"><SelectValue placeholder="Tipo" /></SelectTrigger>
+                  <SelectTrigger className="w-28 h-7 text-xs">
+                    <SelectValue placeholder="Tipo" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos tipos</SelectItem>
                     <SelectItem value="visita">Visita</SelectItem>
@@ -664,13 +838,20 @@ export default function AgendaPage() {
                 </Select>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className={cn('h-7 text-xs gap-1', (dateRange.from || dateRange.to) && 'border-primary text-primary')}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "h-7 text-xs gap-1",
+                        (dateRange.from || dateRange.to) && "border-primary text-primary",
+                      )}
+                    >
                       <CalendarRange className="h-3 w-3" />
                       {dateRange.from && dateRange.to
-                        ? `${format(dateRange.from, 'dd/MM')} — ${format(dateRange.to, 'dd/MM')}`
+                        ? `${format(dateRange.from, "dd/MM")} — ${format(dateRange.to, "dd/MM")}`
                         : dateRange.from
-                        ? `A partir de ${format(dateRange.from, 'dd/MM')}`
-                        : 'Período'}
+                          ? `A partir de ${format(dateRange.from, "dd/MM")}`
+                          : "Período"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-3" align="end">
@@ -680,7 +861,7 @@ export default function AgendaPage() {
                         <Calendar
                           mode="single"
                           selected={dateRange.from}
-                          onSelect={(d) => setDateRange(prev => ({ ...prev, from: d || undefined }))}
+                          onSelect={(d) => setDateRange((prev) => ({ ...prev, from: d || undefined }))}
                           className="p-2 pointer-events-auto"
                         />
                       </div>
@@ -689,19 +870,30 @@ export default function AgendaPage() {
                         <Calendar
                           mode="single"
                           selected={dateRange.to}
-                          onSelect={(d) => setDateRange(prev => ({ ...prev, to: d || undefined }))}
-                          disabled={(d) => dateRange.from ? d < dateRange.from : false}
+                          onSelect={(d) => setDateRange((prev) => ({ ...prev, to: d || undefined }))}
+                          disabled={(d) => (dateRange.from ? d < dateRange.from : false)}
                           className="p-2 pointer-events-auto"
                         />
                       </div>
                       {(dateRange.from || dateRange.to) && (
-                        <Button variant="ghost" size="sm" className="w-full" onClick={() => setDateRange({})}>Limpar período</Button>
+                        <Button variant="ghost" size="sm" className="w-full" onClick={() => setDateRange({})}>
+                          Limpar período
+                        </Button>
                       )}
                     </div>
                   </PopoverContent>
                 </Popover>
-                {(filterStatus !== 'all' || filterType !== 'all' || dateRange.from || dateRange.to) && (
-                  <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground" onClick={() => { setFilterStatus('all'); setFilterType('all'); setDateRange({}); }}>
+                {(filterStatus !== "all" || filterType !== "all" || dateRange.from || dateRange.to) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs gap-1 text-muted-foreground"
+                    onClick={() => {
+                      setFilterStatus("all");
+                      setFilterType("all");
+                      setDateRange({});
+                    }}
+                  >
                     <X className="h-3 w-3" /> Limpar
                   </Button>
                 )}
@@ -712,665 +904,916 @@ export default function AgendaPage() {
       </div>
 
       <AnimatedFilterContent filterKey={activeInsight} className="space-y-ds-lg">
-      {/* KPI Grid - 6 cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-ds-sm">
-        <AnimatedKpiCard icon={CalendarDays} label="Agendas hoje" value={todayIndicators.concluidas} secondaryValue={todayIndicators.total} color="text-info" delay={0.1} onClick={() => togglePanel('today')} active={showTodayPanel} />
-        <AnimatedKpiCard icon={ListTodo} label="Tarefas" value={completedTasks.length} secondaryValue={pendingTasks.length} color="text-warning" delay={0.15} onClick={() => togglePanel('tasks')} active={showTasksPanel} pulse={pendingTasks.some(t => { const days = Math.floor((Date.now() - new Date(t.task.createdAt).getTime()) / 86400000); return days >= 10; })} />
-        <AnimatedKpiCard icon={CheckCircle} label="Agendas" value={indicators.totalConcluidas} secondaryValue={indicators.totalAgendas} color="text-success" delay={0.2} />
-        <AnimatedKpiCard icon={Handshake} label="Visitas" value={indicators.visitasConcluidas} secondaryValue={indicators.visitasCriadas} color="text-info" delay={0.25} />
-        <AnimatedKpiCard icon={UserPlus} label="Prospecções" value={indicators.prospecoesConcluidas} secondaryValue={indicators.prospecoesCriadas} color="text-warning" delay={0.3} />
-        {canWrite('agenda.create') && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4 }}>
-            <Card className="hover:shadow-md transition-shadow cursor-pointer h-full border-dashed border-2 border-primary/20 hover:border-primary/40" onClick={() => setShowForm(true)}>
-              <CardContent className="p-ds-sm flex items-center gap-ds-sm h-full">
-                <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                  <Plus className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-ds-sm font-semibold text-primary">Nova agenda</p>
-                  <p className="text-ds-xs text-muted-foreground">Criar</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </div>
+        {/* KPI Grid - 6 cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-ds-sm">
+          <AnimatedKpiCard
+            icon={CalendarDays}
+            label="Agendas hoje"
+            value={todayIndicators.concluidas}
+            secondaryValue={todayIndicators.total}
+            color="text-info"
+            delay={0.1}
+            onClick={() => togglePanel("today")}
+            active={showTodayPanel}
+          />
+          <AnimatedKpiCard
+            icon={ListTodo}
+            label="Tarefas"
+            value={completedTasks.length}
+            secondaryValue={pendingTasks.length}
+            color="text-warning"
+            delay={0.15}
+            onClick={() => togglePanel("tasks")}
+            active={showTasksPanel}
+            pulse={pendingTasks.some((t) => {
+              const days = Math.floor((Date.now() - new Date(t.task.createdAt).getTime()) / 86400000);
+              return days >= 10;
+            })}
+          />
+          <AnimatedKpiCard
+            icon={CheckCircle}
+            label="Agendas"
+            value={indicators.totalConcluidas}
+            secondaryValue={indicators.totalAgendas}
+            color="text-success"
+            delay={0.2}
+          />
+          <AnimatedKpiCard
+            icon={Handshake}
+            label="Visitas"
+            value={indicators.visitasConcluidas}
+            secondaryValue={indicators.visitasCriadas}
+            color="text-info"
+            delay={0.25}
+          />
+          <AnimatedKpiCard
+            icon={UserPlus}
+            label="Prospecções"
+            value={indicators.prospecoesConcluidas}
+            secondaryValue={indicators.prospecoesCriadas}
+            color="text-warning"
+            delay={0.3}
+          />
+          {canWrite("agenda.create") && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35, duration: 0.4 }}
+            >
+              <Card
+                className="hover:shadow-md transition-shadow cursor-pointer h-full border-dashed border-2 border-primary/20 hover:border-primary/40"
+                onClick={() => setShowForm(true)}
+              >
+                <CardContent className="p-ds-sm flex items-center gap-ds-sm h-full">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <Plus className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-ds-sm font-semibold text-primary">Nova agenda</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </div>
 
-      <AnimatePresence>
-        {showTodayPanel && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm pt-ds-xs">
-              <TodayAgenda viewMode="personal" visits={visibleVisits} />
-              <VisitMap viewMode="personal" filteredVisits={filteredVisits} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <AnimatePresence>
+          {showTodayPanel && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm pt-ds-xs">
+                <TodayAgenda viewMode="personal" visits={visibleVisits} />
+                <VisitMap viewMode="personal" filteredVisits={filteredVisits} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      <AnimatePresence>
-        {showTasksPanel && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
-          >
-            <div className="pt-ds-xs">
-              <InlineTasksPanel onOpenVisit={(visitId) => {
-                const visit = visits.find(v => v.id === visitId);
-                if (visit) {
-                  setSelectedVisit(visit);
-                  setShowDetail(true);
-                }
-              }} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <AnimatePresence>
+          {showTasksPanel && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-ds-xs">
+                <InlineTasksPanel
+                  onOpenVisit={(visitId) => {
+                    const visit = visits.find((v) => v.id === visitId);
+                    if (visit) {
+                      setSelectedVisit(visit);
+                      setShowDetail(true);
+                    }
+                  }}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {view === 'month' ? (
-        <Card>
-          <CardContent className="p-ds-xs sm:p-ds-sm">
-            <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
-              {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(d => (
-                <div key={d} className="bg-muted px-2 py-2 text-center text-xs font-medium text-muted-foreground">{d}</div>
-              ))}
-              {days.map((day, i) => {
-                const dayVisits = getVisitsForDay(day);
-                const isToday = isSameDay(day, today);
-                const isCurrentMonth = isSameMonth(day, currentDate);
-                const dayStr = format(day, 'yyyy-MM-dd');
-                return (
-                  <div
-                    key={i}
-                    onDragOver={(e) => handleDragOver(e, dayStr)}
-                    onDragLeave={handleDragLeave}
-                    onDrop={(e) => handleDrop(e, day)}
-                    onClick={(e) => {
-                      // Only trigger if clicking the cell itself (not a visit item)
-                      if ((e.target as HTMLElement).closest('[data-visit-item]')) return;
-                      if (canWrite('agenda.create')) {
-                        setFormData(prev => ({ ...prev, date: dayStr }));
-                        setShowForm(true);
-                      }
-                    }}
-                    className={cn(
-                      'bg-card min-h-[80px] sm:min-h-[100px] p-1.5 transition-colors group/day cursor-pointer',
-                      !isCurrentMonth && 'opacity-40',
-                      dragOverDay === dayStr && 'bg-primary/10 ring-2 ring-primary/30',
-                      canWrite('agenda.create') && 'hover:bg-muted/30',
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className={cn(
-                        'text-xs font-medium inline-flex items-center justify-center w-6 h-6 rounded-full',
-                        isToday && 'bg-primary text-primary-foreground',
-                      )}>
-                        {format(day, 'd')}
-                      </span>
-                      {canWrite('agenda.create') && dayVisits.length === 0 && (
-                        <Plus className="h-3 w-3 text-muted-foreground/0 group-hover/day:text-muted-foreground/60 transition-colors" />
+        {view === "month" ? (
+          <Card>
+            <CardContent className="p-ds-xs sm:p-ds-sm">
+              <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
+                {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((d) => (
+                  <div key={d} className="bg-muted px-2 py-2 text-center text-xs font-medium text-muted-foreground">
+                    {d}
+                  </div>
+                ))}
+                {days.map((day, i) => {
+                  const dayVisits = getVisitsForDay(day);
+                  const isToday = isSameDay(day, today);
+                  const isCurrentMonth = isSameMonth(day, currentDate);
+                  const dayStr = format(day, "yyyy-MM-dd");
+                  return (
+                    <div
+                      key={i}
+                      onDragOver={(e) => handleDragOver(e, dayStr)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, day)}
+                      onClick={(e) => {
+                        // Only trigger if clicking the cell itself (not a visit item)
+                        if ((e.target as HTMLElement).closest("[data-visit-item]")) return;
+                        if (canWrite("agenda.create")) {
+                          setFormData((prev) => ({ ...prev, date: dayStr }));
+                          setShowForm(true);
+                        }
+                      }}
+                      className={cn(
+                        "bg-card min-h-[80px] sm:min-h-[100px] p-1.5 transition-colors group/day cursor-pointer",
+                        !isCurrentMonth && "opacity-40",
+                        dragOverDay === dayStr && "bg-primary/10 ring-2 ring-primary/30",
+                        canWrite("agenda.create") && "hover:bg-muted/30",
                       )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={cn(
+                            "text-xs font-medium inline-flex items-center justify-center w-6 h-6 rounded-full",
+                            isToday && "bg-primary text-primary-foreground",
+                          )}
+                        >
+                          {format(day, "d")}
+                        </span>
+                        {canWrite("agenda.create") && dayVisits.length === 0 && (
+                          <Plus className="h-3 w-3 text-muted-foreground/0 group-hover/day:text-muted-foreground/60 transition-colors" />
+                        )}
+                      </div>
+                      <div className="mt-1 space-y-0.5">
+                        {dayVisits.slice(0, 3).map((v) => {
+                          const partner = getPartnerById(v.partnerId);
+                          const myInvite = user
+                            ? v.invitedUsers?.find((iu) => iu.userId === user.id && iu.status === "pending")
+                            : null;
+                          return (
+                            <div
+                              key={v.id}
+                              data-visit-item
+                              draggable={canWrite("agenda.drag")}
+                              onDragStart={(e) => canWrite("agenda.drag") && handleDragStart(e, v.id)}
+                              onDragEnd={handleDragEnd}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenDetail(v);
+                              }}
+                              className={cn(
+                                "text-[10px] px-1.5 py-0.5 rounded truncate border cursor-pointer hover:ring-1 hover:ring-primary/40 flex items-center gap-1",
+                                statusBgClasses[v.status],
+                                draggedVisitId === v.id && "opacity-50",
+                              )}
+                            >
+                              {v.type === "visita" ? (
+                                <Handshake className="h-2.5 w-2.5 shrink-0 text-info" />
+                              ) : (
+                                <UserPlus className="h-2.5 w-2.5 shrink-0 text-warning" />
+                              )}
+                              <span className="truncate flex-1">
+                                {(partner?.name || v.prospectPartner || "Sem nome")?.split(" ")[0]}
+                              </span>
+                              {(() => {
+                                const participants = getParticipants(v);
+                                return (
+                                  <TooltipProvider delayDuration={200}>
+                                    <div className="flex -space-x-1 shrink-0">
+                                      {participants.slice(0, 2).map((p) => (
+                                        <Tooltip key={p.id}>
+                                          <TooltipTrigger asChild>
+                                            <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">
+                                              {p.name.charAt(0)}
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="top" className="text-xs">
+                                            {p.name} • {p.cargo}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      ))}
+                                      {participants.length > 2 && (
+                                        <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">
+                                          +{participants.length - 2}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </TooltipProvider>
+                                );
+                              })()}
+                              {myInvite && (
+                                <span className="flex gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                  <button
+                                    aria-label="Aceitar convite"
+                                    className="h-3.5 w-3.5 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90"
+                                    onClick={() => handleAcceptVisitInvite(v.id)}
+                                  >
+                                    <Check className="h-2 w-2" />
+                                  </button>
+                                  <button
+                                    aria-label="Recusar convite"
+                                    className="h-3.5 w-3.5 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground"
+                                    onClick={() => handleRejectVisitInvite(v.id)}
+                                  >
+                                    <X className="h-2 w-2" />
+                                  </button>
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {dayVisits.length > 3 && (
+                          <span className="text-[10px] text-muted-foreground pl-1">+{dayVisits.length - 3}</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="mt-1 space-y-0.5">
-                      {dayVisits.slice(0, 3).map(v => {
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {days.map((day, i) => {
+              const dayVisits = getVisitsForDay(day);
+              return (
+                <Card key={i}>
+                  <CardHeader className="py-3 px-4">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "w-7 h-7 rounded-full flex items-center justify-center text-xs",
+                          isSameDay(day, today) ? "bg-primary text-primary-foreground" : "bg-muted",
+                        )}
+                      >
+                        {format(day, "d")}
+                      </span>
+                      <span className="capitalize">{format(day, "EEEE, dd 'de' MMMM", { locale: ptBR })}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-4 pb-4 space-y-2">
+                    {dayVisits.length === 0 ? (
+                      <p className="text-sm text-muted-foreground py-4 text-center">Nenhuma visita agendada</p>
+                    ) : (
+                      dayVisits.map((v) => {
                         const partner = getPartnerById(v.partnerId);
-                        const myInvite = user ? v.invitedUsers?.find(iu => iu.userId === user.id && iu.status === 'pending') : null;
+                        const vUser = getUserById(v.userId);
                         return (
                           <div
                             key={v.id}
-                            data-visit-item
-                            draggable={canWrite('agenda.drag')}
-                            onDragStart={(e) => canWrite('agenda.drag') && handleDragStart(e, v.id)}
-                            onDragEnd={handleDragEnd}
-                            onClick={(e) => { e.stopPropagation(); handleOpenDetail(v); }}
-                            className={cn(
-                              'text-[10px] px-1.5 py-0.5 rounded truncate border cursor-pointer hover:ring-1 hover:ring-primary/40 flex items-center gap-1',
-                              statusBgClasses[v.status],
-                              draggedVisitId === v.id && 'opacity-50',
-                            )}
+                            onClick={() => handleOpenDetail(v)}
+                            className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/30 transition-colors cursor-pointer"
                           >
-                            {v.type === 'visita' ? <Handshake className="h-2.5 w-2.5 shrink-0 text-info" /> : <UserPlus className="h-2.5 w-2.5 shrink-0 text-warning" />}
-                            <span className="truncate flex-1">{(partner?.name || v.prospectPartner || 'Sem nome')?.split(' ')[0]}</span>
+                            <div
+                              className={cn(
+                                "px-2 py-0.5 rounded text-[10px] font-medium border shrink-0",
+                                statusBgClasses[v.status],
+                              )}
+                            >
+                              {v.status}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {partner?.name || v.prospectPartner || "Sem nome"}
+                              </p>
+                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    "text-[9px] px-1 py-0 gap-0.5",
+                                    v.type === "visita"
+                                      ? "bg-info/10 text-info border-info/20"
+                                      : "bg-warning/10 text-warning border-warning/20",
+                                  )}
+                                >
+                                  {v.type === "visita" ? (
+                                    <>
+                                      <Handshake className="h-2.5 w-2.5" />
+                                      Visita
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UserPlus className="h-2.5 w-2.5" />
+                                      Prospecção
+                                    </>
+                                  )}
+                                </Badge>
+                                {v.time ? (
+                                  <span>{v.time}</span>
+                                ) : (
+                                  <span className="flex items-center gap-0.5">
+                                    <ClockIcon className="h-3 w-3" /> Sem horário
+                                  </span>
+                                )}
+                                <span>• {vUser?.name}</span>
+                              </div>
+                            </div>
                             {(() => {
                               const participants = getParticipants(v);
                               return (
                                 <TooltipProvider delayDuration={200}>
-                                  <div className="flex -space-x-1 shrink-0">
-                                    {participants.slice(0, 2).map(p => (
+                                  <div className="flex -space-x-1.5 shrink-0">
+                                    {participants.slice(0, 4).map((p) => (
                                       <Tooltip key={p.id}>
                                         <TooltipTrigger asChild>
-                                          <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">{p.name.charAt(0)}</div>
+                                          <div className="relative">
+                                            {p.id === rankingLeaderId && (
+                                              <Crown className="h-3 w-3 text-yellow-500 fill-yellow-500 absolute -top-2 left-1/2 -translate-x-1/2 z-10" />
+                                            )}
+                                            <Avatar className="h-6 w-6 border-2 border-background">
+                                              <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">
+                                                {p.name.charAt(0)}
+                                              </AvatarFallback>
+                                            </Avatar>
+                                          </div>
                                         </TooltipTrigger>
-                                        <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
+                                        <TooltipContent side="top" className="text-xs">
+                                          {p.name} • {p.cargo}
+                                        </TooltipContent>
                                       </Tooltip>
                                     ))}
-                                    {participants.length > 2 && (
-                                      <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">+{participants.length - 2}</div>
+                                    {participants.length > 4 && (
+                                      <Avatar className="h-6 w-6 border-2 border-background">
+                                        <AvatarFallback className="text-[9px] bg-muted text-muted-foreground">
+                                          +{participants.length - 4}
+                                        </AvatarFallback>
+                                      </Avatar>
                                     )}
                                   </div>
                                 </TooltipProvider>
                               );
                             })()}
-                            {myInvite && (
-                              <span className="flex gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
-                                 <button
-                                   aria-label="Aceitar convite"
-                                   className="h-3.5 w-3.5 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90"
-                                   onClick={() => handleAcceptVisitInvite(v.id)}
-                                 >
-                                   <Check className="h-2 w-2" />
-                                 </button>
-                                 <button
-                                   aria-label="Recusar convite"
-                                   className="h-3.5 w-3.5 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground"
-                                   onClick={() => handleRejectVisitInvite(v.id)}
-                                 >
-                                  <X className="h-2 w-2" />
-                                </button>
-                              </span>
-                            )}
+                            <div className="flex items-center gap-1.5">
+                              {hasActiveRegistration(v.partnerId) && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-[9px] bg-info/10 text-info border-info/20 gap-0.5"
+                                >
+                                  <FileText className="h-2.5 w-2.5" />
+                                  Cadastro
+                                </Badge>
+                              )}
+                              {v.potentialValue && (
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    "text-[9px]",
+                                    v.potentialValue >= 1000000 ? "bg-warning/10 text-warning border-warning/20" : "",
+                                  )}
+                                >
+                                  {formatCentavos(v.potentialValue)}
+                                </Badge>
+                              )}
+                              <Badge variant="outline" className="text-[10px] capitalize">
+                                {v.medio}
+                              </Badge>
+                            </div>
                           </div>
                         );
-                      })}
-                      {dayVisits.length > 3 && (
-                        <span className="text-[10px] text-muted-foreground pl-1">+{dayVisits.length - 3}</span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {days.map((day, i) => {
-            const dayVisits = getVisitsForDay(day);
-            return (
-              <Card key={i}>
-                <CardHeader className="py-3 px-4">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <span className={cn(
-                      'w-7 h-7 rounded-full flex items-center justify-center text-xs',
-                      isSameDay(day, today) ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                    )}>
-                      {format(day, 'd')}
-                    </span>
-                    <span className="capitalize">{format(day, "EEEE, dd 'de' MMMM", { locale: ptBR })}</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="px-4 pb-4 space-y-2">
-                  {dayVisits.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center">Nenhuma visita agendada</p>
-                  ) : dayVisits.map(v => {
-                    const partner = getPartnerById(v.partnerId);
-                    const vUser = getUserById(v.userId);
-                    return (
-                      <div key={v.id} onClick={() => handleOpenDetail(v)} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/30 transition-colors cursor-pointer">
-                        <div className={cn('px-2 py-0.5 rounded text-[10px] font-medium border shrink-0', statusBgClasses[v.status])}>
-                          {v.status}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{partner?.name || v.prospectPartner || 'Sem nome'}</p>
-                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Badge variant="outline" className={cn('text-[9px] px-1 py-0 gap-0.5', v.type === 'visita' ? 'bg-info/10 text-info border-info/20' : 'bg-warning/10 text-warning border-warning/20')}>
-                              {v.type === 'visita' ? <><Handshake className="h-2.5 w-2.5" />Visita</> : <><UserPlus className="h-2.5 w-2.5" />Prospecção</>}
-                            </Badge>
-                            {v.time ? <span>{v.time}</span> : <span className="flex items-center gap-0.5"><ClockIcon className="h-3 w-3" /> Sem horário</span>}
-                            <span>• {vUser?.name}</span>
-                          </div>
-                        </div>
-                        {(() => {
-                          const participants = getParticipants(v);
-                          return (
-                            <TooltipProvider delayDuration={200}>
-                              <div className="flex -space-x-1.5 shrink-0">
-                                {participants.slice(0, 4).map(p => (
-                                  <Tooltip key={p.id}>
-                                    <TooltipTrigger asChild>
-                                      <div className="relative">
-                                        {p.id === rankingLeaderId && (
-                                          <Crown className="h-3 w-3 text-yellow-500 fill-yellow-500 absolute -top-2 left-1/2 -translate-x-1/2 z-10" />
-                                        )}
-                                        <Avatar className="h-6 w-6 border-2 border-background">
-                                          <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">{p.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                      </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
-                                  </Tooltip>
-                                ))}
-                                {participants.length > 4 && (
-                                  <Avatar className="h-6 w-6 border-2 border-background">
-                                    <AvatarFallback className="text-[9px] bg-muted text-muted-foreground">+{participants.length - 4}</AvatarFallback>
-                                  </Avatar>
-                                )}
-                              </div>
-                            </TooltipProvider>
-                          );
-                        })()}
-                        <div className="flex items-center gap-1.5">
-                          {hasActiveRegistration(v.partnerId) && (
-                            <Badge variant="outline" className="text-[9px] bg-info/10 text-info border-info/20 gap-0.5">
-                              <FileText className="h-2.5 w-2.5" />Cadastro
-                            </Badge>
-                          )}
-                          {v.potentialValue && (
-                            <Badge variant="outline" className={cn('text-[9px]', v.potentialValue >= 1000000 ? 'bg-warning/10 text-warning border-warning/20' : '')}>
-                              {formatCentavos(v.potentialValue)}
-                            </Badge>
-                          )}
-                          <Badge variant="outline" className="text-[10px] capitalize">{v.medio}</Badge>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+                      })
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
-      {/* Map with filtered visit pins */}
-      <AgendaMap visits={filteredVisits} getPartnerById={getPartnerById} />
+        {/* Map with filtered visit pins */}
+        <AgendaMap visits={filteredVisits} getPartnerById={getPartnerById} />
 
-      {/* Create/Edit Visit Dialog */}
-      <Dialog open={showForm} onOpenChange={(open) => {
-        setShowForm(open);
-        if (!open) { setEditingVisit(null); resetForm(); }
-      }}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingVisit ? 'Editar Agenda' : 'Nova Agenda'} — Etapa {formStep + 1}/3</DialogTitle>
-          </DialogHeader>
+        {/* Create/Edit Visit Dialog */}
+        <Dialog
+          open={showForm}
+          onOpenChange={(open) => {
+            setShowForm(open);
+            if (!open) {
+              setEditingVisit(null);
+              resetForm();
+            }
+          }}
+        >
+          <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingVisit ? "Editar Agenda" : "Nova Agenda"} — Etapa {formStep + 1}/3
+              </DialogTitle>
+            </DialogHeader>
 
-          {formStep === 0 && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Tipo</Label>
-                  <Select value={formData.type} onValueChange={(v) => setFormData({...formData, type: v as VisitType, partnerId: '', prospectPartner: '', prospectCnpj: '', prospectAddress: '', prospectPhone: '', prospectContact: '', prospectEmail: ''})}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="visita">Visita</SelectItem>
-                      <SelectItem value="prospecção">Prospecção</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Meio</Label>
-                  <Select value={formData.medio} onValueChange={(v) => setFormData({...formData, medio: v as 'presencial' | 'remoto'})}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="presencial">Presencial</SelectItem>
-                      <SelectItem value="remoto">Remoto</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Period (required) */}
-              <div className="space-y-2">
-                <Label>Período da agenda *</Label>
-                <Select value={formData.period} onValueChange={(v) => setFormData({...formData, period: v as VisitPeriod})}>
-                  <SelectTrigger className={cn(!formData.period && 'text-muted-foreground')}>
-                    <SelectValue placeholder="Selecione o período" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getActiveItems('periods').map(p => (
-                      <SelectItem key={p} value={p.toLowerCase() as VisitPeriod}>{p}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {formData.type === 'visita' ? (
-                <div className="space-y-2">
-                  <Label>Parceiro</Label>
-                  <Select value={formData.partnerId} onValueChange={(v) => {
-                    const partner = getPartnerById(v);
-                    setFormData({...formData, partnerId: v, structures: partner?.structures || []});
-                  }}>
-                    <SelectTrigger><SelectValue placeholder="Selecione o parceiro" /></SelectTrigger>
-                    <SelectContent>
-                      {(profile === 'nao_gestor' && user
-                        ? partners.filter(p => p.responsibleUserId === user.id)
-                        : partners
-                      ).map(p => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {formData.partnerId && (
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">{getPartnerById(formData.partnerId)?.address}</p>
-                      <div className="flex flex-wrap gap-1">
-                        {getPartnerById(formData.partnerId)?.structures.map(s => (
-                          <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-3">
+            {formStep === 0 && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Parceiro</Label>
-                    <Input value={formData.prospectPartner} onChange={e => setFormData({...formData, prospectPartner: e.target.value})} placeholder="Nome do parceiro" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>CNPJ</Label>
-                    <Input value={formData.prospectCnpj} onChange={e => setFormData({...formData, prospectCnpj: e.target.value})} placeholder="00.000.000/0000-00" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>E-mail *</Label>
-                    <Input
-                      type="email"
-                      value={formData.prospectEmail}
-                      onChange={e => setFormData({...formData, prospectEmail: e.target.value})}
-                      placeholder="email@parceiro.com"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Endereço</Label>
-                    <Input value={formData.prospectAddress} onChange={e => setFormData({...formData, prospectAddress: e.target.value})} placeholder="Endereço completo" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Telefone</Label>
-                      <Input value={formData.prospectPhone} onChange={e => setFormData({...formData, prospectPhone: e.target.value})} placeholder="(00) 0000-0000" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Contato</Label>
-                      <Input value={formData.prospectContact} onChange={e => setFormData({...formData, prospectContact: e.target.value})} placeholder="Nome do contato" />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Data *</Label>
-                  <Input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Hora <span className="text-muted-foreground text-xs">(opcional)</span></Label>
-                  <Input type="time" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} />
-                </div>
-              </div>
-
-              {/* Potential Value */}
-              <div className="space-y-2">
-                <Label className="flex items-center gap-1.5">
-                  <DollarSign className="h-3.5 w-3.5" />
-                  Potencial de Produção
-                </Label>
-                <Input
-                  value={formData.potentialValue}
-                  onChange={e => setFormData({...formData, potentialValue: formatCurrencyInput(e.target.value)})}
-                  placeholder="Ex: R$ 5.000,00"
-                />
-              </div>
-
-              {/* Convidados */}
-              <div className="space-y-2">
-                <Label>Convidados</Label>
-                <div className="space-y-1.5 max-h-40 overflow-y-auto border rounded-md p-2">
-                  {allCargos.map(cargo => {
-                    const usersInCargo = invitableUsers.filter(u => u.role === cargo);
-                    if (usersInCargo.length === 0) return null;
-                    return (
-                      <div key={cargo} className="space-y-1">
-                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide pt-1">{cargoLabels[cargo]}</p>
-                        {usersInCargo.map(c => (
-                          <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer">
-                            <Checkbox
-                              checked={formData.invitedUserIds.includes(c.id)}
-                              onCheckedChange={() => setFormData({
-                                ...formData,
-                                invitedUserIds: formData.invitedUserIds.includes(c.id)
-                                  ? formData.invitedUserIds.filter(id => id !== c.id)
-                                  : [...formData.invitedUserIds, c.id],
-                              })}
-                            />
-                            <span>{c.name}</span>
-                          </label>
-                        ))}
-                      </div>
-                    );
-                  })}
-                </div>
-                {formData.invitedUserIds.length > 0 && (
-                  <p className="text-[11px] text-muted-foreground">{formData.invitedUserIds.length} convidado(s)</p>
-                )}
-              </div>
-
-              {editingVisit && (
-                <>
-                  <div className="space-y-2">
-                    <Label>Status</Label>
-                    <Select value={formData.status} onValueChange={(v) => {
-                      const newStatus = v as VisitStatus;
-                      if (newStatus === 'Reagendada' || newStatus === 'Cancelada') {
-                        setPendingFormStatus(newStatus);
-                        setShowJustificationModal(true);
-                      } else {
-                        setFormData({...formData, status: newStatus, rescheduleReason: '', cancelReason: ''});
+                    <Label>Tipo</Label>
+                    <Select
+                      value={formData.type}
+                      onValueChange={(v) =>
+                        setFormData({
+                          ...formData,
+                          type: v as VisitType,
+                          partnerId: "",
+                          prospectPartner: "",
+                          prospectCnpj: "",
+                          prospectAddress: "",
+                          prospectPhone: "",
+                          prospectContact: "",
+                          prospectEmail: "",
+                        })
                       }
-                    }}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Planejada">Planejada</SelectItem>
-                        <SelectItem value="Concluída">Concluída</SelectItem>
-                        <SelectItem value="Reagendada">Reagendada</SelectItem>
-                        <SelectItem value="Cancelada">Cancelada</SelectItem>
+                        <SelectItem value="visita">Visita</SelectItem>
+                        <SelectItem value="prospecção">Prospecção</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-
-                  {/* Display selected reason */}
-                  <AnimatePresence>
-                    {formData.status === 'Reagendada' && formData.rescheduleReason && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-sm overflow-hidden"
-                      >
-                        <p className="text-xs font-medium text-warning">Motivo do reagendamento</p>
-                        <p className="text-sm">{formData.rescheduleReason}</p>
-                      </motion.div>
-                    )}
-                    {formData.status === 'Cancelada' && formData.cancelReason && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-sm overflow-hidden"
-                      >
-                        <p className="text-xs font-medium text-destructive">Motivo do cancelamento</p>
-                        <p className="text-sm">{formData.cancelReason}</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </>
-              )}
-            </div>
-          )}
-
-          {formStep === 1 && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Bancos</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {infoBankNames.map(b => (
-                    <label key={b} className="flex items-center gap-2 text-sm cursor-pointer">
-                      <Checkbox checked={formData.banks.includes(b)} onCheckedChange={() => setFormData({...formData, banks: toggleArray(formData.banks, b)})} />
-                      {b}
-                    </label>
-                  ))}
+                  <div className="space-y-2">
+                    <Label>Meio</Label>
+                    <Select
+                      value={formData.medio}
+                      onValueChange={(v) => setFormData({ ...formData, medio: v as "presencial" | "remoto" })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="presencial">Presencial</SelectItem>
+                        <SelectItem value="remoto">Remoto</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Produtos</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {getActiveItems('products').map(p => (
-                    <label key={p} className="flex items-center gap-2 text-sm cursor-pointer">
-                      <Checkbox checked={formData.products.includes(p)} onCheckedChange={() => setFormData({...formData, products: toggleArray(formData.products, p)})} />
-                      {p}
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
 
-          {formStep === 2 && !showBankRegistration && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Resumo da visita</Label>
-                <Textarea value={formData.summary} onChange={e => setFormData({...formData, summary: e.target.value})} placeholder="Resumo geral da visita..." />
-              </div>
-
-              {/* Bank Registrations added */}
-              {bankRegistrations.length > 0 && (
+                {/* Period (required) */}
                 <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Cadastros de banco solicitados:</Label>
-                  {bankRegistrations.map((br, i) => (
-                    <div key={i} className="flex items-center gap-2 rounded-md bg-primary/10 border border-primary/20 px-3 py-2">
-                      <LandmarkIcon className="h-4 w-4 text-primary shrink-0" />
-                      <span className="text-sm font-medium">{br.bankName}</span>
-                      {br.pendingDocs.length > 0 && (
-                        <Badge variant="outline" className="text-[10px] ml-auto">{br.pendingDocs.length} docs pendentes</Badge>
-                      )}
-                    </div>
-                  ))}
+                  <Label>Período da agenda *</Label>
+                  <Select
+                    value={formData.period}
+                    onValueChange={(v) => setFormData({ ...formData, period: v as VisitPeriod })}
+                  >
+                    <SelectTrigger className={cn(!formData.period && "text-muted-foreground")}>
+                      <SelectValue placeholder="Selecione o período" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getActiveItems("periods").map((p) => (
+                        <SelectItem key={p} value={p.toLowerCase() as VisitPeriod}>
+                          {p}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
 
-              {/* Cadastrar Banco button */}
-              {(formData.partnerId || formData.prospectPartner) && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full gap-2 border-dashed border-primary/40 text-primary hover:bg-primary/5"
-                  onClick={() => setShowBankRegistration(true)}
-                >
-                  <LandmarkIcon className="h-4 w-4" />
-                  Cadastrar Banco
-                </Button>
-              )}
-            </div>
-          )}
+                {formData.type === "visita" ? (
+                  <div className="space-y-2">
+                    <Label>Parceiro</Label>
+                    <Select
+                      value={formData.partnerId}
+                      onValueChange={(v) => {
+                        const partner = getPartnerById(v);
+                        setFormData({ ...formData, partnerId: v, structures: partner?.structures || [] });
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o parceiro" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(profile === "nao_gestor" && user
+                          ? partners.filter((p) => p.responsibleUserId === user.id)
+                          : partners
+                        ).map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {formData.partnerId && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground">{getPartnerById(formData.partnerId)?.address}</p>
+                        <div className="flex flex-wrap gap-1">
+                          {getPartnerById(formData.partnerId)?.structures.map((s) => (
+                            <Badge key={s} variant="secondary" className="text-[10px]">
+                              {s}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label>Parceiro</Label>
+                      <Input
+                        value={formData.prospectPartner}
+                        onChange={(e) => setFormData({ ...formData, prospectPartner: e.target.value })}
+                        placeholder="Nome do parceiro"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>CNPJ</Label>
+                      <Input
+                        value={formData.prospectCnpj}
+                        onChange={(e) => setFormData({ ...formData, prospectCnpj: e.target.value })}
+                        placeholder="00.000.000/0000-00"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>E-mail *</Label>
+                      <Input
+                        type="email"
+                        value={formData.prospectEmail}
+                        onChange={(e) => setFormData({ ...formData, prospectEmail: e.target.value })}
+                        placeholder="email@parceiro.com"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Endereço</Label>
+                      <Input
+                        value={formData.prospectAddress}
+                        onChange={(e) => setFormData({ ...formData, prospectAddress: e.target.value })}
+                        placeholder="Endereço completo"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Telefone</Label>
+                        <Input
+                          value={formData.prospectPhone}
+                          onChange={(e) => setFormData({ ...formData, prospectPhone: e.target.value })}
+                          placeholder="(00) 0000-0000"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Contato</Label>
+                        <Input
+                          value={formData.prospectContact}
+                          onChange={(e) => setFormData({ ...formData, prospectContact: e.target.value })}
+                          placeholder="Nome do contato"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-          {formStep === 2 && showBankRegistration && (
-            <BankRegistrationFlow
-              partnerId={formData.partnerId || `prospect-${formData.prospectCnpj}`}
-              partnerName={formData.type === 'visita' ? (getPartnerById(formData.partnerId)?.name || '') : (formData.prospectPartner || '')}
-              onComplete={(data) => {
-                setBankRegistrations(prev => [...prev, { bankName: data.bankName, pendingDocs: data.pendingDocs }]);
-                const pName = formData.type === 'visita' ? (getPartnerById(formData.partnerId)?.name || '') : (formData.prospectPartner || '');
-                const details = Object.entries(data.fieldValues).map(([, v]) => v).filter(Boolean).join(' | ');
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Data *</Label>
+                    <Input
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>
+                      Hora <span className="text-muted-foreground text-xs">(opcional)</span>
+                    </Label>
+                    <Input
+                      type="time"
+                      value={formData.time}
+                      onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                    />
+                  </div>
+                </div>
 
-                // Auto-generate tasks for pending docs
-                const now = new Date().toISOString();
-                const autoTasks: VisitComment[] = [];
-                data.pendingDocIds.forEach((docId, i) => {
-                  autoTasks.push({
-                    id: `auto-doc-${Date.now()}-${i}`,
-                    userId: user?.id || '',
-                    text: `📄 Enviar: ${data.pendingDocs[i]} (${data.bankName})`,
-                    type: 'task',
-                    taskCompleted: false,
-                    taskCategory: 'document',
-                    taskSourceId: docId,
-                    taskBankName: data.bankName,
-                    createdAt: now,
-                  });
-                });
-                // Auto-generate tasks for unfilled operational fields
-                data.unfilledFieldIds.forEach((fieldId, i) => {
-                  autoTasks.push({
-                    id: `auto-field-${Date.now()}-${i}`,
-                    userId: user?.id || '',
-                    text: `🧾 Preencher: ${data.unfilledFieldNames[i]} (${data.bankName})`,
-                    type: 'task',
-                    taskCompleted: false,
-                    taskCategory: 'data',
-                    taskSourceId: fieldId,
-                    taskBankName: data.bankName,
-                    createdAt: now,
-                  });
-                });
-                setPendingAutoTasks(prev => [...prev, ...autoTasks]);
+                {/* Potential Value */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5">
+                    <DollarSign className="h-3.5 w-3.5" />
+                    Potencial de Produção
+                  </Label>
+                  <Input
+                    value={formData.potentialValue}
+                    onChange={(e) => setFormData({ ...formData, potentialValue: formatCurrencyInput(e.target.value) })}
+                    placeholder="Ex: R$ 5.000,00"
+                  />
+                </div>
 
-                const newReg = addRegistration({
-                  partnerId: formData.partnerId || '',
-                  bank: data.bankName,
-                  cnpj: formData.type === 'visita' ? (getPartnerById(formData.partnerId)?.cnpj || '') : (formData.prospectCnpj || ''),
-                  commercialUserId: user?.id || '',
-                  observation: `Solicitação via agenda. ${details ? `Dados: ${details}` : ''}${data.pendingDocs.length > 0 ? ` | Docs pendentes: ${data.pendingDocs.join(', ')}` : ''}`,
-                  status: 'Não iniciado',
-                  solicitation: 'Substabelecido',
-                  handlingWith: 'Comercial',
-                  code: '',
-                  contractConfirmed: false,
-                });
-                // Send approval notification to the team manager (gerente), not all gestors
-                const userTeam = teams.find(t =>
-                  t.commercialIds.includes(user?.id || '') ||
-                  t.ascomIds.includes(user?.id || '') ||
-                  t.managerId === user?.id ||
-                  t.directorId === user?.id ||
-                  (t.cadastroIds || []).includes(user?.id || '')
-                );
-                const managerId = userTeam?.managerId;
-                if (managerId && managerId !== user?.id) {
-                  addNotification({
-                    type: 'registration_approval',
-                    visitId: '',
-                    fromUserId: user?.id || '',
-                    toUserId: managerId,
-                    partnerId: formData.partnerId || '',
-                    partnerName: pName,
-                    date: format(new Date(), 'yyyy-MM-dd'),
-                    time: '',
-                    status: 'pending',
-                    message: `📋 ${user?.name || 'Comercial'} solicita aprovação de cadastro no banco ${data.bankName} para ${pName}.${data.pendingDocs.length > 0 ? ` (${data.pendingDocs.length} docs pendentes)` : ''}`,
-                    registrationId: newReg.id,
-                    bankName: data.bankName,
-                  });
+                {/* Convidados */}
+                <div className="space-y-2">
+                  <Label>Convidados</Label>
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto border rounded-md p-2">
+                    {allCargos.map((cargo) => {
+                      const usersInCargo = invitableUsers.filter((u) => u.role === cargo);
+                      if (usersInCargo.length === 0) return null;
+                      return (
+                        <div key={cargo} className="space-y-1">
+                          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide pt-1">
+                            {cargoLabels[cargo]}
+                          </p>
+                          {usersInCargo.map((c) => (
+                            <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                              <Checkbox
+                                checked={formData.invitedUserIds.includes(c.id)}
+                                onCheckedChange={() =>
+                                  setFormData({
+                                    ...formData,
+                                    invitedUserIds: formData.invitedUserIds.includes(c.id)
+                                      ? formData.invitedUserIds.filter((id) => id !== c.id)
+                                      : [...formData.invitedUserIds, c.id],
+                                  })
+                                }
+                              />
+                              <span>{c.name}</span>
+                            </label>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {formData.invitedUserIds.length > 0 && (
+                    <p className="text-[11px] text-muted-foreground">{formData.invitedUserIds.length} convidado(s)</p>
+                  )}
+                </div>
+
+                {editingVisit && (
+                  <>
+                    <div className="space-y-2">
+                      <Label>Status</Label>
+                      <Select
+                        value={formData.status}
+                        onValueChange={(v) => {
+                          const newStatus = v as VisitStatus;
+                          if (newStatus === "Reagendada" || newStatus === "Cancelada") {
+                            setPendingFormStatus(newStatus);
+                            setShowJustificationModal(true);
+                          } else {
+                            setFormData({ ...formData, status: newStatus, rescheduleReason: "", cancelReason: "" });
+                          }
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Planejada">Planejada</SelectItem>
+                          <SelectItem value="Concluída">Concluída</SelectItem>
+                          <SelectItem value="Reagendada">Reagendada</SelectItem>
+                          <SelectItem value="Cancelada">Cancelada</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Display selected reason */}
+                    <AnimatePresence>
+                      {formData.status === "Reagendada" && formData.rescheduleReason && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-sm overflow-hidden"
+                        >
+                          <p className="text-xs font-medium text-warning">Motivo do reagendamento</p>
+                          <p className="text-sm">{formData.rescheduleReason}</p>
+                        </motion.div>
+                      )}
+                      {formData.status === "Cancelada" && formData.cancelReason && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-sm overflow-hidden"
+                        >
+                          <p className="text-xs font-medium text-destructive">Motivo do cancelamento</p>
+                          <p className="text-sm">{formData.cancelReason}</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </>
+                )}
+              </div>
+            )}
+
+            {formStep === 1 && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Bancos</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {infoBankNames.map((b) => (
+                      <label key={b} className="flex items-center gap-2 text-sm cursor-pointer">
+                        <Checkbox
+                          checked={formData.banks.includes(b)}
+                          onCheckedChange={() => setFormData({ ...formData, banks: toggleArray(formData.banks, b) })}
+                        />
+                        {b}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Produtos</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {getActiveItems("products").map((p) => (
+                      <label key={p} className="flex items-center gap-2 text-sm cursor-pointer">
+                        <Checkbox
+                          checked={formData.products.includes(p)}
+                          onCheckedChange={() =>
+                            setFormData({ ...formData, products: toggleArray(formData.products, p) })
+                          }
+                        />
+                        {p}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {formStep === 2 && !showBankRegistration && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Resumo da visita</Label>
+                  <Textarea
+                    value={formData.summary}
+                    onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+                    placeholder="Resumo geral da visita..."
+                  />
+                </div>
+
+                {/* Bank Registrations added */}
+                {bankRegistrations.length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Cadastros de banco solicitados:</Label>
+                    {bankRegistrations.map((br, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-2 rounded-md bg-primary/10 border border-primary/20 px-3 py-2"
+                      >
+                        <LandmarkIcon className="h-4 w-4 text-primary shrink-0" />
+                        <span className="text-sm font-medium">{br.bankName}</span>
+                        {br.pendingDocs.length > 0 && (
+                          <Badge variant="outline" className="text-[10px] ml-auto">
+                            {br.pendingDocs.length} docs pendentes
+                          </Badge>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Cadastrar Banco button */}
+                {(formData.partnerId || formData.prospectPartner) && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full gap-2 border-dashed border-primary/40 text-primary hover:bg-primary/5"
+                    onClick={() => setShowBankRegistration(true)}
+                  >
+                    <LandmarkIcon className="h-4 w-4" />
+                    Cadastrar Banco
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {formStep === 2 && showBankRegistration && (
+              <BankRegistrationFlow
+                partnerId={formData.partnerId || `prospect-${formData.prospectCnpj}`}
+                partnerName={
+                  formData.type === "visita"
+                    ? getPartnerById(formData.partnerId)?.name || ""
+                    : formData.prospectPartner || ""
                 }
-                setShowBankRegistration(false);
-                const totalTasks = autoTasks.length;
-                toast({ title: 'Cadastro solicitado', description: `Aprovação enviada ao gerente.${totalTasks > 0 ? ` ${totalTasks} tarefa(s) gerada(s) automaticamente.` : ''}` });
-              }}
-              onCancel={() => setShowBankRegistration(false)}
-            />
-          )}
+                onComplete={(data) => {
+                  setBankRegistrations((prev) => [...prev, { bankName: data.bankName, pendingDocs: data.pendingDocs }]);
+                  const pName =
+                    formData.type === "visita"
+                      ? getPartnerById(formData.partnerId)?.name || ""
+                      : formData.prospectPartner || "";
+                  const details = Object.entries(data.fieldValues)
+                    .map(([, v]) => v)
+                    .filter(Boolean)
+                    .join(" | ");
 
-          {!showBankRegistration && (
-            <DialogFooter className="flex gap-2">
-              {formStep > 0 && <Button variant="outline" onClick={() => setFormStep(formStep - 1)}>Voltar</Button>}
-              {formStep < 2 ? (
-                <Button onClick={() => setFormStep(formStep + 1)} disabled={formStep === 0 && !canProceedStep1}>Próximo</Button>
-              ) : (
-                <Button onClick={handleSave}>Salvar agenda</Button>
-              )}
-            </DialogFooter>
-          )}
-        </DialogContent>
-      </Dialog>
+                  // Auto-generate tasks for pending docs
+                  const now = new Date().toISOString();
+                  const autoTasks: VisitComment[] = [];
+                  data.pendingDocIds.forEach((docId, i) => {
+                    autoTasks.push({
+                      id: `auto-doc-${Date.now()}-${i}`,
+                      userId: user?.id || "",
+                      text: `📄 Enviar: ${data.pendingDocs[i]} (${data.bankName})`,
+                      type: "task",
+                      taskCompleted: false,
+                      taskCategory: "document",
+                      taskSourceId: docId,
+                      taskBankName: data.bankName,
+                      createdAt: now,
+                    });
+                  });
+                  // Auto-generate tasks for unfilled operational fields
+                  data.unfilledFieldIds.forEach((fieldId, i) => {
+                    autoTasks.push({
+                      id: `auto-field-${Date.now()}-${i}`,
+                      userId: user?.id || "",
+                      text: `🧾 Preencher: ${data.unfilledFieldNames[i]} (${data.bankName})`,
+                      type: "task",
+                      taskCompleted: false,
+                      taskCategory: "data",
+                      taskSourceId: fieldId,
+                      taskBankName: data.bankName,
+                      createdAt: now,
+                    });
+                  });
+                  setPendingAutoTasks((prev) => [...prev, ...autoTasks]);
 
+                  const newReg = addRegistration({
+                    partnerId: formData.partnerId || "",
+                    bank: data.bankName,
+                    cnpj:
+                      formData.type === "visita"
+                        ? getPartnerById(formData.partnerId)?.cnpj || ""
+                        : formData.prospectCnpj || "",
+                    commercialUserId: user?.id || "",
+                    observation: `Solicitação via agenda. ${details ? `Dados: ${details}` : ""}${data.pendingDocs.length > 0 ? ` | Docs pendentes: ${data.pendingDocs.join(", ")}` : ""}`,
+                    status: "Não iniciado",
+                    solicitation: "Substabelecido",
+                    handlingWith: "Comercial",
+                    code: "",
+                    contractConfirmed: false,
+                  });
+                  // Send approval notification to the team manager (gerente), not all gestors
+                  const userTeam = teams.find(
+                    (t) =>
+                      t.commercialIds.includes(user?.id || "") ||
+                      t.ascomIds.includes(user?.id || "") ||
+                      t.managerId === user?.id ||
+                      t.directorId === user?.id ||
+                      (t.cadastroIds || []).includes(user?.id || ""),
+                  );
+                  const managerId = userTeam?.managerId;
+                  if (managerId && managerId !== user?.id) {
+                    addNotification({
+                      type: "registration_approval",
+                      visitId: "",
+                      fromUserId: user?.id || "",
+                      toUserId: managerId,
+                      partnerId: formData.partnerId || "",
+                      partnerName: pName,
+                      date: format(new Date(), "yyyy-MM-dd"),
+                      time: "",
+                      status: "pending",
+                      message: `📋 ${user?.name || "Comercial"} solicita aprovação de cadastro no banco ${data.bankName} para ${pName}.${data.pendingDocs.length > 0 ? ` (${data.pendingDocs.length} docs pendentes)` : ""}`,
+                      registrationId: newReg.id,
+                      bankName: data.bankName,
+                    });
+                  }
+                  setShowBankRegistration(false);
+                  const totalTasks = autoTasks.length;
+                  toast({
+                    title: "Cadastro solicitado",
+                    description: `Aprovação enviada ao gerente.${totalTasks > 0 ? ` ${totalTasks} tarefa(s) gerada(s) automaticamente.` : ""}`,
+                  });
+                }}
+                onCancel={() => setShowBankRegistration(false)}
+              />
+            )}
+
+            {!showBankRegistration && (
+              <DialogFooter className="flex gap-2">
+                {formStep > 0 && (
+                  <Button variant="outline" onClick={() => setFormStep(formStep - 1)}>
+                    Voltar
+                  </Button>
+                )}
+                {formStep < 2 ? (
+                  <Button onClick={() => setFormStep(formStep + 1)} disabled={formStep === 0 && !canProceedStep1}>
+                    Próximo
+                  </Button>
+                ) : (
+                  <Button onClick={handleSave}>Salvar agenda</Button>
+                )}
+              </DialogFooter>
+            )}
+          </DialogContent>
+        </Dialog>
       </AnimatedFilterContent>
 
       {/* Detail Modal */}
@@ -1380,8 +1823,8 @@ export default function AgendaPage() {
         onOpenChange={setShowDetail}
         onEdit={handleEditFromDetail}
         onDelete={(visitId) => {
-          setVisits(prev => prev.filter(v => v.id !== visitId));
-          toast({ title: 'Visita excluída', description: 'A visita foi removida com sucesso.' });
+          setVisits((prev) => prev.filter((v) => v.id !== visitId));
+          toast({ title: "Visita excluída", description: "A visita foi removida com sucesso." });
         }}
         onAcceptInvite={handleAcceptVisitInvite}
         onRejectInvite={handleRejectVisitInvite}
@@ -1393,11 +1836,12 @@ export default function AgendaPage() {
       {/* Justification Modal */}
       <JustificationModal
         open={showJustificationModal}
-        onOpenChange={(open) => { if (!open) handleJustificationCancel(); }}
-        targetStatus={pendingFormStatus || 'Reagendada'}
+        onOpenChange={(open) => {
+          if (!open) handleJustificationCancel();
+        }}
+        targetStatus={pendingFormStatus || "Reagendada"}
         onConfirm={handleJustificationConfirm}
       />
-
 
       <InviteRejectionModal
         open={showInviteRejectionModal}
