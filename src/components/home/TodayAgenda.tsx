@@ -31,7 +31,7 @@ export default function TodayAgenda({ viewMode, visits: allVisits }: TodayAgenda
   const [completedIds, setCompletedIds] = useLocalStorage<string[]>('ribercred_completed_visits', []);
 
   const todayVisits = useMemo(() => {
-    return mockVisits
+    return allVisits
       .filter(v => {
         if (v.date !== today) return false;
         if (viewMode === 'personal') return v.userId === user?.id;
