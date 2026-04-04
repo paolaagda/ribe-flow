@@ -19,6 +19,7 @@ const potentialColors: Record<string, string> = {
 
 interface TodayAgendaProps {
   viewMode: 'personal' | 'team';
+  visits: Visit[];
 }
 
 export default function TodayAgenda({ viewMode }: TodayAgendaProps) {
