@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CalendarCheck, Check, Clock, MapPin, CalendarX, Handshake, UserPlus } from 'lucide-react';
-import { mockVisits, mockUsers, statusBgClasses } from '@/data/mock-data';
+import { mockUsers, statusBgClasses, Visit } from '@/data/mock-data';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePartners } from '@/hooks/usePartners';
 import { useToast } from '@/hooks/use-toast';
