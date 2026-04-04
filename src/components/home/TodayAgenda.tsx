@@ -22,7 +22,7 @@ interface TodayAgendaProps {
   visits: Visit[];
 }
 
-export default function TodayAgenda({ viewMode }: TodayAgendaProps) {
+export default function TodayAgenda({ viewMode, visits: allVisits }: TodayAgendaProps) {
   const { user } = useAuth();
   const { getPartnerById } = usePartners();
   const { toast } = useToast();
