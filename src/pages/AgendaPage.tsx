@@ -1084,7 +1084,7 @@ export default function AgendaPage() {
                                 handleOpenDetail(v);
                               }}
                               className={cn(
-                                "text-[10px] px-1.5 py-0.5 rounded truncate border cursor-pointer hover:ring-1 hover:ring-primary/40 flex items-center gap-1",
+                                "text-[10px] px-1 py-0.5 rounded border cursor-pointer hover:ring-1 hover:ring-primary/40 flex items-center gap-1",
                                 statusBgClasses[v.status],
                                 draggedVisitId === v.id && "opacity-50",
                               )}
@@ -1094,9 +1094,6 @@ export default function AgendaPage() {
                               ) : (
                                 <UserPlus className="h-2.5 w-2.5 shrink-0 text-warning" />
                               )}
-                              <span className="truncate flex-1">
-                                {(partner?.name || v.prospectPartner || "Sem nome")?.split(" ")[0]}
-                              </span>
                               {(() => {
                                 const participants = getParticipants(v);
                                 return (
