@@ -221,7 +221,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
       <div className="min-h-screen flex w-full">
         <AppSidebarContent />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center border-b border-border px-4 bg-card/50 backdrop-blur-sm">
+          <header className="sticky top-0 z-40 h-14 flex items-center border-b border-border px-4 bg-card/80 backdrop-blur-lg">
             <SidebarTrigger className="mr-4" />
             <div className="ml-auto flex items-center gap-1">
               <ThemeToggleButton />
