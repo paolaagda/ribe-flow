@@ -1346,8 +1346,8 @@ export default function AgendaPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="visita">Visita</SelectItem>
-                        <SelectItem value="prospecção">Prospecção</SelectItem>
+                        <SelectItem value="visita">Visita a Parceiro</SelectItem>
+                        <SelectItem value="prospecção">Prospecção (oportunidade futura)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
