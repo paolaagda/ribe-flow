@@ -1368,6 +1368,12 @@ export default function AgendaPage() {
                   </div>
                 </div>
 
+                {formData.type === "prospecção" && (
+                  <p className="text-xs text-muted-foreground bg-muted/50 rounded px-3 py-2">
+                    ⚠ Prospecções são oportunidades futuras e não fazem parte da base de parceiros.
+                  </p>
+                )}
+
                 {/* Period (required) */}
                 <div className="space-y-2">
                   <Label>Período da agenda *</Label>
