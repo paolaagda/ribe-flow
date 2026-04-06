@@ -1758,7 +1758,7 @@ export default function AgendaPage() {
                     code: "",
                     contractConfirmed: false,
                   });
-                  // Send approval notification to the team manager (gerente), not all gestors
+                  // Send approval notification to the team manager (gerente)
                   const userTeam = teams.find(
                     (t) =>
                       t.commercialIds.includes(user?.id || "") ||

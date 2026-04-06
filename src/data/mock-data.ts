@@ -211,7 +211,7 @@ function generateVisits(): Visit[] {
 
     const partner = mockPartners[Math.floor(seededRandom() * mockPartners.length)];
     const user = commercialUsers[Math.floor(seededRandom() * commercialUsers.length)];
-    const type = types[Math.floor(seededRandom() * types.length)];
+    const type: VisitType = seededRandom() < 0.9 ? 'visita' : 'prospecção';
 
     const period: VisitPeriod = parseInt(visits.length > 0 ? '1' : '0') >= 0 && seededRandom() > 0.5 ? 'tarde' : 'manhã';
     const hour = 8 + Math.floor(seededRandom() * 10);
