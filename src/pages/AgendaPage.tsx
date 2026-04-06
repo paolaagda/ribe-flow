@@ -295,8 +295,8 @@ export default function AgendaPage() {
       visitasConcluidas: visitas.filter((v) => v.status === "Concluída").length,
       prospecoesCriadas: prospecoes.length,
       prospecoesConcluidas: prospecoes.filter((v) => v.status === "Concluída").length,
-      totalAgendas: filteredVisits.length,
-      totalConcluidas: filteredVisits.filter((v) => v.status === "Concluída").length,
+      totalAgendas: visitas.length,
+      totalConcluidas: visitas.filter((v) => v.status === "Concluída").length,
     };
   }, [filteredVisits]);
 
