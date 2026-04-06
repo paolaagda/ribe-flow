@@ -27,7 +27,7 @@ interface Props {
 
 export default function TasksDrawer({ open, onOpenChange, onOpenVisit }: Props) {
   const { allTasks, pendingTasks, completedTasks, overdueTasks, toggleTask, getDaysPending } = useTasks();
-  const { profile } = useAuth();
+  const { user } = useAuth();
   const { partners } = usePartners();
   const [filterUser, setFilterUser] = useState('all');
   const [filterPartner, setFilterPartner] = useState('all');

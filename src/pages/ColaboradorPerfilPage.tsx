@@ -13,7 +13,7 @@ import { useTasks } from '@/hooks/useTasks';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { useTeamFilter } from '@/hooks/useTeamFilter';
 import { useRegistrations } from '@/hooks/useRegistrations';
-import { cargoLabels, cargoColors, profileLabels, getPartnerById } from '@/data/mock-data';
+import { cargoLabels, cargoColors, getPartnerById } from '@/data/mock-data';
 import { statusColors } from '@/data/registrations';
 import { format, parseISO, differenceInDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -165,8 +165,8 @@ export default function ColaboradorPerfilPage() {
                   <span>{cargoLabels[user.role]}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 shrink-0" />
-                  <span>Perfil: {profileLabels[user.profile]}</span>
+                  <Briefcase className="h-4 w-4 shrink-0" />
+                  <span>{cargoLabels[user.role]}</span>
                 </div>
                 {userTeam && (
                   <div className="flex items-center gap-2">

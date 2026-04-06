@@ -2,12 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { AppProfile, CompanyCargo, cargoLabels, allCargos } from '@/data/mock-data';
+import { CompanyCargo, cargoLabels, allCargos } from '@/data/mock-data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Moon, Sun, Handshake, ArrowLeft, Mail, CheckCircle2, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -15,7 +14,6 @@ import { useTheme } from '@/hooks/useTheme';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
-  const [isGestor, setIsGestor] = useState(false);
   const [cargo, setCargo] = useState<CompanyCargo>('comercial');
   const [loading, setLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
@@ -31,9 +29,8 @@ export default function LoginPage() {
 
   const handleLogin = () => {
     setLoading(true);
-    const appProfile: AppProfile = isGestor ? 'gestor' : 'nao_gestor';
     setTimeout(() => {
-      login(cargo, appProfile);
+      login(cargo);
       navigate('/dashboard');
     }, 800);
   };
@@ -156,20 +153,6 @@ export default function LoginPage() {
                     </Select>
                   </div>
 
-                  {/* Profile Toggle */}
-                  <div className="flex items-center justify-between rounded-xl border-2 border-border p-3">
-                    <div className="space-y-0.5">
-                      <Label className="text-sm font-medium">Perfil do App</Label>
-                      <p className="text-xs text-muted-foreground">
-                        {isGestor ? 'Acesso completo ao sistema' : 'Acesso limitado aos seus dados'}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">Não Gestor</span>
-                      <Switch checked={isGestor} onCheckedChange={setIsGestor} />
-                      <span className={`text-xs font-medium ${isGestor ? 'text-primary' : 'text-muted-foreground'}`}>Gestor</span>
-                    </div>
-                  </div>
 
                   {/* Login Button */}
                   <Button

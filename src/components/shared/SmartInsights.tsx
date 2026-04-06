@@ -48,7 +48,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
   const { visits } = useVisits();
   const { partners } = usePartners();
   const { pendingTasks, completedTasks } = useTasks();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
 
   const insights = useMemo((): Insight[] => {
     const result: Insight[] = [];
@@ -56,7 +56,8 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
     const monthStart = startOfMonth(today);
     const monthEnd = endOfMonth(today);
 
-    const visibleVisits = profile === 'nao_gestor' && user
+    const isRestricted = user && ['comercial', 'cadastro'].includes(user.role);
+    const visibleVisits = isRestricted
       ? visits.filter(v => v.userId === user.id || v.createdBy === user.id)
       : visits;
 
@@ -186,7 +187,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
     }
 
     return result.slice(0, 4);
-  }, [page, visits, partners, pendingTasks, completedTasks, user, profile, filterStatus, filterType, filterView]);
+  }, [page, visits, partners, pendingTasks, completedTasks, user, filterStatus, filterType, filterView]);
 
   const handleClick = (insight: Insight) => {
     if (onFilterClick) {

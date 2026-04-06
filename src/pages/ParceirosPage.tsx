@@ -26,7 +26,7 @@ export default function ParceirosPage() {
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'parceiros' | 'lojas'>('parceiros');
   const { canRead } = usePermission();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { partners } = usePartners();
   const { stores } = useStores();
   const { visits } = useVisits();
@@ -35,11 +35,11 @@ export default function ParceirosPage() {
 
   // Filter partners by role: comercial only sees their own partners
   const visiblePartners = useMemo(() => {
-    if (profile === 'nao_gestor' && user) {
+    if (user && ['comercial', 'cadastro'].includes(user.role)) {
       return partners.filter(p => p.responsibleUserId === user.id);
     }
     return partners;
-  }, [profile, user, partners]);
+  }, [user, partners]);
 
   const visibleStores = useMemo(() => {
     const visiblePartnerIds = new Set(visiblePartners.map(p => p.id));
@@ -105,7 +105,7 @@ export default function ParceirosPage() {
     <PageTransition className="space-y-ds-lg">
       <PageHeader
         title="Parceiros"
-        description={profile === 'nao_gestor' ? 'Seus parceiros vinculados' : 'Gerencie lojas e parceiros'}
+        description={user && ['comercial', 'cadastro'].includes(user.role) ? 'Seus parceiros vinculados' : 'Gerencie lojas e parceiros'}
       />
 
       <SmartInsights page="parceiros" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
