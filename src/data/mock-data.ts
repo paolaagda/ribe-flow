@@ -179,7 +179,7 @@ export const mockPartners: Partner[] = [
 // ============ GENERATE VISITS ============
 function generateVisits(): Visit[] {
   const statuses: VisitStatus[] = ['Planejada', 'Concluída', 'Reagendada', 'Cancelada'];
-  const types: VisitType[] = ['visita', 'prospecção'];
+  // types inlined with weighted probability (~90% visita, ~10% prospecção)
   const medios: VisitMedio[] = ['presencial', 'remoto'];
   const visits: Visit[] = [];
   const today = new Date();
