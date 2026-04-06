@@ -301,7 +301,7 @@ export default function AgendaPage() {
   }, [filteredVisits]);
 
   const todayIndicators = useMemo(() => {
-    const todayVisits = visibleVisits.filter((v) => v.date === todayStr);
+    const todayVisits = visibleVisits.filter((v) => v.date === todayStr && v.type === "visita");
     return {
       total: todayVisits.length,
       concluidas: todayVisits.filter((v) => v.status === "Concluída").length,
