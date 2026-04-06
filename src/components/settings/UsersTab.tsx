@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
-import { User, UserRole, AppProfile, CompanyCargo, cargoLabels, cargoColors, profileLabels, profileColors, allCargos } from '@/data/mock-data';
+import { User, UserRole, CompanyCargo, cargoLabels, cargoColors, allCargos } from '@/data/mock-data';
 import { useUsersData } from '@/hooks/useUsersData';
 import { PermissionLevel, defaultPermissions, groupedPermissions } from '@/data/permissions';
 import { usePermission } from '@/hooks/usePermission';
@@ -26,18 +26,18 @@ import { Team, initialTeams } from '@/data/teams';
 import { Edit, Lock, Trash2, RefreshCw, Search, Shield, Eye, EyeOff, Pencil, Save, Plus, Users2, ChevronRight, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const allProfiles: AppProfile[] = ['gestor', 'nao_gestor'];
+
 
 export default function UsersTab() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { profile } = useAuth();
+  const { user: authUser } = useAuth();
   const [search, setSearch] = useState('');
   const { users, setUsers } = useUsersData();
   const [editUser, setEditUser] = useState<User | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', email: '', role: '' as UserRole, profile: 'nao_gestor' as AppProfile, bio: '' });
-  const [permissions, setPermissions] = useLocalStorage<Record<AppProfile, Record<string, PermissionLevel>>>(
-    'ribercred_permissions_v6',
+  const [editForm, setEditForm] = useState({ name: '', email: '', role: '' as UserRole, bio: '' });
+  const [permissions, setPermissions] = useLocalStorage<Record<CompanyCargo, Record<string, PermissionLevel>>>(
+    'ribercred_permissions_v7',
     defaultPermissions
   );
   const [hasChanges, setHasChanges] = useState(false);
@@ -51,9 +51,9 @@ export default function UsersTab() {
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [deletingTeamId, setDeletingTeamId] = useState<string | null>(null);
   const [showNewUser, setShowNewUser] = useState(false);
-  const [newUserForm, setNewUserForm] = useState({ name: '', email: '', role: 'comercial' as UserRole, profile: 'nao_gestor' as AppProfile, bio: '' });
+  const [newUserForm, setNewUserForm] = useState({ name: '', email: '', role: 'comercial' as UserRole, bio: '' });
 
-  const isGestor = profile === 'gestor';
+  const canManage = authUser && ['diretor', 'gerente'].includes(authUser.role);
   const { canRead, canWrite } = usePermission();
   const grouped = groupedPermissions();
 
@@ -63,7 +63,7 @@ export default function UsersTab() {
 
   const handleEdit = (user: User) => {
     setEditUser(user);
-    setEditForm({ name: user.name, email: user.email, role: user.role, profile: user.profile, bio: user.bio });
+    setEditForm({ name: user.name, email: user.email, role: user.role, bio: user.bio });
   };
 
   const handleSave = () => {
@@ -94,10 +94,10 @@ export default function UsersTab() {
     toast({ title: `Senha de ${name} resetada (simulado)` });
   };
 
-  const handlePermissionChange = (appProfile: AppProfile, key: string, level: PermissionLevel) => {
+  const handlePermissionChange = (cargo: CompanyCargo, key: string, level: PermissionLevel) => {
     setPermissions(prev => ({
       ...prev,
-      [appProfile]: { ...prev[appProfile], [key]: level },
+      [cargo]: { ...prev[cargo], [key]: level },
     }));
     setHasChanges(true);
   };
@@ -107,13 +107,13 @@ export default function UsersTab() {
     toast({ title: 'Permissões salvas com sucesso!' });
   };
 
-  const handleResetPermissions = (appProfile: AppProfile) => {
+  const handleResetPermissions = (cargo: CompanyCargo) => {
     setPermissions(prev => ({
       ...prev,
-      [appProfile]: { ...defaultPermissions[appProfile] },
+      [cargo]: { ...defaultPermissions[cargo] },
     }));
     setHasChanges(true);
-    toast({ title: `Permissões de ${profileLabels[appProfile]} restauradas ao padrão` });
+    toast({ title: `Permissões de ${cargoLabels[cargo]} restauradas ao padrão` });
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,14 +148,13 @@ export default function UsersTab() {
       name: newUserForm.name,
       email: newUserForm.email,
       role: newUserForm.role,
-      profile: newUserForm.profile,
       bio: newUserForm.bio || 'Novo colaborador',
       active: true,
       avatar: '',
     };
     setUsers(prev => [...prev, newUser]);
     setShowNewUser(false);
-    setNewUserForm({ name: '', email: '', role: 'comercial', profile: 'nao_gestor', bio: '' });
+    setNewUserForm({ name: '', email: '', role: 'comercial', bio: '' });
     toast({ title: 'Colaborador criado com sucesso!' });
   };
 
