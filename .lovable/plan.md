@@ -1,42 +1,34 @@
 
 
-## Diagnóstico do Bug
+## Plano: Gerar Documentação de Arquitetura Funcional (Markdown)
 
-O KPI "Agendas Hoje" mostra **0/0** enquanto o painel "Agenda do dia" mostra **3 itens**. A causa é uma **inconsistência de fontes de dados**:
+Gerar um arquivo `Canal_Parceiro_Documentacao_Arquitetura.md` em `/mnt/documents/` com base exclusiva no código-fonte analisado.
 
-- **KPI (`todayIndicators`)** → usa `visibleVisits` que vem do hook `useVisits()` → dados persistidos no **localStorage**. Quando o localStorage foi criado em um dia anterior, as datas "de hoje" ficaram defasadas, e ao filtrar por `todayStr` não encontra nada.
+### Estrutura do Documento
 
-- **Painel "Agenda do dia" (`TodayAgenda`)** → importa `mockVisits` **diretamente** do módulo `mock-data.ts`, que é regenerado a cada carregamento com a data atual (`new Date()`). Por isso sempre mostra visitas "de hoje".
+O Markdown terá as seguintes seções, cada uma diferenciando explicitamente o que é **implementado**, **parcial**, **ausente** ou **hipótese**, com indicação de origem técnica:
 
-## Plano de Correção
+1. **Visão Geral do Produto** — SPA React/TS, dados em localStorage, sem backend
+2. **Módulos Implementados** — tabela com status de cada módulo
+3. **Telas Existentes** — mapeamento de todas as 12 rotas com componentes e funcionalidades
+4. **Entidades e Relacionamentos** — User, Partner, Visit, Registration, Campaign, Team, Store, Notification, AuditLog + diagrama ASCII dos relacionamentos
+5. **Fluxos Principais** — Login, criação de agenda, convite/aceitação, solicitação de cadastro, aprovação/recusa pelo gerente, gamificação, tarefas/documentos
+6. **Regras de Negócio Identificadas** — permissões (48 ações, 13 módulos), visibilidade por perfil, sincronização tarefa-documento, auto-refresh de datas mock, notificações automáticas
+7. **Componentes de Interface** — shared (PageHeader, AnimatedKpiCard, SmartInsights, PaginationControls), domínio (agenda, partners, cadastro, campaigns, settings, info, notifications), UI (shadcn/ui)
+8. **Padrões Visuais** — tema claro/escuro (CSS vars), design tokens, cor primária verde (#16a34a), framer-motion, sidebar colapsável, bottom nav mobile, responsividade (useIsMobile/useIsTablet), swipe gestures
+9. **Automações Existentes** — notificações de convite, task_overdue, registration_approval, sync bidirecional tarefa↔checklist de documentos, regeneração de datas de visitas demo
+10. **Pendências Estruturais** — sem backend real, sem autenticação real, sem persistência de dados entre dispositivos, campanhas usam mockVisits direto em vez de localStorage, sem testes funcionais
+11. **Pontos de Melhoria** — inconsistências identificadas no código
+12. **Resumo Executivo do Estado Atual** — sólido, funcional-incompleto, frágil, top 10 prioridades
 
-### 1. Unificar fonte de dados no TodayAgenda
+### Inconsistências Identificadas (a documentar)
+- `CampanhasPage` importa `mockVisits` diretamente em vez de `useVisits()` → pontuação de campanhas não reflete dados atualizados do localStorage
+- Login sem validação real (qualquer cargo + perfil = acesso)
+- `useTeamFilter` referencia `mockUsers` diretamente em vez de dados dinâmicos
+- Dados de equipes são estáticos em `initialTeams`, editáveis apenas se houver UI (parcial nas Configurações)
 
-O componente `TodayAgenda` deve receber as visitas via **props** (vindas do mesmo `useVisits()` usado pelo resto da página), em vez de importar `mockVisits` diretamente.
-
-**Arquivo:** `src/components/home/TodayAgenda.tsx`
-- Adicionar prop `visits: Visit[]` à interface
-- Remover importação direta de `mockVisits`
-- Usar `visits` da prop no filtro de visitas do dia
-
-**Arquivo:** `src/pages/AgendaPage.tsx`
-- Passar `visibleVisits` como prop para `<TodayAgenda>`
-
-### 2. Atualizar dados do localStorage quando datas ficam obsoletas
-
-Quando o app detectar que os dados do localStorage não possuem nenhuma visita para "hoje", deve regenerar as visitas fixas com a data atual.
-
-**Arquivo:** `src/hooks/useVisits.ts`
-- Adicionar lógica de verificação: se nenhuma visita no localStorage tem a data de hoje, atualizar as visitas fixas (vt1-vt7) para a data atual
-- Isso garante que o dashboard sempre tenha dados demonstrativos relevantes
-
-### 3. Aplicar a mesma correção no VisitMap (se aplicável)
-
-Verificar se `VisitMap` também usa `mockVisits` diretamente e corrigir para usar a mesma fonte de dados consistente.
-
-## Resultado Esperado
-
-- KPI e painel "Agenda do dia" sempre mostram os mesmos dados
-- Dados de demonstração se atualizam automaticamente para a data corrente
-- Sem inconsistências visuais entre componentes
+### Implementação
+- Script Python que escreve o arquivo `.md` completo em `/mnt/documents/`
+- Conteúdo 100% baseado na análise de código já realizada
+- Estimativa: ~2500 linhas de Markdown
 
