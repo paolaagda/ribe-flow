@@ -92,7 +92,9 @@ export default function TodayAgenda({ viewMode, visits: allVisits }: TodayAgenda
               transition={{ delay: i * 0.05 }}
               className={`p-3 rounded-lg border transition-all hover:shadow-sm ${
                 isNext ? 'border-primary bg-primary/5 ring-1 ring-primary/20' :
-                isDone ? 'opacity-70' : 'border-border'
+                isDone ? 'opacity-70' :
+                v.type === 'prospecção' ? 'opacity-50 border-muted' :
+                'border-border'
               }`}
             >
               <div className="flex items-start gap-3">

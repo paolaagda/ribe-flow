@@ -295,13 +295,13 @@ export default function AgendaPage() {
       visitasConcluidas: visitas.filter((v) => v.status === "Concluída").length,
       prospecoesCriadas: prospecoes.length,
       prospecoesConcluidas: prospecoes.filter((v) => v.status === "Concluída").length,
-      totalAgendas: filteredVisits.length,
-      totalConcluidas: filteredVisits.filter((v) => v.status === "Concluída").length,
+      totalAgendas: visitas.length,
+      totalConcluidas: visitas.filter((v) => v.status === "Concluída").length,
     };
   }, [filteredVisits]);
 
   const todayIndicators = useMemo(() => {
-    const todayVisits = visibleVisits.filter((v) => v.date === todayStr);
+    const todayVisits = visibleVisits.filter((v) => v.date === todayStr && v.type === "visita");
     return {
       total: todayVisits.length,
       concluidas: todayVisits.filter((v) => v.status === "Concluída").length,
@@ -1088,6 +1088,7 @@ export default function AgendaPage() {
                                 "text-[10px] px-1 py-0.5 rounded border cursor-pointer hover:ring-1 hover:ring-primary/40 flex items-center gap-1",
                                 statusBgClasses[v.status],
                                 draggedVisitId === v.id && "opacity-50",
+                                v.type === "prospecção" && "opacity-50 border-muted",
                               )}
                             >
                               {v.type === "visita" ? (
@@ -1345,8 +1346,8 @@ export default function AgendaPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="visita">Visita</SelectItem>
-                        <SelectItem value="prospecção">Prospecção</SelectItem>
+                        <SelectItem value="visita">Visita a Parceiro</SelectItem>
+                        <SelectItem value="prospecção">Prospecção (oportunidade futura)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1366,6 +1367,12 @@ export default function AgendaPage() {
                     </Select>
                   </div>
                 </div>
+
+                {formData.type === "prospecção" && (
+                  <p className="text-xs text-muted-foreground bg-muted/50 rounded px-3 py-2">
+                    ⚠ Prospecções são oportunidades futuras e não fazem parte da base de parceiros.
+                  </p>
+                )}
 
                 {/* Period (required) */}
                 <div className="space-y-2">
@@ -1757,7 +1764,7 @@ export default function AgendaPage() {
                     code: "",
                     contractConfirmed: false,
                   });
-                  // Send approval notification to the team manager (gerente), not all gestors
+                  // Send approval notification to the team manager (gerente)
                   const userTeam = teams.find(
                     (t) =>
                       t.commercialIds.includes(user?.id || "") ||

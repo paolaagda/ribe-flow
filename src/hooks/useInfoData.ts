@@ -108,7 +108,7 @@ const initialUserProcesses: InfoUserProcess[] = [
     documents: ['RG / CNH', 'Comprovante de Endereço', 'Certificado de Regularidade'],
     data: ['Nome completo', 'CPF', 'E-mail corporativo', 'Telefone'],
     steps: [
-      'Solicitar credenciais ao gestor',
+      'Solicitar credenciais ao gerente',
       'Preencher formulário de cadastro',
       'Enviar documentação digitalizada',
       'Aguardar validação do compliance',

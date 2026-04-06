@@ -179,7 +179,7 @@ export const mockPartners: Partner[] = [
 // ============ GENERATE VISITS ============
 function generateVisits(): Visit[] {
   const statuses: VisitStatus[] = ['Planejada', 'Concluída', 'Reagendada', 'Cancelada'];
-  const types: VisitType[] = ['visita', 'prospecção'];
+  // types inlined with weighted probability (~90% visita, ~10% prospecção)
   const medios: VisitMedio[] = ['presencial', 'remoto'];
   const visits: Visit[] = [];
   const today = new Date();
@@ -211,7 +211,7 @@ function generateVisits(): Visit[] {
 
     const partner = mockPartners[Math.floor(seededRandom() * mockPartners.length)];
     const user = commercialUsers[Math.floor(seededRandom() * commercialUsers.length)];
-    const type = types[Math.floor(seededRandom() * types.length)];
+    const type: VisitType = seededRandom() < 0.9 ? 'visita' : 'prospecção';
 
     const period: VisitPeriod = parseInt(visits.length > 0 ? '1' : '0') >= 0 && seededRandom() > 0.5 ? 'tarde' : 'manhã';
     const hour = 8 + Math.floor(seededRandom() * 10);
