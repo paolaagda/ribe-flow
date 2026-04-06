@@ -171,7 +171,7 @@ export default function UsersTab() {
         <TabsList className="w-full justify-center">
           <TabsTrigger value="equipe">Colaboradores</TabsTrigger>
           {canRead('teams.view') && <TabsTrigger value="equipes">Equipes</TabsTrigger>}
-          {isGestor && <TabsTrigger value="permissoes">Permissões</TabsTrigger>}
+          {canWrite('users.permissions') && <TabsTrigger value="permissoes">Permissões</TabsTrigger>}
         </TabsList>
 
         {/* Tab Equipe */}
@@ -181,7 +181,7 @@ export default function UsersTab() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Buscar usuário..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
             </div>
-            {isGestor && canWrite('users.edit') && (
+            {canManage && canWrite('users.edit') && (
               <Button size="sm" onClick={() => setShowNewUser(true)}>
                 <Plus className="h-4 w-4 mr-1" /> Novo
               </Button>
@@ -200,7 +200,7 @@ export default function UsersTab() {
                           {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      {isGestor && (
+                      {canManage && (
                         <button
                           onClick={() => triggerPhotoUpload(user.id)}
                           className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-sm"
@@ -221,7 +221,7 @@ export default function UsersTab() {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">{user.bio}</p>
-                  {isGestor && (
+                  {canManage && (
                     <>
                       <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                         {canWrite('users.edit') && (
@@ -267,8 +267,8 @@ export default function UsersTab() {
                       </div>
                     </>
                   )}
-                  {!isGestor && (
-                    <p className="text-[10px] text-muted-foreground flex items-center gap-1"><Shield className="h-3 w-3" /> Acesso restrito ao gestor</p>
+                  {!canManage && (
+                    <p className="text-[10px] text-muted-foreground flex items-center gap-1"><Shield className="h-3 w-3" /> Acesso restrito</p>
                   )}
                 </CardContent>
               </Card>
@@ -277,24 +277,24 @@ export default function UsersTab() {
         </TabsContent>
 
         {/* Tab Permissões */}
-        {isGestor && (
+        {canWrite('users.permissions') && (
           <TabsContent value="permissoes" className="space-y-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Configure o nível de acesso de cada perfil em cada funcionalidade do sistema.</p>
+              <p className="text-sm text-muted-foreground">Configure o nível de acesso de cada cargo em cada funcionalidade do sistema.</p>
               <Button onClick={handleSavePermissions} disabled={!hasChanges} size="sm">
                 <Save className="h-4 w-4 mr-1" /> Salvar permissões
               </Button>
             </div>
 
-            <Accordion type="single" collapsible defaultValue="gestor" className="space-y-2">
-              {allProfiles.map(r => (
+            <Accordion type="single" collapsible defaultValue="diretor" className="space-y-2">
+              {allCargos.map(r => (
                 <AccordionItem key={r} value={r} className="border rounded-lg px-4">
                   <AccordionTrigger className="hover:no-underline">
                     <div className="flex items-center gap-3">
-                      <Badge className={cn('text-xs capitalize', profileColors[r])} variant="secondary">
-                        {profileLabels[r]}
+                      <Badge className={cn('text-xs capitalize', cargoColors[r])} variant="secondary">
+                        {cargoLabels[r]}
                       </Badge>
-                      <span className="text-sm font-medium">{profileLabels[r]}</span>
+                      <span className="text-sm font-medium">{cargoLabels[r]}</span>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
@@ -623,16 +623,6 @@ export default function UsersTab() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Perfil do App</Label>
-              <Select value={newUserForm.profile} onValueChange={v => setNewUserForm({...newUserForm, profile: v as AppProfile})}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="gestor">Gestor</SelectItem>
-                  <SelectItem value="nao_gestor">Não Gestor</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
               <Label>Bio</Label>
               <Input value={newUserForm.bio} onChange={e => setNewUserForm({...newUserForm, bio: e.target.value})} placeholder="Breve descrição" />
             </div>
@@ -671,16 +661,6 @@ export default function UsersTab() {
                   {allCargos.map(c => (
                     <SelectItem key={c} value={c}>{cargoLabels[c]}</SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Perfil do App</Label>
-              <Select value={editForm.profile} onValueChange={v => setEditForm({...editForm, profile: v as AppProfile})}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="gestor">Gestor</SelectItem>
-                  <SelectItem value="nao_gestor">Não Gestor</SelectItem>
                 </SelectContent>
               </Select>
             </div>
