@@ -1088,6 +1088,7 @@ export default function AgendaPage() {
                                 "text-[10px] px-1 py-0.5 rounded border cursor-pointer hover:ring-1 hover:ring-primary/40 flex items-center gap-1",
                                 statusBgClasses[v.status],
                                 draggedVisitId === v.id && "opacity-50",
+                                v.type === "prospecção" && "opacity-50 border-muted",
                               )}
                             >
                               {v.type === "visita" ? (
