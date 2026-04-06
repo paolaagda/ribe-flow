@@ -229,7 +229,7 @@ export default function AgendaPage() {
       );
     }
     return visits;
-  }, [visits, user, profile]);
+  }, [visits, user]);
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
 

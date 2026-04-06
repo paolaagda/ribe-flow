@@ -123,7 +123,7 @@ export default function TasksDrawer({ open, onOpenChange, onOpenVisit }: Props) 
               className="overflow-hidden px-4"
             >
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pb-3">
-                {profile === 'gestor' && activeUsers.length > 1 && (
+                {user && ['diretor', 'gerente', 'ascom'].includes(user.role) && activeUsers.length > 1 && (
                   <Select value={filterUser} onValueChange={setFilterUser}>
                     <SelectTrigger className="h-7 text-xs">
                       <SelectValue placeholder="Usuário" />
