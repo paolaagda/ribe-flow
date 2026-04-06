@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
-import { User, UserRole, AppProfile, CompanyCargo, cargoLabels, cargoColors, profileLabels, profileColors, allCargos } from '@/data/mock-data';
+import { User, UserRole, CompanyCargo, cargoLabels, cargoColors, allCargos } from '@/data/mock-data';
 import { useUsersData } from '@/hooks/useUsersData';
 import { PermissionLevel, defaultPermissions, groupedPermissions } from '@/data/permissions';
 import { usePermission } from '@/hooks/usePermission';
@@ -26,18 +26,18 @@ import { Team, initialTeams } from '@/data/teams';
 import { Edit, Lock, Trash2, RefreshCw, Search, Shield, Eye, EyeOff, Pencil, Save, Plus, Users2, ChevronRight, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const allProfiles: AppProfile[] = ['gestor', 'nao_gestor'];
+
 
 export default function UsersTab() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { profile } = useAuth();
+  const { user: authUser } = useAuth();
   const [search, setSearch] = useState('');
   const { users, setUsers } = useUsersData();
   const [editUser, setEditUser] = useState<User | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', email: '', role: '' as UserRole, profile: 'nao_gestor' as AppProfile, bio: '' });
-  const [permissions, setPermissions] = useLocalStorage<Record<AppProfile, Record<string, PermissionLevel>>>(
-    'ribercred_permissions_v6',
+  const [editForm, setEditForm] = useState({ name: '', email: '', role: '' as UserRole, bio: '' });
+  const [permissions, setPermissions] = useLocalStorage<Record<CompanyCargo, Record<string, PermissionLevel>>>(
+    'ribercred_permissions_v7',
     defaultPermissions
   );
   const [hasChanges, setHasChanges] = useState(false);
@@ -51,9 +51,9 @@ export default function UsersTab() {
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [deletingTeamId, setDeletingTeamId] = useState<string | null>(null);
   const [showNewUser, setShowNewUser] = useState(false);
-  const [newUserForm, setNewUserForm] = useState({ name: '', email: '', role: 'comercial' as UserRole, profile: 'nao_gestor' as AppProfile, bio: '' });
+  const [newUserForm, setNewUserForm] = useState({ name: '', email: '', role: 'comercial' as UserRole, bio: '' });
 
-  const isGestor = profile === 'gestor';
+  const canManage = authUser && ['diretor', 'gerente'].includes(authUser.role);
   const { canRead, canWrite } = usePermission();
   const grouped = groupedPermissions();
 
@@ -63,7 +63,7 @@ export default function UsersTab() {
 
   const handleEdit = (user: User) => {
     setEditUser(user);
-    setEditForm({ name: user.name, email: user.email, role: user.role, profile: user.profile, bio: user.bio });
+    setEditForm({ name: user.name, email: user.email, role: user.role, bio: user.bio });
   };
 
   const handleSave = () => {
@@ -94,10 +94,10 @@ export default function UsersTab() {
     toast({ title: `Senha de ${name} resetada (simulado)` });
   };
 
-  const handlePermissionChange = (appProfile: AppProfile, key: string, level: PermissionLevel) => {
+  const handlePermissionChange = (cargo: CompanyCargo, key: string, level: PermissionLevel) => {
     setPermissions(prev => ({
       ...prev,
-      [appProfile]: { ...prev[appProfile], [key]: level },
+      [cargo]: { ...prev[cargo], [key]: level },
     }));
     setHasChanges(true);
   };
@@ -107,13 +107,13 @@ export default function UsersTab() {
     toast({ title: 'Permissões salvas com sucesso!' });
   };
 
-  const handleResetPermissions = (appProfile: AppProfile) => {
+  const handleResetPermissions = (cargo: CompanyCargo) => {
     setPermissions(prev => ({
       ...prev,
-      [appProfile]: { ...defaultPermissions[appProfile] },
+      [cargo]: { ...defaultPermissions[cargo] },
     }));
     setHasChanges(true);
-    toast({ title: `Permissões de ${profileLabels[appProfile]} restauradas ao padrão` });
+    toast({ title: `Permissões de ${cargoLabels[cargo]} restauradas ao padrão` });
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,14 +148,13 @@ export default function UsersTab() {
       name: newUserForm.name,
       email: newUserForm.email,
       role: newUserForm.role,
-      profile: newUserForm.profile,
       bio: newUserForm.bio || 'Novo colaborador',
       active: true,
       avatar: '',
     };
     setUsers(prev => [...prev, newUser]);
     setShowNewUser(false);
-    setNewUserForm({ name: '', email: '', role: 'comercial', profile: 'nao_gestor', bio: '' });
+    setNewUserForm({ name: '', email: '', role: 'comercial', bio: '' });
     toast({ title: 'Colaborador criado com sucesso!' });
   };
 
@@ -172,7 +171,7 @@ export default function UsersTab() {
         <TabsList className="w-full justify-center">
           <TabsTrigger value="equipe">Colaboradores</TabsTrigger>
           {canRead('teams.view') && <TabsTrigger value="equipes">Equipes</TabsTrigger>}
-          {isGestor && <TabsTrigger value="permissoes">Permissões</TabsTrigger>}
+          {canWrite('users.permissions') && <TabsTrigger value="permissoes">Permissões</TabsTrigger>}
         </TabsList>
 
         {/* Tab Equipe */}
@@ -182,7 +181,7 @@ export default function UsersTab() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Buscar usuário..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
             </div>
-            {isGestor && canWrite('users.edit') && (
+            {canManage && canWrite('users.edit') && (
               <Button size="sm" onClick={() => setShowNewUser(true)}>
                 <Plus className="h-4 w-4 mr-1" /> Novo
               </Button>
@@ -201,7 +200,7 @@ export default function UsersTab() {
                           {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      {isGestor && (
+                      {canManage && (
                         <button
                           onClick={() => triggerPhotoUpload(user.id)}
                           className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-sm"
@@ -222,7 +221,7 @@ export default function UsersTab() {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">{user.bio}</p>
-                  {isGestor && (
+                  {canManage && (
                     <>
                       <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                         {canWrite('users.edit') && (
@@ -268,8 +267,8 @@ export default function UsersTab() {
                       </div>
                     </>
                   )}
-                  {!isGestor && (
-                    <p className="text-[10px] text-muted-foreground flex items-center gap-1"><Shield className="h-3 w-3" /> Acesso restrito ao gestor</p>
+                  {!canManage && (
+                    <p className="text-[10px] text-muted-foreground flex items-center gap-1"><Shield className="h-3 w-3" /> Acesso restrito</p>
                   )}
                 </CardContent>
               </Card>
@@ -278,24 +277,24 @@ export default function UsersTab() {
         </TabsContent>
 
         {/* Tab Permissões */}
-        {isGestor && (
+        {canWrite('users.permissions') && (
           <TabsContent value="permissoes" className="space-y-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Configure o nível de acesso de cada perfil em cada funcionalidade do sistema.</p>
+              <p className="text-sm text-muted-foreground">Configure o nível de acesso de cada cargo em cada funcionalidade do sistema.</p>
               <Button onClick={handleSavePermissions} disabled={!hasChanges} size="sm">
                 <Save className="h-4 w-4 mr-1" /> Salvar permissões
               </Button>
             </div>
 
-            <Accordion type="single" collapsible defaultValue="gestor" className="space-y-2">
-              {allProfiles.map(r => (
+            <Accordion type="single" collapsible defaultValue="diretor" className="space-y-2">
+              {allCargos.map(r => (
                 <AccordionItem key={r} value={r} className="border rounded-lg px-4">
                   <AccordionTrigger className="hover:no-underline">
                     <div className="flex items-center gap-3">
-                      <Badge className={cn('text-xs capitalize', profileColors[r])} variant="secondary">
-                        {profileLabels[r]}
+                      <Badge className={cn('text-xs capitalize', cargoColors[r])} variant="secondary">
+                        {cargoLabels[r]}
                       </Badge>
-                      <span className="text-sm font-medium">{profileLabels[r]}</span>
+                      <span className="text-sm font-medium">{cargoLabels[r]}</span>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
@@ -624,16 +623,6 @@ export default function UsersTab() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Perfil do App</Label>
-              <Select value={newUserForm.profile} onValueChange={v => setNewUserForm({...newUserForm, profile: v as AppProfile})}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="gestor">Gestor</SelectItem>
-                  <SelectItem value="nao_gestor">Não Gestor</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
               <Label>Bio</Label>
               <Input value={newUserForm.bio} onChange={e => setNewUserForm({...newUserForm, bio: e.target.value})} placeholder="Breve descrição" />
             </div>
@@ -672,16 +661,6 @@ export default function UsersTab() {
                   {allCargos.map(c => (
                     <SelectItem key={c} value={c}>{cargoLabels[c]}</SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Perfil do App</Label>
-              <Select value={editForm.profile} onValueChange={v => setEditForm({...editForm, profile: v as AppProfile})}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="gestor">Gestor</SelectItem>
-                  <SelectItem value="nao_gestor">Não Gestor</SelectItem>
                 </SelectContent>
               </Select>
             </div>

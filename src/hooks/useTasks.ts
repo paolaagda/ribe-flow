@@ -16,7 +16,7 @@ const OVERDUE_DAYS = 10;
 export function useTasks() {
   const { visits, setVisits } = useVisits();
   const { getPartnerById } = usePartners();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [checkedDocs, setCheckedDocs] = useLocalStorage<Record<string, string[]>>(
     'ribercred_partner_docs_v1',
     {}
@@ -24,7 +24,8 @@ export function useTasks() {
 
   const allTasks = useMemo<TaskItem[]>(() => {
     const tasks: TaskItem[] = [];
-    const visibleVisits = profile === 'nao_gestor' && user
+    const isRestricted = user && ['comercial', 'cadastro'].includes(user.role);
+    const visibleVisits = isRestricted
       ? visits.filter(v =>
           v.userId === user.id ||
           v.createdBy === user.id ||
@@ -47,7 +48,7 @@ export function useTasks() {
     return tasks.sort((a, b) =>
       new Date(a.task.createdAt).getTime() - new Date(b.task.createdAt).getTime()
     );
-  }, [visits, getPartnerById, user, profile]);
+  }, [visits, getPartnerById, user]);
 
   const pendingTasks = useMemo(() => allTasks.filter(t => !t.task.taskCompleted), [allTasks]);
   const completedTasks = useMemo(() => allTasks.filter(t => t.task.taskCompleted), [allTasks]);

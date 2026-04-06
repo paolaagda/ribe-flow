@@ -23,7 +23,7 @@ interface Props {
 
 export default function InlineTasksPanel({ onOpenVisit }: Props) {
   const { allTasks, pendingTasks, completedTasks, overdueTasks, toggleTask, getDaysPending } = useTasks();
-  const { profile } = useAuth();
+  const { user } = useAuth();
   const { partners } = usePartners();
   const [filterUser, setFilterUser] = useState('all');
   const [filterPartner, setFilterPartner] = useState('all');
@@ -98,7 +98,7 @@ export default function InlineTasksPanel({ onOpenVisit }: Props) {
 
       {showFilters && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {profile === 'gestor' && activeUsers.length > 1 && (
+          {user && ['diretor', 'gerente', 'ascom'].includes(user.role) && activeUsers.length > 1 && (
             <Select value={filterUser} onValueChange={setFilterUser}>
               <SelectTrigger className="h-7 text-xs">
                 <SelectValue placeholder="Usuário" />

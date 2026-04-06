@@ -97,7 +97,7 @@ type ViewMode = "day" | "week" | "month";
 
 export default function AgendaPage() {
   const { canRead, canWrite } = usePermission();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const { partners, getPartnerById } = usePartners();
   const { addNotification } = useNotifications();
@@ -218,8 +218,9 @@ export default function AgendaPage() {
 
   // Visibility filter: comercial only sees visits they participate in
   const visibleVisits = useMemo(() => {
-    if (!user || !profile) return visits;
-    if (profile === "nao_gestor") {
+    if (!user) return visits;
+    const isRestricted = ['comercial', 'cadastro'].includes(user.role);
+    if (isRestricted) {
       return visits.filter(
         (v) =>
           v.userId === user.id ||
@@ -228,7 +229,7 @@ export default function AgendaPage() {
       );
     }
     return visits;
-  }, [visits, user, profile]);
+  }, [visits, user]);
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
 
@@ -444,7 +445,7 @@ export default function AgendaPage() {
     }
     const invitedUsers = formData.invitedUserIds.map((uid) => ({ userId: uid, status: "pending" as const }));
 
-    if (user && profile === "gestor" && formData.type === "visita" && formData.partnerId) {
+    if (user && ['diretor', 'gerente'].includes(user.role) && formData.type === "visita" && formData.partnerId) {
       const partner = getPartnerById(formData.partnerId);
       if (
         partner &&
@@ -1400,7 +1401,7 @@ export default function AgendaPage() {
                         <SelectValue placeholder="Selecione o parceiro" />
                       </SelectTrigger>
                       <SelectContent>
-                        {(profile === "nao_gestor" && user
+                        {(user && ['comercial', 'cadastro'].includes(user.role)
                           ? partners.filter((p) => p.responsibleUserId === user.id)
                           : partners
                         ).map((p) => (

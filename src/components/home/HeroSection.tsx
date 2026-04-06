@@ -34,8 +34,8 @@ export default function HeroSection() {
   }, []);
 
   const stats = useMemo(() => {
-    const isCommercial = user?.profile === 'nao_gestor';
-    const userVisits = isCommercial && user
+    const isRestricted = user && ['comercial', 'cadastro'].includes(user.role);
+    const userVisits = isRestricted && user
       ? mockVisits.filter(v => v.userId === user.id || v.createdBy === user.id || v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted'))
       : mockVisits;
 
