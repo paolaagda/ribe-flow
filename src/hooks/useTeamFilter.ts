@@ -4,8 +4,11 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Team, initialTeams, getTeamByUserId, getTeamMembers } from '@/data/teams';
 import { mockUsers, Visit, User } from '@/data/mock-data';
 
+// Roles that have global visibility (can see all users' data)
+const GLOBAL_VIEW_ROLES = ['diretor', 'gerente', 'ascom'];
+
 export function useTeamFilter() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [teams] = useLocalStorage<Team[]>('ribercred_teams', initialTeams);
 
   const myTeam = useMemo(() => {
@@ -14,19 +17,18 @@ export function useTeamFilter() {
   }, [user, teams]);
 
   const getVisibleUserIds = useMemo((): string[] => {
-    if (!user || !profile) return [];
-    if (profile === 'gestor') return mockUsers.map(u => u.id);
-    // nao_gestor sees only themselves
+    if (!user) return [];
+    if (GLOBAL_VIEW_ROLES.includes(user.role)) return mockUsers.map(u => u.id);
     return [user.id];
-  }, [user, profile]);
+  }, [user]);
 
   const getVisibleUsers = useMemo((): User[] => {
     return mockUsers.filter(u => getVisibleUserIds.includes(u.id));
   }, [getVisibleUserIds]);
 
   const filterVisitsByTeam = (visits: Visit[]): Visit[] => {
-    if (!user || !profile) return [];
-    if (profile === 'gestor') return visits;
+    if (!user) return [];
+    if (GLOBAL_VIEW_ROLES.includes(user.role)) return visits;
     return visits.filter(v => getVisibleUserIds.includes(v.userId));
   };
 

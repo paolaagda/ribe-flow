@@ -1,4 +1,4 @@
-import { AppProfile } from './mock-data';
+import { CompanyCargo } from './mock-data';
 
 export type PermissionLevel = 'none' | 'read' | 'write';
 
@@ -103,104 +103,105 @@ export const permissionItems: PermissionItem[] = [
   { module: 'Insights', action: 'Ver insights inteligentes', key: 'insights.view' },
 ];
 
+// Helper to create a full permission map for a cargo
+function makePerms(overrides: Record<string, PermissionLevel>): Record<string, PermissionLevel> {
+  const base: Record<string, PermissionLevel> = {};
+  for (const item of permissionItems) {
+    base[item.key] = overrides[item.key] ?? 'none';
+  }
+  return base;
+}
+
 const allWrite = Object.fromEntries(permissionItems.map(p => [p.key, 'write' as PermissionLevel]));
 
-export const defaultPermissions: Record<AppProfile, Record<string, PermissionLevel>> = {
-  gestor: { ...allWrite },
-  nao_gestor: {
-    // Dashboard
-    'dashboard.view': 'read',
-    'dashboard.kpis': 'read',
-    'dashboard.map': 'none',
+const diretorPerms = { ...allWrite };
 
-    // Agenda
-    'agenda.view': 'read',
-    'agenda.create': 'write',
-    'agenda.edit': 'write',
-    'agenda.delete': 'none',
-    'agenda.drag': 'write',
-    'agenda.filterCommercial': 'none',
-    'agenda.viewOthers': 'none',
-    'agenda.export': 'none',
+const gerentePerms = makePerms({
+  ...allWrite,
+  'users.delete': 'none',
+  'teams.delete': 'none',
+});
 
-    // Tarefas
-    'tasks.view': 'read',
-    'tasks.create': 'write',
-    'tasks.complete': 'write',
-    'tasks.delete': 'none',
-    'tasks.viewOthers': 'none',
+const comercialPerms = makePerms({
+  'dashboard.view': 'read',
+  'dashboard.kpis': 'read',
+  'dashboard.map': 'read',
+  'agenda.view': 'read',
+  'agenda.create': 'write',
+  'agenda.edit': 'write',
+  'agenda.drag': 'write',
+  'tasks.view': 'read',
+  'tasks.create': 'write',
+  'tasks.complete': 'write',
+  'partners.list': 'read',
+  'partners.details': 'read',
+  'partners.exportPdf': 'read',
+  'stores.view': 'read',
+  'users.profile': 'read',
+  'settings.theme': 'write',
+  'campaigns.view': 'read',
+  'gamification.view': 'read',
+  'gamification.ranking': 'read',
+  'gamification.badges': 'read',
+  'teams.view': 'read',
+  'notifications.view': 'read',
+  'registration.view': 'read',
+  'registration.create': 'write',
+  'registration.editObservation': 'write',
+  'insights.view': 'read',
+});
 
-    // Análises
-    'analysis.reports': 'none',
-    'analysis.filterPeriod': 'none',
-    'analysis.ranking': 'none',
-    'analysis.partnerMap': 'none',
-    'analysis.export': 'none',
+const ascomPerms = makePerms({
+  'dashboard.view': 'read',
+  'dashboard.kpis': 'read',
+  'dashboard.map': 'read',
+  'agenda.view': 'read',
+  'agenda.viewOthers': 'read',
+  'tasks.view': 'read',
+  'analysis.reports': 'read',
+  'analysis.filterPeriod': 'read',
+  'analysis.ranking': 'read',
+  'analysis.partnerMap': 'read',
+  'partners.list': 'read',
+  'partners.details': 'read',
+  'partners.exportPdf': 'read',
+  'stores.view': 'read',
+  'users.list': 'read',
+  'users.profile': 'read',
+  'settings.theme': 'write',
+  'campaigns.view': 'read',
+  'gamification.view': 'read',
+  'gamification.ranking': 'read',
+  'gamification.badges': 'read',
+  'teams.view': 'read',
+  'notifications.view': 'read',
+  'insights.view': 'read',
+});
 
-    // Parceiros
-    'partners.list': 'read',
-    'partners.details': 'read',
-    'partners.create': 'none',
-    'partners.edit': 'none',
-    'partners.delete': 'none',
-    'partners.exportPdf': 'none',
-    'partners.bulkImport': 'none',
+const cadastroPerms = makePerms({
+  'settings.theme': 'write',
+  'tasks.view': 'read',
+  'tasks.create': 'write',
+  'tasks.complete': 'write',
+  'partners.list': 'read',
+  'partners.details': 'read',
+  'gamification.view': 'read',
+  'gamification.ranking': 'read',
+  'gamification.badges': 'read',
+  'notifications.view': 'read',
+  'registration.view': 'write',
+  'registration.create': 'write',
+  'registration.edit': 'write',
+  'registration.changeStatus': 'read',
+  'registration.editObservation': 'write',
+});
 
-    // Lojas
-    'stores.view': 'read',
-    'stores.create': 'none',
-    'stores.edit': 'none',
-    'stores.delete': 'none',
-
-    // Colaboradores
-    'users.list': 'none',
-    'users.create': 'none',
-    'users.edit': 'none',
-    'users.block': 'none',
-    'users.resetPassword': 'none',
-    'users.delete': 'none',
-    'users.permissions': 'none',
-    'users.profile': 'none',
-
-    // Configurações
-    'settings.view': 'none',
-    'settings.theme': 'none',
-    'settings.systemData': 'none',
-
-    // Campanhas
-    'campaigns.view': 'read',
-    'campaigns.create': 'none',
-    'campaigns.edit': 'none',
-    'campaigns.delete': 'none',
-
-    // Gamificação
-    'gamification.view': 'read',
-    'gamification.ranking': 'read',
-    'gamification.badges': 'read',
-
-    // Equipes
-    'teams.view': 'none',
-    'teams.create': 'none',
-    'teams.edit': 'none',
-    'teams.delete': 'none',
-
-    // Notificações
-    'notifications.view': 'read',
-    'notifications.manage': 'none',
-
-    // Cadastro
-    'registration.view': 'read',
-    'registration.create': 'none',
-    'registration.edit': 'none',
-    'registration.changeStatus': 'none',
-    'registration.editObservation': 'none',
-
-    // Logs
-    'logs.view': 'none',
-
-    // Insights
-    'insights.view': 'read',
-  },
+export const defaultPermissions: Record<CompanyCargo, Record<string, PermissionLevel>> = {
+  diretor: diretorPerms,
+  gerente: gerentePerms,
+  comercial: comercialPerms,
+  ascom: ascomPerms,
+  cadastro: cadastroPerms,
 };
 
 // Group permission items by module

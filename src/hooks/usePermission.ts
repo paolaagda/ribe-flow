@@ -1,18 +1,18 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { PermissionLevel, defaultPermissions } from '@/data/permissions';
-import { AppProfile } from '@/data/mock-data';
+import { CompanyCargo } from '@/data/mock-data';
 
 export function usePermission() {
-  const { profile } = useAuth();
-  const [permissions] = useLocalStorage<Record<AppProfile, Record<string, PermissionLevel>>>(
-    'ribercred_permissions_v6',
+  const { user } = useAuth();
+  const [permissions] = useLocalStorage<Record<CompanyCargo, Record<string, PermissionLevel>>>(
+    'ribercred_permissions_v7',
     defaultPermissions
   );
 
   const can = (key: string): PermissionLevel => {
-    if (!profile) return 'none';
-    return permissions[profile]?.[key] || 'none';
+    if (!user) return 'none';
+    return permissions[user.role]?.[key] || 'none';
   };
 
   const canRead = (key: string): boolean => can(key) !== 'none';
