@@ -311,16 +311,16 @@ export default function AgendaPage() {
       visitasConcluidas: visitas.filter((v) => v.status === "Concluída").length,
       prospecoesCriadas: prospecoes.length,
       prospecoesConcluidas: prospecoes.filter((v) => v.status === "Concluída").length,
-      totalAgendas: visitas.length,
-      totalConcluidas: visitas.filter((v) => v.status === "Concluída").length,
+      totalAgendas: filteredVisits.length,
+      totalConcluidas: filteredVisits.filter((v) => v.status === "Concluída").length,
     };
   }, [filteredVisits]);
 
   const todayIndicators = useMemo(() => {
-    const todayVisits = visibleVisits.filter((v) => v.date === todayStr && v.type === "visita");
+    const todayAll = visibleVisits.filter((v) => v.date === todayStr);
     return {
-      total: todayVisits.length,
-      concluidas: todayVisits.filter((v) => v.status === "Concluída").length,
+      total: todayAll.length,
+      concluidas: todayAll.filter((v) => v.status === "Concluída").length,
     };
   }, [visibleVisits, todayStr]);
 
@@ -937,7 +937,7 @@ export default function AgendaPage() {
             icon={ListTodo}
             label="Tarefas"
             value={completedTasks.length}
-            secondaryValue={pendingTasks.length}
+            secondaryValue={pendingTasks.length + completedTasks.length}
             color="text-warning"
             delay={0.15}
             onClick={() => togglePanel("tasks")}
