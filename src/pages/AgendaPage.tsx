@@ -125,6 +125,21 @@ export default function AgendaPage() {
     },
     [registrations],
   );
+
+  // Memoized map: partnerId -> last concluded visit (for "Última visita" display)
+  const lastVisitMap = useMemo(() => {
+    const map = new Map<string, { id: string; date: string }>();
+    const concluded = visits
+      .filter(v => v.status === 'Concluída')
+      .sort((a, b) => b.date.localeCompare(a.date));
+    for (const v of concluded) {
+      if (!map.has(v.partnerId)) {
+        map.set(v.partnerId, { id: v.id, date: v.date });
+      }
+    }
+    return map;
+  }, [visits]);
+
   const [view, setView] = useState<ViewMode>("month");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showForm, setShowForm] = useState(false);
