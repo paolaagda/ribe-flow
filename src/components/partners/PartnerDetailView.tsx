@@ -243,12 +243,6 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
 
         <TabsContent value="tasks" className="mt-4">
           <PartnerTasksSection partnerId={partnerId} />
-          {partnerTasks.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <CheckSquare className="h-10 w-10 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">Nenhuma tarefa registrada para este parceiro</p>
-            </div>
-          )}
         </TabsContent>
 
         <TabsContent value="docs" className="mt-4">
