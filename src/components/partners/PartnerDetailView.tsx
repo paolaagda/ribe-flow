@@ -200,8 +200,14 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
+          {/* KPI summary - operational priority first */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <AnimatedKpiCard icon={BarChart3} label="Total Visitas" value={stats.totalVisits} color="text-info" />
+            <AnimatedKpiCard icon={TrendingUp} label="Conversão" value={`${stats.conversionRate}%`} color="text-success" />
+            <AnimatedKpiCard icon={Clock} label="Freq. Média" value={stats.avgFrequency ? `${stats.avgFrequency}d` : '—'} color="text-warning" />
+            <AnimatedKpiCard icon={DollarSign} label="Potencial" value={stats.totalPotential ? formatCentavos(stats.totalPotential) : '—'} color="text-success" />
+          </div>
           <PartnerInsights partner={partner} visits={partnerVisits} stats={stats} />
-          <PartnerCharts visits={partnerVisits} />
           {partnerStores.length > 0 && (
             <Card>
               <CardHeader className="pb-3">

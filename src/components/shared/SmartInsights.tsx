@@ -46,11 +46,20 @@ interface SmartInsightsProps {
   scopedPartners?: import('@/data/mock-data').Partner[];
 }
 
-export default function SmartInsights({ page, activeFilter, onFilterClick, onInsightClick, filterView, filterStatus, filterType }: SmartInsightsProps) {
+export default function SmartInsights({ page, activeFilter, onFilterClick, onInsightClick, filterView, filterStatus, filterType, scopedPartners }: SmartInsightsProps) {
   const { visits } = useVisits();
-  const { partners } = usePartners();
+  const { partners: allPartners } = usePartners();
   const { pendingTasks, completedTasks } = useTasks();
   const { user } = useAuth();
+
+  // Use scoped partners when provided, otherwise filter by role
+  const roleFilteredPartners = useMemo(() => {
+    if (scopedPartners) return scopedPartners;
+    if (user && ['comercial', 'cadastro'].includes(user.role)) {
+      return allPartners.filter(p => p.responsibleUserId === user.id);
+    }
+    return allPartners;
+  }, [scopedPartners, allPartners, user]);
 
   const insights = useMemo((): Insight[] => {
     const result: Insight[] = [];
