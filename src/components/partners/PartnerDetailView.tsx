@@ -56,6 +56,7 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
   const { visits } = useVisits();
   const { getStoresByPartnerId } = useStores();
   const { canWrite, canRead } = usePermission();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
   const partner = getPartnerById(partnerId);
