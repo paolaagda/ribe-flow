@@ -326,7 +326,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
           </div>
 
           {/* Quick actions for completed visits */}
-          {visit.status === 'Concluída' && canWrite('agenda.create') && (onScheduleFollowUp || true) && (
+          {visit.status === 'Concluída' && canWrite('agenda.create') && (onScheduleFollowUp || onToggleTask) && (
             <>
               <Separator />
               <div className="flex items-center gap-2">

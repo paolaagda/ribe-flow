@@ -1241,10 +1241,8 @@ export default function AgendaPage() {
                                   )}>{partner.potential}</Badge>
                                 )}
                                 {v.type === 'visita' && partner && (() => {
-                                  const lastConcluded = visits
-                                    .filter(vv => vv.partnerId === v.partnerId && vv.status === 'Concluída' && vv.id !== v.id)
-                                    .sort((a, b) => b.date.localeCompare(a.date))[0];
-                                  if (!lastConcluded) return <span className="text-[10px] text-muted-foreground/70">Primeira visita</span>;
+                                  const lastConcluded = lastVisitMap.get(v.partnerId);
+                                  if (!lastConcluded || lastConcluded.id === v.id) return <span className="text-[10px] text-muted-foreground/70">Primeira visita</span>;
                                   const days = Math.floor((Date.now() - new Date(lastConcluded.date).getTime()) / 86400000);
                                   return <span className="text-[10px] text-muted-foreground/70">Última visita: {days}d atrás</span>;
                                 })()}
