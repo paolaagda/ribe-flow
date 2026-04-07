@@ -61,6 +61,8 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
   const partner = getPartnerById(partnerId);
   const { getPartnerData } = usePartnerOperationalData(partner ? [partner] : []);
   const opData = partner ? getPartnerData(partnerId) : null;
+  const { getTasksByPartnerId } = useTasks();
+  const partnerTasks = getTasksByPartnerId(partnerId);
 
   const partnerVisits = useMemo(() => {
     return visits.filter(v => v.partnerId === partnerId).sort((a, b) => b.date.localeCompare(a.date));
