@@ -2,6 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Partner, getUserById } from '@/data/mock-data';
 import { PartnerOperationalData, Criticality } from '@/hooks/usePartnerOperationalData';
+import { usePermission } from '@/hooks/usePermission';
 import { Building2, MapPin, User, CheckSquare, FileText, Landmark, ChevronRight, ArrowRight, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNowStrict, parseISO } from 'date-fns';
@@ -28,6 +29,8 @@ const potentialBadgeClass: Record<string, string> = {
 
 export default function PartnerListItemCard({ partner, operationalData, onClick, canOpenDetail }: Props) {
   const responsible = getUserById(partner.responsibleUserId);
+  const { canRead } = usePermission();
+  const canSeeRegistration = canRead('registration.view');
   const cc = criticalityConfig[operationalData.criticality];
 
   const city = partner.address.split('—')[1]?.trim() || partner.address;
@@ -94,13 +97,13 @@ export default function PartnerListItemCard({ partner, operationalData, onClick,
                 {operationalData.pendingDocsCount} doc{operationalData.pendingDocsCount > 1 ? 's' : ''}
               </Badge>
             )}
-            {operationalData.activeRegistrationsCount > 0 && (
+            {canSeeRegistration && operationalData.activeRegistrationsCount > 0 && (
               <Badge variant="outline" className="text-[10px] gap-1 bg-primary/10 text-primary border-primary/20">
                 <Landmark className="h-2.5 w-2.5" />
                 Cadastro ativo
               </Badge>
             )}
-            {operationalData.pendingTasksCount === 0 && operationalData.pendingDocsCount === 0 && operationalData.activeRegistrationsCount === 0 && (
+            {operationalData.pendingTasksCount === 0 && operationalData.pendingDocsCount === 0 && (!canSeeRegistration || operationalData.activeRegistrationsCount === 0) && (
               <Badge variant="outline" className="text-[10px] bg-success/5 text-success border-success/20">
                 Em dia
               </Badge>
