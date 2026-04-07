@@ -187,7 +187,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
         result.push({ id: 'parc_valor_total', icon: <DollarSign className="h-3 w-3 shrink-0" />, text: `Valor potencial total: ${formatCentavos(totalValue)}`, variant: 'info' });
       }
       const recentPartnerIds = new Set(thisMonth.filter(v => v.status === 'Concluída').map(v => v.partnerId));
-      const withoutRecent = partners.filter(p => !recentPartnerIds.has(p.id));
+      const withoutRecent = roleFilteredPartners.filter(p => !recentPartnerIds.has(p.id));
       if (withoutRecent.length > 0) {
         result.push({ id: 'parc_sem_visita_30d', icon: <Calendar className="h-3 w-3 shrink-0" />, text: `${withoutRecent.length} parceiros sem visita concluída neste mês`, variant: 'warning' });
       }
