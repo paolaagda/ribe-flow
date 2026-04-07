@@ -119,6 +119,23 @@ export default function AgendaPage() {
     return sorted.length > 0 && sorted[0].score > 0 ? sorted[0].userId : null;
   }, []);
 
+  const campaignProgress = useMemo(() => {
+    const activeCampaign = initialCampaigns.find((c) => getCampaignStatus(c) === "Ativa");
+    if (!activeCampaign || !user) return null;
+    const participant = activeCampaign.participants.find((p) => p.userId === user.id);
+    if (!participant) return null;
+    const completedVisits = getCompletedVisitsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate);
+    const completedProspections = getCompletedProspectionsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate);
+    return {
+      visits: completedVisits,
+      visitGoal: participant.visitGoal,
+      visitPercent: participant.visitGoal > 0 ? Math.round((completedVisits / participant.visitGoal) * 100) : 0,
+      prospections: completedProspections,
+      prospectionGoal: participant.prospectionGoal,
+      prospectionPercent: participant.prospectionGoal > 0 ? Math.round((completedProspections / participant.prospectionGoal) * 100) : 0,
+    };
+  }, [user]);
+
   const hasActiveRegistration = useCallback(
     (partnerId: string) => {
       return registrations.some((r) => r.partnerId === partnerId && !["Concluído", "Cancelado"].includes(r.status));
