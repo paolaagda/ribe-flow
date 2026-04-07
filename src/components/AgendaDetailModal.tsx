@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,10 +7,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Visit, getUserById, statusBgClasses, cargoLabels } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
+import { useVisits } from '@/hooks/useVisits';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus, FileText } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus, FileText, CalendarPlus, ListTodo } from 'lucide-react';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
@@ -29,14 +31,17 @@ interface AgendaDetailModalProps {
   onLeaveVisit?: (visitId: string) => void;
   onAddComment?: (visitId: string, text: string, type: 'observation' | 'task', parentId?: string) => void;
   onToggleTask?: (visitId: string, commentId: string) => void;
+  onScheduleFollowUp?: (partnerId: string) => void;
 }
 
-export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, onDelete, onAcceptInvite, onRejectInvite, onLeaveVisit, onAddComment, onToggleTask }: AgendaDetailModalProps) {
+export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, onDelete, onAcceptInvite, onRejectInvite, onLeaveVisit, onAddComment, onToggleTask, onScheduleFollowUp }: AgendaDetailModalProps) {
   const { canWrite } = usePermission();
   const { user } = useAuth();
   const { getAvatar } = useUserAvatars();
   const { getPartnerById } = usePartners();
+  const { visits } = useVisits();
   const { hasActive, activeCount, regs } = useRegistrationBadge(visit?.partnerId);
+  const commentsRef = useRef<HTMLDivElement>(null);
   if (!visit) return null;
 
   const partner = getPartnerById(visit.partnerId);
@@ -46,6 +51,16 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   const myInvite = user ? visit.invitedUsers?.find(iu => iu.userId === user.id) : null;
   const isResponsibleCommercial = user?.id === visit.userId;
   const canEditVisit = canWrite('agenda.edit') && (isResponsibleCommercial || user?.id === visit.createdBy || user?.role !== 'comercial');
+
+  // Calculate last visit to this partner
+  const lastVisitInfo = partner && visit.type === 'visita' ? (() => {
+    const lastConcluded = visits
+      .filter(v => v.partnerId === visit.partnerId && v.status === 'Concluída' && v.id !== visit.id)
+      .sort((a, b) => b.date.localeCompare(a.date))[0];
+    if (!lastConcluded) return 'Primeira visita';
+    const days = Math.floor((Date.now() - new Date(lastConcluded.date).getTime()) / 86400000);
+    return `Última visita: ${days}d atrás`;
+  })() : null;
 
   const statusBadgeMap: Record<string, { label: string; className: string }> = {
     pending: { label: 'Pendente', className: 'bg-warning/10 text-warning border-warning/20' },
@@ -70,7 +85,33 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
           <div>
             <p className="text-base font-semibold">{partner?.name || visit.prospectPartner}</p>
             <p className="text-xs text-muted-foreground">{partner?.address || visit.prospectAddress}</p>
+            {/* Visual aids: potential + last visit */}
+            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+              {partner && (
+                <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 capitalize",
+                  partner.potential === 'alto' ? 'bg-success/10 text-success border-success/20' :
+                  partner.potential === 'médio' ? 'bg-info/10 text-info border-info/20' :
+                  'bg-muted/50 text-muted-foreground border-border/30'
+                )}>Potencial {partner.potential}</Badge>
+              )}
+              {lastVisitInfo && (
+                <span className="text-[10px] text-muted-foreground/70">{lastVisitInfo}</span>
+              )}
+            </div>
           </div>
+
+          {/* Missing summary banner */}
+          {visit.status === 'Concluída' && !visit.summary?.trim() && (
+            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/30 border border-border/30">
+              <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+              <p className="text-xs text-muted-foreground flex-1">Resumo da visita ainda não preenchido</p>
+              {canEditVisit && (
+                <Button variant="ghost" size="sm" className="h-6 text-xs px-2" onClick={() => onEdit(visit)}>
+                  Editar
+                </Button>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -274,12 +315,38 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
 
           {/* Comments */}
           <Separator />
-          {onAddComment && onToggleTask && (
-            <AgendaComments
-              comments={visit.comments || []}
-              onAddComment={(text, type, parentId) => onAddComment(visit.id, text, type, parentId)}
-              onToggleTask={(commentId) => onToggleTask(visit.id, commentId)}
-            />
+          <div ref={commentsRef}>
+            {onAddComment && onToggleTask && (
+              <AgendaComments
+                comments={visit.comments || []}
+                onAddComment={(text, type, parentId) => onAddComment(visit.id, text, type, parentId)}
+                onToggleTask={(commentId) => onToggleTask(visit.id, commentId)}
+              />
+            )}
+          </div>
+
+          {/* Quick actions for completed visits */}
+          {visit.status === 'Concluída' && canWrite('agenda.create') && (onScheduleFollowUp || true) && (
+            <>
+              <Separator />
+              <div className="flex items-center gap-2">
+                {onScheduleFollowUp && (
+                  <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => onScheduleFollowUp(visit.partnerId)}>
+                    <CalendarPlus className="h-3.5 w-3.5" /> Agendar follow-up
+                  </Button>
+                )}
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => {
+                  commentsRef.current?.scrollIntoView({ behavior: 'smooth' });
+                  // Focus the task input after scrolling
+                  setTimeout(() => {
+                    const taskInput = commentsRef.current?.querySelector('input, textarea') as HTMLElement;
+                    taskInput?.focus();
+                  }, 400);
+                }}>
+                  <ListTodo className="h-3.5 w-3.5" /> Nova tarefa
+                </Button>
+              </div>
+            </>
           )}
         </div>
 
