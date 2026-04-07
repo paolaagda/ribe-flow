@@ -76,6 +76,13 @@ export default function CadastroPage() {
   const { addLog } = useAuditLog();
   const navigate = useNavigate();
   const { getRegData, summary: opSummary } = useRegistrationOperationalData(registrations);
+  const { user } = useAuth();
+
+  // Permission flags
+  const canEditReg = canWrite('registration.edit');
+  const canChangeStatus = canWrite('registration.changeStatus');
+  const canEditObs = canWrite('registration.editObservation');
+  const canDelete = canEditReg && (user?.role === 'diretor' || user?.role === 'gerente');
 
   const [search, setSearch] = useState('');
   const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
