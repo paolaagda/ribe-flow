@@ -937,7 +937,7 @@ export default function AgendaPage() {
             icon={ListTodo}
             label="Tarefas"
             value={completedTasks.length}
-            secondaryValue={pendingTasks.length}
+            secondaryValue={pendingTasks.length + completedTasks.length}
             color="text-warning"
             delay={0.15}
             onClick={() => togglePanel("tasks")}
