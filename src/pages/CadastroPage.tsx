@@ -181,10 +181,12 @@ export default function CadastroPage() {
       if (!isDateInRange(getLastUpdateDate(r))) return false;
       if (search) {
         const q = search.toLowerCase();
+        const partnerName = getPartnerById(r.partnerId)?.name?.toLowerCase() || '';
         const matchesSearch = r.observation.toLowerCase().includes(q) ||
           r.bank.toLowerCase().includes(q) ||
           r.code.toLowerCase().includes(q) ||
-          r.handlingWith.toLowerCase().includes(q);
+          r.handlingWith.toLowerCase().includes(q) ||
+          partnerName.includes(q);
         if (!matchesSearch) return false;
       }
       return true;
@@ -347,11 +349,14 @@ export default function CadastroPage() {
           </div>
         </PageHeader>
 
+        {/* Operational KPIs */}
+        <RegistrationOperationalSummary summary={opSummary} />
+
         {/* Search always visible */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por observação, banco, código..."
+            placeholder="Buscar por parceiro, observação, banco, código..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="pl-9 h-9"
@@ -636,6 +641,7 @@ export default function CadastroPage() {
               <RegistrationCard
                 key={reg.id}
                 registration={reg}
+                operationalData={getRegData(reg)}
                 onClick={() => handleCardClick(reg)}
                 onEdit={() => handleEdit(reg)}
                 onChangeStatus={() => handleEdit(reg)}
