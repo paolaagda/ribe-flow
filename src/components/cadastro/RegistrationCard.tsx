@@ -140,8 +140,10 @@ export default function RegistrationCard({ registration, operationalData, onClic
           </div>
         )}
 
-        {/* Action buttons */}
+        {/* Action buttons - only render row if at least one action available */}
+        {(onEdit || onChangeStatus || onTogglePause || onDelete) && (
         <div className="flex items-center justify-end gap-1 pt-2">
+          {onEdit && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => handleAction(e, onEdit)}>
@@ -150,6 +152,8 @@ export default function RegistrationCard({ registration, operationalData, onClic
             </TooltipTrigger>
             <TooltipContent>Editar</TooltipContent>
           </Tooltip>
+          )}
+          {onChangeStatus && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => handleAction(e, onChangeStatus)}>
@@ -158,6 +162,8 @@ export default function RegistrationCard({ registration, operationalData, onClic
             </TooltipTrigger>
             <TooltipContent>Atualizar status</TooltipContent>
           </Tooltip>
+          )}
+          {onTogglePause && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className={cn("h-7 w-7", isPaused && "text-warning")} onClick={e => handleAction(e, onTogglePause)}>
@@ -166,6 +172,8 @@ export default function RegistrationCard({ registration, operationalData, onClic
             </TooltipTrigger>
             <TooltipContent>{isPaused ? 'Reativar' : 'Pausar'}</TooltipContent>
           </Tooltip>
+          )}
+          {onDelete && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={e => handleAction(e, onDelete)}>
@@ -174,7 +182,9 @@ export default function RegistrationCard({ registration, operationalData, onClic
             </TooltipTrigger>
             <TooltipContent>Excluir</TooltipContent>
           </Tooltip>
+          )}
         </div>
+        )}
       </CardContent>
     </Card>
   );

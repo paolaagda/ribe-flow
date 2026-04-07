@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 import { usePartners } from '@/hooks/usePartners';
 import PageHeader from '@/components/shared/PageHeader';
 import PageTransition from '@/components/PageTransition';
@@ -75,6 +76,13 @@ export default function CadastroPage() {
   const { addLog } = useAuditLog();
   const navigate = useNavigate();
   const { getRegData, summary: opSummary } = useRegistrationOperationalData(registrations);
+  const { user } = useAuth();
+
+  // Permission flags
+  const canEditReg = canWrite('registration.edit');
+  const canChangeStatus = canWrite('registration.changeStatus');
+  const canEditObs = canWrite('registration.editObservation');
+  const canDelete = canEditReg && (user?.role === 'diretor' || user?.role === 'gerente');
 
   const [search, setSearch] = useState('');
   const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
@@ -85,6 +93,7 @@ export default function CadastroPage() {
   const [filterDateMode, setFilterDateMode] = useState<DateMode>('none');
   const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>();
   const [filterDateTo, setFilterDateTo] = useState<Date | undefined>();
+  const [filterCriticality, setFilterCriticality] = useState<'all' | 'alta' | 'média' | 'baixa'>('all');
 
   const [showFilters, setShowFilters] = useState(false);
   const [kpiTab, setKpiTab] = useState('status');
@@ -118,31 +127,8 @@ export default function CadastroPage() {
     filterSolicitation !== 'all',
     filterHandlers.length > 0,
     filterDateMode !== 'none',
+    filterCriticality !== 'all',
   ].filter(Boolean).length;
-
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    registrations.forEach(r => {
-      counts[r.status] = (counts[r.status] || 0) + 1;
-    });
-    return counts;
-  }, [registrations]);
-
-  const handlerCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    registrations.forEach(r => {
-      counts[r.handlingWith] = (counts[r.handlingWith] || 0) + 1;
-    });
-    return counts;
-  }, [registrations]);
-
-  const bankCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    registrations.forEach(r => {
-      counts[r.bank] = (counts[r.bank] || 0) + 1;
-    });
-    return counts;
-  }, [registrations]);
 
   const getLastUpdateDate = (reg: Registration): string => {
     if (reg.updates.length > 0) return reg.updates[reg.updates.length - 1].date;
@@ -153,21 +139,10 @@ export default function CadastroPage() {
     if (filterDateMode === 'none') return true;
     const date = new Date(dateStr + 'T00:00:00');
     const now = new Date();
-
-    if (filterDateMode === 'day' && filterDateFrom) {
-      return format(date, 'yyyy-MM-dd') === format(filterDateFrom, 'yyyy-MM-dd');
-    }
-    if (filterDateMode === 'period' && filterDateFrom && filterDateTo) {
-      return isWithinInterval(date, { start: startOfDay(filterDateFrom), end: endOfDay(filterDateTo) });
-    }
-    if (filterDateMode === 'weekly') {
-      const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-      const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
-      return isWithinInterval(date, { start: weekStart, end: weekEnd });
-    }
-    if (filterDateMode === 'monthly') {
-      return isWithinInterval(date, { start: startOfMonth(now), end: endOfMonth(now) });
-    }
+    if (filterDateMode === 'day' && filterDateFrom) return format(date, 'yyyy-MM-dd') === format(filterDateFrom, 'yyyy-MM-dd');
+    if (filterDateMode === 'period' && filterDateFrom && filterDateTo) return isWithinInterval(date, { start: startOfDay(filterDateFrom), end: endOfDay(filterDateTo) });
+    if (filterDateMode === 'weekly') { const ws = startOfWeek(now, { weekStartsOn: 1 }); const we = endOfWeek(now, { weekStartsOn: 1 }); return isWithinInterval(date, { start: ws, end: we }); }
+    if (filterDateMode === 'monthly') return isWithinInterval(date, { start: startOfMonth(now), end: endOfMonth(now) });
     return true;
   };
 
@@ -179,6 +154,7 @@ export default function CadastroPage() {
       if (filterSolicitation !== 'all' && r.solicitation !== filterSolicitation) return false;
       if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
       if (!isDateInRange(getLastUpdateDate(r))) return false;
+      if (filterCriticality !== 'all' && getRegData(r).criticality !== filterCriticality) return false;
       if (search) {
         const q = search.toLowerCase();
         const partnerName = getPartnerById(r.partnerId)?.name?.toLowerCase() || '';
@@ -191,7 +167,26 @@ export default function CadastroPage() {
       }
       return true;
     });
-  }, [registrations, filterStatuses, filterBanks, filterCommercial, filterSolicitation, filterHandlers, filterDateMode, filterDateFrom, filterDateTo, search]);
+  }, [registrations, filterStatuses, filterBanks, filterCommercial, filterSolicitation, filterHandlers, filterDateMode, filterDateFrom, filterDateTo, filterCriticality, search, getRegData]);
+
+  // KPIs computed from filtered list
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filtered.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
+    return counts;
+  }, [filtered]);
+
+  const handlerCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filtered.forEach(r => { counts[r.handlingWith] = (counts[r.handlingWith] || 0) + 1; });
+    return counts;
+  }, [filtered]);
+
+  const bankCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filtered.forEach(r => { counts[r.bank] = (counts[r.bank] || 0) + 1; });
+    return counts;
+  }, [filtered]);
 
   const sorted = useMemo(() => {
     if (sortField === 'none') return filtered;
@@ -283,6 +278,7 @@ export default function CadastroPage() {
     setFilterDateMode('none');
     setFilterDateFrom(undefined);
     setFilterDateTo(undefined);
+    setFilterCriticality('all');
   };
 
   const handleDateModeSelect = (mode: DateMode) => {
@@ -433,6 +429,18 @@ export default function CadastroPage() {
                     </SelectContent>
                   </Select>
 
+                  <Select value={filterCriticality} onValueChange={v => setFilterCriticality(v as any)}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Criticidade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as criticidades</SelectItem>
+                      <SelectItem value="alta">Alta</SelectItem>
+                      <SelectItem value="média">Média</SelectItem>
+                      <SelectItem value="baixa">Baixa</SelectItem>
+                    </SelectContent>
+                  </Select>
+
                   {/* Date filter */}
                   <Popover>
                     <PopoverTrigger asChild>
@@ -510,7 +518,7 @@ export default function CadastroPage() {
           <TabsList className="w-full justify-center">
             <TabsTrigger value="status" className="gap-1.5">
               <FileCheck className="h-3.5 w-3.5" /> Status
-              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{registrations.length}</Badge>
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{filtered.length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="handlers" className="gap-1.5">
               <Users className="h-3.5 w-3.5" /> Tratando Com
@@ -525,7 +533,7 @@ export default function CadastroPage() {
           <TabsContent value="status" className="mt-3">
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {[
-                { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: registrations.length },
+                { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: filtered.length },
                 ...Object.entries(statusKpiConfig).map(([status, config]) => ({
                   status, label: status, icon: config.icon, color: config.color, count: statusCounts[status] || 0,
                 })),
@@ -643,10 +651,10 @@ export default function CadastroPage() {
                 registration={reg}
                 operationalData={getRegData(reg)}
                 onClick={() => handleCardClick(reg)}
-                onEdit={() => handleEdit(reg)}
-                onChangeStatus={() => handleEdit(reg)}
-                onTogglePause={() => handleTogglePause(reg)}
-                onDelete={() => setDeleteTarget(reg)}
+                onEdit={canEditReg ? () => handleEdit(reg) : undefined}
+                onChangeStatus={canChangeStatus ? () => handleEdit(reg) : undefined}
+                onTogglePause={canChangeStatus ? () => handleTogglePause(reg) : undefined}
+                onDelete={canDelete ? () => setDeleteTarget(reg) : undefined}
               />
             ))}
           </div>
@@ -703,7 +711,14 @@ export default function CadastroPage() {
                               <SelectContent>{statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                             </Select>
                           ) : (
-                            <Badge className={cn('cursor-pointer text-[10px] font-semibold border', statusColorMap[reg.status] || 'bg-muted')} onClick={() => startEditing(reg.id, 'status', reg.status)}>
+                            <Badge
+                              className={cn(
+                                'text-[10px] font-semibold border',
+                                statusColorMap[reg.status] || 'bg-muted',
+                                canChangeStatus ? 'cursor-pointer' : 'cursor-default',
+                              )}
+                              onClick={() => canChangeStatus && startEditing(reg.id, 'status', reg.status)}
+                            >
                               {reg.status}
                             </Badge>
                           )}
@@ -717,7 +732,13 @@ export default function CadastroPage() {
                               <SelectContent>{handlers.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
                             </Select>
                           ) : (
-                            <span className="cursor-pointer hover:text-primary transition-colors" onClick={() => startEditing(reg.id, 'handlingWith', reg.handlingWith)}>
+                            <span
+                              className={cn(
+                                'transition-colors',
+                                canEditReg ? 'cursor-pointer hover:text-primary' : 'cursor-default',
+                              )}
+                              onClick={() => canEditReg && startEditing(reg.id, 'handlingWith', reg.handlingWith)}
+                            >
                               {reg.handlingWith}
                             </span>
                           )}
@@ -736,8 +757,11 @@ export default function CadastroPage() {
                             />
                           ) : (
                             <p
-                              className="text-xs text-muted-foreground line-clamp-2 cursor-pointer hover:text-foreground transition-colors"
-                              onClick={() => startEditing(reg.id, 'observation', reg.observation)}
+                              className={cn(
+                                'text-xs text-muted-foreground line-clamp-2',
+                                canEditObs ? 'cursor-pointer hover:text-foreground transition-colors' : 'cursor-default',
+                              )}
+                              onClick={() => canEditObs && startEditing(reg.id, 'observation', reg.observation)}
                             >
                               {reg.observation || '—'}
                             </p>
@@ -765,7 +789,8 @@ export default function CadastroPage() {
                         <TableCell className="text-center" onClick={e => e.stopPropagation()}>
                           <Checkbox
                             checked={reg.contractConfirmed ?? false}
-                            onCheckedChange={(checked) => updateRegistration(reg.id, { contractConfirmed: !!checked })}
+                            onCheckedChange={canEditReg ? (checked) => updateRegistration(reg.id, { contractConfirmed: !!checked }) : undefined}
+                            disabled={!canEditReg}
                             className="mx-auto"
                           />
                         </TableCell>
