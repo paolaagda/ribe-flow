@@ -93,6 +93,7 @@ export default function CadastroPage() {
   const [filterDateMode, setFilterDateMode] = useState<DateMode>('none');
   const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>();
   const [filterDateTo, setFilterDateTo] = useState<Date | undefined>();
+  const [filterCriticality, setFilterCriticality] = useState<'all' | 'alta' | 'média' | 'baixa'>('all');
 
   const [showFilters, setShowFilters] = useState(false);
   const [kpiTab, setKpiTab] = useState('status');
