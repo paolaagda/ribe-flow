@@ -4,7 +4,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Handshake, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { initialCampaigns, getCampaignStatus, getCompletedVisitsForUser, getCompletedProspectionsForUser } from '@/data/campaigns';
 import { mockVisits } from '@/data/mock-data';
+import { cn } from '@/lib/utils';
 
 const motivationalPhrases = [
   "Hoje é um ótimo dia para abrir novas portas.",
@@ -33,17 +35,34 @@ export default function HeroSection() {
     return () => clearInterval(interval);
   }, []);
 
-  const stats = useMemo(() => {
+  const campaignProgress = useMemo(() => {
+    const activeCampaign = initialCampaigns.find(c => getCampaignStatus(c) === 'Ativa');
+    if (!activeCampaign || !user) return null;
+    const participant = activeCampaign.participants.find(p => p.userId === user.id);
+    if (!participant) return null;
+    const visits = getCompletedVisitsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate);
+    const prospections = getCompletedProspectionsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate);
+    return {
+      visits,
+      visitGoal: participant.visitGoal,
+      visitPercent: participant.visitGoal > 0 ? Math.round((visits / participant.visitGoal) * 100) : 0,
+      prospections,
+      prospectionGoal: participant.prospectionGoal,
+      prospectionPercent: participant.prospectionGoal > 0 ? Math.round((prospections / participant.prospectionGoal) * 100) : 0,
+    };
+  }, [user]);
+
+  const fallbackStats = useMemo(() => {
+    if (campaignProgress) return null;
     const isRestricted = user && ['comercial', 'cadastro'].includes(user.role);
     const userVisits = isRestricted && user
       ? mockVisits.filter(v => v.userId === user.id || v.createdBy === user.id || v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted'))
       : mockVisits;
-
-    const visitasConcluidas = userVisits.filter(v => v.type === 'visita' && v.status === 'Concluída').length;
-    const prospecoesConcluidas = userVisits.filter(v => v.type === 'prospecção' && v.status === 'Concluída').length;
-
-    return { visitasConcluidas, prospecoesConcluidas };
-  }, [user]);
+    return {
+      visitasConcluidas: userVisits.filter(v => v.type === 'visita' && v.status === 'Concluída').length,
+      prospecoesConcluidas: userVisits.filter(v => v.type === 'prospecção' && v.status === 'Concluída').length,
+    };
+  }, [user, campaignProgress]);
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?';
 
