@@ -1096,6 +1096,9 @@ export default function AgendaPage() {
                               ) : (
                                 <UserPlus className="h-2.5 w-2.5 shrink-0 text-warning" />
                               )}
+                              <span className="text-[9px] truncate max-w-[60px]">
+                                {partner?.name || v.prospectPartner || ""}
+                              </span>
                               {(() => {
                                 const participants = getParticipants(v);
                                 return (
@@ -1227,6 +1230,38 @@ export default function AgendaPage() {
                                   </span>
                                 )}
                                 <span>• {vUser?.name}</span>
+                              </div>
+                              {/* Last visit & potential */}
+                              <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                {partner && (
+                                  <Badge variant="outline" className={cn("text-[9px] px-1 py-0 capitalize",
+                                    partner.potential === 'alto' ? 'bg-success/10 text-success border-success/20' :
+                                    partner.potential === 'médio' ? 'bg-info/10 text-info border-info/20' :
+                                    'bg-muted/50 text-muted-foreground border-border/30'
+                                  )}>{partner.potential}</Badge>
+                                )}
+                                {v.type === 'visita' && partner && (() => {
+                                  const lastConcluded = visits
+                                    .filter(vv => vv.partnerId === v.partnerId && vv.status === 'Concluída' && vv.id !== v.id)
+                                    .sort((a, b) => b.date.localeCompare(a.date))[0];
+                                  if (!lastConcluded) return <span className="text-[10px] text-muted-foreground/70">Primeira visita</span>;
+                                  const days = Math.floor((Date.now() - new Date(lastConcluded.date).getTime()) / 86400000);
+                                  return <span className="text-[10px] text-muted-foreground/70">Última visita: {days}d atrás</span>;
+                                })()}
+                                {v.status === 'Concluída' && !v.summary?.trim() && (
+                                  <Badge variant="outline" className="text-[9px] px-1 py-0 bg-muted/50 text-muted-foreground border-border/30 gap-0.5">
+                                    <FileText className="h-2 w-2" /> Sem resumo
+                                  </Badge>
+                                )}
+                                {(() => {
+                                  const pendingCount = v.comments?.filter(c => c.type === 'task' && !c.taskCompleted).length || 0;
+                                  if (pendingCount === 0) return null;
+                                  return (
+                                    <Badge variant="outline" className="text-[9px] px-1 py-0 bg-warning/10 text-warning border-warning/20 gap-0.5">
+                                      <ListTodo className="h-2 w-2" /> {pendingCount} tarefa{pendingCount > 1 ? 's' : ''}
+                                    </Badge>
+                                  );
+                                })()}
                               </div>
                             </div>
                             {(() => {
@@ -1836,6 +1871,21 @@ export default function AgendaPage() {
         onLeaveVisit={handleLeaveVisit}
         onAddComment={handleAddComment}
         onToggleTask={handleToggleTask}
+        onScheduleFollowUp={(partnerId) => {
+          setShowDetail(false);
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const partner = getPartnerById(partnerId);
+          resetForm();
+          setFormData(prev => ({
+            ...prev,
+            partnerId,
+            date: format(tomorrow, "yyyy-MM-dd"),
+            type: "visita",
+            structures: partner?.structures || [],
+          }));
+          setShowForm(true);
+        }}
       />
 
       {/* Justification Modal */}
