@@ -149,10 +149,10 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
         result.push({ id: 'agenda_sem_visita_15d', icon: <Calendar className="h-3 w-3 shrink-0" />, text: `${partnersWithoutVisit.length} parceiro${partnersWithoutVisit.length > 1 ? 's' : ''} sem visita há mais de 15 dias`, variant: 'warning' });
       }
 
-      // 7. NEW: Completed visits without summary
+      // 7. NEW: Completed visits without summary (warning when actionable)
       const semResumo = thisMonthConcluded.filter(v => !v.summary?.trim());
       if (semResumo.length > 0) {
-        result.push({ id: 'agenda_sem_resumo', icon: <Lightbulb className="h-3 w-3 shrink-0" />, text: `${semResumo.length} visita${semResumo.length > 1 ? 's' : ''} concluída${semResumo.length > 1 ? 's' : ''} sem resumo`, variant: 'neutral' });
+        result.push({ id: 'agenda_sem_resumo', icon: <Lightbulb className="h-3 w-3 shrink-0" />, text: `${semResumo.length} visita${semResumo.length > 1 ? 's' : ''} concluída${semResumo.length > 1 ? 's' : ''} sem resumo`, variant: semResumo.length >= 3 ? 'warning' : 'neutral' });
       }
 
       // 8. NEW (secondary): Partners with active registration and scheduled visit
