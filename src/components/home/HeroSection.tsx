@@ -4,7 +4,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Handshake, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { initialCampaigns, getCampaignStatus, getCompletedVisitsForUser, getCompletedProspectionsForUser } from '@/data/campaigns';
 import { mockVisits } from '@/data/mock-data';
+import { cn } from '@/lib/utils';
 
 const motivationalPhrases = [
   "Hoje é um ótimo dia para abrir novas portas.",
@@ -33,17 +35,34 @@ export default function HeroSection() {
     return () => clearInterval(interval);
   }, []);
 
-  const stats = useMemo(() => {
+  const campaignProgress = useMemo(() => {
+    const activeCampaign = initialCampaigns.find(c => getCampaignStatus(c) === 'Ativa');
+    if (!activeCampaign || !user) return null;
+    const participant = activeCampaign.participants.find(p => p.userId === user.id);
+    if (!participant) return null;
+    const visits = getCompletedVisitsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate);
+    const prospections = getCompletedProspectionsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate);
+    return {
+      visits,
+      visitGoal: participant.visitGoal,
+      visitPercent: participant.visitGoal > 0 ? Math.round((visits / participant.visitGoal) * 100) : 0,
+      prospections,
+      prospectionGoal: participant.prospectionGoal,
+      prospectionPercent: participant.prospectionGoal > 0 ? Math.round((prospections / participant.prospectionGoal) * 100) : 0,
+    };
+  }, [user]);
+
+  const fallbackStats = useMemo(() => {
+    if (campaignProgress) return null;
     const isRestricted = user && ['comercial', 'cadastro'].includes(user.role);
     const userVisits = isRestricted && user
       ? mockVisits.filter(v => v.userId === user.id || v.createdBy === user.id || v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted'))
       : mockVisits;
-
-    const visitasConcluidas = userVisits.filter(v => v.type === 'visita' && v.status === 'Concluída').length;
-    const prospecoesConcluidas = userVisits.filter(v => v.type === 'prospecção' && v.status === 'Concluída').length;
-
-    return { visitasConcluidas, prospecoesConcluidas };
-  }, [user]);
+    return {
+      visitasConcluidas: userVisits.filter(v => v.type === 'visita' && v.status === 'Concluída').length,
+      prospecoesConcluidas: userVisits.filter(v => v.type === 'prospecção' && v.status === 'Concluída').length,
+    };
+  }, [user, campaignProgress]);
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?';
 
@@ -88,22 +107,66 @@ export default function HeroSection() {
             </div>
 
             <div className="flex flex-wrap gap-3 text-ds-sm">
+              {/* Visitas */}
               <div className="stat-chip gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-info/12 flex items-center justify-center">
                   <Handshake className="h-4 w-4 text-info" />
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-bold tabular-nums text-ds-sm leading-tight">{stats.visitasConcluidas}</span>
+                <div className="flex flex-col min-w-[72px]">
+                  <span className="font-bold tabular-nums text-ds-sm leading-tight">
+                    {campaignProgress ? `${campaignProgress.visits} / ${campaignProgress.visitGoal}` : fallbackStats?.visitasConcluidas ?? 0}
+                  </span>
                   <span className="text-muted-foreground text-ds-xs">visitas</span>
+                  {campaignProgress && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
+                        <div
+                          className={cn(
+                            'h-full rounded-full transition-all duration-700 ease-out',
+                            campaignProgress.visitPercent >= 100 ? 'bg-success' : campaignProgress.visitPercent >= 60 ? 'bg-primary' : 'bg-warning',
+                          )}
+                          style={{ width: `${Math.min(campaignProgress.visitPercent, 100)}%` }}
+                        />
+                      </div>
+                      <span className={cn(
+                        'text-[9px] font-semibold tabular-nums whitespace-nowrap',
+                        campaignProgress.visitPercent >= 100 ? 'text-success' : campaignProgress.visitPercent >= 60 ? 'text-primary' : 'text-warning',
+                      )}>
+                        {campaignProgress.visitPercent}%
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
+              {/* Prospecções */}
               <div className="stat-chip gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-warning/12 flex items-center justify-center">
                   <UserPlus className="h-4 w-4 text-warning" />
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-bold tabular-nums text-ds-sm leading-tight">{stats.prospecoesConcluidas}</span>
+                <div className="flex flex-col min-w-[72px]">
+                  <span className="font-bold tabular-nums text-ds-sm leading-tight">
+                    {campaignProgress ? `${campaignProgress.prospections} / ${campaignProgress.prospectionGoal}` : fallbackStats?.prospecoesConcluidas ?? 0}
+                  </span>
                   <span className="text-muted-foreground text-ds-xs">prospecções</span>
+                  {campaignProgress && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
+                        <div
+                          className={cn(
+                            'h-full rounded-full transition-all duration-700 ease-out',
+                            campaignProgress.prospectionPercent >= 100 ? 'bg-success' : campaignProgress.prospectionPercent >= 60 ? 'bg-primary' : 'bg-warning',
+                          )}
+                          style={{ width: `${Math.min(campaignProgress.prospectionPercent, 100)}%` }}
+                        />
+                      </div>
+                      <span className={cn(
+                        'text-[9px] font-semibold tabular-nums whitespace-nowrap',
+                        campaignProgress.prospectionPercent >= 100 ? 'text-success' : campaignProgress.prospectionPercent >= 60 ? 'text-primary' : 'text-warning',
+                      )}>
+                        {campaignProgress.prospectionPercent}%
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
