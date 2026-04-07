@@ -58,6 +58,13 @@ export default function PartnerListItemCard({ partner, operationalData, onClick,
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
+            <Badge variant="outline" className={cn(
+              'text-[10px] w-5 h-5 p-0 flex items-center justify-center font-bold',
+              partner.partnerClass === 'A' ? 'bg-success/10 text-success border-success/20' :
+              partner.partnerClass === 'B' ? 'bg-info/10 text-info border-info/20' :
+              partner.partnerClass === 'C' ? 'bg-warning/10 text-warning border-warning/20' :
+              'bg-muted text-muted-foreground border-muted-foreground/20'
+            )}>{partner.partnerClass}</Badge>
             <Badge variant="outline" className={cn('text-[10px]', cc.className)}>{cc.label}</Badge>
             <Badge variant="outline" className={cn('text-[10px] capitalize', potentialBadgeClass[partner.potential])}>{partner.potential}</Badge>
           </div>

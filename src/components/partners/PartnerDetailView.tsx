@@ -13,6 +13,7 @@ import { usePartnerOperationalData } from '@/hooks/usePartnerOperationalData';
 import { getUserById, Partner } from '@/data/mock-data';
 import { cn } from '@/lib/utils';
 import { formatCentavos } from '@/lib/currency';
+import { useClassification } from '@/hooks/useClassification';
 import {
   ArrowLeft, Building2, MapPin, Phone, User, Calendar,
   TrendingUp, BarChart3, Target, Clock, CalendarPlus, CalendarRange,
@@ -158,8 +159,18 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-bold truncate">{partner.name}</h2>
               <p className="text-xs text-muted-foreground">{partner.razaoSocial} • {partner.cnpj}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Produção média: {partner.averageProduction > 0 ? formatCentavos(partner.averageProduction) : <span className="italic">Sem dados de produção</span>}
+              </p>
             </div>
             <div className="flex gap-1.5 shrink-0 flex-wrap justify-end">
+              <Badge variant="outline" className={cn(
+                'text-[10px] w-5 h-5 p-0 flex items-center justify-center font-bold',
+                partner.partnerClass === 'A' ? 'bg-success/10 text-success border-success/20' :
+                partner.partnerClass === 'B' ? 'bg-info/10 text-info border-info/20' :
+                partner.partnerClass === 'C' ? 'bg-warning/10 text-warning border-warning/20' :
+                'bg-muted text-muted-foreground border-muted-foreground/20'
+              )}>{partner.partnerClass}</Badge>
               {cc && <Badge variant="outline" className={cn('text-[10px]', cc.className)}>{cc.label}</Badge>}
               <Badge variant="outline" className={cn('text-[10px] capitalize', pc.color, pc.bg)}>{partner.potential}</Badge>
             </div>
