@@ -198,7 +198,7 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
           <TabsTrigger value="tasks" className="text-xs">Tarefas</TabsTrigger>
           <TabsTrigger value="docs" className="text-xs">Documentos</TabsTrigger>
           <TabsTrigger value="visits" className="text-xs">Visitas</TabsTrigger>
-          <TabsTrigger value="registration" className="text-xs">Cadastro</TabsTrigger>
+          {canRead('registration.view') && <TabsTrigger value="registration" className="text-xs">Cadastro</TabsTrigger>}
           <TabsTrigger value="history" className="text-xs">Histórico</TabsTrigger>
         </TabsList>
 
