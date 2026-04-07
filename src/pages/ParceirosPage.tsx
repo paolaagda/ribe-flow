@@ -152,7 +152,7 @@ export default function ParceirosPage() {
 
       <PartnersOperationalSummary summary={summary} />
 
-      <SmartInsights page="parceiros" activeFilter={activeInsight} onFilterClick={setActiveInsight} />
+      <SmartInsights page="parceiros" activeFilter={activeInsight} onFilterClick={setActiveInsight} scopedPartners={visiblePartners} />
 
       <PartnersFilterBar
         filters={filters}

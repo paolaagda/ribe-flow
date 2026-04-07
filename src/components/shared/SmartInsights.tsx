@@ -42,13 +42,24 @@ interface SmartInsightsProps {
   filterView?: 'day' | 'week' | 'month';
   filterStatus?: string;
   filterType?: string;
+  /** Pre-filtered partners scoped to the logged-in user's role */
+  scopedPartners?: import('@/data/mock-data').Partner[];
 }
 
-export default function SmartInsights({ page, activeFilter, onFilterClick, onInsightClick, filterView, filterStatus, filterType }: SmartInsightsProps) {
+export default function SmartInsights({ page, activeFilter, onFilterClick, onInsightClick, filterView, filterStatus, filterType, scopedPartners }: SmartInsightsProps) {
   const { visits } = useVisits();
-  const { partners } = usePartners();
+  const { partners: allPartners } = usePartners();
   const { pendingTasks, completedTasks } = useTasks();
   const { user } = useAuth();
+
+  // Use scoped partners when provided, otherwise filter by role
+  const roleFilteredPartners = useMemo(() => {
+    if (scopedPartners) return scopedPartners;
+    if (user && ['comercial', 'cadastro'].includes(user.role)) {
+      return allPartners.filter(p => p.responsibleUserId === user.id);
+    }
+    return allPartners;
+  }, [scopedPartners, allPartners, user]);
 
   const insights = useMemo((): Insight[] => {
     const result: Insight[] = [];
@@ -167,7 +178,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
     }
 
     if (page === 'parceiros') {
-      const highPotential = partners.filter(p => p.potential === 'alto');
+      const highPotential = roleFilteredPartners.filter(p => p.potential === 'alto');
       if (highPotential.length > 0) {
         result.push({ id: 'parc_alto_potencial', icon: <TrendingUp className="h-3 w-3 shrink-0" />, text: `${highPotential.length} parceiro${highPotential.length > 1 ? 's' : ''} com alto potencial`, variant: 'success' });
       }
@@ -176,7 +187,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
         result.push({ id: 'parc_valor_total', icon: <DollarSign className="h-3 w-3 shrink-0" />, text: `Valor potencial total: ${formatCentavos(totalValue)}`, variant: 'info' });
       }
       const recentPartnerIds = new Set(thisMonth.filter(v => v.status === 'Concluída').map(v => v.partnerId));
-      const withoutRecent = partners.filter(p => !recentPartnerIds.has(p.id));
+      const withoutRecent = roleFilteredPartners.filter(p => !recentPartnerIds.has(p.id));
       if (withoutRecent.length > 0) {
         result.push({ id: 'parc_sem_visita_30d', icon: <Calendar className="h-3 w-3 shrink-0" />, text: `${withoutRecent.length} parceiros sem visita concluída neste mês`, variant: 'warning' });
       }
@@ -187,7 +198,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
     }
 
     return result.slice(0, 4);
-  }, [page, visits, partners, pendingTasks, completedTasks, user, filterStatus, filterType, filterView]);
+  }, [page, visits, roleFilteredPartners, pendingTasks, completedTasks, user, filterStatus, filterType, filterView]);
 
   const handleClick = (insight: Insight) => {
     if (onFilterClick) {

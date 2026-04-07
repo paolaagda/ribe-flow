@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useTasks } from '@/hooks/useTasks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -60,6 +61,8 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
   const partner = getPartnerById(partnerId);
   const { getPartnerData } = usePartnerOperationalData(partner ? [partner] : []);
   const opData = partner ? getPartnerData(partnerId) : null;
+  const { getTasksByPartnerId } = useTasks();
+  const partnerTasks = getTasksByPartnerId(partnerId);
 
   const partnerVisits = useMemo(() => {
     return visits.filter(v => v.partnerId === partnerId).sort((a, b) => b.date.localeCompare(a.date));
@@ -180,7 +183,11 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
           <AnimatedKpiCard icon={Calendar} label="Última Visita" value={opData.lastVisitDate ? formatDistanceToNowStrict(parseISO(opData.lastVisitDate), { locale: ptBR }) : '—'} color="text-muted-foreground" />
           <AnimatedKpiCard icon={Landmark} label="Cadastro Ativo" value={opData.activeRegistrationsCount} color="text-primary" />
           <AnimatedKpiCard icon={Clock} label="Dias s/ Mov." value={opData.daysSinceLastVisit ?? '—'} color={opData.daysSinceLastVisit && opData.daysSinceLastVisit > 15 ? 'text-warning' : 'text-muted-foreground'} />
-          <AnimatedKpiCard icon={ArrowRight} label="Próxima Ação" value={opData.nextAction} color="text-primary" />
+          <div className="col-span-2 sm:col-span-3 lg:col-span-6 flex items-center gap-2 px-3 py-2 rounded-lg border bg-primary/5 border-primary/10 text-sm">
+            <ArrowRight className="h-4 w-4 text-primary shrink-0" />
+            <span className="text-xs font-medium text-muted-foreground">Próxima Ação:</span>
+            <span className="text-xs text-foreground">{opData.nextAction}</span>
+          </div>
         </div>
       )}
 
@@ -196,8 +203,14 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
+          {/* KPI summary - operational priority first */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <AnimatedKpiCard icon={BarChart3} label="Total Visitas" value={stats.totalVisits} color="text-info" />
+            <AnimatedKpiCard icon={TrendingUp} label="Conversão" value={`${stats.conversionRate}%`} color="text-success" />
+            <AnimatedKpiCard icon={Clock} label="Freq. Média" value={stats.avgFrequency ? `${stats.avgFrequency}d` : '—'} color="text-warning" />
+            <AnimatedKpiCard icon={DollarSign} label="Potencial" value={stats.totalPotential ? formatCentavos(stats.totalPotential) : '—'} color="text-success" />
+          </div>
           <PartnerInsights partner={partner} visits={partnerVisits} stats={stats} />
-          <PartnerCharts visits={partnerVisits} />
           {partnerStores.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
@@ -224,18 +237,12 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
               </CardContent>
             </Card>
           )}
-          {/* KPI summary */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <AnimatedKpiCard icon={BarChart3} label="Total Visitas" value={stats.totalVisits} color="text-info" />
-            <AnimatedKpiCard icon={TrendingUp} label="Conversão" value={`${stats.conversionRate}%`} color="text-success" />
-            <AnimatedKpiCard icon={Clock} label="Freq. Média" value={stats.avgFrequency ? `${stats.avgFrequency}d` : '—'} color="text-warning" />
-            <AnimatedKpiCard icon={DollarSign} label="Potencial" value={stats.totalPotential ? formatCentavos(stats.totalPotential) : '—'} color="text-success" />
-          </div>
+          <PartnerCharts visits={partnerVisits} />
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-4">
           <PartnerTasksSection partnerId={partnerId} />
-          {partnerVisits.filter(v => v.comments?.some(c => c.type === 'task')).length === 0 && (
+          {partnerTasks.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               <CheckSquare className="h-10 w-10 mx-auto mb-2 opacity-50" />
               <p className="text-sm">Nenhuma tarefa registrada para este parceiro</p>
