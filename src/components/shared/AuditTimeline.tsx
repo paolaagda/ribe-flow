@@ -7,12 +7,14 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { FileText, Pencil, Trash2, RefreshCw, Shield } from 'lucide-react';
 
-const actionIcons = {
+const actionIcons: Record<string, typeof FileText> = {
   create: FileText,
   edit: Pencil,
   delete: Trash2,
   status_change: RefreshCw,
   permission_change: Shield,
+  approve: Shield,
+  reject: Trash2,
 };
 
 interface Props {
