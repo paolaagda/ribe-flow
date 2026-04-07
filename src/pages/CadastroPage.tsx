@@ -278,6 +278,7 @@ export default function CadastroPage() {
     setFilterDateMode('none');
     setFilterDateFrom(undefined);
     setFilterDateTo(undefined);
+    setFilterCriticality('all');
   };
 
   const handleDateModeSelect = (mode: DateMode) => {
@@ -505,7 +506,7 @@ export default function CadastroPage() {
           <TabsList className="w-full justify-center">
             <TabsTrigger value="status" className="gap-1.5">
               <FileCheck className="h-3.5 w-3.5" /> Status
-              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{registrations.length}</Badge>
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{filtered.length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="handlers" className="gap-1.5">
               <Users className="h-3.5 w-3.5" /> Tratando Com
@@ -520,7 +521,7 @@ export default function CadastroPage() {
           <TabsContent value="status" className="mt-3">
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {[
-                { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: registrations.length },
+                { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: filtered.length },
                 ...Object.entries(statusKpiConfig).map(([status, config]) => ({
                   status, label: status, icon: config.icon, color: config.color, count: statusCounts[status] || 0,
                 })),
@@ -638,10 +639,10 @@ export default function CadastroPage() {
                 registration={reg}
                 operationalData={getRegData(reg)}
                 onClick={() => handleCardClick(reg)}
-                onEdit={() => handleEdit(reg)}
-                onChangeStatus={() => handleEdit(reg)}
-                onTogglePause={() => handleTogglePause(reg)}
-                onDelete={() => setDeleteTarget(reg)}
+                onEdit={canEditReg ? () => handleEdit(reg) : undefined}
+                onChangeStatus={canChangeStatus ? () => handleEdit(reg) : undefined}
+                onTogglePause={canChangeStatus ? () => handleTogglePause(reg) : undefined}
+                onDelete={canDelete ? () => setDeleteTarget(reg) : undefined}
               />
             ))}
           </div>
@@ -698,7 +699,14 @@ export default function CadastroPage() {
                               <SelectContent>{statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                             </Select>
                           ) : (
-                            <Badge className={cn('cursor-pointer text-[10px] font-semibold border', statusColorMap[reg.status] || 'bg-muted')} onClick={() => startEditing(reg.id, 'status', reg.status)}>
+                            <Badge
+                              className={cn(
+                                'text-[10px] font-semibold border',
+                                statusColorMap[reg.status] || 'bg-muted',
+                                canChangeStatus ? 'cursor-pointer' : 'cursor-default',
+                              )}
+                              onClick={() => canChangeStatus && startEditing(reg.id, 'status', reg.status)}
+                            >
                               {reg.status}
                             </Badge>
                           )}
@@ -712,7 +720,13 @@ export default function CadastroPage() {
                               <SelectContent>{handlers.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
                             </Select>
                           ) : (
-                            <span className="cursor-pointer hover:text-primary transition-colors" onClick={() => startEditing(reg.id, 'handlingWith', reg.handlingWith)}>
+                            <span
+                              className={cn(
+                                'transition-colors',
+                                canEditReg ? 'cursor-pointer hover:text-primary' : 'cursor-default',
+                              )}
+                              onClick={() => canEditReg && startEditing(reg.id, 'handlingWith', reg.handlingWith)}
+                            >
                               {reg.handlingWith}
                             </span>
                           )}
@@ -731,8 +745,11 @@ export default function CadastroPage() {
                             />
                           ) : (
                             <p
-                              className="text-xs text-muted-foreground line-clamp-2 cursor-pointer hover:text-foreground transition-colors"
-                              onClick={() => startEditing(reg.id, 'observation', reg.observation)}
+                              className={cn(
+                                'text-xs text-muted-foreground line-clamp-2',
+                                canEditObs ? 'cursor-pointer hover:text-foreground transition-colors' : 'cursor-default',
+                              )}
+                              onClick={() => canEditObs && startEditing(reg.id, 'observation', reg.observation)}
                             >
                               {reg.observation || '—'}
                             </p>
@@ -760,7 +777,8 @@ export default function CadastroPage() {
                         <TableCell className="text-center" onClick={e => e.stopPropagation()}>
                           <Checkbox
                             checked={reg.contractConfirmed ?? false}
-                            onCheckedChange={(checked) => updateRegistration(reg.id, { contractConfirmed: !!checked })}
+                            onCheckedChange={canEditReg ? (checked) => updateRegistration(reg.id, { contractConfirmed: !!checked }) : undefined}
+                            disabled={!canEditReg}
                             className="mx-auto"
                           />
                         </TableCell>
