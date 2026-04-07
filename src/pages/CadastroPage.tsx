@@ -130,30 +130,6 @@ export default function CadastroPage() {
     filterCriticality !== 'all',
   ].filter(Boolean).length;
 
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    registrations.forEach(r => {
-      counts[r.status] = (counts[r.status] || 0) + 1;
-    });
-    return counts;
-  }, [registrations]);
-
-  const handlerCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    registrations.forEach(r => {
-      counts[r.handlingWith] = (counts[r.handlingWith] || 0) + 1;
-    });
-    return counts;
-  }, [registrations]);
-
-  const bankCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    registrations.forEach(r => {
-      counts[r.bank] = (counts[r.bank] || 0) + 1;
-    });
-    return counts;
-  }, [registrations]);
-
   const getLastUpdateDate = (reg: Registration): string => {
     if (reg.updates.length > 0) return reg.updates[reg.updates.length - 1].date;
     return reg.requestedAt;
@@ -163,21 +139,10 @@ export default function CadastroPage() {
     if (filterDateMode === 'none') return true;
     const date = new Date(dateStr + 'T00:00:00');
     const now = new Date();
-
-    if (filterDateMode === 'day' && filterDateFrom) {
-      return format(date, 'yyyy-MM-dd') === format(filterDateFrom, 'yyyy-MM-dd');
-    }
-    if (filterDateMode === 'period' && filterDateFrom && filterDateTo) {
-      return isWithinInterval(date, { start: startOfDay(filterDateFrom), end: endOfDay(filterDateTo) });
-    }
-    if (filterDateMode === 'weekly') {
-      const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-      const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
-      return isWithinInterval(date, { start: weekStart, end: weekEnd });
-    }
-    if (filterDateMode === 'monthly') {
-      return isWithinInterval(date, { start: startOfMonth(now), end: endOfMonth(now) });
-    }
+    if (filterDateMode === 'day' && filterDateFrom) return format(date, 'yyyy-MM-dd') === format(filterDateFrom, 'yyyy-MM-dd');
+    if (filterDateMode === 'period' && filterDateFrom && filterDateTo) return isWithinInterval(date, { start: startOfDay(filterDateFrom), end: endOfDay(filterDateTo) });
+    if (filterDateMode === 'weekly') { const ws = startOfWeek(now, { weekStartsOn: 1 }); const we = endOfWeek(now, { weekStartsOn: 1 }); return isWithinInterval(date, { start: ws, end: we }); }
+    if (filterDateMode === 'monthly') return isWithinInterval(date, { start: startOfMonth(now), end: endOfMonth(now) });
     return true;
   };
 
@@ -189,6 +154,7 @@ export default function CadastroPage() {
       if (filterSolicitation !== 'all' && r.solicitation !== filterSolicitation) return false;
       if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
       if (!isDateInRange(getLastUpdateDate(r))) return false;
+      if (filterCriticality !== 'all' && getRegData(r).criticality !== filterCriticality) return false;
       if (search) {
         const q = search.toLowerCase();
         const partnerName = getPartnerById(r.partnerId)?.name?.toLowerCase() || '';
@@ -201,7 +167,26 @@ export default function CadastroPage() {
       }
       return true;
     });
-  }, [registrations, filterStatuses, filterBanks, filterCommercial, filterSolicitation, filterHandlers, filterDateMode, filterDateFrom, filterDateTo, search]);
+  }, [registrations, filterStatuses, filterBanks, filterCommercial, filterSolicitation, filterHandlers, filterDateMode, filterDateFrom, filterDateTo, filterCriticality, search, getRegData]);
+
+  // KPIs computed from filtered list
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filtered.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
+    return counts;
+  }, [filtered]);
+
+  const handlerCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filtered.forEach(r => { counts[r.handlingWith] = (counts[r.handlingWith] || 0) + 1; });
+    return counts;
+  }, [filtered]);
+
+  const bankCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filtered.forEach(r => { counts[r.bank] = (counts[r.bank] || 0) + 1; });
+    return counts;
+  }, [filtered]);
 
   const sorted = useMemo(() => {
     if (sortField === 'none') return filtered;
