@@ -178,7 +178,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
     }
 
     if (page === 'parceiros') {
-      const highPotential = partners.filter(p => p.potential === 'alto');
+      const highPotential = roleFilteredPartners.filter(p => p.potential === 'alto');
       if (highPotential.length > 0) {
         result.push({ id: 'parc_alto_potencial', icon: <TrendingUp className="h-3 w-3 shrink-0" />, text: `${highPotential.length} parceiro${highPotential.length > 1 ? 's' : ''} com alto potencial`, variant: 'success' });
       }
