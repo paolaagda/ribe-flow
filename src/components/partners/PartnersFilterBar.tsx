@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, X, Building2, Store as StoreIcon } from 'lucide-react';
 import { Criticality } from '@/hooks/usePartnerOperationalData';
 import { getUserById, mockUsers } from '@/data/mock-data';
+import { usePermission } from '@/hooks/usePermission';
 
 export interface PartnerFilters {
   search: string;
@@ -40,6 +41,8 @@ export const defaultFilters: PartnerFilters = {
 
 export default function PartnersFilterBar({ filters, onFiltersChange, viewMode, onViewModeChange }: Props) {
   const commercialUsers = mockUsers.filter(u => u.role === 'comercial' && u.active);
+  const { canRead } = usePermission();
+  const canSeeRegistration = canRead('registration.view');
   const hasActiveFilters = filters.criticality !== 'all' || filters.responsibleUserId !== 'all' || filters.hasPendingDocs || filters.hasOpenTasks || filters.hasActiveRegistration;
 
   const update = (partial: Partial<PartnerFilters>) => onFiltersChange({ ...filters, ...partial });
@@ -115,13 +118,15 @@ export default function PartnersFilterBar({ filters, onFiltersChange, viewMode, 
         >
           Tarefas abertas
         </Badge>
-        <Badge
-          variant={filters.hasActiveRegistration ? 'default' : 'outline'}
-          className="cursor-pointer text-xs h-8 px-3 hover:bg-primary/10 transition-colors"
-          onClick={() => toggleFilter('hasActiveRegistration')}
-        >
-          Cadastro ativo
-        </Badge>
+        {canSeeRegistration && (
+          <Badge
+            variant={filters.hasActiveRegistration ? 'default' : 'outline'}
+            className="cursor-pointer text-xs h-8 px-3 hover:bg-primary/10 transition-colors"
+            onClick={() => toggleFilter('hasActiveRegistration')}
+          >
+            Cadastro ativo
+          </Badge>
+        )}
 
         {hasActiveFilters && (
           <Button variant="ghost" size="sm" className="h-8 text-xs gap-1 text-muted-foreground" onClick={() => onFiltersChange({ ...defaultFilters, search: filters.search })}>

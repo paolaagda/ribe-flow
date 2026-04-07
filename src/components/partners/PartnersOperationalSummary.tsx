@@ -1,5 +1,6 @@
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 import { Building2, AlertTriangle, FileText, CheckSquare, Landmark } from 'lucide-react';
+import { usePermission } from '@/hooks/usePermission';
 
 interface SummaryData {
   total: number;
@@ -14,8 +15,11 @@ interface Props {
 }
 
 export default function PartnersOperationalSummary({ summary }: Props) {
+  const { canRead } = usePermission();
+  const canSeeRegistration = canRead('registration.view');
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-ds-xs">
+    <div className={`grid grid-cols-2 sm:grid-cols-3 ${canSeeRegistration ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-ds-xs`}>
       <AnimatedKpiCard
         icon={Building2}
         label="Total Parceiros"
@@ -45,13 +49,15 @@ export default function PartnersOperationalSummary({ summary }: Props) {
         color="text-info"
         delay={0.15}
       />
-      <AnimatedKpiCard
-        icon={Landmark}
-        label="Cadastro Ativo"
-        value={summary.totalActiveRegistrations}
-        color="text-success"
-        delay={0.2}
-      />
+      {canSeeRegistration && (
+        <AnimatedKpiCard
+          icon={Landmark}
+          label="Cadastro Ativo"
+          value={summary.totalActiveRegistrations}
+          color="text-success"
+          delay={0.2}
+        />
+      )}
     </div>
   );
 }

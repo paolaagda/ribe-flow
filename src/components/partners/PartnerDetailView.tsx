@@ -272,10 +272,11 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
           )}
         </TabsContent>
 
-        <TabsContent value="registration" className="mt-4">
-          <PartnerRegistrations partnerId={partnerId} />
-          {/* empty state handled inside PartnerRegistrations */}
-        </TabsContent>
+        {canRead('registration.view') && (
+          <TabsContent value="registration" className="mt-4">
+            <PartnerRegistrations partnerId={partnerId} />
+          </TabsContent>
+        )}
 
         <TabsContent value="history" className="mt-4">
           <PartnerTimeline visits={partnerVisits} />
