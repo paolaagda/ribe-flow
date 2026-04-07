@@ -172,6 +172,8 @@ export default function PartnersTab() {
         phone: formData.phone,
         contact: formData.contact,
         responsibleUserId: formData.responsibleUserId,
+        partnerClass: 'D',
+        averageProduction: 0,
       };
       setPartners(prev => [...prev, newPartner]);
       toast({ title: 'Parceiro criado!' });
@@ -309,6 +311,8 @@ export default function PartnersTab() {
       phone: row.phone,
       contact: row.contact,
       responsibleUserId: row.responsibleUserId,
+      partnerClass: 'D' as const,
+      averageProduction: 0,
     }));
 
     setPartners(prev => [...prev, ...newPartners]);
