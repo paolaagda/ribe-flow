@@ -9,7 +9,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePartners } from '@/hooks/usePartners';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { useTeamFilter } from '@/hooks/useTeamFilter';
 
 const potentialColors: Record<string, string> = {
   alto: 'bg-success/10 text-success border-success/20',
@@ -19,27 +18,20 @@ const potentialColors: Record<string, string> = {
 
 interface TodayAgendaProps {
   viewMode: 'personal' | 'team';
-  visits: Visit[];
+  todayVisits: Visit[];
 }
 
-export default function TodayAgenda({ viewMode, visits: allVisits }: TodayAgendaProps) {
+export default function TodayAgenda({ viewMode, todayVisits: rawTodayVisits }: TodayAgendaProps) {
   const { user } = useAuth();
   const { getPartnerById } = usePartners();
   const { toast } = useToast();
-  const { getVisibleUserIds } = useTeamFilter();
-  const today = new Date().toISOString().split('T')[0];
   const [completedIds, setCompletedIds] = useLocalStorage<string[]>('ribercred_completed_visits', []);
 
   const todayVisits = useMemo(() => {
-    return allVisits
-      .filter(v => {
-        if (v.date !== today) return false;
-        if (viewMode === 'personal') return v.userId === user?.id;
-        return getVisibleUserIds.includes(v.userId);
-      })
+    return rawTodayVisits
       .map(v => completedIds.includes(v.id) ? { ...v, status: 'Concluída' as const } : v)
       .sort((a, b) => a.time.localeCompare(b.time));
-  }, [today, user, completedIds, viewMode, getVisibleUserIds]);
+  }, [rawTodayVisits, completedIds]);
 
   const now = new Date();
   const currentTime = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;

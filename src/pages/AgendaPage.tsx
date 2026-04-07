@@ -316,13 +316,17 @@ export default function AgendaPage() {
     };
   }, [filteredVisits]);
 
-  const todayIndicators = useMemo(() => {
-    const todayAll = visibleVisits.filter((v) => v.date === todayStr);
-    return {
-      total: todayAll.length,
-      concluidas: todayAll.filter((v) => v.status === "Concluída").length,
-    };
+  // Single source of truth for today's visits — feeds card, TodayAgenda, and VisitMap
+  const todayVisits = useMemo(() => {
+    return visibleVisits.filter((v) => v.date === todayStr);
   }, [visibleVisits, todayStr]);
+
+  const todayIndicators = useMemo(() => {
+    return {
+      total: todayVisits.length,
+      concluidas: todayVisits.filter((v) => v.status === "Concluída").length,
+    };
+  }, [todayVisits]);
 
   const { pendingTasks, completedTasks } = useTasks();
 
@@ -1004,8 +1008,8 @@ export default function AgendaPage() {
               className="overflow-hidden"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm pt-ds-xs">
-                <TodayAgenda viewMode="personal" visits={visibleVisits} />
-                <VisitMap viewMode="personal" filteredVisits={filteredVisits} />
+                <TodayAgenda viewMode="personal" todayVisits={todayVisits} />
+                <VisitMap viewMode="personal" todayVisits={todayVisits} />
               </div>
             </motion.div>
           )}
