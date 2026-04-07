@@ -18,9 +18,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { useRegistrations } from '@/hooks/useRegistrations';
+import { useRegistrationOperationalData } from '@/hooks/useRegistrationOperationalData';
 import { useSystemData } from '@/hooks/useSystemData';
 import { useInfoData } from '@/hooks/useInfoData';
 import RegistrationCard from '@/components/cadastro/RegistrationCard';
+import RegistrationOperationalSummary from '@/components/cadastro/RegistrationOperationalSummary';
 import RegistrationModal from '@/components/cadastro/RegistrationModal';
 import { Registration } from '@/data/registrations';
 import { mockUsers } from '@/data/mock-data';
@@ -72,6 +74,7 @@ export default function CadastroPage() {
   const { toast } = useToast();
   const { addLog } = useAuditLog();
   const navigate = useNavigate();
+  const { getRegData, summary: opSummary } = useRegistrationOperationalData(registrations);
 
   const [search, setSearch] = useState('');
   const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
@@ -178,10 +181,12 @@ export default function CadastroPage() {
       if (!isDateInRange(getLastUpdateDate(r))) return false;
       if (search) {
         const q = search.toLowerCase();
+        const partnerName = getPartnerById(r.partnerId)?.name?.toLowerCase() || '';
         const matchesSearch = r.observation.toLowerCase().includes(q) ||
           r.bank.toLowerCase().includes(q) ||
           r.code.toLowerCase().includes(q) ||
-          r.handlingWith.toLowerCase().includes(q);
+          r.handlingWith.toLowerCase().includes(q) ||
+          partnerName.includes(q);
         if (!matchesSearch) return false;
       }
       return true;
@@ -344,11 +349,14 @@ export default function CadastroPage() {
           </div>
         </PageHeader>
 
+        {/* Operational KPIs */}
+        <RegistrationOperationalSummary summary={opSummary} />
+
         {/* Search always visible */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por observação, banco, código..."
+            placeholder="Buscar por parceiro, observação, banco, código..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="pl-9 h-9"
@@ -633,6 +641,7 @@ export default function CadastroPage() {
               <RegistrationCard
                 key={reg.id}
                 registration={reg}
+                operationalData={getRegData(reg)}
                 onClick={() => handleCardClick(reg)}
                 onEdit={() => handleEdit(reg)}
                 onChangeStatus={() => handleEdit(reg)}

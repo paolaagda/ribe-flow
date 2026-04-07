@@ -28,6 +28,7 @@ import PartnerTasksSection from './PartnerTasksSection';
 import PartnerRegistrations from './PartnerRegistrations';
 import PartnerDocuments from './PartnerDocuments';
 import { usePermission } from '@/hooks/usePermission';
+import { useAuth } from '@/contexts/AuthContext';
 import { Criticality } from '@/hooks/usePartnerOperationalData';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 import { formatDistanceToNowStrict, parseISO } from 'date-fns';
@@ -54,7 +55,7 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
   const { partners, getPartnerById } = usePartners();
   const { visits } = useVisits();
   const { getStoresByPartnerId } = useStores();
-  const { canWrite } = usePermission();
+  const { canWrite, canRead } = usePermission();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
@@ -198,7 +199,7 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
           <TabsTrigger value="tasks" className="text-xs">Tarefas</TabsTrigger>
           <TabsTrigger value="docs" className="text-xs">Documentos</TabsTrigger>
           <TabsTrigger value="visits" className="text-xs">Visitas</TabsTrigger>
-          <TabsTrigger value="registration" className="text-xs">Cadastro</TabsTrigger>
+          {canRead('registration.view') && <TabsTrigger value="registration" className="text-xs">Cadastro</TabsTrigger>}
           <TabsTrigger value="history" className="text-xs">Histórico</TabsTrigger>
         </TabsList>
 
@@ -242,12 +243,6 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
 
         <TabsContent value="tasks" className="mt-4">
           <PartnerTasksSection partnerId={partnerId} />
-          {partnerTasks.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <CheckSquare className="h-10 w-10 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">Nenhuma tarefa registrada para este parceiro</p>
-            </div>
-          )}
         </TabsContent>
 
         <TabsContent value="docs" className="mt-4">
@@ -271,10 +266,11 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
           )}
         </TabsContent>
 
-        <TabsContent value="registration" className="mt-4">
-          <PartnerRegistrations partnerId={partnerId} />
-          {/* empty state handled inside PartnerRegistrations */}
-        </TabsContent>
+        {canRead('registration.view') && (
+          <TabsContent value="registration" className="mt-4">
+            <PartnerRegistrations partnerId={partnerId} />
+          </TabsContent>
+        )}
 
         <TabsContent value="history" className="mt-4">
           <PartnerTimeline visits={partnerVisits} />
