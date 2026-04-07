@@ -18,9 +18,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { useRegistrations } from '@/hooks/useRegistrations';
+import { useRegistrationOperationalData } from '@/hooks/useRegistrationOperationalData';
 import { useSystemData } from '@/hooks/useSystemData';
 import { useInfoData } from '@/hooks/useInfoData';
 import RegistrationCard from '@/components/cadastro/RegistrationCard';
+import RegistrationOperationalSummary from '@/components/cadastro/RegistrationOperationalSummary';
 import RegistrationModal from '@/components/cadastro/RegistrationModal';
 import { Registration } from '@/data/registrations';
 import { mockUsers } from '@/data/mock-data';
@@ -72,6 +74,7 @@ export default function CadastroPage() {
   const { toast } = useToast();
   const { addLog } = useAuditLog();
   const navigate = useNavigate();
+  const { getRegData, summary: opSummary } = useRegistrationOperationalData(registrations);
 
   const [search, setSearch] = useState('');
   const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
