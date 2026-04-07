@@ -1008,8 +1008,8 @@ export default function AgendaPage() {
               className="overflow-hidden"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm pt-ds-xs">
-                <TodayAgenda viewMode="personal" visits={visibleVisits} />
-                <VisitMap viewMode="personal" filteredVisits={filteredVisits} />
+                <TodayAgenda viewMode="personal" todayVisits={todayVisits} />
+                <VisitMap viewMode="personal" todayVisits={todayVisits} />
               </div>
             </motion.div>
           )}
