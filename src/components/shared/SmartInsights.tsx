@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
 import { useTasks } from '@/hooks/useTasks';
+import { useRegistrations } from '@/hooks/useRegistrations';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCentavos } from '@/lib/currency';
 import { format, startOfMonth, endOfMonth, parseISO, isWithinInterval, differenceInDays } from 'date-fns';
@@ -50,6 +51,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
   const { visits } = useVisits();
   const { partners: allPartners } = usePartners();
   const { pendingTasks, completedTasks } = useTasks();
+  const { registrations } = useRegistrations();
   const { user } = useAuth();
 
   // Use scoped partners when provided, otherwise filter by role
@@ -134,6 +136,35 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
         if (prospThisMonth.length > 0) {
           result.push({ id: 'agenda_prospeccoes', icon: <UserPlus className="h-3 w-3 shrink-0" />, text: `${prospThisMonth.length} prospecç${prospThisMonth.length > 1 ? 'ões' : 'ão'} neste mês`, variant: 'info' });
         }
+      }
+
+      // 6. NEW: Partners without visit in 15+ days
+      const recentPartnerIds = new Set(
+        contextVisits
+          .filter(v => v.status === 'Concluída' && differenceInDays(today, parseISO(v.date)) <= 15)
+          .map(v => v.partnerId)
+      );
+      const partnersWithoutVisit = roleFilteredPartners.filter(p => !recentPartnerIds.has(p.id));
+      if (partnersWithoutVisit.length > 0) {
+        result.push({ id: 'agenda_sem_visita_15d', icon: <Calendar className="h-3 w-3 shrink-0" />, text: `${partnersWithoutVisit.length} parceiro${partnersWithoutVisit.length > 1 ? 's' : ''} sem visita há mais de 15 dias`, variant: 'warning' });
+      }
+
+      // 7. NEW: Completed visits without summary
+      const semResumo = thisMonthConcluded.filter(v => !v.summary?.trim());
+      if (semResumo.length > 0) {
+        result.push({ id: 'agenda_sem_resumo', icon: <Lightbulb className="h-3 w-3 shrink-0" />, text: `${semResumo.length} visita${semResumo.length > 1 ? 's' : ''} concluída${semResumo.length > 1 ? 's' : ''} sem resumo`, variant: 'neutral' });
+      }
+
+      // 8. NEW (secondary): Partners with active registration and scheduled visit
+      const activeRegPartnerIds = new Set(
+        registrations
+          .filter(r => !['Concluído', 'Cancelado'].includes(r.status))
+          .map(r => r.partnerId)
+      );
+      const withRegAndVisit = planned.filter(v => activeRegPartnerIds.has(v.partnerId));
+      const uniqueRegPartners = new Set(withRegAndVisit.map(v => v.partnerId));
+      if (uniqueRegPartners.size > 0) {
+        result.push({ id: 'agenda_cadastro_visita', icon: <CheckCircle2 className="h-3 w-3 shrink-0" />, text: `${uniqueRegPartners.size} parceiro${uniqueRegPartners.size > 1 ? 's' : ''} com cadastro ativo e visita agendada`, variant: 'info' });
       }
     }
 
