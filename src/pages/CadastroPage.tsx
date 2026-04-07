@@ -127,6 +127,7 @@ export default function CadastroPage() {
     filterSolicitation !== 'all',
     filterHandlers.length > 0,
     filterDateMode !== 'none',
+    filterCriticality !== 'all',
   ].filter(Boolean).length;
 
   const statusCounts = useMemo(() => {
