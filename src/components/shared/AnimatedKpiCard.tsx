@@ -88,6 +88,17 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
             )}
             {suffix && !secondaryValue && <span className="text-[10px] font-normal text-muted-foreground/70 ml-0.5">{suffix}</span>}
           </p>
+          {progressPercent != null && (
+            <div className="w-full mt-1 h-1.5 rounded-full bg-secondary overflow-hidden">
+              <div
+                className={cn(
+                  'h-full rounded-full transition-all duration-700 ease-out',
+                  progressPercent >= 100 ? 'bg-success' : progressPercent >= 60 ? 'bg-primary' : 'bg-warning',
+                )}
+                style={{ width: `${Math.min(progressPercent, 100)}%` }}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>
