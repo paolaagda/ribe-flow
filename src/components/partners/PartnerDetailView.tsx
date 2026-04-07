@@ -28,6 +28,7 @@ import PartnerTasksSection from './PartnerTasksSection';
 import PartnerRegistrations from './PartnerRegistrations';
 import PartnerDocuments from './PartnerDocuments';
 import { usePermission } from '@/hooks/usePermission';
+import { useAuth } from '@/contexts/AuthContext';
 import { Criticality } from '@/hooks/usePartnerOperationalData';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 import { formatDistanceToNowStrict, parseISO } from 'date-fns';
@@ -54,8 +55,7 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
   const { partners, getPartnerById } = usePartners();
   const { visits } = useVisits();
   const { getStoresByPartnerId } = useStores();
-  const { canWrite } = usePermission();
-  const navigate = useNavigate();
+  const { canWrite, canRead } = usePermission();
   const [loading, setLoading] = useState(true);
 
   const partner = getPartnerById(partnerId);
