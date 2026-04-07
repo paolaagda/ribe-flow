@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 import { usePartners } from '@/hooks/usePartners';
 import PageHeader from '@/components/shared/PageHeader';
 import PageTransition from '@/components/PageTransition';
