@@ -38,7 +38,7 @@ export default function AuditTimeline({ logs, maxItems, emptyMessage = 'Nenhuma 
   return (
     <div className="space-y-3">
       {displayed.map((log) => {
-        const Icon = actionIcons[log.action];
+        const Icon = actionIcons[log.action] || FileText;
         return (
           <div key={log.id} className="flex gap-3 group">
             <div className="flex flex-col items-center">
