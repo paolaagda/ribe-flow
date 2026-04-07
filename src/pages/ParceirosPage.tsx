@@ -103,6 +103,11 @@ export default function ParceirosPage() {
       base = base.filter(p => getPartnerData(p.id).activeRegistrationsCount > 0);
     }
 
+    // Partner class
+    if (filters.partnerClass !== 'all') {
+      base = base.filter(p => p.partnerClass === filters.partnerClass);
+    }
+
     return base;
   }, [insightFiltered, filters, getPartnerData]);
 
