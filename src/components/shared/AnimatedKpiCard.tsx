@@ -15,6 +15,7 @@ interface AnimatedKpiCardProps {
   onClick?: () => void;
   active?: boolean;
   pulse?: boolean;
+  progressPercent?: number | null;
 }
 
 export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryValue, color = 'text-primary', suffix, delay = 0, onClick, active, pulse }: AnimatedKpiCardProps) {
