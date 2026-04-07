@@ -42,6 +42,8 @@ interface SmartInsightsProps {
   filterView?: 'day' | 'week' | 'month';
   filterStatus?: string;
   filterType?: string;
+  /** Pre-filtered partners scoped to the logged-in user's role */
+  scopedPartners?: import('@/data/mock-data').Partner[];
 }
 
 export default function SmartInsights({ page, activeFilter, onFilterClick, onInsightClick, filterView, filterStatus, filterType }: SmartInsightsProps) {
