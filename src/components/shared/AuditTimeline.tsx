@@ -7,12 +7,14 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { FileText, Pencil, Trash2, RefreshCw, Shield } from 'lucide-react';
 
-const actionIcons = {
+const actionIcons: Record<string, typeof FileText> = {
   create: FileText,
   edit: Pencil,
   delete: Trash2,
   status_change: RefreshCw,
   permission_change: Shield,
+  approve: Shield,
+  reject: Trash2,
 };
 
 interface Props {
@@ -36,7 +38,7 @@ export default function AuditTimeline({ logs, maxItems, emptyMessage = 'Nenhuma 
   return (
     <div className="space-y-3">
       {displayed.map((log) => {
-        const Icon = actionIcons[log.action];
+        const Icon = actionIcons[log.action] || FileText;
         return (
           <div key={log.id} className="flex gap-3 group">
             <div className="flex flex-col items-center">
