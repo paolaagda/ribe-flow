@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Team, initialTeams } from "@/data/teams";
-import { initialCampaigns, getCampaignStatus, calculateUserScore } from "@/data/campaigns";
+import { initialCampaigns, getCampaignStatus, calculateUserScore, getCompletedVisitsForUser, getCompletedProspectionsForUser } from "@/data/campaigns";
 import PageTransition from "@/components/PageTransition";
 import HeroSection from "@/components/home/HeroSection";
 import AnimatedKpiCard from "@/components/shared/AnimatedKpiCard";
@@ -118,6 +118,23 @@ export default function AgendaPage() {
       .sort((a, b) => b.score - a.score);
     return sorted.length > 0 && sorted[0].score > 0 ? sorted[0].userId : null;
   }, []);
+
+  const campaignProgress = useMemo(() => {
+    const activeCampaign = initialCampaigns.find((c) => getCampaignStatus(c) === "Ativa");
+    if (!activeCampaign || !user) return null;
+    const participant = activeCampaign.participants.find((p) => p.userId === user.id);
+    if (!participant) return null;
+    const completedVisits = getCompletedVisitsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate);
+    const completedProspections = getCompletedProspectionsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate);
+    return {
+      visits: completedVisits,
+      visitGoal: participant.visitGoal,
+      visitPercent: participant.visitGoal > 0 ? Math.round((completedVisits / participant.visitGoal) * 100) : 0,
+      prospections: completedProspections,
+      prospectionGoal: participant.prospectionGoal,
+      prospectionPercent: participant.prospectionGoal > 0 ? Math.round((completedProspections / participant.prospectionGoal) * 100) : 0,
+    };
+  }, [user]);
 
   const hasActiveRegistration = useCallback(
     (partnerId: string) => {
@@ -957,18 +974,20 @@ export default function AgendaPage() {
           <AnimatedKpiCard
             icon={Handshake}
             label="Visitas"
-            value={indicators.visitasConcluidas}
-            secondaryValue={indicators.visitasCriadas}
+            value={campaignProgress ? campaignProgress.visits : indicators.visitasConcluidas}
+            secondaryValue={campaignProgress ? campaignProgress.visitGoal : indicators.visitasCriadas}
             color="text-info"
             delay={0.25}
+            progressPercent={campaignProgress?.visitPercent ?? null}
           />
           <AnimatedKpiCard
             icon={UserPlus}
             label="Prospecções"
-            value={indicators.prospecoesConcluidas}
-            secondaryValue={indicators.prospecoesCriadas}
+            value={campaignProgress ? campaignProgress.prospections : indicators.prospecoesConcluidas}
+            secondaryValue={campaignProgress ? campaignProgress.prospectionGoal : indicators.prospecoesCriadas}
             color="text-warning"
             delay={0.3}
+            progressPercent={campaignProgress?.prospectionPercent ?? null}
           />
           {canWrite("agenda.create") && (
             <motion.div
