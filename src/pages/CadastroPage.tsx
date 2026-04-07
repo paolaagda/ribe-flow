@@ -429,6 +429,18 @@ export default function CadastroPage() {
                     </SelectContent>
                   </Select>
 
+                  <Select value={filterCriticality} onValueChange={v => setFilterCriticality(v as any)}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Criticidade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as criticidades</SelectItem>
+                      <SelectItem value="alta">Alta</SelectItem>
+                      <SelectItem value="média">Média</SelectItem>
+                      <SelectItem value="baixa">Baixa</SelectItem>
+                    </SelectContent>
+                  </Select>
+
                   {/* Date filter */}
                   <Popover>
                     <PopoverTrigger asChild>
