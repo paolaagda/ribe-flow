@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, X, Building2, Store as StoreIcon } from 'lucide-react';
 import { Criticality } from '@/hooks/usePartnerOperationalData';
-import { getUserById, mockUsers } from '@/data/mock-data';
+import { PartnerClass, getUserById, mockUsers } from '@/data/mock-data';
 import { usePermission } from '@/hooks/usePermission';
+import { cn } from '@/lib/utils';
 
 export interface PartnerFilters {
   search: string;
@@ -14,6 +15,7 @@ export interface PartnerFilters {
   hasPendingDocs: boolean;
   hasOpenTasks: boolean;
   hasActiveRegistration: boolean;
+  partnerClass: PartnerClass | 'all';
 }
 
 interface Props {
@@ -37,13 +39,21 @@ export const defaultFilters: PartnerFilters = {
   hasPendingDocs: false,
   hasOpenTasks: false,
   hasActiveRegistration: false,
+  partnerClass: 'all',
+};
+
+const classFilterColors: Record<string, string> = {
+  A: 'bg-success/10 text-success border-success/20',
+  B: 'bg-info/10 text-info border-info/20',
+  C: 'bg-warning/10 text-warning border-warning/20',
+  D: 'bg-muted text-muted-foreground border-muted-foreground/20',
 };
 
 export default function PartnersFilterBar({ filters, onFiltersChange, viewMode, onViewModeChange }: Props) {
   const commercialUsers = mockUsers.filter(u => u.role === 'comercial' && u.active);
   const { canRead } = usePermission();
   const canSeeRegistration = canRead('registration.view');
-  const hasActiveFilters = filters.criticality !== 'all' || filters.responsibleUserId !== 'all' || filters.hasPendingDocs || filters.hasOpenTasks || filters.hasActiveRegistration;
+  const hasActiveFilters = filters.criticality !== 'all' || filters.responsibleUserId !== 'all' || filters.hasPendingDocs || filters.hasOpenTasks || filters.hasActiveRegistration || filters.partnerClass !== 'all';
 
   const update = (partial: Partial<PartnerFilters>) => onFiltersChange({ ...filters, ...partial });
   const toggleFilter = (key: 'hasPendingDocs' | 'hasOpenTasks' | 'hasActiveRegistration') => update({ [key]: !filters[key] });
@@ -127,6 +137,20 @@ export default function PartnersFilterBar({ filters, onFiltersChange, viewMode, 
             Cadastro ativo
           </Badge>
         )}
+
+        {(['A', 'B', 'C', 'D'] as const).map(cls => (
+          <Badge
+            key={cls}
+            variant={filters.partnerClass === cls ? 'default' : 'outline'}
+            className={cn(
+              'cursor-pointer text-xs h-8 w-8 p-0 flex items-center justify-center font-bold hover:bg-primary/10 transition-colors',
+              filters.partnerClass !== cls && classFilterColors[cls],
+            )}
+            onClick={() => update({ partnerClass: filters.partnerClass === cls ? 'all' : cls })}
+          >
+            {cls}
+          </Badge>
+        ))}
 
         {hasActiveFilters && (
           <Button variant="ghost" size="sm" className="h-8 text-xs gap-1 text-muted-foreground" onClick={() => onFiltersChange({ ...defaultFilters, search: filters.search })}>
