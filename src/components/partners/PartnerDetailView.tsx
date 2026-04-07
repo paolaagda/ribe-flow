@@ -284,7 +284,7 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
         )}
 
         <TabsContent value="history" className="mt-4">
-          <PartnerTimeline visits={partnerVisits} />
+          <PartnerTimeline visits={partnerVisits} partnerId={partnerId} />
         </TabsContent>
       </Tabs>
     </motion.div>
