@@ -198,7 +198,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
     }
 
     return result.slice(0, 4);
-  }, [page, visits, partners, pendingTasks, completedTasks, user, filterStatus, filterType, filterView]);
+  }, [page, visits, roleFilteredPartners, pendingTasks, completedTasks, user, filterStatus, filterType, filterView]);
 
   const handleClick = (insight: Insight) => {
     if (onFilterClick) {
