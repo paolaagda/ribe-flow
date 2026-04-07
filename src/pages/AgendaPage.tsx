@@ -974,20 +974,18 @@ export default function AgendaPage() {
           <AnimatedKpiCard
             icon={Handshake}
             label="Visitas"
-            value={campaignProgress ? campaignProgress.visits : indicators.visitasConcluidas}
-            secondaryValue={campaignProgress ? campaignProgress.visitGoal : indicators.visitasCriadas}
+            value={indicators.visitasConcluidas}
+            secondaryValue={indicators.visitasCriadas}
             color="text-info"
             delay={0.25}
-            progressPercent={campaignProgress?.visitPercent ?? null}
           />
           <AnimatedKpiCard
             icon={UserPlus}
             label="Prospecções"
-            value={campaignProgress ? campaignProgress.prospections : indicators.prospecoesConcluidas}
-            secondaryValue={campaignProgress ? campaignProgress.prospectionGoal : indicators.prospecoesCriadas}
+            value={indicators.prospecoesConcluidas}
+            secondaryValue={indicators.prospecoesCriadas}
             color="text-warning"
             delay={0.3}
-            progressPercent={campaignProgress?.prospectionPercent ?? null}
           />
           {canWrite("agenda.create") && (
             <motion.div

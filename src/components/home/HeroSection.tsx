@@ -107,22 +107,66 @@ export default function HeroSection() {
             </div>
 
             <div className="flex flex-wrap gap-3 text-ds-sm">
+              {/* Visitas */}
               <div className="stat-chip gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-info/12 flex items-center justify-center">
                   <Handshake className="h-4 w-4 text-info" />
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-bold tabular-nums text-ds-sm leading-tight">{stats.visitasConcluidas}</span>
+                <div className="flex flex-col min-w-[72px]">
+                  <span className="font-bold tabular-nums text-ds-sm leading-tight">
+                    {campaignProgress ? `${campaignProgress.visits} / ${campaignProgress.visitGoal}` : fallbackStats?.visitasConcluidas ?? 0}
+                  </span>
                   <span className="text-muted-foreground text-ds-xs">visitas</span>
+                  {campaignProgress && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
+                        <div
+                          className={cn(
+                            'h-full rounded-full transition-all duration-700 ease-out',
+                            campaignProgress.visitPercent >= 100 ? 'bg-success' : campaignProgress.visitPercent >= 60 ? 'bg-primary' : 'bg-warning',
+                          )}
+                          style={{ width: `${Math.min(campaignProgress.visitPercent, 100)}%` }}
+                        />
+                      </div>
+                      <span className={cn(
+                        'text-[9px] font-semibold tabular-nums whitespace-nowrap',
+                        campaignProgress.visitPercent >= 100 ? 'text-success' : campaignProgress.visitPercent >= 60 ? 'text-primary' : 'text-warning',
+                      )}>
+                        {campaignProgress.visitPercent}%
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
+              {/* Prospecções */}
               <div className="stat-chip gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-warning/12 flex items-center justify-center">
                   <UserPlus className="h-4 w-4 text-warning" />
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-bold tabular-nums text-ds-sm leading-tight">{stats.prospecoesConcluidas}</span>
+                <div className="flex flex-col min-w-[72px]">
+                  <span className="font-bold tabular-nums text-ds-sm leading-tight">
+                    {campaignProgress ? `${campaignProgress.prospections} / ${campaignProgress.prospectionGoal}` : fallbackStats?.prospecoesConcluidas ?? 0}
+                  </span>
                   <span className="text-muted-foreground text-ds-xs">prospecções</span>
+                  {campaignProgress && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
+                        <div
+                          className={cn(
+                            'h-full rounded-full transition-all duration-700 ease-out',
+                            campaignProgress.prospectionPercent >= 100 ? 'bg-success' : campaignProgress.prospectionPercent >= 60 ? 'bg-primary' : 'bg-warning',
+                          )}
+                          style={{ width: `${Math.min(campaignProgress.prospectionPercent, 100)}%` }}
+                        />
+                      </div>
+                      <span className={cn(
+                        'text-[9px] font-semibold tabular-nums whitespace-nowrap',
+                        campaignProgress.prospectionPercent >= 100 ? 'text-success' : campaignProgress.prospectionPercent >= 60 ? 'text-primary' : 'text-warning',
+                      )}>
+                        {campaignProgress.prospectionPercent}%
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
