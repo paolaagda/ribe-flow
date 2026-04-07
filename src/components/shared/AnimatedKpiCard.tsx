@@ -18,7 +18,7 @@ interface AnimatedKpiCardProps {
   progressPercent?: number | null;
 }
 
-export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryValue, color = 'text-primary', suffix, delay = 0, onClick, active, pulse }: AnimatedKpiCardProps) {
+export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryValue, color = 'text-primary', suffix, delay = 0, onClick, active, pulse, progressPercent }: AnimatedKpiCardProps) {
   const [displayValue, setDisplayValue] = useState(0);
   const numericValue = typeof value === 'number' ? value : null;
 
