@@ -4,39 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, Navigation, Clock, Route } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { mockVisits, Visit } from '@/data/mock-data';
-import { useAuth } from '@/contexts/AuthContext';
+import { Visit } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
-import { useTeamFilter } from '@/hooks/useTeamFilter';
 
 interface VisitMapProps {
   viewMode: 'personal' | 'team';
-  filteredVisits?: Visit[];
+  todayVisits: Visit[];
 }
 
-export default function VisitMap({ viewMode, filteredVisits }: VisitMapProps) {
-  const { user } = useAuth();
+export default function VisitMap({ viewMode, todayVisits }: VisitMapProps) {
   const { getPartnerById } = usePartners();
-  const { getVisibleUserIds } = useTeamFilter();
-  const today = new Date().toISOString().split('T')[0];
 
-  const todayVisits = useMemo(() => {
-    const source = filteredVisits || mockVisits;
-    return source
-      .filter(v => {
-        if (v.date !== today) return false;
-        if (!filteredVisits) {
-          if (viewMode === 'personal') return v.userId === user?.id;
-          return getVisibleUserIds.includes(v.userId);
-        }
-        return true;
-      })
-      .sort((a, b) => a.time.localeCompare(b.time));
-  }, [today, user, viewMode, getVisibleUserIds, filteredVisits]);
+  const sortedVisits = useMemo(() => {
+    return [...todayVisits].sort((a, b) => a.time.localeCompare(b.time));
+  }, [todayVisits]);
 
   const points = useMemo(() => {
-    if (todayVisits.length === 0) return [];
-    const partners = todayVisits.map(v => ({
+    if (sortedVisits.length === 0) return [];
+    const partners = sortedVisits.map(v => ({
       visit: v,
       partner: getPartnerById(v.partnerId),
     })).filter(p => p.partner);
@@ -58,21 +43,21 @@ export default function VisitMap({ viewMode, filteredVisits }: VisitMapProps) {
       time: p.visit.time,
       index: i,
     }));
-  }, [todayVisits, getPartnerById]);
+  }, [sortedVisits, getPartnerById]);
 
-  const mockDistance = (todayVisits.length * 12.5).toFixed(1);
-  const mockTime = Math.round(todayVisits.length * 25);
+  const mockDistance = (sortedVisits.length * 12.5).toFixed(1);
+  const mockTime = Math.round(sortedVisits.length * 25);
 
   const googleMapsUrl = useMemo(() => {
-    const partners = todayVisits.map(v => getPartnerById(v.partnerId)).filter(Boolean);
+    const partners = sortedVisits.map(v => getPartnerById(v.partnerId)).filter(Boolean);
     if (partners.length < 2) return null;
     const origin = `${partners[0]!.lat},${partners[0]!.lng}`;
     const dest = `${partners[partners.length - 1]!.lat},${partners[partners.length - 1]!.lng}`;
     const waypoints = partners.slice(1, -1).map(p => `${p!.lat},${p!.lng}`).join('|');
     return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}${waypoints ? `&waypoints=${waypoints}` : ''}`;
-  }, [todayVisits, getPartnerById]);
+  }, [sortedVisits, getPartnerById]);
 
-  if (todayVisits.length === 0) {
+  if (sortedVisits.length === 0) {
     return (
       <Card>
         <CardHeader className="pb-2">
