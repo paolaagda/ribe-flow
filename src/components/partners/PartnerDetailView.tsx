@@ -152,52 +152,63 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
 
       {/* Partner Identity Card */}
       <Card>
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="p-4 sm:p-5 space-y-4">
+          {/* Row 1: Avatar + Name/CNPJ + Badges */}
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Building2 className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-bold truncate">{partner.name}</h2>
-              <p className="text-xs text-muted-foreground">{partner.razaoSocial} • {partner.cnpj}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-lg font-bold truncate max-w-[70%]">{partner.name}</h2>
+                <div className="flex gap-1 shrink-0">
+                  <Badge variant="outline" className={cn(
+                    'text-[10px] w-5 h-5 p-0 flex items-center justify-center font-bold',
+                    partner.partnerClass === 'A' ? 'bg-success/10 text-success border-success/20' :
+                    partner.partnerClass === 'B' ? 'bg-info/10 text-info border-info/20' :
+                    partner.partnerClass === 'C' ? 'bg-warning/10 text-warning border-warning/20' :
+                    'bg-muted text-muted-foreground border-muted-foreground/20'
+                  )}>{partner.partnerClass}</Badge>
+                  {cc && <Badge variant="outline" className={cn('text-[10px]', cc.className)}>{cc.label}</Badge>}
+                  <Badge variant="outline" className={cn('text-[10px] capitalize', pc.color, pc.bg)}>{partner.potential}</Badge>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">{partner.razaoSocial} • {partner.cnpj}</p>
               <PartnerProductionEditor partner={partner} />
             </div>
-            <div className="flex gap-1.5 shrink-0 flex-wrap justify-end">
-              <Badge variant="outline" className={cn(
-                'text-[10px] w-5 h-5 p-0 flex items-center justify-center font-bold',
-                partner.partnerClass === 'A' ? 'bg-success/10 text-success border-success/20' :
-                partner.partnerClass === 'B' ? 'bg-info/10 text-info border-info/20' :
-                partner.partnerClass === 'C' ? 'bg-warning/10 text-warning border-warning/20' :
-                'bg-muted text-muted-foreground border-muted-foreground/20'
-              )}>{partner.partnerClass}</Badge>
-              {cc && <Badge variant="outline" className={cn('text-[10px]', cc.className)}>{cc.label}</Badge>}
-              <Badge variant="outline" className={cn('text-[10px] capitalize', pc.color, pc.bg)}>{partner.potential}</Badge>
+          </div>
+
+          <Separator className="opacity-50" />
+
+          {/* Row 2: Contact info */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground min-w-0"><MapPin className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{partner.address}</span></div>
+            <div className="flex items-center gap-2 text-muted-foreground"><Phone className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{partner.phone}</span></div>
+            <div className="flex items-center gap-2 text-muted-foreground"><User className="h-3.5 w-3.5 shrink-0" /><span className="truncate">Contato: {partner.contact}</span></div>
+            <div className="flex items-center gap-2 text-muted-foreground"><User className="h-3.5 w-3.5 shrink-0" />Comercial: <span className="font-medium text-foreground truncate">{responsible?.name || '—'}</span></div>
+          </div>
+
+          {/* Row 3: Structure tags */}
+          {partner.structures.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {partner.structures.map(s => <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>)}
             </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground"><MapPin className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{partner.address}</span></div>
-            <div className="flex items-center gap-2 text-muted-foreground"><Phone className="h-3.5 w-3.5 shrink-0" />{partner.phone}</div>
-            <div className="flex items-center gap-2 text-muted-foreground"><User className="h-3.5 w-3.5 shrink-0" />Contato: {partner.contact}</div>
-            <div className="flex items-center gap-2 text-muted-foreground"><User className="h-3.5 w-3.5 shrink-0" />Comercial: <span className="font-medium text-foreground">{responsible?.name || '—'}</span></div>
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {partner.structures.map(s => <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>)}
-          </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Operational Summary Cards */}
       {opData && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-          <AnimatedKpiCard icon={CheckSquare} label="Tarefas Abertas" value={opData.pendingTasksCount} color="text-warning" pulse={opData.overdueTasksCount > 0} />
-          <AnimatedKpiCard icon={FileText} label="Docs Pendentes" value={opData.pendingDocsCount} secondaryValue={opData.totalDocsCount} color="text-info" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+          <AnimatedKpiCard icon={CheckSquare} label="Tarefas" value={opData.pendingTasksCount} color="text-warning" pulse={opData.overdueTasksCount > 0} />
+          <AnimatedKpiCard icon={FileText} label="Docs" value={opData.pendingDocsCount} secondaryValue={opData.totalDocsCount} color="text-info" />
           <AnimatedKpiCard icon={Calendar} label="Última Visita" value={opData.lastVisitDate ? formatDistanceToNowStrict(parseISO(opData.lastVisitDate), { locale: ptBR }) : '—'} color="text-muted-foreground" />
-          <AnimatedKpiCard icon={Landmark} label="Cadastro Ativo" value={opData.activeRegistrationsCount} color="text-primary" />
+          <AnimatedKpiCard icon={Landmark} label="Cadastros" value={opData.activeRegistrationsCount} color="text-primary" />
           <AnimatedKpiCard icon={Clock} label="Dias s/ Mov." value={opData.daysSinceLastVisit ?? '—'} color={opData.daysSinceLastVisit && opData.daysSinceLastVisit > 15 ? 'text-warning' : 'text-muted-foreground'} />
-          <div className="col-span-2 sm:col-span-3 lg:col-span-6 flex items-center gap-2 px-3 py-2 rounded-lg border bg-primary/5 border-primary/10 text-sm">
+          <div className="col-span-2 sm:col-span-3 lg:col-span-5 flex items-center gap-2 px-3 py-2.5 rounded-lg border bg-primary/5 border-primary/10">
             <ArrowRight className="h-4 w-4 text-primary shrink-0" />
-            <span className="text-xs font-medium text-muted-foreground">Próxima Ação:</span>
-            <span className="text-xs text-foreground">{opData.nextAction}</span>
+            <span className="text-xs font-medium text-muted-foreground shrink-0">Próxima Ação:</span>
+            <span className="text-xs text-foreground truncate">{opData.nextAction}</span>
           </div>
         </div>
       )}

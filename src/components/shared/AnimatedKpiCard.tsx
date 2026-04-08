@@ -64,24 +64,24 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
           onClick && 'group-hover:opacity-100',
         )} style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.03) 0%, transparent 60%)' }} />
         
-        <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center h-full min-h-[72px] sm:min-h-[80px] relative overflow-hidden gap-1.5">
-          {/* Linha 1: Ícone + Label (mais destaque) */}
-          <div className="flex flex-row items-center gap-1.5">
+        <CardContent className="p-3 sm:p-3.5 flex flex-col items-center text-center justify-center h-full min-h-[80px] sm:min-h-[88px] relative overflow-hidden gap-2">
+          {/* Linha 1: Ícone + Label */}
+          <div className="flex flex-row items-center gap-1.5 max-w-full">
             <div className={cn(
               'icon-container-sm relative transition-transform duration-300 shrink-0',
               onClick && 'group-hover:scale-105',
               active ? 'icon-container-primary' : '',
               color
             )}>
-              <Icon className="h-4 w-4" />
+              <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               {pulse && (
                 <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-destructive animate-pulse ring-2 ring-card" />
               )}
             </div>
-            <p className="text-[10px] sm:text-[11px] font-semibold text-foreground tracking-wide uppercase leading-tight line-clamp-2">{label}</p>
+            <p className="text-[10px] sm:text-[11px] font-semibold text-foreground tracking-wide uppercase leading-tight truncate max-w-[calc(100%-28px)]" title={label}>{label}</p>
           </div>
-          {/* Linha 2: Valores (menos destaque) */}
-          <p className="text-lg sm:text-xl font-bold tabular-nums leading-none tracking-tight text-muted-foreground">
+          {/* Linha 2: Valores */}
+          <p className="text-lg sm:text-xl font-bold tabular-nums leading-none tracking-tight text-muted-foreground whitespace-nowrap">
             {numericValue !== null ? displayValue : value}
             {secondaryValue !== undefined && (
               <span className="text-xs font-normal text-muted-foreground/70 ml-0.5">/ {secondaryValue}</span>
@@ -89,7 +89,7 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
             {suffix && !secondaryValue && <span className="text-[10px] font-normal text-muted-foreground/70 ml-0.5">{suffix}</span>}
           </p>
           {progressPercent != null && (
-            <div className="w-full flex flex-col gap-0.5 mt-1">
+            <div className="w-full flex flex-col gap-0.5 mt-0.5">
               <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
                 <div
                   className={cn(
