@@ -26,6 +26,7 @@ function getGreeting(): string {
 
 export default function HeroSection() {
   const { user } = useAuth();
+  const { visits: allVisits } = useVisits();
   const [phraseIndex, setPhraseIndex] = useState(0);
 
   useEffect(() => {
