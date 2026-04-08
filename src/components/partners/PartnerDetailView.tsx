@@ -19,6 +19,7 @@ import {
   TrendingUp, BarChart3, Target, Clock, CalendarPlus, CalendarRange,
   DollarSign, CheckSquare, FileText, Landmark, ArrowRight, Store
 } from 'lucide-react';
+import PartnerProductionEditor from './PartnerProductionEditor';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import PartnerVisitHistory from './PartnerVisitHistory';
