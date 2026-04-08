@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Handshake, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { initialCampaigns, getCampaignStatus, getCompletedVisitsForUser, getCompletedProspectionsForUser } from '@/data/campaigns';
-import { mockVisits } from '@/data/mock-data';
+import { useVisits } from '@/hooks/useVisits';
 import { cn } from '@/lib/utils';
 
 const motivationalPhrases = [
