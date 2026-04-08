@@ -87,6 +87,15 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             <p className="text-xs text-muted-foreground">{partner?.address || visit.prospectAddress}</p>
             {/* Visual aids: potential + last visit */}
             <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+              {partner && visit.type === 'visita' && (
+                <Badge variant="outline" className={cn(
+                  'text-[9px] w-4 h-4 p-0 flex items-center justify-center font-bold',
+                  partner.partnerClass === 'A' ? 'bg-success/10 text-success border-success/20' :
+                  partner.partnerClass === 'B' ? 'bg-info/10 text-info border-info/20' :
+                  partner.partnerClass === 'C' ? 'bg-warning/10 text-warning border-warning/20' :
+                  'bg-muted text-muted-foreground border-muted-foreground/20'
+                )}>{partner.partnerClass}</Badge>
+              )}
               {partner && (
                 <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 capitalize",
                   partner.potential === 'alto' ? 'bg-success/10 text-success border-success/20' :
