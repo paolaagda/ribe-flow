@@ -41,8 +41,8 @@ export default function HeroSection() {
     if (!activeCampaign || !user) return null;
     const participant = activeCampaign.participants.find(p => p.userId === user.id);
     if (!participant) return null;
-    const visits = getCompletedVisitsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate);
-    const prospections = getCompletedProspectionsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate);
+    const visits = getCompletedVisitsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate, allVisits);
+    const prospections = getCompletedProspectionsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate, allVisits);
     return {
       visits,
       visitGoal: participant.visitGoal,
