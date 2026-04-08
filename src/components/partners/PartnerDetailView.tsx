@@ -199,12 +199,12 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
 
       {/* Operational Summary Cards */}
       {opData && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
           <AnimatedKpiCard icon={CheckSquare} label="Tarefas" value={opData.pendingTasksCount} color="text-warning" pulse={opData.overdueTasksCount > 0} />
-          <AnimatedKpiCard icon={FileText} label="Docs" value={opData.pendingDocsCount} secondaryValue={opData.totalDocsCount} color="text-info" />
+          <AnimatedKpiCard icon={FileText} label="Documentos" value={opData.pendingDocsCount} secondaryValue={opData.totalDocsCount} color="text-info" />
           <AnimatedKpiCard icon={Calendar} label="Última Visita" value={opData.lastVisitDate ? formatDistanceToNowStrict(parseISO(opData.lastVisitDate), { locale: ptBR }) : '—'} color="text-muted-foreground" />
           <AnimatedKpiCard icon={Landmark} label="Cadastros" value={opData.activeRegistrationsCount} color="text-primary" />
-          <AnimatedKpiCard icon={Clock} label="Dias s/ Mov." value={opData.daysSinceLastVisit ?? '—'} color={opData.daysSinceLastVisit && opData.daysSinceLastVisit > 15 ? 'text-warning' : 'text-muted-foreground'} />
+          <AnimatedKpiCard icon={Clock} label="Dias s/ Visita" value={opData.daysSinceLastVisit ?? '—'} color={opData.daysSinceLastVisit && opData.daysSinceLastVisit > 15 ? 'text-warning' : 'text-muted-foreground'} />
           <div className="col-span-2 sm:col-span-3 lg:col-span-5 flex items-center gap-2 px-3 py-2.5 rounded-lg border bg-primary/5 border-primary/10">
             <ArrowRight className="h-4 w-4 text-primary shrink-0" />
             <span className="text-xs font-medium text-muted-foreground shrink-0">Próxima Ação:</span>
