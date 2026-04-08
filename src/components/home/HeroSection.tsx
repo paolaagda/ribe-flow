@@ -51,7 +51,7 @@ export default function HeroSection() {
       prospectionGoal: participant.prospectionGoal,
       prospectionPercent: participant.prospectionGoal > 0 ? Math.round((prospections / participant.prospectionGoal) * 100) : 0,
     };
-  }, [user]);
+  }, [user, allVisits]);
 
   const fallbackStats = useMemo(() => {
     if (campaignProgress) return null;
