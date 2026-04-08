@@ -1374,8 +1374,8 @@ export default function AgendaPage() {
           </div>
         )}
 
-        {/* Map with filtered visit pins */}
-        <AgendaMap visits={filteredVisits} getPartnerById={getPartnerById} />
+        {/* Map with filtered visit pins — scoped to current view period */}
+        <AgendaMap visits={viewFilteredVisits} getPartnerById={getPartnerById} />
 
         {/* Create/Edit Visit Dialog */}
         <Dialog
