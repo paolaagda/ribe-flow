@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Handshake, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { initialCampaigns, getCampaignStatus, getCompletedVisitsForUser, getCompletedProspectionsForUser } from '@/data/campaigns';
-import { mockVisits } from '@/data/mock-data';
+import { useVisits } from '@/hooks/useVisits';
 import { cn } from '@/lib/utils';
 
 const motivationalPhrases = [
@@ -26,6 +26,7 @@ function getGreeting(): string {
 
 export default function HeroSection() {
   const { user } = useAuth();
+  const { visits: allVisits } = useVisits();
   const [phraseIndex, setPhraseIndex] = useState(0);
 
   useEffect(() => {
@@ -40,8 +41,8 @@ export default function HeroSection() {
     if (!activeCampaign || !user) return null;
     const participant = activeCampaign.participants.find(p => p.userId === user.id);
     if (!participant) return null;
-    const visits = getCompletedVisitsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate);
-    const prospections = getCompletedProspectionsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate);
+    const visits = getCompletedVisitsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate, allVisits);
+    const prospections = getCompletedProspectionsForUser(user.id, activeCampaign.startDate, activeCampaign.endDate, allVisits);
     return {
       visits,
       visitGoal: participant.visitGoal,
@@ -50,19 +51,19 @@ export default function HeroSection() {
       prospectionGoal: participant.prospectionGoal,
       prospectionPercent: participant.prospectionGoal > 0 ? Math.round((prospections / participant.prospectionGoal) * 100) : 0,
     };
-  }, [user]);
+  }, [user, allVisits]);
 
   const fallbackStats = useMemo(() => {
     if (campaignProgress) return null;
     const isRestricted = user && ['comercial', 'cadastro'].includes(user.role);
     const userVisits = isRestricted && user
-      ? mockVisits.filter(v => v.userId === user.id || v.createdBy === user.id || v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted'))
-      : mockVisits;
+      ? allVisits.filter(v => v.userId === user.id || v.createdBy === user.id || v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted'))
+      : allVisits;
     return {
       visitasConcluidas: userVisits.filter(v => v.type === 'visita' && v.status === 'Concluída').length,
       prospecoesConcluidas: userVisits.filter(v => v.type === 'prospecção' && v.status === 'Concluída').length,
     };
-  }, [user, campaignProgress]);
+  }, [user, campaignProgress, allVisits]);
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?';
 
