@@ -94,8 +94,6 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
     const thisMonthConcluded = thisMonth.filter(v => v.status === 'Concluída');
 
     if (page === 'agenda') {
-      // --- Classification-aware portfolio insights ---
-
       // Build last-visit map for all partners
       const lastVisitByPartner: Record<string, string> = {};
       visibleVisits
@@ -106,61 +104,38 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
           }
         });
 
-      // 1. Class A/B partners without visit in 30+ days (high priority)
-      const priorityPartners = roleFilteredPartners.filter(
-        p => (p.partnerClass === 'A' || p.partnerClass === 'B')
-      );
-      const neglectedPriority = priorityPartners.filter(p => {
+      // 1. High potential value in planned visits (dynamic by date)
+      const plannedWithValue = planned.filter(v => v.potentialValue && v.potentialValue > 0);
+      if (plannedWithValue.length > 0) {
+        const totalPlanned = plannedWithValue.reduce((s, v) => s + (v.potentialValue || 0), 0);
+        const nextDate = plannedWithValue.sort((a, b) => a.date.localeCompare(b.date))[0];
+        const dateLabel = nextDate ? format(parseISO(nextDate.date), 'dd/MM') : '';
+        result.push({ id: 'agenda_valor_planejado', icon: <DollarSign className="h-3 w-3 shrink-0" />, text: `Alto valor potencial planejado${dateLabel ? ` em ${dateLabel}` : ''}: ${formatCentavos(totalPlanned)}`, variant: 'info' });
+      }
+
+      // 2. Partners without any visit in 15+ days
+      const allNeglected = roleFilteredPartners.filter(p => {
         const last = lastVisitByPartner[p.id];
-        return !last || differenceInDays(today, parseISO(last)) > 30;
+        return !last || differenceInDays(today, parseISO(last)) > 15;
       });
-      if (neglectedPriority.length > 0) {
-        const classACt = neglectedPriority.filter(p => p.partnerClass === 'A').length;
-        const label = classACt > 0
-          ? `${neglectedPriority.length} parceiro${neglectedPriority.length > 1 ? 's' : ''} A/B sem visita há +30 dias${classACt > 0 ? ` (${classACt} classe A)` : ''}`
-          : `${neglectedPriority.length} parceiro${neglectedPriority.length > 1 ? 's' : ''} A/B sem visita há +30 dias`;
-        result.push({ id: 'agenda_ab_sem_visita', icon: <ShieldAlert className="h-3 w-3 shrink-0" />, text: label, variant: 'warning' });
+      if (allNeglected.length > 0) {
+        result.push({ id: 'agenda_sem_visita_15d', icon: <Calendar className="h-3 w-3 shrink-0" />, text: `${allNeglected.length} parceiro${allNeglected.length > 1 ? 's' : ''} sem visita há mais de 15 dias`, variant: 'warning' });
       }
 
-      // 2. Overdue tasks (kept — actionable, not duplicated in KPIs)
-      const overdue = pendingTasks.filter(t => differenceInDays(today, parseISO(t.task.createdAt)) >= 10);
-      if (overdue.length > 0) {
-        result.push({ id: 'agenda_tarefas_atrasadas', icon: <AlertTriangle className="h-3 w-3 shrink-0" />, text: `${overdue.length} tarefa${overdue.length > 1 ? 's' : ''} pendente${overdue.length > 1 ? 's' : ''} há mais de 10 dias`, variant: 'warning' });
+      // 3. Class A partners without visit in 15+ days
+      const classANeglected = allNeglected.filter(p => p.partnerClass === 'A');
+      if (classANeglected.length > 0) {
+        result.push({ id: 'agenda_a_sem_visita', icon: <ShieldAlert className="h-3 w-3 shrink-0" />, text: `${classANeglected.length} parceiro${classANeglected.length > 1 ? 's' : ''} classe A sem visita há +15 dias`, variant: 'warning' });
       }
 
-      // 3. Visits to class A/B this month (portfolio coverage)
-      const thisMonthVisitsAB = thisMonth.filter(v => {
+      // 4. Period visits to class A/B partners (uses view-filtered visits)
+      const periodVisitsAB = contextVisits.filter(v => {
         const partner = roleFilteredPartners.find(p => p.id === v.partnerId);
         return partner && (partner.partnerClass === 'A' || partner.partnerClass === 'B');
       });
-      if (thisMonthVisitsAB.length > 0) {
-        const concludedAB = thisMonthVisitsAB.filter(v => v.status === 'Concluída').length;
-        result.push({ id: 'agenda_cobertura_ab', icon: <Star className="h-3 w-3 shrink-0" />, text: `${concludedAB} de ${thisMonthVisitsAB.length} agendas A/B concluídas neste mês`, variant: concludedAB >= thisMonthVisitsAB.length * 0.6 ? 'success' : 'info' });
-      }
-
-      // 4. Completed visits without summary (actionable)
-      const semResumo = thisMonthConcluded.filter(v => !v.summary?.trim());
-      if (semResumo.length > 0) {
-        result.push({ id: 'agenda_sem_resumo', icon: <Lightbulb className="h-3 w-3 shrink-0" />, text: `${semResumo.length} visita${semResumo.length > 1 ? 's' : ''} concluída${semResumo.length > 1 ? 's' : ''} sem resumo`, variant: semResumo.length >= 3 ? 'warning' : 'neutral' });
-      }
-
-      // 5. Cancellation rate alert (only when significant)
-      const canceladas = thisMonth.filter(v => v.status === 'Cancelada');
-      const cancelRate = thisMonth.length > 0 ? Math.round((canceladas.length / thisMonth.length) * 100) : 0;
-      if (cancelRate > 15) {
-        result.push({ id: 'agenda_cancelamentos', icon: <AlertTriangle className="h-3 w-3 shrink-0" />, text: `${cancelRate}% das agendas canceladas neste mês`, variant: 'warning' });
-      }
-
-      // 6. Critical partners with planned visit (positive reinforcement)
-      const criticalPartnerIds = new Set(
-        roleFilteredPartners
-          .filter(p => p.partnerClass === 'A' && (!lastVisitByPartner[p.id] || differenceInDays(today, parseISO(lastVisitByPartner[p.id])) > 15))
-          .map(p => p.id)
-      );
-      const criticalWithVisit = planned.filter(v => criticalPartnerIds.has(v.partnerId));
-      const uniqueCritical = new Set(criticalWithVisit.map(v => v.partnerId));
-      if (uniqueCritical.size > 0) {
-        result.push({ id: 'agenda_critico_agendado', icon: <CheckCircle2 className="h-3 w-3 shrink-0" />, text: `${uniqueCritical.size} parceiro${uniqueCritical.size > 1 ? 's' : ''} classe A prioritário${uniqueCritical.size > 1 ? 's' : ''} com visita agendada`, variant: 'success' });
+      if (periodVisitsAB.length > 0) {
+        const concludedAB = periodVisitsAB.filter(v => v.status === 'Concluída').length;
+        result.push({ id: 'agenda_visitas_ab_periodo', icon: <Star className="h-3 w-3 shrink-0" />, text: `${concludedAB} de ${periodVisitsAB.length} agendas A/B concluídas no período`, variant: concludedAB >= periodVisitsAB.length * 0.5 ? 'success' : 'info' });
       }
     }
 
