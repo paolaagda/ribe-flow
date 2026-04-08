@@ -152,28 +152,26 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
 
       {/* Partner Identity Card */}
       <Card>
-        <CardContent className="p-4 sm:p-5 space-y-4">
+        <CardContent className="p-4 sm:p-6 space-y-4">
           {/* Row 1: Avatar + Name/CNPJ + Badges */}
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 sm:gap-4">
             <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Building2 className="h-5 w-5 text-primary" />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg font-bold truncate max-w-[70%]">{partner.name}</h2>
-                <div className="flex gap-1 shrink-0">
-                  <Badge variant="outline" className={cn(
-                    'text-[10px] w-5 h-5 p-0 flex items-center justify-center font-bold',
-                    partner.partnerClass === 'A' ? 'bg-success/10 text-success border-success/20' :
-                    partner.partnerClass === 'B' ? 'bg-info/10 text-info border-info/20' :
-                    partner.partnerClass === 'C' ? 'bg-warning/10 text-warning border-warning/20' :
-                    'bg-muted text-muted-foreground border-muted-foreground/20'
-                  )}>{partner.partnerClass}</Badge>
-                  {cc && <Badge variant="outline" className={cn('text-[10px]', cc.className)}>{cc.label}</Badge>}
-                  <Badge variant="outline" className={cn('text-[10px] capitalize', pc.color, pc.bg)}>{partner.potential}</Badge>
-                </div>
+            <div className="flex-1 min-w-0 space-y-1">
+              <h2 className="text-lg font-bold leading-snug">{partner.name}</h2>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <Badge variant="outline" className={cn(
+                  'text-[10px] w-5 h-5 p-0 flex items-center justify-center font-bold',
+                  partner.partnerClass === 'A' ? 'bg-success/10 text-success border-success/20' :
+                  partner.partnerClass === 'B' ? 'bg-info/10 text-info border-info/20' :
+                  partner.partnerClass === 'C' ? 'bg-warning/10 text-warning border-warning/20' :
+                  'bg-muted text-muted-foreground border-muted-foreground/20'
+                )}>{partner.partnerClass}</Badge>
+                {cc && <Badge variant="outline" className={cn('text-[10px]', cc.className)}>{cc.label}</Badge>}
+                <Badge variant="outline" className={cn('text-[10px] capitalize', pc.color, pc.bg)}>{partner.potential}</Badge>
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">{partner.razaoSocial} • {partner.cnpj}</p>
+              <p className="text-xs text-muted-foreground">{partner.razaoSocial} • {partner.cnpj}</p>
               <PartnerProductionEditor partner={partner} />
             </div>
           </div>
@@ -181,11 +179,11 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
           <Separator className="opacity-50" />
 
           {/* Row 2: Contact info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground min-w-0"><MapPin className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{partner.address}</span></div>
-            <div className="flex items-center gap-2 text-muted-foreground"><Phone className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{partner.phone}</span></div>
-            <div className="flex items-center gap-2 text-muted-foreground"><User className="h-3.5 w-3.5 shrink-0" /><span className="truncate">Contato: {partner.contact}</span></div>
-            <div className="flex items-center gap-2 text-muted-foreground"><User className="h-3.5 w-3.5 shrink-0" />Comercial: <span className="font-medium text-foreground truncate">{responsible?.name || '—'}</span></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 text-sm">
+            <div className="flex items-center gap-2.5 text-muted-foreground min-w-0"><MapPin className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{partner.address}</span></div>
+            <div className="flex items-center gap-2.5 text-muted-foreground min-w-0"><Phone className="h-3.5 w-3.5 shrink-0" /><span>{partner.phone}</span></div>
+            <div className="flex items-center gap-2.5 text-muted-foreground min-w-0"><User className="h-3.5 w-3.5 shrink-0" /><span>Contato: {partner.contact}</span></div>
+            <div className="flex items-center gap-2.5 text-muted-foreground min-w-0"><User className="h-3.5 w-3.5 shrink-0" /><span>Comercial: <span className="font-medium text-foreground">{responsible?.name || '—'}</span></span></div>
           </div>
 
           {/* Row 3: Structure tags */}
