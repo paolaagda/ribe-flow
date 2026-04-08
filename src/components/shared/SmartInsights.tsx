@@ -96,75 +96,73 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
     const thisMonthConcluded = thisMonth.filter(v => v.status === 'Concluída');
 
     if (page === 'agenda') {
-      // 1. Monthly concluded count
-      if (thisMonthConcluded.length >= 3) {
-        result.push({ id: 'agenda_evolucao', icon: <TrendingUp className="h-3 w-3 shrink-0" />, text: `${thisMonthConcluded.length} visitas concluídas neste mês`, variant: 'success' });
-      }
+      // --- Classification-aware portfolio insights ---
 
-      // 2. Day with highest potential value (instead of total)
-      const dayValueMap: Record<string, number> = {};
-      thisMonth.filter(v => v.potentialValue).forEach(v => {
-        dayValueMap[v.date] = (dayValueMap[v.date] || 0) + (v.potentialValue || 0);
+      // Build last-visit map for all partners
+      const lastVisitByPartner: Record<string, string> = {};
+      visibleVisits
+        .filter(v => v.status === 'Concluída')
+        .forEach(v => {
+          if (!lastVisitByPartner[v.partnerId] || v.date > lastVisitByPartner[v.partnerId]) {
+            lastVisitByPartner[v.partnerId] = v.date;
+          }
+        });
+
+      // 1. Class A/B partners without visit in 30+ days (high priority)
+      const priorityPartners = roleFilteredPartners.filter(
+        p => (p.partnerClass === 'A' || p.partnerClass === 'B')
+      );
+      const neglectedPriority = priorityPartners.filter(p => {
+        const last = lastVisitByPartner[p.id];
+        return !last || differenceInDays(today, parseISO(last)) > 30;
       });
-      const topDay = Object.entries(dayValueMap).sort((a, b) => b[1] - a[1])[0];
-      if (topDay && topDay[1] > 0) {
-        const dayFormatted = format(parseISO(topDay[0]), 'dd/MM');
-        result.push({ id: 'agenda_valor_hoje', icon: <DollarSign className="h-3 w-3 shrink-0" />, text: `Alto valor potencial planejado em ${dayFormatted}`, variant: 'info' });
+      if (neglectedPriority.length > 0) {
+        const classACt = neglectedPriority.filter(p => p.partnerClass === 'A').length;
+        const label = classACt > 0
+          ? `${neglectedPriority.length} parceiro${neglectedPriority.length > 1 ? 's' : ''} A/B sem visita há +30 dias${classACt > 0 ? ` (${classACt} classe A)` : ''}`
+          : `${neglectedPriority.length} parceiro${neglectedPriority.length > 1 ? 's' : ''} A/B sem visita há +30 dias`;
+        result.push({ id: 'agenda_ab_sem_visita', icon: <ShieldAlert className="h-3 w-3 shrink-0" />, text: label, variant: 'warning' });
       }
 
-      // 3. Overdue tasks
+      // 2. Overdue tasks (kept — actionable, not duplicated in KPIs)
       const overdue = pendingTasks.filter(t => differenceInDays(today, parseISO(t.task.createdAt)) >= 10);
       if (overdue.length > 0) {
         result.push({ id: 'agenda_tarefas_atrasadas', icon: <AlertTriangle className="h-3 w-3 shrink-0" />, text: `${overdue.length} tarefa${overdue.length > 1 ? 's' : ''} pendente${overdue.length > 1 ? 's' : ''} há mais de 10 dias`, variant: 'warning' });
       }
 
-      // 4. Completion rate
-      if (contextVisits.length > 10) {
-        const rate = Math.round((concluded.length / contextVisits.length) * 100);
-        if (rate >= 70) {
-          result.push({ id: 'agenda_taxa_conclusao', icon: <CheckCircle2 className="h-3 w-3 shrink-0" />, text: `Taxa de conclusão de ${rate}% — excelente!`, variant: 'success' });
-        }
+      // 3. Visits to class A/B this month (portfolio coverage)
+      const thisMonthVisitsAB = thisMonth.filter(v => {
+        const partner = roleFilteredPartners.find(p => p.id === v.partnerId);
+        return partner && (partner.partnerClass === 'A' || partner.partnerClass === 'B');
+      });
+      if (thisMonthVisitsAB.length > 0) {
+        const concludedAB = thisMonthVisitsAB.filter(v => v.status === 'Concluída').length;
+        result.push({ id: 'agenda_cobertura_ab', icon: <Star className="h-3 w-3 shrink-0" />, text: `${concludedAB} de ${thisMonthVisitsAB.length} agendas A/B concluídas neste mês`, variant: concludedAB >= thisMonthVisitsAB.length * 0.6 ? 'success' : 'info' });
       }
 
-      // 5. NEW: Cancellation rate or prospecting count
-      const canceladas = thisMonth.filter(v => v.status === 'Cancelada');
-      const cancelRate = thisMonth.length > 0 ? Math.round((canceladas.length / thisMonth.length) * 100) : 0;
-      if (cancelRate > 10) {
-        result.push({ id: 'agenda_cancelamentos', icon: <AlertTriangle className="h-3 w-3 shrink-0" />, text: `${cancelRate}% das agendas canceladas neste mês`, variant: 'warning' });
-      } else {
-        const prospThisMonth = thisMonth.filter(v => v.type === 'prospecção');
-        if (prospThisMonth.length > 0) {
-          result.push({ id: 'agenda_prospeccoes', icon: <UserPlus className="h-3 w-3 shrink-0" />, text: `${prospThisMonth.length} prospecç${prospThisMonth.length > 1 ? 'ões' : 'ão'} neste mês`, variant: 'info' });
-        }
-      }
-
-      // 6. NEW: Partners without visit in 15+ days
-      const recentPartnerIds = new Set(
-        contextVisits
-          .filter(v => v.status === 'Concluída' && differenceInDays(today, parseISO(v.date)) <= 15)
-          .map(v => v.partnerId)
-      );
-      const partnersWithoutVisit = roleFilteredPartners.filter(p => !recentPartnerIds.has(p.id));
-      if (partnersWithoutVisit.length > 0) {
-        result.push({ id: 'agenda_sem_visita_15d', icon: <Calendar className="h-3 w-3 shrink-0" />, text: `${partnersWithoutVisit.length} parceiro${partnersWithoutVisit.length > 1 ? 's' : ''} sem visita há mais de 15 dias`, variant: 'warning' });
-      }
-
-      // 7. NEW: Completed visits without summary (warning when actionable)
+      // 4. Completed visits without summary (actionable)
       const semResumo = thisMonthConcluded.filter(v => !v.summary?.trim());
       if (semResumo.length > 0) {
         result.push({ id: 'agenda_sem_resumo', icon: <Lightbulb className="h-3 w-3 shrink-0" />, text: `${semResumo.length} visita${semResumo.length > 1 ? 's' : ''} concluída${semResumo.length > 1 ? 's' : ''} sem resumo`, variant: semResumo.length >= 3 ? 'warning' : 'neutral' });
       }
 
-      // 8. NEW (secondary): Partners with active registration and scheduled visit
-      const activeRegPartnerIds = new Set(
-        registrations
-          .filter(r => !['Concluído', 'Cancelado'].includes(r.status))
-          .map(r => r.partnerId)
+      // 5. Cancellation rate alert (only when significant)
+      const canceladas = thisMonth.filter(v => v.status === 'Cancelada');
+      const cancelRate = thisMonth.length > 0 ? Math.round((canceladas.length / thisMonth.length) * 100) : 0;
+      if (cancelRate > 15) {
+        result.push({ id: 'agenda_cancelamentos', icon: <AlertTriangle className="h-3 w-3 shrink-0" />, text: `${cancelRate}% das agendas canceladas neste mês`, variant: 'warning' });
+      }
+
+      // 6. Critical partners with planned visit (positive reinforcement)
+      const criticalPartnerIds = new Set(
+        roleFilteredPartners
+          .filter(p => p.partnerClass === 'A' && (!lastVisitByPartner[p.id] || differenceInDays(today, parseISO(lastVisitByPartner[p.id])) > 15))
+          .map(p => p.id)
       );
-      const withRegAndVisit = planned.filter(v => activeRegPartnerIds.has(v.partnerId));
-      const uniqueRegPartners = new Set(withRegAndVisit.map(v => v.partnerId));
-      if (uniqueRegPartners.size > 0) {
-        result.push({ id: 'agenda_cadastro_visita', icon: <CheckCircle2 className="h-3 w-3 shrink-0" />, text: `${uniqueRegPartners.size} parceiro${uniqueRegPartners.size > 1 ? 's' : ''} com cadastro ativo e visita agendada`, variant: 'info' });
+      const criticalWithVisit = planned.filter(v => criticalPartnerIds.has(v.partnerId));
+      const uniqueCritical = new Set(criticalWithVisit.map(v => v.partnerId));
+      if (uniqueCritical.size > 0) {
+        result.push({ id: 'agenda_critico_agendado', icon: <CheckCircle2 className="h-3 w-3 shrink-0" />, text: `${uniqueCritical.size} parceiro${uniqueCritical.size > 1 ? 's' : ''} classe A prioritário${uniqueCritical.size > 1 ? 's' : ''} com visita agendada`, variant: 'success' });
       }
     }
 
