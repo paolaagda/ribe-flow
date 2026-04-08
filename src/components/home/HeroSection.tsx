@@ -63,7 +63,7 @@ export default function HeroSection() {
       visitasConcluidas: userVisits.filter(v => v.type === 'visita' && v.status === 'Concluída').length,
       prospecoesConcluidas: userVisits.filter(v => v.type === 'prospecção' && v.status === 'Concluída').length,
     };
-  }, [user, campaignProgress]);
+  }, [user, campaignProgress, allVisits]);
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?';
 
