@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { Lightbulb, TrendingUp, DollarSign, AlertTriangle, CheckCircle2, Target, Calendar, X, UserPlus } from 'lucide-react';
+import { Lightbulb, TrendingUp, DollarSign, AlertTriangle, CheckCircle2, Target, Calendar, X, UserPlus, ShieldAlert, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
