@@ -160,9 +160,7 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-bold truncate">{partner.name}</h2>
               <p className="text-xs text-muted-foreground">{partner.razaoSocial} • {partner.cnpj}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Produção média: {partner.averageProduction > 0 ? formatCentavos(partner.averageProduction) : <span className="italic">Sem dados de produção</span>}
-              </p>
+              <PartnerProductionEditor partner={partner} />
             </div>
             <div className="flex gap-1.5 shrink-0 flex-wrap justify-end">
               <Badge variant="outline" className={cn(
