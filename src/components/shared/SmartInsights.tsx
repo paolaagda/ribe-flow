@@ -1,11 +1,10 @@
 import { useMemo } from 'react';
 
-import { Lightbulb, TrendingUp, DollarSign, AlertTriangle, CheckCircle2, Target, Calendar, X, UserPlus, ShieldAlert, Star } from 'lucide-react';
+import { Lightbulb, TrendingUp, DollarSign, AlertTriangle, CheckCircle2, Target, Calendar, X, ShieldAlert, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
 import { useTasks } from '@/hooks/useTasks';
-import { useRegistrations } from '@/hooks/useRegistrations';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCentavos } from '@/lib/currency';
 import { format, startOfMonth, endOfMonth, parseISO, isWithinInterval, differenceInDays } from 'date-fns';
@@ -50,8 +49,7 @@ interface SmartInsightsProps {
 export default function SmartInsights({ page, activeFilter, onFilterClick, onInsightClick, filterView, filterStatus, filterType, scopedPartners }: SmartInsightsProps) {
   const { visits } = useVisits();
   const { partners: allPartners } = usePartners();
-  const { pendingTasks, completedTasks } = useTasks();
-  const { registrations } = useRegistrations();
+  const { pendingTasks } = useTasks();
   const { user } = useAuth();
 
   // Use scoped partners when provided, otherwise filter by role
@@ -227,7 +225,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
     }
 
     return result.slice(0, 4);
-  }, [page, visits, roleFilteredPartners, pendingTasks, completedTasks, user, filterStatus, filterType, filterView]);
+  }, [page, visits, roleFilteredPartners, pendingTasks, user, filterStatus, filterType, filterView]);
 
   const handleClick = (insight: Insight) => {
     if (onFilterClick) {
