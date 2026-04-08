@@ -303,6 +303,27 @@ export default function AgendaPage() {
 
   // Performance indicators
 
+  // Visits filtered by current calendar view period (day/week/month)
+  const viewFilteredVisits = useMemo(() => {
+    let start: Date, end: Date;
+    if (view === "month") {
+      start = startOfMonth(currentDate);
+      end = endOfMonth(currentDate);
+    } else if (view === "week") {
+      start = startOfWeek(currentDate, { locale: ptBR });
+      end = endOfWeek(currentDate, { locale: ptBR });
+    } else {
+      start = new Date(currentDate);
+      start.setHours(0, 0, 0, 0);
+      end = new Date(currentDate);
+      end.setHours(23, 59, 59, 999);
+    }
+    return filteredVisits.filter((v) => {
+      const vDate = parseISO(v.date);
+      return isWithinInterval(vDate, { start, end });
+    });
+  }, [filteredVisits, view, currentDate]);
+
   const indicators = useMemo(() => {
     const visitas = filteredVisits.filter((v) => v.type === "visita");
     const prospecoes = filteredVisits.filter((v) => v.type === "prospecção");
@@ -1353,8 +1374,8 @@ export default function AgendaPage() {
           </div>
         )}
 
-        {/* Map with filtered visit pins */}
-        <AgendaMap visits={filteredVisits} getPartnerById={getPartnerById} />
+        {/* Map with filtered visit pins — scoped to current view period */}
+        <AgendaMap visits={viewFilteredVisits} getPartnerById={getPartnerById} />
 
         {/* Create/Edit Visit Dialog */}
         <Dialog
