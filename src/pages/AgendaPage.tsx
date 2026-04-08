@@ -324,18 +324,19 @@ export default function AgendaPage() {
     });
   }, [filteredVisits, view, currentDate]);
 
+  // KPI indicators scoped to the current calendar view period (day/week/month)
   const indicators = useMemo(() => {
-    const visitas = filteredVisits.filter((v) => v.type === "visita");
-    const prospecoes = filteredVisits.filter((v) => v.type === "prospecção");
+    const visitas = viewFilteredVisits.filter((v) => v.type === "visita");
+    const prospecoes = viewFilteredVisits.filter((v) => v.type === "prospecção");
     return {
       visitasCriadas: visitas.length,
       visitasConcluidas: visitas.filter((v) => v.status === "Concluída").length,
       prospecoesCriadas: prospecoes.length,
       prospecoesConcluidas: prospecoes.filter((v) => v.status === "Concluída").length,
-      totalAgendas: filteredVisits.length,
-      totalConcluidas: filteredVisits.filter((v) => v.status === "Concluída").length,
+      totalAgendas: viewFilteredVisits.length,
+      totalConcluidas: viewFilteredVisits.filter((v) => v.status === "Concluída").length,
     };
-  }, [filteredVisits]);
+  }, [viewFilteredVisits]);
 
   // Single source of truth for today's visits — feeds card, TodayAgenda, and VisitMap
   const todayVisits = useMemo(() => {
