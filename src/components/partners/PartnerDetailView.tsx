@@ -33,8 +33,9 @@ import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
 import { Criticality } from '@/hooks/usePartnerOperationalData';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
-import { formatDistanceToNowStrict, parseISO } from 'date-fns';
+import { format as formatDate, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useSearchParams } from 'react-router-dom';
 
 interface Props {
   partnerId: string;
@@ -95,8 +96,11 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
     const conversionRate = partnerVisits.length > 0 ? Math.round((completed / partnerVisits.length) * 100) : 0;
     const banks = [...new Set(partnerVisits.flatMap(v => v.banks))];
     const products = [...new Set(partnerVisits.flatMap(v => v.products))];
-    const totalPotential = partnerVisits.reduce((sum, v) => sum + (v.potentialValue || 0), 0);
-    return { completed, prospections, totalVisits, lastVisit, avgFrequency, conversionRate, banks, products, totalPotential, topStatus: '' };
+    const visitsWithPotential = partnerVisits.filter(v => v.type === 'visita' && (v.potentialValue || 0) > 0);
+    const avgPotential = visitsWithPotential.length > 0
+      ? Math.round(visitsWithPotential.reduce((sum, v) => sum + (v.potentialValue || 0), 0) / visitsWithPotential.length)
+      : 0;
+    return { completed, prospections, totalVisits, lastVisit, avgFrequency, conversionRate, banks, products, avgPotential, topStatus: '' };
   }, [partnerVisits]);
 
   if (loading) {
@@ -143,7 +147,7 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
             <CalendarRange className="h-3.5 w-3.5" /> Ver agenda
           </Button>
           {canWrite('agenda.create') && (
-            <Button size="sm" className="gap-1.5 text-xs" onClick={() => navigate('/agenda')}>
+           <Button size="sm" className="gap-1.5 text-xs" onClick={() => navigate(`/agenda?newVisit=true&partnerId=${partnerId}`)}>
               <CalendarPlus className="h-3.5 w-3.5" /> Nova visita
             </Button>
           )}
@@ -200,7 +204,7 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
           <AnimatedKpiCard icon={CheckSquare} label="Tarefas" value={opData.pendingTasksCount} color="text-warning" pulse={opData.overdueTasksCount > 0} />
           <AnimatedKpiCard icon={FileText} label="Documentos" value={opData.pendingDocsCount} secondaryValue={opData.totalDocsCount} color="text-info" />
-          <AnimatedKpiCard icon={Calendar} label="Última Visita" value={opData.lastVisitDate ? formatDistanceToNowStrict(parseISO(opData.lastVisitDate), { locale: ptBR }) : '—'} color="text-muted-foreground" />
+          <AnimatedKpiCard icon={Calendar} label="Última Visita" value={opData.lastVisitDate ? formatDate(parseISO(opData.lastVisitDate), 'dd/MM/yyyy') : '—'} color="text-muted-foreground" />
           <AnimatedKpiCard icon={Landmark} label="Cadastros" value={opData.activeRegistrationsCount} color="text-primary" />
           <AnimatedKpiCard icon={Clock} label="Dias s/ Visita" value={opData.daysSinceLastVisit ?? '—'} color={opData.daysSinceLastVisit && opData.daysSinceLastVisit > 15 ? 'text-warning' : 'text-muted-foreground'} />
           <div className="col-span-2 sm:col-span-3 lg:col-span-5 flex items-center gap-2 px-3 py-2.5 rounded-lg border bg-primary/5 border-primary/10">
@@ -228,7 +232,7 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
             <AnimatedKpiCard icon={BarChart3} label="Total Visitas" value={stats.totalVisits} color="text-info" />
             <AnimatedKpiCard icon={TrendingUp} label="Conversão" value={`${stats.conversionRate}%`} color="text-success" />
             <AnimatedKpiCard icon={Clock} label="Freq. Média" value={stats.avgFrequency ? `${stats.avgFrequency}d` : '—'} color="text-warning" />
-            <AnimatedKpiCard icon={DollarSign} label="Potencial" value={stats.totalPotential ? formatCentavos(stats.totalPotential) : '—'} color="text-success" />
+            <AnimatedKpiCard icon={DollarSign} label="Potencial Médio" value={stats.avgPotential ? formatCentavos(stats.avgPotential) : '—'} color="text-success" />
           </div>
           <PartnerInsights partner={partner} visits={partnerVisits} stats={stats} />
           {partnerStores.length > 0 && (

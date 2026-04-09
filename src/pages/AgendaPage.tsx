@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Team, initialTeams } from "@/data/teams";
 import { initialCampaigns, getCampaignStatus, calculateUserScore } from "@/data/campaigns";
@@ -96,6 +97,7 @@ import { Calendar } from "@/components/ui/calendar";
 type ViewMode = "day" | "week" | "month";
 
 export default function AgendaPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { canRead, canWrite } = usePermission();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -167,7 +169,24 @@ export default function AgendaPage() {
   const [bankRegistrations, setBankRegistrations] = useState<Array<{ bankName: string; pendingDocs: string[] }>>([]);
   const [pendingAutoTasks, setPendingAutoTasks] = useState<VisitComment[]>([]);
 
-  // Exclusive toggle: close other panels when opening one
+  // Auto-open new visit form when navigated from partner detail
+  useEffect(() => {
+    const newVisit = searchParams.get('newVisit');
+    const partnerIdParam = searchParams.get('partnerId');
+    if (newVisit === 'true' && partnerIdParam) {
+      setFormData(prev => ({
+        ...prev,
+        partnerId: partnerIdParam,
+        type: 'visita' as VisitType,
+        date: format(new Date(), 'yyyy-MM-dd'),
+      }));
+      setFormStep(0);
+      setShowForm(true);
+      // Clean URL params
+      setSearchParams({}, { replace: true });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const togglePanel = (panel: "today" | "tasks") => {
     if (panel === "today") {
       setShowTodayPanel((prev) => !prev);
