@@ -685,7 +685,6 @@ export default function CadastroPage() {
                         isActive
                           ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
                           : 'border-border/50 card-interactive',
-                        isEmpty && 'opacity-50',
                       )}
                       onClick={() => toggleFilter(filterHandlers, handler, setFilterHandlers)}
                     >
@@ -721,7 +720,6 @@ export default function CadastroPage() {
                         isActive
                           ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
                           : 'border-border/50 card-interactive',
-                        isEmpty && 'opacity-50',
                       )}
                       onClick={() => toggleFilter(filterBanks, bank, setFilterBanks)}
                     >
