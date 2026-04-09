@@ -1,6 +1,6 @@
-import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
-import { AlertTriangle, UserCog, Users, Building2, ClipboardList } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import AnimatedKpiCard from "@/components/shared/AnimatedKpiCard";
+import { AlertTriangle, UserCog, Users, Building2, ClipboardList } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface SummaryCardData {
   key: string;
@@ -22,7 +22,6 @@ interface Props {
 export default function RegistrationOperationalSummary({ cards, activeCard, onCardClick }: Props) {
   return (
     <div className="space-y-1.5">
-      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Resumo Inteligente de Cadastro</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-ds-xs">
         {cards.map((card, i) => (
           <Tooltip key={card.key}>
