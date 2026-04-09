@@ -52,7 +52,7 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
     >
       <Card
         className={cn(
-          'h-full min-h-[112px] border-border/50 overflow-hidden relative group',
+          'h-full border-border/50 overflow-hidden relative group',
           onClick ? 'card-interactive cursor-pointer' : 'card-flat',
           active && 'ring-2 ring-primary/30 border-primary/20 card-glow',
         )}
@@ -64,56 +64,48 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
           onClick && 'group-hover:opacity-100',
         )} style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.03) 0%, transparent 60%)' }} />
         
-        <CardContent className="h-full min-h-[112px] p-3 sm:p-4 grid grid-rows-[auto_1fr_auto] relative">
-          {/* Row 1: Icon */}
-          <div className="flex items-center justify-center">
-            <div className={cn(
-              'icon-container-sm relative transition-transform duration-300 shrink-0',
-              onClick && 'group-hover:scale-105',
-              active ? 'icon-container-primary' : '',
-              color
-            )}>
-              <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              {pulse && (
-                <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-destructive animate-pulse ring-2 ring-card" />
-              )}
-            </div>
-          </div>
-          {/* Row 2: Label + Value */}
-          <div className="flex flex-col items-center justify-center gap-1">
-            <p className="text-[10px] sm:text-[11px] font-semibold text-foreground tracking-wide uppercase leading-tight text-center w-full" title={label}>{label}</p>
-            <p className="text-lg sm:text-xl font-bold tabular-nums leading-none tracking-tight text-muted-foreground whitespace-nowrap">
-              {numericValue !== null ? displayValue : value}
-              {secondaryValue !== undefined && (
-                <span className="text-xs font-normal text-muted-foreground/70 ml-0.5">/ {secondaryValue}</span>
-              )}
-              {suffix && !secondaryValue && <span className="text-[10px] font-normal text-muted-foreground/70 ml-0.5">{suffix}</span>}
-            </p>
-          </div>
-          {/* Row 3: Footer (progress or invisible placeholder) */}
-          <div className="flex items-center justify-center min-h-[18px]">
-            {progressPercent != null ? (
-              <div className="w-full flex flex-col gap-0.5">
-                <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
-                  <div
-                    className={cn(
-                      'h-full rounded-full transition-all duration-700 ease-out',
-                      progressPercent >= 100 ? 'bg-success' : progressPercent >= 60 ? 'bg-primary' : 'bg-warning',
-                    )}
-                    style={{ width: `${Math.min(progressPercent, 100)}%` }}
-                  />
-                </div>
-                <span className={cn(
-                  'text-[9px] font-semibold tabular-nums text-center',
-                  progressPercent >= 100 ? 'text-success' : progressPercent >= 60 ? 'text-primary' : 'text-warning',
-                )}>
-                  {progressPercent}%
-                </span>
-              </div>
-            ) : (
-              <span className="invisible text-xs">0%</span>
+        <CardContent className="h-full p-3 sm:p-4 flex flex-col items-center justify-center gap-1 relative">
+          {/* Icon */}
+          <div className={cn(
+            'icon-container-sm relative transition-transform duration-300 shrink-0',
+            onClick && 'group-hover:scale-105',
+            active ? 'icon-container-primary' : '',
+            color
+          )}>
+            <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            {pulse && (
+              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-destructive animate-pulse ring-2 ring-card" />
             )}
           </div>
+          {/* Label + Value */}
+          <p className="text-[10px] sm:text-[11px] font-semibold text-foreground tracking-wide uppercase leading-tight text-center w-full" title={label}>{label}</p>
+          <p className="text-lg sm:text-xl font-bold tabular-nums leading-none tracking-tight text-muted-foreground whitespace-nowrap">
+            {numericValue !== null ? displayValue : value}
+            {secondaryValue !== undefined && (
+              <span className="text-xs font-normal text-muted-foreground/70 ml-0.5">/ {secondaryValue}</span>
+            )}
+            {suffix && !secondaryValue && <span className="text-[10px] font-normal text-muted-foreground/70 ml-0.5">{suffix}</span>}
+          </p>
+          {/* Progress */}
+          {progressPercent != null && (
+            <div className="w-full flex flex-col gap-0.5 mt-1">
+              <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
+                <div
+                  className={cn(
+                    'h-full rounded-full transition-all duration-700 ease-out',
+                    progressPercent >= 100 ? 'bg-success' : progressPercent >= 60 ? 'bg-primary' : 'bg-warning',
+                  )}
+                  style={{ width: `${Math.min(progressPercent, 100)}%` }}
+                />
+              </div>
+              <span className={cn(
+                'text-[9px] font-semibold tabular-nums text-center',
+                progressPercent >= 100 ? 'text-success' : progressPercent >= 60 ? 'text-primary' : 'text-warning',
+              )}>
+                {progressPercent}%
+              </span>
+            </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>
