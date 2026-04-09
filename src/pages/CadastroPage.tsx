@@ -670,7 +670,7 @@ export default function CadastroPage() {
 
           <TabsContent value="handlers" className="mt-3">
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {handlers.filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
+              {Object.keys(handlerCounts).filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
                 const count = handlerCounts[handler] || 0;
                 const isActive = filterHandlers.includes(handler);
                 const pct = handlerPctBase > 0
@@ -705,7 +705,7 @@ export default function CadastroPage() {
 
           <TabsContent value="banks" className="mt-3">
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {banks.filter(b => (bankCounts[b] || 0) > 0).map((bank, i) => {
+              {Object.keys(bankCounts).filter(b => (bankCounts[b] || 0) > 0).map((bank, i) => {
                 const count = bankCounts[bank] || 0;
                 const isActive = filterBanks.includes(bank);
                 const pct = bankPctBase > 0
