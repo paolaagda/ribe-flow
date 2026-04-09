@@ -753,7 +753,11 @@ export default function CadastroPage() {
         {/* Content - Cards or Table */}
         {sorted.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            <p className="text-sm">Nenhum cadastro encontrado.</p>
+            <p className="text-sm">
+              {activeSummaryCard
+                ? `Nenhum contrato encontrado para o filtro '${summaryCards.find(c => c.key === activeSummaryCard)?.label || activeSummaryCard}'.`
+                : 'Nenhum cadastro encontrado.'}
+            </p>
           </div>
         ) : viewMode === 'cards' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
