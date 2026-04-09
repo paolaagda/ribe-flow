@@ -625,7 +625,7 @@ export default function CadastroPage() {
           </TabsList>
 
           <TabsContent value="status" className="mt-3">
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 items-stretch">
               {[
                 { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: Object.values(statusCounts).reduce((a, b) => a + b, 0) },
                 ...Object.entries(statusKpiConfig).map(([status, config]) => ({
@@ -639,10 +639,10 @@ export default function CadastroPage() {
                 return (
                   <Tooltip key={status}>
                     <TooltipTrigger asChild>
-                      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
+                      <motion.div className="h-full" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
                         <Card
                           className={cn(
-                            'cursor-pointer overflow-hidden group transition-all duration-200',
+                            'h-full min-h-[96px] cursor-pointer overflow-hidden group transition-all duration-200',
                             'hover:shadow-md hover:-translate-y-0.5',
                             isSelected
                               ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
@@ -656,17 +656,25 @@ export default function CadastroPage() {
                             }
                           }}
                         >
-                          <div className="flex flex-col items-center justify-center gap-1 p-3">
-                            <div className={cn('relative transition-transform duration-200 group-hover:scale-110', color)}>
-                              <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                              {status === 'Em análise' && count > 0 && (
-                                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                          <div className="h-full min-h-[96px] p-3 grid grid-rows-[auto_1fr_auto]">
+                            <div className="flex items-center justify-center">
+                              <div className={cn('relative transition-transform duration-200 group-hover:scale-110', color)}>
+                                <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                                {status === 'Em análise' && count > 0 && (
+                                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-center">
+                              <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
+                            </div>
+                            <div className="flex items-center justify-center min-h-[16px]">
+                              {pct !== null ? (
+                                <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{pct}%</span>
+                              ) : (
+                                <span className="invisible text-[9px]">0%</span>
                               )}
                             </div>
-                            <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
-                            {pct !== null && (
-                              <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{pct}%</span>
-                            )}
                           </div>
                         </Card>
                       </motion.div>
@@ -679,7 +687,7 @@ export default function CadastroPage() {
           </TabsContent>
 
           <TabsContent value="handlers" className="mt-3">
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 items-stretch">
               {Object.keys(handlerCounts).filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
                 const count = handlerCounts[handler] || 0;
                 const isActive = filterHandlers.includes(handler);
@@ -687,10 +695,10 @@ export default function CadastroPage() {
                   ? Math.round(((handlerNonCompletedCounts[handler] || 0) / handlerPctBase) * 100)
                   : null;
                 return (
-                  <motion.div key={handler} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
+                  <motion.div className="h-full" key={handler} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
                     <Card
                       className={cn(
-                        'cursor-pointer overflow-hidden group transition-all duration-200',
+                        'h-full min-h-[96px] cursor-pointer overflow-hidden group transition-all duration-200',
                         'hover:shadow-md hover:-translate-y-0.5',
                         isActive
                           ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
@@ -698,13 +706,21 @@ export default function CadastroPage() {
                       )}
                       onClick={() => toggleFilter(filterHandlers, handler, setFilterHandlers)}
                     >
-                      <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3">
-                        <Users className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
-                        <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
-                        {pct !== null && pct > 0 && (
-                          <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{pct}%</span>
-                        )}
-                        <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{handler}</span>
+                      <div className="h-full min-h-[96px] p-3 grid grid-rows-[auto_1fr_auto]">
+                        <div className="flex items-center justify-center">
+                          <Users className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
+                        </div>
+                        <div className="flex flex-col items-center justify-center gap-0.5">
+                          <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
+                        </div>
+                        <div className="flex flex-col items-center justify-center min-h-[16px] gap-0.5">
+                          {pct !== null && pct > 0 ? (
+                            <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{pct}%</span>
+                          ) : (
+                            <span className="invisible text-[9px]">0%</span>
+                          )}
+                          <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{handler}</span>
+                        </div>
                       </div>
                     </Card>
                   </motion.div>
@@ -714,7 +730,7 @@ export default function CadastroPage() {
           </TabsContent>
 
           <TabsContent value="banks" className="mt-3">
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 items-stretch">
               {Object.keys(bankCounts).filter(b => (bankCounts[b] || 0) > 0).map((bank, i) => {
                 const count = bankCounts[bank] || 0;
                 const isActive = filterBanks.includes(bank);
@@ -722,10 +738,10 @@ export default function CadastroPage() {
                   ? Math.round(((bankNonCompletedCounts[bank] || 0) / bankPctBase) * 100)
                   : null;
                 return (
-                  <motion.div key={bank} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
+                  <motion.div className="h-full" key={bank} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
                     <Card
                       className={cn(
-                        'cursor-pointer overflow-hidden group transition-all duration-200',
+                        'h-full min-h-[96px] cursor-pointer overflow-hidden group transition-all duration-200',
                         'hover:shadow-md hover:-translate-y-0.5',
                         isActive
                           ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
@@ -733,13 +749,21 @@ export default function CadastroPage() {
                       )}
                       onClick={() => toggleFilter(filterBanks, bank, setFilterBanks)}
                     >
-                      <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3">
-                        <Building2 className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
-                        <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
-                        {pct !== null && pct > 0 && (
-                          <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{pct}%</span>
-                        )}
-                        <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{bank}</span>
+                      <div className="h-full min-h-[96px] p-3 grid grid-rows-[auto_1fr_auto]">
+                        <div className="flex items-center justify-center">
+                          <Building2 className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
+                        </div>
+                        <div className="flex items-center justify-center">
+                          <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
+                        </div>
+                        <div className="flex flex-col items-center justify-center min-h-[16px] gap-0.5">
+                          {pct !== null && pct > 0 ? (
+                            <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{pct}%</span>
+                          ) : (
+                            <span className="invisible text-[9px]">0%</span>
+                          )}
+                          <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{bank}</span>
+                        </div>
                       </div>
                     </Card>
                   </motion.div>
