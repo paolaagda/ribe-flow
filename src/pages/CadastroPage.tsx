@@ -672,9 +672,13 @@ export default function CadastroPage() {
 
           <TabsContent value="handlers" className="mt-3">
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {handlers.filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
-                const count = handlerCounts[handler];
+              {handlers.map((handler, i) => {
+                const count = handlerCounts[handler] || 0;
                 const isActive = filterHandlers.includes(handler);
+                const isEmpty = count === 0;
+                const pct = handlerPctBase > 0
+                  ? Math.round(((handlerNonCompletedCounts[handler] || 0) / handlerPctBase) * 100)
+                  : null;
                 return (
                   <motion.div key={handler} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
                     <Card
@@ -684,12 +688,16 @@ export default function CadastroPage() {
                         isActive
                           ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
                           : 'border-border/50 card-interactive',
+                        isEmpty && 'opacity-50',
                       )}
                       onClick={() => toggleFilter(filterHandlers, handler, setFilterHandlers)}
                     >
                       <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3">
                         <Users className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
                         <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
+                        {pct !== null && pct > 0 && (
+                          <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{pct}%</span>
+                        )}
                         <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{handler}</span>
                       </div>
                     </Card>
