@@ -602,15 +602,15 @@ export default function CadastroPage() {
           <TabsList className="w-full justify-center">
             <TabsTrigger value="status" className="gap-1.5">
               <FileCheck className="h-3.5 w-3.5" /> Status
-              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{filtered.length}</Badge>
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.values(statusCounts).reduce((a, b) => a + b, 0)}</Badge>
             </TabsTrigger>
             <TabsTrigger value="handlers" className="gap-1.5">
               <Users className="h-3.5 w-3.5" /> Tratando Com
-              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(handlerCounts).length}</Badge>
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.values(handlerCounts).reduce((a, b) => a + b, 0)}</Badge>
             </TabsTrigger>
             <TabsTrigger value="banks" className="gap-1.5">
               <Building2 className="h-3.5 w-3.5" /> Bancos
-              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(bankCounts).length}</Badge>
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.values(bankCounts).reduce((a, b) => a + b, 0)}</Badge>
             </TabsTrigger>
           </TabsList>
 
@@ -670,7 +670,7 @@ export default function CadastroPage() {
 
           <TabsContent value="handlers" className="mt-3">
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {handlers.filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
+              {Object.keys(handlerCounts).filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
                 const count = handlerCounts[handler] || 0;
                 const isActive = filterHandlers.includes(handler);
                 const pct = handlerPctBase > 0
@@ -705,7 +705,7 @@ export default function CadastroPage() {
 
           <TabsContent value="banks" className="mt-3">
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {banks.filter(b => (bankCounts[b] || 0) > 0).map((bank, i) => {
+              {Object.keys(bankCounts).filter(b => (bankCounts[b] || 0) > 0).map((bank, i) => {
                 const count = bankCounts[bank] || 0;
                 const isActive = filterBanks.includes(bank);
                 const pct = bankPctBase > 0
