@@ -44,7 +44,7 @@ const criticalityConfig: Record<RegistrationCriticality, { label: string; classN
 export default function CadastroDetalhePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { registrations, getById } = useRegistrations();
+  const { registrations, getById, updateRegistration } = useRegistrations();
   const { getPartnerById } = usePartners();
   const { visits } = useVisits();
   const { getLogsForEntity } = useAuditLog();
