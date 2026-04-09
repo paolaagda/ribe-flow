@@ -146,13 +146,11 @@ export default function CadastroPage() {
     return true;
   };
 
-  const filtered = useMemo(() => {
+  // Base filter: everything except status/handler/bank card filters
+  const baseFiltered = useMemo(() => {
     return registrations.filter(r => {
-      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
-      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
       if (filterCommercial !== 'all' && r.commercialUserId !== filterCommercial) return false;
       if (filterSolicitation !== 'all' && r.solicitation !== filterSolicitation) return false;
-      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
       if (!isDateInRange(getLastUpdateDate(r))) return false;
       if (filterCriticality !== 'all' && getRegData(r).criticality !== filterCriticality) return false;
       if (search) {
@@ -167,26 +165,112 @@ export default function CadastroPage() {
       }
       return true;
     });
-  }, [registrations, filterStatuses, filterBanks, filterCommercial, filterSolicitation, filterHandlers, filterDateMode, filterDateFrom, filterDateTo, filterCriticality, search, getRegData]);
+  }, [registrations, filterCommercial, filterSolicitation, filterDateMode, filterDateFrom, filterDateTo, filterCriticality, search, getRegData]);
 
-  // KPIs computed from filtered list
+  const filtered = useMemo(() => {
+    return baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return true;
+    });
+  }, [baseFiltered, filterStatuses, filterBanks, filterHandlers]);
+
+  // Each group counts from base filtered by OTHER card groups only (not its own)
   const statusCounts = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return true;
+    });
     const counts: Record<string, number> = {};
-    filtered.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
+    subset.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
     return counts;
-  }, [filtered]);
+  }, [baseFiltered, filterBanks, filterHandlers]);
 
   const handlerCounts = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      return true;
+    });
     const counts: Record<string, number> = {};
-    filtered.forEach(r => { counts[r.handlingWith] = (counts[r.handlingWith] || 0) + 1; });
+    subset.forEach(r => { counts[r.handlingWith] = (counts[r.handlingWith] || 0) + 1; });
     return counts;
-  }, [filtered]);
+  }, [baseFiltered, filterStatuses, filterBanks]);
 
   const bankCounts = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return true;
+    });
     const counts: Record<string, number> = {};
-    filtered.forEach(r => { counts[r.bank] = (counts[r.bank] || 0) + 1; });
+    subset.forEach(r => { counts[r.bank] = (counts[r.bank] || 0) + 1; });
     return counts;
-  }, [filtered]);
+  }, [baseFiltered, filterStatuses, filterHandlers]);
+
+  // Percentage base: non-completed registrations in the relevant subset
+  const statusPctBase = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return r.status !== 'Concluído';
+    });
+    return subset.length;
+  }, [baseFiltered, filterBanks, filterHandlers]);
+
+  const handlerPctBase = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      return r.status !== 'Concluído';
+    });
+    return subset.length;
+  }, [baseFiltered, filterStatuses, filterBanks]);
+
+  const bankPctBase = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return r.status !== 'Concluído';
+    });
+    return subset.length;
+  }, [baseFiltered, filterStatuses, filterHandlers]);
+
+  // Non-completed counts for percentages
+  const statusNonCompletedCounts = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return r.status !== 'Concluído';
+    });
+    const counts: Record<string, number> = {};
+    subset.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
+    return counts;
+  }, [baseFiltered, filterBanks, filterHandlers]);
+
+  const handlerNonCompletedCounts = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      return r.status !== 'Concluído';
+    });
+    const counts: Record<string, number> = {};
+    subset.forEach(r => { counts[r.handlingWith] = (counts[r.handlingWith] || 0) + 1; });
+    return counts;
+  }, [baseFiltered, filterStatuses, filterBanks]);
+
+  const bankNonCompletedCounts = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return r.status !== 'Concluído';
+    });
+    const counts: Record<string, number> = {};
+    subset.forEach(r => { counts[r.bank] = (counts[r.bank] || 0) + 1; });
+    return counts;
+  }, [baseFiltered, filterStatuses, filterHandlers]);
 
   const sorted = useMemo(() => {
     if (sortField === 'none') return filtered;
@@ -533,12 +617,16 @@ export default function CadastroPage() {
           <TabsContent value="status" className="mt-3">
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {[
-                { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: filtered.length },
+                { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: Object.values(statusCounts).reduce((a, b) => a + b, 0) },
                 ...Object.entries(statusKpiConfig).map(([status, config]) => ({
                   status, label: status, icon: config.icon, color: config.color, count: statusCounts[status] || 0,
                 })),
-              ].filter(({ status, count }) => status === 'all' || count > 0).map(({ status, label, icon: Icon, color, count }, i) => {
+              ].map(({ status, label, icon: Icon, color, count }, i) => {
                 const isSelected = status === 'all' ? filterStatuses.length === 0 : filterStatuses.includes(status);
+                const isEmpty = count === 0 && status !== 'all';
+                const pct = status !== 'all' && status !== 'Concluído' && statusPctBase > 0
+                  ? Math.round(((statusNonCompletedCounts[status] || 0) / statusPctBase) * 100)
+                  : null;
                 return (
                   <Tooltip key={status}>
                     <TooltipTrigger asChild>
@@ -550,6 +638,7 @@ export default function CadastroPage() {
                             isSelected
                               ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
                               : 'border-border/50 card-interactive',
+                            isEmpty && 'opacity-50',
                           )}
                           onClick={() => {
                             if (status === 'all') {
@@ -567,6 +656,9 @@ export default function CadastroPage() {
                               )}
                             </div>
                             <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
+                            {pct !== null && (
+                              <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{pct}%</span>
+                            )}
                           </div>
                         </Card>
                       </motion.div>
@@ -580,9 +672,13 @@ export default function CadastroPage() {
 
           <TabsContent value="handlers" className="mt-3">
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {handlers.filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
-                const count = handlerCounts[handler];
+              {handlers.map((handler, i) => {
+                const count = handlerCounts[handler] || 0;
                 const isActive = filterHandlers.includes(handler);
+                const isEmpty = count === 0;
+                const pct = handlerPctBase > 0
+                  ? Math.round(((handlerNonCompletedCounts[handler] || 0) / handlerPctBase) * 100)
+                  : null;
                 return (
                   <motion.div key={handler} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
                     <Card
@@ -592,12 +688,16 @@ export default function CadastroPage() {
                         isActive
                           ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
                           : 'border-border/50 card-interactive',
+                        isEmpty && 'opacity-50',
                       )}
                       onClick={() => toggleFilter(filterHandlers, handler, setFilterHandlers)}
                     >
                       <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3">
                         <Users className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
                         <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
+                        {pct !== null && pct > 0 && (
+                          <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{pct}%</span>
+                        )}
                         <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{handler}</span>
                       </div>
                     </Card>
@@ -609,9 +709,13 @@ export default function CadastroPage() {
 
           <TabsContent value="banks" className="mt-3">
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {banks.filter(b => (bankCounts[b] || 0) > 0).map((bank, i) => {
-                const count = bankCounts[bank];
+              {banks.map((bank, i) => {
+                const count = bankCounts[bank] || 0;
                 const isActive = filterBanks.includes(bank);
+                const isEmpty = count === 0;
+                const pct = bankPctBase > 0
+                  ? Math.round(((bankNonCompletedCounts[bank] || 0) / bankPctBase) * 100)
+                  : null;
                 return (
                   <motion.div key={bank} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04, duration: 0.3 }}>
                     <Card
@@ -621,12 +725,16 @@ export default function CadastroPage() {
                         isActive
                           ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
                           : 'border-border/50 card-interactive',
+                        isEmpty && 'opacity-50',
                       )}
                       onClick={() => toggleFilter(filterBanks, bank, setFilterBanks)}
                     >
                       <div className="flex flex-col items-center justify-center gap-1 p-2.5 sm:p-3">
                         <Building2 className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110" />
                         <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
+                        {pct !== null && pct > 0 && (
+                          <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{pct}%</span>
+                        )}
                         <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-tight text-center line-clamp-2">{bank}</span>
                       </div>
                     </Card>
