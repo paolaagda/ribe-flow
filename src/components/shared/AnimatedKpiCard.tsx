@@ -64,7 +64,7 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
           onClick && 'group-hover:opacity-100',
         )} style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.03) 0%, transparent 60%)' }} />
         
-        <CardContent className="p-3 sm:p-4 flex flex-col items-center text-center justify-center h-full min-h-[88px] sm:min-h-[96px] relative overflow-hidden gap-1.5">
+        <CardContent className="p-3 sm:p-4 flex flex-col items-center text-center justify-between h-full min-h-[96px] sm:min-h-[104px] relative overflow-hidden gap-1.5">
           {/* Linha 1: Ícone */}
           <div className={cn(
             'icon-container-sm relative transition-transform duration-300 shrink-0',
