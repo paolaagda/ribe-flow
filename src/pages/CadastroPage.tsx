@@ -617,12 +617,16 @@ export default function CadastroPage() {
           <TabsContent value="status" className="mt-3">
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {[
-                { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: filtered.length },
+                { status: 'all', label: 'Total', icon: FileText, color: 'text-primary', count: Object.values(statusCounts).reduce((a, b) => a + b, 0) },
                 ...Object.entries(statusKpiConfig).map(([status, config]) => ({
                   status, label: status, icon: config.icon, color: config.color, count: statusCounts[status] || 0,
                 })),
-              ].filter(({ status, count }) => status === 'all' || count > 0).map(({ status, label, icon: Icon, color, count }, i) => {
+              ].map(({ status, label, icon: Icon, color, count }, i) => {
                 const isSelected = status === 'all' ? filterStatuses.length === 0 : filterStatuses.includes(status);
+                const isEmpty = count === 0 && status !== 'all';
+                const pct = status !== 'all' && status !== 'Concluído' && statusPctBase > 0
+                  ? Math.round(((statusNonCompletedCounts[status] || 0) / statusPctBase) * 100)
+                  : null;
                 return (
                   <Tooltip key={status}>
                     <TooltipTrigger asChild>
@@ -634,6 +638,7 @@ export default function CadastroPage() {
                             isSelected
                               ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
                               : 'border-border/50 card-interactive',
+                            isEmpty && 'opacity-50',
                           )}
                           onClick={() => {
                             if (status === 'all') {
@@ -651,6 +656,9 @@ export default function CadastroPage() {
                               )}
                             </div>
                             <span className="text-base sm:text-lg font-bold tabular-nums text-foreground leading-none">{count}</span>
+                            {pct !== null && (
+                              <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{pct}%</span>
+                            )}
                           </div>
                         </Card>
                       </motion.div>
