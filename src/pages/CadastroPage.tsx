@@ -621,9 +621,8 @@ export default function CadastroPage() {
                 ...Object.entries(statusKpiConfig).map(([status, config]) => ({
                   status, label: status, icon: config.icon, color: config.color, count: statusCounts[status] || 0,
                 })),
-              ].map(({ status, label, icon: Icon, color, count }, i) => {
+              ].filter(({ status, count }) => status === 'all' || count > 0).map(({ status, label, icon: Icon, color, count }, i) => {
                 const isSelected = status === 'all' ? filterStatuses.length === 0 : filterStatuses.includes(status);
-                const isEmpty = count === 0 && status !== 'all';
                 const pct = status !== 'all' && status !== 'Concluído' && statusPctBase > 0
                   ? Math.round(((statusNonCompletedCounts[status] || 0) / statusPctBase) * 100)
                   : null;
@@ -638,7 +637,6 @@ export default function CadastroPage() {
                             isSelected
                               ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
                               : 'border-border/50 card-interactive',
-                            isEmpty && 'opacity-50',
                           )}
                           onClick={() => {
                             if (status === 'all') {
@@ -672,10 +670,9 @@ export default function CadastroPage() {
 
           <TabsContent value="handlers" className="mt-3">
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {handlers.map((handler, i) => {
+              {handlers.filter(h => (handlerCounts[h] || 0) > 0).map((handler, i) => {
                 const count = handlerCounts[handler] || 0;
                 const isActive = filterHandlers.includes(handler);
-                const isEmpty = count === 0;
                 const pct = handlerPctBase > 0
                   ? Math.round(((handlerNonCompletedCounts[handler] || 0) / handlerPctBase) * 100)
                   : null;
@@ -688,7 +685,6 @@ export default function CadastroPage() {
                         isActive
                           ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
                           : 'border-border/50 card-interactive',
-                        isEmpty && 'opacity-50',
                       )}
                       onClick={() => toggleFilter(filterHandlers, handler, setFilterHandlers)}
                     >
@@ -709,10 +705,9 @@ export default function CadastroPage() {
 
           <TabsContent value="banks" className="mt-3">
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {banks.map((bank, i) => {
+              {banks.filter(b => (bankCounts[b] || 0) > 0).map((bank, i) => {
                 const count = bankCounts[bank] || 0;
                 const isActive = filterBanks.includes(bank);
-                const isEmpty = count === 0;
                 const pct = bankPctBase > 0
                   ? Math.round(((bankNonCompletedCounts[bank] || 0) / bankPctBase) * 100)
                   : null;
@@ -725,7 +720,6 @@ export default function CadastroPage() {
                         isActive
                           ? 'ring-2 ring-primary border-primary shadow-[0_0_12px_hsl(var(--primary)/0.25)]'
                           : 'border-border/50 card-interactive',
-                        isEmpty && 'opacity-50',
                       )}
                       onClick={() => toggleFilter(filterBanks, bank, setFilterBanks)}
                     >
