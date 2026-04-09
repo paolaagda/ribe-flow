@@ -1541,7 +1541,7 @@ export default function AgendaPage() {
               );
             })}
           </div>
-        )
+        )}
 
         {/* Map with filtered visit pins — scoped to current view period */}
         <AgendaMap visits={viewFilteredVisits} getPartnerById={getPartnerById} />
