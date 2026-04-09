@@ -621,9 +621,8 @@ export default function CadastroPage() {
                 ...Object.entries(statusKpiConfig).map(([status, config]) => ({
                   status, label: status, icon: config.icon, color: config.color, count: statusCounts[status] || 0,
                 })),
-              ].map(({ status, label, icon: Icon, color, count }, i) => {
+              ].filter(({ status, count }) => status === 'all' || count > 0).map(({ status, label, icon: Icon, color, count }, i) => {
                 const isSelected = status === 'all' ? filterStatuses.length === 0 : filterStatuses.includes(status);
-                const isEmpty = count === 0 && status !== 'all';
                 const pct = status !== 'all' && status !== 'Concluído' && statusPctBase > 0
                   ? Math.round(((statusNonCompletedCounts[status] || 0) / statusPctBase) * 100)
                   : null;
