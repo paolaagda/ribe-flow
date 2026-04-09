@@ -300,6 +300,15 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
           <PartnerTimeline visits={partnerVisits} partnerId={partnerId} />
         </TabsContent>
       </Tabs>
+
+      {/* New Visit Dialog - opens locally without navigation */}
+      {partner && (
+        <NewVisitDialog
+          open={showNewVisit}
+          onOpenChange={setShowNewVisit}
+          partner={partner}
+        />
+      )}
     </motion.div>
   );
 }
