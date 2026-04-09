@@ -75,7 +75,7 @@ export default function CadastroPage() {
   const { toast } = useToast();
   const { addLog } = useAuditLog();
   const navigate = useNavigate();
-  const { getRegData, summary: opSummary } = useRegistrationOperationalData(registrations);
+  const { getRegData, summaryCards, getSummaryFilter } = useRegistrationOperationalData(registrations);
   const { user } = useAuth();
 
   // Permission flags
