@@ -94,6 +94,7 @@ export default function CadastroPage() {
   const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>();
   const [filterDateTo, setFilterDateTo] = useState<Date | undefined>();
   const [filterCriticality, setFilterCriticality] = useState<'all' | 'alta' | 'média' | 'baixa'>('all');
+  const [activeSummaryCard, setActiveSummaryCard] = useState<string | null>(null);
 
   const [showFilters, setShowFilters] = useState(false);
   const [kpiTab, setKpiTab] = useState('status');
@@ -430,7 +431,11 @@ export default function CadastroPage() {
         </PageHeader>
 
         {/* Operational KPIs */}
-        <RegistrationOperationalSummary summary={opSummary} />
+        <RegistrationOperationalSummary
+          cards={summaryCards}
+          activeCard={activeSummaryCard}
+          onCardClick={(key) => setActiveSummaryCard(prev => prev === key ? null : key)}
+        />
 
         {/* Search always visible */}
         <div className="relative">
