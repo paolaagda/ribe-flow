@@ -97,6 +97,7 @@ import { Calendar } from "@/components/ui/calendar";
 type ViewMode = "day" | "week" | "month";
 
 export default function AgendaPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { canRead, canWrite } = usePermission();
   const { user } = useAuth();
   const { toast } = useToast();
