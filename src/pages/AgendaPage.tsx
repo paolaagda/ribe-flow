@@ -1202,6 +1202,13 @@ export default function AgendaPage() {
           <Card>
             <CardContent className="p-ds-xs sm:p-ds-sm">
               <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
+                {/* Weekday header row — same as monthly */}
+                {days.map((day, i) => (
+                  <div key={`wh-${i}`} className="bg-muted px-2 py-2 text-center text-xs font-medium text-muted-foreground">
+                    {format(day, "EEE", { locale: ptBR }).replace(/^\w/, c => c.toUpperCase())}
+                  </div>
+                ))}
+                {/* Day cells */}
                 {days.map((day, i) => {
                   const dayVisits = getVisitsForDay(day);
                   const dateStr = format(day, "yyyy-MM-dd");
@@ -1210,40 +1217,40 @@ export default function AgendaPage() {
                     <div
                       key={i}
                       className={cn(
-                        "bg-card min-h-[280px] flex flex-col group/day",
-                        dragOverDay === dateStr && "bg-primary/5",
+                        "bg-card min-h-[200px] p-1.5 transition-colors group/day cursor-pointer",
+                        dragOverDay === dateStr && "bg-primary/10 ring-2 ring-primary/30",
+                        canWrite("agenda.create") && "hover:bg-muted/30",
                       )}
                       onDragOver={(e) => handleDragOver(e, dateStr)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, day)}
-                      onClick={() => {
+                      onClick={(e) => {
+                        if ((e.target as HTMLElement).closest("[data-visit-item]")) return;
                         if (canWrite("agenda.create") && dayVisits.length === 0) {
                           setFormData((prev) => ({ ...prev, date: dateStr }));
                           setShowForm(true);
                         }
                       }}
                     >
-                      {/* Column header */}
-                      <div className="px-2 py-2 border-b border-border/50 text-center">
-                        <span className="text-[10px] uppercase text-muted-foreground font-medium tracking-wide">
-                          {format(day, "EEE", { locale: ptBR })}
+                      {/* Day number + count */}
+                      <div className="flex items-center justify-between mb-1">
+                        <span
+                          className={cn(
+                            "text-xs font-medium inline-flex items-center justify-center w-6 h-6 rounded-full",
+                            isToday && "bg-primary text-primary-foreground",
+                          )}
+                        >
+                          {format(day, "d")}
                         </span>
-                        <div className="mt-0.5">
-                          <span
-                            className={cn(
-                              "text-sm font-semibold inline-flex items-center justify-center w-7 h-7 rounded-full",
-                              isToday && "bg-primary text-primary-foreground",
-                            )}
-                          >
-                            {format(day, "d")}
-                          </span>
-                        </div>
                         {dayVisits.length > 0 && (
-                          <span className="text-[10px] text-muted-foreground">{dayVisits.length} agenda{dayVisits.length > 1 ? 's' : ''}</span>
+                          <span className="text-[10px] text-muted-foreground">{dayVisits.length}</span>
+                        )}
+                        {canWrite("agenda.create") && dayVisits.length === 0 && (
+                          <Plus className="h-3 w-3 text-muted-foreground/0 group-hover/day:text-muted-foreground/60 transition-colors" />
                         )}
                       </div>
-                      {/* Visit items */}
-                      <div className="flex-1 p-1 space-y-1 overflow-y-auto">
+                      {/* Visit items — same visual language as monthly but with more detail */}
+                      <div className="space-y-0.5">
                         {dayVisits.map((v) => {
                           const partner = getPartnerById(v.partnerId);
                           const myInvite = user
@@ -1252,6 +1259,7 @@ export default function AgendaPage() {
                           return (
                             <div
                               key={v.id}
+                              data-visit-item
                               draggable={canWrite("agenda.drag")}
                               onDragStart={(e) => canWrite("agenda.drag") && handleDragStart(e, v.id)}
                               onDragEnd={handleDragEnd}
@@ -1260,101 +1268,94 @@ export default function AgendaPage() {
                                 handleOpenDetail(v);
                               }}
                               className={cn(
-                                "p-1.5 rounded-md border cursor-pointer hover:ring-1 hover:ring-primary/40 transition-all text-left",
+                                "text-[10px] px-1 py-1 rounded border cursor-pointer hover:ring-1 hover:ring-primary/40 flex flex-col gap-0.5",
                                 statusBgClasses[v.status],
                                 draggedVisitId === v.id && "opacity-50",
-                                v.type === "prospecção" && "opacity-60 border-muted",
+                                v.type === "prospecção" && "opacity-50 border-muted",
                               )}
                             >
-                              {/* Time */}
-                              {v.time && (
-                                <div className="flex items-center gap-0.5 mb-0.5">
-                                  <ClockIcon className="h-2.5 w-2.5 text-muted-foreground" />
-                                  <span className="text-[10px] font-mono font-medium text-muted-foreground">{v.time}</span>
-                                </div>
-                              )}
-                              {/* Partner name */}
+                              {/* Row 1: icon + name */}
                               <div className="flex items-center gap-1">
                                 {v.type === "visita" ? (
                                   <Handshake className="h-2.5 w-2.5 shrink-0 text-info" />
                                 ) : (
                                   <UserPlus className="h-2.5 w-2.5 shrink-0 text-warning" />
                                 )}
-                                <span className="text-[11px] font-medium truncate leading-tight">
+                                <span className="text-[10px] font-medium truncate leading-tight">
                                   {partner?.name || v.prospectPartner || ""}
                                 </span>
                               </div>
-                              {/* Status badge */}
-                              <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                <Badge variant="outline" className={cn("text-[8px] px-1 py-0 leading-tight", statusBgClasses[v.status])}>
+                              {/* Row 2: time + status */}
+                              <div className="flex items-center gap-1 flex-wrap">
+                                {v.time && (
+                                  <span className="text-[9px] font-mono text-muted-foreground">{v.time}</span>
+                                )}
+                                <Badge variant="outline" className={cn("text-[8px] px-0.5 py-0 leading-tight", statusBgClasses[v.status])}>
                                   {v.status}
                                 </Badge>
                                 {partner && (
-                                  <Badge variant="outline" className={cn("text-[8px] px-1 py-0 capitalize",
+                                  <Badge variant="outline" className={cn("text-[8px] px-0.5 py-0 capitalize",
                                     partner.potential === 'alto' ? 'bg-success/10 text-success border-success/20' :
                                     partner.potential === 'médio' ? 'bg-info/10 text-info border-info/20' :
                                     'bg-muted/50 text-muted-foreground border-border/30'
                                   )}>{partner.potential}</Badge>
                                 )}
                               </div>
-                              {/* Participants */}
-                              {(() => {
-                                const participants = getParticipants(v);
-                                if (participants.length === 0) return null;
-                                return (
-                                  <TooltipProvider delayDuration={200}>
-                                    <div className="flex -space-x-1 mt-1">
-                                      {participants.slice(0, 3).map((p) => (
-                                        <Tooltip key={p.id}>
-                                          <TooltipTrigger asChild>
-                                            <div className="h-4 w-4 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">
-                                              {p.name.charAt(0)}
-                                            </div>
-                                          </TooltipTrigger>
-                                          <TooltipContent side="top" className="text-xs">
-                                            {p.name} • {p.cargo}
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      ))}
-                                      {participants.length > 3 && (
-                                        <div className="h-4 w-4 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">
-                                          +{participants.length - 3}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </TooltipProvider>
-                                );
-                              })()}
-                              {/* Invite actions */}
-                              {myInvite && (
-                                <div className="flex gap-0.5 mt-1" onClick={(e) => e.stopPropagation()}>
-                                  <button
-                                    aria-label="Aceitar convite"
-                                    className="h-4 w-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90"
-                                    onClick={() => handleAcceptVisitInvite(v.id)}
-                                  >
-                                    <Check className="h-2.5 w-2.5" />
-                                  </button>
-                                  <button
-                                    aria-label="Recusar convite"
-                                    className="h-4 w-4 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground"
-                                    onClick={() => handleRejectVisitInvite(v.id)}
-                                  >
-                                    <X className="h-2.5 w-2.5" />
-                                  </button>
-                                </div>
-                              )}
-                              {/* Value */}
-                              {v.potentialValue && v.potentialValue > 0 && (
-                                <div className="mt-1">
+                              {/* Row 3: participants + invite + value */}
+                              <div className="flex items-center justify-between">
+                                {(() => {
+                                  const participants = getParticipants(v);
+                                  return (
+                                    <TooltipProvider delayDuration={200}>
+                                      <div className="flex -space-x-1 shrink-0">
+                                        {participants.slice(0, 2).map((p) => (
+                                          <Tooltip key={p.id}>
+                                            <TooltipTrigger asChild>
+                                              <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">
+                                                {p.name.charAt(0)}
+                                              </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top" className="text-xs">
+                                              {p.name} • {p.cargo}
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        ))}
+                                        {participants.length > 2 && (
+                                          <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">
+                                            +{participants.length - 2}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </TooltipProvider>
+                                  );
+                                })()}
+                                {myInvite && (
+                                  <span className="flex gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                      aria-label="Aceitar convite"
+                                      className="h-3.5 w-3.5 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90"
+                                      onClick={() => handleAcceptVisitInvite(v.id)}
+                                    >
+                                      <Check className="h-2 w-2" />
+                                    </button>
+                                    <button
+                                      aria-label="Recusar convite"
+                                      className="h-3.5 w-3.5 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground"
+                                      onClick={() => handleRejectVisitInvite(v.id)}
+                                    >
+                                      <X className="h-2 w-2" />
+                                    </button>
+                                  </span>
+                                )}
+                                {v.potentialValue && v.potentialValue > 0 && (
                                   <span className="text-[9px] text-muted-foreground font-medium">{formatCentavos(v.potentialValue)}</span>
-                                </div>
-                              )}
+                                )}
+                              </div>
                             </div>
                           );
                         })}
                         {dayVisits.length === 0 && (
-                          <div className="flex items-center justify-center h-full">
+                          <div className="flex items-center justify-center h-full min-h-[60px]">
                             <p className="text-[10px] text-muted-foreground/40">—</p>
                           </div>
                         )}
