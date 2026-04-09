@@ -146,13 +146,11 @@ export default function CadastroPage() {
     return true;
   };
 
-  const filtered = useMemo(() => {
+  // Base filter: everything except status/handler/bank card filters
+  const baseFiltered = useMemo(() => {
     return registrations.filter(r => {
-      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
-      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
       if (filterCommercial !== 'all' && r.commercialUserId !== filterCommercial) return false;
       if (filterSolicitation !== 'all' && r.solicitation !== filterSolicitation) return false;
-      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
       if (!isDateInRange(getLastUpdateDate(r))) return false;
       if (filterCriticality !== 'all' && getRegData(r).criticality !== filterCriticality) return false;
       if (search) {
@@ -167,26 +165,112 @@ export default function CadastroPage() {
       }
       return true;
     });
-  }, [registrations, filterStatuses, filterBanks, filterCommercial, filterSolicitation, filterHandlers, filterDateMode, filterDateFrom, filterDateTo, filterCriticality, search, getRegData]);
+  }, [registrations, filterCommercial, filterSolicitation, filterDateMode, filterDateFrom, filterDateTo, filterCriticality, search, getRegData]);
 
-  // KPIs computed from filtered list
+  const filtered = useMemo(() => {
+    return baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return true;
+    });
+  }, [baseFiltered, filterStatuses, filterBanks, filterHandlers]);
+
+  // Each group counts from base filtered by OTHER card groups only (not its own)
   const statusCounts = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return true;
+    });
     const counts: Record<string, number> = {};
-    filtered.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
+    subset.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
     return counts;
-  }, [filtered]);
+  }, [baseFiltered, filterBanks, filterHandlers]);
 
   const handlerCounts = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      return true;
+    });
     const counts: Record<string, number> = {};
-    filtered.forEach(r => { counts[r.handlingWith] = (counts[r.handlingWith] || 0) + 1; });
+    subset.forEach(r => { counts[r.handlingWith] = (counts[r.handlingWith] || 0) + 1; });
     return counts;
-  }, [filtered]);
+  }, [baseFiltered, filterStatuses, filterBanks]);
 
   const bankCounts = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return true;
+    });
     const counts: Record<string, number> = {};
-    filtered.forEach(r => { counts[r.bank] = (counts[r.bank] || 0) + 1; });
+    subset.forEach(r => { counts[r.bank] = (counts[r.bank] || 0) + 1; });
     return counts;
-  }, [filtered]);
+  }, [baseFiltered, filterStatuses, filterHandlers]);
+
+  // Percentage base: non-completed registrations in the relevant subset
+  const statusPctBase = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return r.status !== 'Concluído';
+    });
+    return subset.length;
+  }, [baseFiltered, filterBanks, filterHandlers]);
+
+  const handlerPctBase = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      return r.status !== 'Concluído';
+    });
+    return subset.length;
+  }, [baseFiltered, filterStatuses, filterBanks]);
+
+  const bankPctBase = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return r.status !== 'Concluído';
+    });
+    return subset.length;
+  }, [baseFiltered, filterStatuses, filterHandlers]);
+
+  // Non-completed counts for percentages
+  const statusNonCompletedCounts = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return r.status !== 'Concluído';
+    });
+    const counts: Record<string, number> = {};
+    subset.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
+    return counts;
+  }, [baseFiltered, filterBanks, filterHandlers]);
+
+  const handlerNonCompletedCounts = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
+      return r.status !== 'Concluído';
+    });
+    const counts: Record<string, number> = {};
+    subset.forEach(r => { counts[r.handlingWith] = (counts[r.handlingWith] || 0) + 1; });
+    return counts;
+  }, [baseFiltered, filterStatuses, filterBanks]);
+
+  const bankNonCompletedCounts = useMemo(() => {
+    const subset = baseFiltered.filter(r => {
+      if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
+      if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      return r.status !== 'Concluído';
+    });
+    const counts: Record<string, number> = {};
+    subset.forEach(r => { counts[r.bank] = (counts[r.bank] || 0) + 1; });
+    return counts;
+  }, [baseFiltered, filterStatuses, filterHandlers]);
 
   const sorted = useMemo(() => {
     if (sortField === 'none') return filtered;
