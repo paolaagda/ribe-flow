@@ -35,7 +35,7 @@ import { Criticality } from '@/hooks/usePartnerOperationalData';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 import { format as formatDate, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useSearchParams } from 'react-router-dom';
+import NewVisitDialog from './NewVisitDialog';
 
 interface Props {
   partnerId: string;
