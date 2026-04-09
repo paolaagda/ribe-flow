@@ -22,11 +22,11 @@ interface Props {
 export default function RegistrationOperationalSummary({ cards, activeCard, onCardClick }: Props) {
   return (
     <div className="space-y-1.5">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-ds-xs">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-ds-xs items-stretch">
         {cards.map((card, i) => (
           <Tooltip key={card.key}>
             <TooltipTrigger asChild>
-              <div>
+              <div className="h-full">
                 <AnimatedKpiCard
                   icon={card.icon}
                   label={card.label}
@@ -36,7 +36,6 @@ export default function RegistrationOperationalSummary({ cards, activeCard, onCa
                   pulse={card.pulse}
                   onClick={() => onCardClick(card.key)}
                   active={activeCard === card.key}
-                  suffix={card.subtitle ? undefined : undefined}
                 />
               </div>
             </TooltipTrigger>
