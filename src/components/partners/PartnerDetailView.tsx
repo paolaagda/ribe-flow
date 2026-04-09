@@ -61,6 +61,7 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
   const { canWrite, canRead } = usePermission();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [showNewVisit, setShowNewVisit] = useState(false);
 
   const partner = getPartnerById(partnerId);
   const { getPartnerData } = usePartnerOperationalData(partner ? [partner] : []);
@@ -147,7 +148,7 @@ export default function PartnerDetailView({ partnerId, onBack }: Props) {
             <CalendarRange className="h-3.5 w-3.5" /> Ver agenda
           </Button>
           {canWrite('agenda.create') && (
-           <Button size="sm" className="gap-1.5 text-xs" onClick={() => navigate(`/agenda?newVisit=true&partnerId=${partnerId}`)}>
+            <Button size="sm" className="gap-1.5 text-xs" onClick={() => setShowNewVisit(true)}>
               <CalendarPlus className="h-3.5 w-3.5" /> Nova visita
             </Button>
           )}
