@@ -612,15 +612,15 @@ export default function CadastroPage() {
           <TabsList className="w-full justify-center">
             <TabsTrigger value="status" className="gap-1.5">
               <FileCheck className="h-3.5 w-3.5" /> Status
-              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.values(statusCounts).reduce((a, b) => a + b, 0)}</Badge>
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(statusCounts).filter(k => statusCounts[k] > 0).length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="handlers" className="gap-1.5">
               <Users className="h-3.5 w-3.5" /> Tratando Com
-              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.values(handlerCounts).reduce((a, b) => a + b, 0)}</Badge>
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(handlerCounts).filter(k => handlerCounts[k] > 0).length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="banks" className="gap-1.5">
               <Building2 className="h-3.5 w-3.5" /> Bancos
-              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.values(bankCounts).reduce((a, b) => a + b, 0)}</Badge>
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(bankCounts).filter(k => bankCounts[k] > 0).length}</Badge>
             </TabsTrigger>
           </TabsList>
 
