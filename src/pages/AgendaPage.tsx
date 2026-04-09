@@ -2006,7 +2006,7 @@ export default function AgendaPage() {
                     solicitation: "Substabelecido",
                     handlingWith: "Comercial",
                     code: "",
-                    contractConfirmed: false,
+                    contractConfirmed: false, isCritical: false,
                   });
                   // Send approval notification to the team manager (gerente)
                   const userTeam = teams.find(

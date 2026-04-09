@@ -4,6 +4,8 @@ import { useInfoData } from '@/hooks/useInfoData';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Registration } from '@/data/registrations';
 import { differenceInDays } from 'date-fns';
+import { AlertTriangle, UserCog, Users, Building2, ClipboardList } from 'lucide-react';
+import { SummaryCardData } from '@/components/cadastro/RegistrationOperationalSummary';
 
 export type RegistrationCriticality = 'alta' | 'média' | 'baixa';
 
@@ -48,6 +50,22 @@ function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastU
   return 'Acompanhar andamento';
 }
 
+/** Checks if a registration qualifies for "Atenção Imediata" */
+function isImmediateAttention(reg: Registration, daysInProcess: number, pendingDocsCount: number): boolean {
+  // Condition 1: created 30+ days ago and not completed
+  if (daysInProcess >= 30) return true;
+  // Condition 2: has pending documents
+  if (pendingDocsCount > 0) return true;
+  // Condition 3: manual critical flag
+  if (reg.isCritical) return true;
+  return false;
+}
+
+/** Checks if a registration is stalled (>7 days since last update) */
+function isStalledOver7(daysSinceLastUpdate: number): boolean {
+  return daysSinceLastUpdate > 7;
+}
+
 export function useRegistrationOperationalData(registrations: Registration[]) {
   const { getPartnerById } = usePartners();
   const { getActiveDocuments } = useInfoData();
@@ -65,12 +83,10 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
       : reg.requestedAt;
     const daysSinceLastUpdate = differenceInDays(today, new Date(lastUpdateDate));
 
-    // Docs from same source as partner docs
     const partnerChecked = checkedDocs[reg.partnerId] || [];
     const validChecked = partnerChecked.filter(id => activeDocuments.some(d => d.id === id)).length;
     const pendingDocsCount = Math.max(0, totalDocsCount - validChecked);
 
-    // Criticality
     let criticality: RegistrationCriticality = 'baixa';
     const isTerminal = ['Concluído', 'Cancelado'].includes(reg.status);
     if (!isTerminal) {
@@ -99,25 +115,105 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
     };
   }, [checkedDocs, activeDocuments, totalDocsCount, getPartnerById]);
 
-  const summary = useMemo(() => {
+  // Build the 5 summary cards
+  const summaryCards = useMemo((): SummaryCardData[] => {
     let immediateAttention = 0;
-    let idleOver7 = 0;
-    let awaitingPartner = 0;
-    let awaitingBank = 0;
+    let comercialStalled = 0;
+    let parceiroStalled = 0;
+    let bancoStalled = 0;
+    let cadastroStalled = 0;
 
     registrations.forEach(reg => {
       const isTerminal = ['Concluído', 'Cancelado'].includes(reg.status);
       if (isTerminal) return;
 
       const data = getRegData(reg);
-      if (data.criticality === 'alta') immediateAttention++;
-      if (data.daysSinceLastUpdate > 7) idleOver7++;
-      if (reg.handlingWith === 'Parceiro' || reg.handlingWith === 'Comercial') awaitingPartner++;
-      if (reg.handlingWith === 'Banco') awaitingBank++;
+
+      if (isImmediateAttention(reg, data.daysInProcess, data.pendingDocsCount)) {
+        immediateAttention++;
+      }
+
+      if (isStalledOver7(data.daysSinceLastUpdate)) {
+        if (reg.handlingWith === 'Comercial') comercialStalled++;
+        if (reg.handlingWith === 'Parceiro') parceiroStalled++;
+        if (reg.handlingWith === 'Banco') bancoStalled++;
+        if (reg.handlingWith === 'Cadastro') cadastroStalled++;
+      }
     });
 
-    return { immediateAttention, idleOver7, awaitingPartner, awaitingBank };
+    return [
+      {
+        key: 'immediate',
+        label: 'Atenção Imediata',
+        subtitle: 'Prazo, documentos ou alerta crítico',
+        tooltip: 'Cadastros com prazo acima de 30 dias sem conclusão, documentos pendentes ou sinalização crítica manual.',
+        value: immediateAttention,
+        icon: AlertTriangle,
+        color: 'text-destructive',
+        pulse: immediateAttention > 0,
+      },
+      {
+        key: 'comercial_stalled',
+        label: 'Comercial > 7 dias',
+        subtitle: 'Tratando com Comercial',
+        tooltip: 'Contratos parados há mais de 7 dias com responsabilidade do Comercial.',
+        value: comercialStalled,
+        icon: UserCog,
+        color: 'text-warning',
+      },
+      {
+        key: 'parceiro_stalled',
+        label: 'Parceiro > 7 dias',
+        subtitle: 'Aguardando Parceiro',
+        tooltip: 'Contratos parados há mais de 7 dias aguardando ação do Parceiro.',
+        value: parceiroStalled,
+        icon: Users,
+        color: 'text-info',
+      },
+      {
+        key: 'banco_stalled',
+        label: 'Banco > 7 dias',
+        subtitle: 'Aguardando Banco',
+        tooltip: 'Contratos parados há mais de 7 dias aguardando tratativa com o Banco.',
+        value: bancoStalled,
+        icon: Building2,
+        color: 'text-primary',
+      },
+      {
+        key: 'cadastro_stalled',
+        label: 'Cadastro > 7 dias',
+        subtitle: 'Tratando com Cadastro',
+        tooltip: 'Contratos parados há mais de 7 dias com pendência no time de Cadastro.',
+        value: cadastroStalled,
+        icon: ClipboardList,
+        color: 'text-violet-500',
+      },
+    ];
   }, [registrations, getRegData]);
 
-  return { getRegData, summary, STAGE_OWNERS };
+  /** Filter function: given a card key, returns a predicate for registrations */
+  const getSummaryFilter = useCallback((cardKey: string) => {
+    return (reg: Registration): boolean => {
+      const isTerminal = ['Concluído', 'Cancelado'].includes(reg.status);
+      if (isTerminal) return false;
+      const data = getRegData(reg);
+
+      switch (cardKey) {
+        case 'immediate':
+          return isImmediateAttention(reg, data.daysInProcess, data.pendingDocsCount);
+        case 'comercial_stalled':
+          return reg.handlingWith === 'Comercial' && isStalledOver7(data.daysSinceLastUpdate);
+        case 'parceiro_stalled':
+          return reg.handlingWith === 'Parceiro' && isStalledOver7(data.daysSinceLastUpdate);
+        case 'banco_stalled':
+          return reg.handlingWith === 'Banco' && isStalledOver7(data.daysSinceLastUpdate);
+        case 'cadastro_stalled':
+          return reg.handlingWith === 'Cadastro' && isStalledOver7(data.daysSinceLastUpdate);
+        default:
+          return true;
+      }
+    };
+  }, [getRegData]);
+
+  return { getRegData, summaryCards, getSummaryFilter, STAGE_OWNERS };
 }

@@ -75,7 +75,7 @@ export default function CadastroPage() {
   const { toast } = useToast();
   const { addLog } = useAuditLog();
   const navigate = useNavigate();
-  const { getRegData, summary: opSummary } = useRegistrationOperationalData(registrations);
+  const { getRegData, summaryCards, getSummaryFilter } = useRegistrationOperationalData(registrations);
   const { user } = useAuth();
 
   // Permission flags
@@ -94,6 +94,7 @@ export default function CadastroPage() {
   const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>();
   const [filterDateTo, setFilterDateTo] = useState<Date | undefined>();
   const [filterCriticality, setFilterCriticality] = useState<'all' | 'alta' | 'média' | 'baixa'>('all');
+  const [activeSummaryCard, setActiveSummaryCard] = useState<string | null>(null);
 
   const [showFilters, setShowFilters] = useState(false);
   const [kpiTab, setKpiTab] = useState('status');
@@ -172,9 +173,13 @@ export default function CadastroPage() {
       if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
       if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
       if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      if (activeSummaryCard) {
+        const predicate = getSummaryFilter(activeSummaryCard);
+        if (!predicate(r)) return false;
+      }
       return true;
     });
-  }, [baseFiltered, filterStatuses, filterBanks, filterHandlers]);
+  }, [baseFiltered, filterStatuses, filterBanks, filterHandlers, activeSummaryCard, getSummaryFilter]);
 
   // Each group counts from base filtered by OTHER card groups only (not its own)
   const statusCounts = useMemo(() => {
@@ -363,6 +368,7 @@ export default function CadastroPage() {
     setFilterDateFrom(undefined);
     setFilterDateTo(undefined);
     setFilterCriticality('all');
+    setActiveSummaryCard(null);
   };
 
   const handleDateModeSelect = (mode: DateMode) => {
@@ -430,7 +436,11 @@ export default function CadastroPage() {
         </PageHeader>
 
         {/* Operational KPIs */}
-        <RegistrationOperationalSummary summary={opSummary} />
+        <RegistrationOperationalSummary
+          cards={summaryCards}
+          activeCard={activeSummaryCard}
+          onCardClick={(key) => setActiveSummaryCard(prev => prev === key ? null : key)}
+        />
 
         {/* Search always visible */}
         <div className="relative">
@@ -743,7 +753,11 @@ export default function CadastroPage() {
         {/* Content - Cards or Table */}
         {sorted.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            <p className="text-sm">Nenhum cadastro encontrado.</p>
+            <p className="text-sm">
+              {activeSummaryCard
+                ? `Nenhum contrato encontrado para o filtro '${summaryCards.find(c => c.key === activeSummaryCard)?.label || activeSummaryCard}'.`
+                : 'Nenhum cadastro encontrado.'}
+            </p>
           </div>
         ) : viewMode === 'cards' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

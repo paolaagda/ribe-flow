@@ -24,7 +24,7 @@ import { ptBR } from 'date-fns/locale';
 import {
   ArrowLeft, Building2, Calendar, Clock, Hash, FileText, Users,
   TrendingUp, AlertTriangle, CheckCircle2, Info, ShieldAlert, ExternalLink,
-  ArrowRight,
+  ArrowRight, Flag,
 } from 'lucide-react';
 
 const STATUS_STEPS = [
@@ -44,7 +44,7 @@ const criticalityConfig: Record<RegistrationCriticality, { label: string; classN
 export default function CadastroDetalhePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { registrations, getById } = useRegistrations();
+  const { registrations, getById, updateRegistration } = useRegistrations();
   const { getPartnerById } = usePartners();
   const { visits } = useVisits();
   const { getLogsForEntity } = useAuditLog();
@@ -120,6 +120,11 @@ export default function CadastroDetalhePage() {
                     {reg.status}
                   </Badge>
                   {cc && <Badge variant="outline" className={cn('text-xs', cc.className)}>{cc.label}</Badge>}
+                  {reg.isCritical && (
+                    <Badge variant="outline" className="text-xs bg-destructive/10 text-destructive border-destructive/20 gap-1">
+                      <Flag className="h-3 w-3" /> Crítico
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                   <span>{reg.solicitation}</span>
@@ -136,6 +141,27 @@ export default function CadastroDetalhePage() {
                   )}
                 </div>
               </div>
+              {/* Critical toggle button */}
+              {!isTerminal && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={reg.isCritical ? 'destructive' : 'outline'}
+                      size="sm"
+                      className="gap-1.5 shrink-0"
+                      onClick={() => updateRegistration(reg.id, { isCritical: !reg.isCritical })}
+                    >
+                      <Flag className="h-3.5 w-3.5" />
+                      {reg.isCritical ? 'Remover alerta' : 'Marcar crítico'}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {reg.isCritical
+                      ? 'Remover sinalização crítica manual. O item pode permanecer em Atenção Imediata por outras condições.'
+                      : 'Marcar como crítico. O item entrará automaticamente em Atenção Imediata.'}
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
           </CardContent>
         </Card>
