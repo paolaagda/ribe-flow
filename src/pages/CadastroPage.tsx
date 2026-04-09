@@ -368,6 +368,7 @@ export default function CadastroPage() {
     setFilterDateFrom(undefined);
     setFilterDateTo(undefined);
     setFilterCriticality('all');
+    setActiveSummaryCard(null);
   };
 
   const handleDateModeSelect = (mode: DateMode) => {
