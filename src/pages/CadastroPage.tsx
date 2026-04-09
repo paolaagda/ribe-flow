@@ -173,9 +173,13 @@ export default function CadastroPage() {
       if (filterStatuses.length > 0 && !filterStatuses.includes(r.status)) return false;
       if (filterBanks.length > 0 && !filterBanks.includes(r.bank)) return false;
       if (filterHandlers.length > 0 && !filterHandlers.includes(r.handlingWith)) return false;
+      if (activeSummaryCard) {
+        const predicate = getSummaryFilter(activeSummaryCard);
+        if (!predicate(r)) return false;
+      }
       return true;
     });
-  }, [baseFiltered, filterStatuses, filterBanks, filterHandlers]);
+  }, [baseFiltered, filterStatuses, filterBanks, filterHandlers, activeSummaryCard, getSummaryFilter]);
 
   // Each group counts from base filtered by OTHER card groups only (not its own)
   const statusCounts = useMemo(() => {
