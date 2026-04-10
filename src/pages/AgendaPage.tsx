@@ -664,6 +664,8 @@ export default function AgendaPage() {
       invitedUserIds: visit.invitedUsers?.map((iu) => iu.userId) || [],
       rescheduleReason: visit.rescheduleReason || "",
       cancelReason: visit.cancelReason || "",
+      completionOutcome: visit.completionOutcome || "",
+      completionReasonCode: visit.completionReasonCode || "",
     });
     setFormStep(0);
     setShowForm(true);
