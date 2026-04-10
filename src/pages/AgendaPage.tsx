@@ -205,6 +205,8 @@ export default function AgendaPage() {
     invitedUserIds: [] as string[],
     rescheduleReason: "",
     cancelReason: "",
+    completionOutcome: "" as "" | "completed_as_planned" | "completed_without_success",
+    completionReasonCode: "",
   });
 
   const resetForm = () => {
@@ -230,6 +232,8 @@ export default function AgendaPage() {
       invitedUserIds: [],
       rescheduleReason: "",
       cancelReason: "",
+      completionOutcome: "",
+      completionReasonCode: "",
     });
     setFormStep(0);
     setShowBankRegistration(false);
