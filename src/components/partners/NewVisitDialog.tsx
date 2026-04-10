@@ -235,7 +235,7 @@ export default function NewVisitDialog({ open, onOpenChange, partner }: Props) {
               </Label>
               <Input
                 value={formData.potentialValue}
-                onChange={e => setFormData({ ...formData, potentialValue: formatCurrencyInput(e.target.value) })}
+                onChange={e => { userEditedPotential.current = true; setFormData({ ...formData, potentialValue: formatCurrencyInput(e.target.value) }); }}
                 placeholder="Ex: R$ 5.000,00"
               />
             </div>
