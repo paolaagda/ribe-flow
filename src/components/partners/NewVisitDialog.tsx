@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ import { Partner, Visit, VisitPeriod, VisitComment, mockUsers, allCargos, cargoL
 import { useNotifications } from '@/hooks/useNotifications';
 import { getRandomMessage } from '@/data/notification-messages';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
+import { useLastVisitPotential } from '@/hooks/useLastVisitPotential';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DollarSign, CalendarPlus } from 'lucide-react';
@@ -69,7 +70,22 @@ export default function NewVisitDialog({ open, onOpenChange, partner }: Props) {
       invitedUserIds: [],
     });
     setFormStep(0);
+    userEditedPotential.current = false;
   };
+
+  // Auto-suggest potential value from last visit
+  const suggestedPotential = useLastVisitPotential(partner.id, formData.date);
+  const userEditedPotential = useRef(false);
+
+  useEffect(() => {
+    if (!userEditedPotential.current && suggestedPotential) {
+      setFormData(prev => ({ ...prev, potentialValue: suggestedPotential }));
+    }
+  }, [suggestedPotential]);
+
+  useEffect(() => {
+    userEditedPotential.current = false;
+  }, [formData.date]);
 
   const handleSave = () => {
     if (!formData.period) {
@@ -219,7 +235,7 @@ export default function NewVisitDialog({ open, onOpenChange, partner }: Props) {
               </Label>
               <Input
                 value={formData.potentialValue}
-                onChange={e => setFormData({ ...formData, potentialValue: formatCurrencyInput(e.target.value) })}
+                onChange={e => { userEditedPotential.current = true; setFormData({ ...formData, potentialValue: formatCurrencyInput(e.target.value) }); }}
                 placeholder="Ex: R$ 5.000,00"
               />
             </div>
