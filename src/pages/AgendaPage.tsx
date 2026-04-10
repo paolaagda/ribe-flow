@@ -88,6 +88,7 @@ import { ShieldOff, FileText, Landmark as LandmarkIcon } from "lucide-react";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useRegistrations } from "@/hooks/useRegistrations";
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from "@/lib/currency";
+import { useLastVisitPotential } from "@/hooks/useLastVisitPotential";
 import { AnimatePresence, motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
@@ -235,7 +236,22 @@ export default function AgendaPage() {
     setPendingAutoTasks([]);
   };
 
-  // Visibility filter: comercial only sees visits they participate in
+  // Auto-suggest potential value from last visit
+  const suggestedPotential = useLastVisitPotential(formData.partnerId, formData.date);
+  const userEditedPotential = useRef(false);
+
+  useEffect(() => {
+    if (!editingVisit && !userEditedPotential.current && suggestedPotential) {
+      setFormData(prev => ({ ...prev, potentialValue: suggestedPotential }));
+    }
+  }, [suggestedPotential, editingVisit]);
+
+  // Reset the edited flag when partner or date changes
+  useEffect(() => {
+    userEditedPotential.current = false;
+  }, [formData.partnerId, formData.date]);
+
+
   const visibleVisits = useMemo(() => {
     if (!user) return visits;
     const isRestricted = ['comercial', 'cadastro'].includes(user.role);

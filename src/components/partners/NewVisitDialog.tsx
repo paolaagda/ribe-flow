@@ -16,6 +16,7 @@ import { Partner, Visit, VisitPeriod, VisitComment, mockUsers, allCargos, cargoL
 import { useNotifications } from '@/hooks/useNotifications';
 import { getRandomMessage } from '@/data/notification-messages';
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from '@/lib/currency';
+import { useLastVisitPotential } from '@/hooks/useLastVisitPotential';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DollarSign, CalendarPlus } from 'lucide-react';
