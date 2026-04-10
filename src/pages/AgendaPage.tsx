@@ -1858,7 +1858,7 @@ export default function AgendaPage() {
                             setPendingFormStatus(newStatus);
                             setShowJustificationModal(true);
                           } else {
-                            setFormData({ ...formData, status: newStatus, rescheduleReason: "", cancelReason: "" });
+                            setFormData({ ...formData, status: newStatus, rescheduleReason: "", cancelReason: "", completionOutcome: newStatus === "Concluída" ? formData.completionOutcome : "", completionReasonCode: newStatus === "Concluída" ? formData.completionReasonCode : "" });
                           }
                         }}
                       >
