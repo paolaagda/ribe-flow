@@ -564,6 +564,8 @@ export default function AgendaPage() {
                 prospectAddress: formData.prospectAddress,
                 prospectPhone: formData.prospectPhone,
                 prospectContact: formData.prospectContact,
+                completionOutcome: formData.status === "Concluída" ? (formData.completionOutcome as Visit['completionOutcome']) || undefined : undefined,
+                completionReasonCode: formData.status === "Concluída" && formData.completionOutcome === "completed_without_success" ? formData.completionReasonCode || undefined : undefined,
                 invitedUsers: [
                   ...(v.invitedUsers || []),
                   ...invitedUsers.filter((iu) => !v.invitedUsers?.some((e) => e.userId === iu.userId)),
@@ -601,6 +603,8 @@ export default function AgendaPage() {
         prospectAddress: formData.prospectAddress,
         prospectPhone: formData.prospectPhone,
         prospectContact: formData.prospectContact,
+        completionOutcome: formData.status === "Concluída" ? (formData.completionOutcome as Visit['completionOutcome']) || undefined : undefined,
+        completionReasonCode: formData.status === "Concluída" && formData.completionOutcome === "completed_without_success" ? formData.completionReasonCode || undefined : undefined,
         comments: [...pendingAutoTasks],
       };
       setVisits((prev) => [...prev, newVisit]);
