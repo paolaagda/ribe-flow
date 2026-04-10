@@ -269,7 +269,22 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             </div>
           )}
 
-          {/* Participants */}
+          {/* Completion outcome */}
+          {visit.status === 'Concluída' && visit.completionOutcome === 'completed_without_success' && visit.completionReasonCode && (
+            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-sm">
+              <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-medium text-warning">Objetivo não alcançado</p>
+                <p className="text-sm">{visit.completionReasonCode}</p>
+              </div>
+            </div>
+          )}
+          {visit.status === 'Concluída' && visit.completionOutcome === 'completed_as_planned' && (
+            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-success/10 border border-success/20 text-sm">
+              <Check className="h-4 w-4 text-success shrink-0" />
+              <p className="text-xs font-medium text-success">Objetivo alcançado conforme planejado</p>
+            </div>
+          )}
           {visit.invitedUsers && visit.invitedUsers.length > 0 && (
             <>
               <Separator />
