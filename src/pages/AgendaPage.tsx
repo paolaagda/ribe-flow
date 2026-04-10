@@ -92,6 +92,7 @@ import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from "@/li
 import { useLastVisitPotential } from "@/hooks/useLastVisitPotential";
 import { AnimatePresence, motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -1948,6 +1949,62 @@ export default function AgendaPage() {
                     placeholder="Resumo geral da visita..."
                   />
                 </div>
+
+                {/* Resultado da agenda — only when status is Concluída */}
+                {formData.status === "Concluída" && (
+                  <div className="space-y-3 p-3 rounded-lg border border-border/50 bg-muted/20">
+                    <Label className="text-sm font-semibold">Resultado da agenda</Label>
+                    <p className="text-xs text-muted-foreground">O objetivo da agenda foi alcançado?</p>
+                    <RadioGroup
+                      value={formData.completionOutcome}
+                      onValueChange={(v) => setFormData({ ...formData, completionOutcome: v as typeof formData.completionOutcome, completionReasonCode: "" })}
+                      className="flex gap-4"
+                    >
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="completed_as_planned" id="outcome-yes" />
+                        <Label htmlFor="outcome-yes" className="text-sm cursor-pointer">Sim</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="completed_without_success" id="outcome-no" />
+                        <Label htmlFor="outcome-no" className="text-sm cursor-pointer">Não</Label>
+                      </div>
+                    </RadioGroup>
+
+                    <AnimatePresence>
+                      {formData.completionOutcome === "completed_without_success" && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="space-y-2 overflow-hidden"
+                        >
+                          <p className="text-xs text-muted-foreground">
+                            A agenda foi concluída operacionalmente, mas o objetivo planejado não foi alcançado.
+                          </p>
+                          <Select
+                            value={formData.completionReasonCode}
+                            onValueChange={(v) => setFormData({ ...formData, completionReasonCode: v })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o motivo..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(() => {
+                                const typeKey = formData.type === "prospecção" ? "prospeccao" : "visita";
+                                const medioKey = formData.medio === "remoto" ? "remota" : "presencial";
+                                const key = `${typeKey}_${medioKey}`;
+                                const reasons = COMPLETION_REASONS[key] || [];
+                                return reasons.map((r) => (
+                                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                                ));
+                              })()}
+                            </SelectContent>
+                          </Select>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
 
                 {/* Bank Registrations added */}
                 {bankRegistrations.length > 0 && (
