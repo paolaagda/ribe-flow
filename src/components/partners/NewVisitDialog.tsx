@@ -70,7 +70,22 @@ export default function NewVisitDialog({ open, onOpenChange, partner }: Props) {
       invitedUserIds: [],
     });
     setFormStep(0);
+    userEditedPotential.current = false;
   };
+
+  // Auto-suggest potential value from last visit
+  const suggestedPotential = useLastVisitPotential(partner.id, formData.date);
+  const userEditedPotential = useRef(false);
+
+  useEffect(() => {
+    if (!userEditedPotential.current && suggestedPotential) {
+      setFormData(prev => ({ ...prev, potentialValue: suggestedPotential }));
+    }
+  }, [suggestedPotential]);
+
+  useEffect(() => {
+    userEditedPotential.current = false;
+  }, [formData.date]);
 
   const handleSave = () => {
     if (!formData.period) {
