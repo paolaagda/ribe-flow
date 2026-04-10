@@ -108,7 +108,53 @@ export interface Visit {
   prospectPhone?: string;
   prospectContact?: string;
   convertedToPartnerId?: string;
+  completionOutcome?: 'completed_as_planned' | 'completed_without_success';
+  completionReasonCode?: string;
 }
+
+export const COMPLETION_REASONS: Record<string, string[]> = {
+  visita_presencial: [
+    'Loja fechada',
+    'Parceiro ausente',
+    'Responsável não estava no local',
+    'Parceiro sem tempo para atendimento',
+    'Visita não pôde ser realizada no momento',
+    'Parceiro pediu reagendamento',
+    'Problema operacional no local',
+    'Não foi possível avançar na pauta da visita',
+  ],
+  visita_remota: [
+    'Parceiro não atendeu',
+    'Parceiro não respondeu',
+    'Responsável indisponível no horário',
+    'Problema de conexão/chamada',
+    'Reunião remota não aconteceu',
+    'Parceiro pediu reagendamento',
+    'Não foi possível avançar na pauta da visita',
+  ],
+  prospeccao_presencial: [
+    'Loja fechada',
+    'Responsável ausente',
+    'Não conseguiu falar com o decisor',
+    'Sem interesse no momento',
+    'Já possui parceria com concorrente',
+    'Não aceitou apresentação/proposta',
+    'Não tem perfil para captação',
+    'Pediu retorno futuro',
+    'Prospecção realizada, mas sem avanço',
+  ],
+  prospeccao_remota: [
+    'Não atendeu',
+    'Não respondeu',
+    'Não conseguiu falar com o decisor',
+    'Sem interesse no momento',
+    'Já possui parceria com concorrente',
+    'Não aceitou apresentação/proposta',
+    'Problema de conexão/chamada',
+    'Pediu retorno futuro',
+    'Prospecção realizada, mas sem avanço',
+  ],
+};
 
 // ============ CARGO LABELS & COLORS ============
 export const cargoLabels: Record<CompanyCargo, string> = {
