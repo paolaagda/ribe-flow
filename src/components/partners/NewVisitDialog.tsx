@@ -74,7 +74,7 @@ export default function NewVisitDialog({ open, onOpenChange, partner }: Props) {
   };
 
   // Auto-suggest potential value from last visit
-  const suggestedPotential = useLastVisitPotential(partner.id, formData.date);
+  const { value: suggestedPotential, sourceDate: suggestedSourceDate } = useLastVisitPotential(partner.id, formData.date);
   const userEditedPotential = useRef(false);
 
   useEffect(() => {
@@ -238,6 +238,9 @@ export default function NewVisitDialog({ open, onOpenChange, partner }: Props) {
                 onChange={e => { userEditedPotential.current = true; setFormData({ ...formData, potentialValue: formatCurrencyInput(e.target.value) }); }}
                 placeholder="Ex: R$ 5.000,00"
               />
+              {suggestedSourceDate && !userEditedPotential.current && (
+                <p className="text-[11px] text-muted-foreground">Sugestão baseada na visita de {suggestedSourceDate}</p>
+              )}
             </div>
 
             {/* Convidados */}
