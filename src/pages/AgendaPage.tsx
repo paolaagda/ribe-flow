@@ -29,7 +29,6 @@ import {
   getPartnerById as getPartnerByIdGlobal,
   allCargos,
   cargoLabels,
-  COMPLETION_REASONS,
 } from "@/data/mock-data";
 import { useSystemData } from "@/hooks/useSystemData";
 import { useInfoData } from "@/hooks/useInfoData";
@@ -1992,8 +1991,8 @@ export default function AgendaPage() {
                               {(() => {
                                 const typeKey = formData.type === "prospecção" ? "prospeccao" : "visita";
                                 const medioKey = formData.medio === "remoto" ? "remota" : "presencial";
-                                const key = `${typeKey}_${medioKey}`;
-                                const reasons = COMPLETION_REASONS[key] || [];
+                                const categoryKey = `completionReasons_${typeKey}_${medioKey}` as import('@/hooks/useSystemData').SystemCategory;
+                                const reasons = getActiveItems(categoryKey);
                                 return reasons.map((r) => (
                                   <SelectItem key={r} value={r}>{r}</SelectItem>
                                 ));

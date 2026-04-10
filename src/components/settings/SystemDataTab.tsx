@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useSystemData, SystemCategory, categoryLabels } from '@/hooks/useSystemData';
-import { Plus, Package, AlertTriangle, XCircle, Store, Clock, FileCheck, FileText, Users, ShieldX } from 'lucide-react';
+import { Plus, Package, AlertTriangle, XCircle, Store, Clock, FileCheck, FileText, Users, ShieldX, ClipboardCheck, Eye, Phone, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import InfoDataSection from './InfoDataSection';
 
@@ -21,6 +21,10 @@ const categoryIcons: Record<string, React.ElementType> = {
   registrationHandlers: Users,
   inviteRejectionReasons: XCircle,
   registrationRejectionReasons: ShieldX,
+  completionReasons_visita_presencial: MapPin,
+  completionReasons_visita_remota: Phone,
+  completionReasons_prospeccao_presencial: Eye,
+  completionReasons_prospeccao_remota: Phone,
 };
 
 interface CategorySection {
@@ -34,6 +38,11 @@ const sections: CategorySection[] = [
     title: 'Agenda',
     description: 'Dados utilizados nos formulários e filtros da página Agenda.',
     categories: ['periods', 'rescheduleReasons', 'cancelReasons', 'inviteRejectionReasons'],
+  },
+  {
+    title: 'Resultado da Agenda',
+    description: 'Justificativas exibidas ao concluir uma agenda quando o objetivo não foi alcançado. Separadas por tipo e formato.',
+    categories: ['completionReasons_visita_presencial', 'completionReasons_visita_remota', 'completionReasons_prospeccao_presencial', 'completionReasons_prospeccao_remota'],
   },
   {
     title: 'Cadastro',

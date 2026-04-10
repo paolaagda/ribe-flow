@@ -9,7 +9,7 @@ export interface SystemItem {
   active: boolean;
 }
 
-export type SystemCategory = 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers' | 'inviteRejectionReasons' | 'registrationRejectionReasons';
+export type SystemCategory = 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers' | 'inviteRejectionReasons' | 'registrationRejectionReasons' | 'completionReasons_visita_presencial' | 'completionReasons_visita_remota' | 'completionReasons_prospeccao_presencial' | 'completionReasons_prospeccao_remota';
 
 const categoryLabels: Record<SystemCategory, string> = {
   products: 'Produtos',
@@ -22,6 +22,10 @@ const categoryLabels: Record<SystemCategory, string> = {
   registrationHandlers: 'Tratando Com',
   inviteRejectionReasons: 'Justificativas de Rejeição de Convite',
   registrationRejectionReasons: 'Justificativas de Recusa de Cadastro',
+  completionReasons_visita_presencial: 'Visita presencial',
+  completionReasons_visita_remota: 'Visita remota',
+  completionReasons_prospeccao_presencial: 'Prospecção presencial',
+  completionReasons_prospeccao_remota: 'Prospecção remota',
 };
 
 function buildInitial(items: readonly string[]): SystemItem[] {
@@ -51,6 +55,47 @@ const initialData: Record<SystemCategory, SystemItem[]> = {
     'Parceiro já cadastrado em outra promotora',
     'Dados inconsistentes',
     'Fora da área de atuação',
+  ]),
+  completionReasons_visita_presencial: buildInitial([
+    'Loja fechada',
+    'Parceiro ausente',
+    'Responsável não estava no local',
+    'Parceiro sem tempo para atendimento',
+    'Visita não pôde ser realizada no momento',
+    'Parceiro pediu reagendamento',
+    'Problema operacional no local',
+    'Não foi possível avançar na pauta da visita',
+  ]),
+  completionReasons_visita_remota: buildInitial([
+    'Parceiro não atendeu',
+    'Parceiro não respondeu',
+    'Responsável indisponível no horário',
+    'Problema de conexão/chamada',
+    'Reunião remota não aconteceu',
+    'Parceiro pediu reagendamento',
+    'Não foi possível avançar na pauta da visita',
+  ]),
+  completionReasons_prospeccao_presencial: buildInitial([
+    'Loja fechada',
+    'Responsável ausente',
+    'Não conseguiu falar com o decisor',
+    'Sem interesse no momento',
+    'Já possui parceria com concorrente',
+    'Não aceitou apresentação/proposta',
+    'Não tem perfil para captação',
+    'Pediu retorno futuro',
+    'Prospecção realizada, mas sem avanço',
+  ]),
+  completionReasons_prospeccao_remota: buildInitial([
+    'Não atendeu',
+    'Não respondeu',
+    'Não conseguiu falar com o decisor',
+    'Sem interesse no momento',
+    'Já possui parceria com concorrente',
+    'Não aceitou apresentação/proposta',
+    'Problema de conexão/chamada',
+    'Pediu retorno futuro',
+    'Prospecção realizada, mas sem avanço',
   ]),
 };
 
