@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Team, initialTeams } from "@/data/teams";
