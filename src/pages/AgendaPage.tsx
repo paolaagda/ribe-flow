@@ -85,7 +85,7 @@ import AgendaMap from "@/components/agenda/AgendaMap";
 import SmartInsights from "@/components/shared/SmartInsights";
 import AnimatedFilterContent from "@/components/shared/AnimatedFilterContent";
 import { usePermission } from "@/hooks/usePermission";
-import { ShieldOff, FileText, Landmark as LandmarkIcon } from "lucide-react";
+import { ShieldOff, FileText } from "lucide-react";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useRegistrations } from "@/hooks/useRegistrations";
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from "@/lib/currency";
