@@ -160,7 +160,7 @@ export default function AgendaPage() {
   const [pendingDrop, setPendingDrop] = useState<{ visitId: string; newDate: string; day: Date } | null>(null);
   const [pendingFormStatus, setPendingFormStatus] = useState<"Reagendada" | "Cancelada" | "Inconclusa" | null>(null);
   const [showFinalStatusConfirm, setShowFinalStatusConfirm] = useState(false);
-  const [pendingFinalStatus, setPendingFinalStatus] = useState<VisitStatus | null>(null);
+  
   const [showJustificationModal, setShowJustificationModal] = useState(false);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [showTodayPanel, setShowTodayPanel] = useState(false);
