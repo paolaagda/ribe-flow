@@ -434,12 +434,14 @@ export default function AgendaPage() {
       setPendingDrop(null);
     } else if (pendingFormStatus) {
       // Form status change
-      const reasonField = pendingFormStatus === "Reagendada" ? "rescheduleReason" : "cancelReason";
+      const reasonField = pendingFormStatus === "Reagendada" ? "rescheduleReason" : pendingFormStatus === "Inconclusa" ? "inconclusiveReason" : "cancelReason";
       setFormData((prev) => ({ ...prev, status: pendingFormStatus as VisitStatus, [reasonField]: reason }));
       const msg =
         pendingFormStatus === "Reagendada"
           ? "Reagendamento registrado com sucesso"
-          : "Cancelamento registrado com sucesso";
+          : pendingFormStatus === "Inconclusa"
+            ? "Agenda marcada como inconclusa"
+            : "Cancelamento registrado com sucesso";
       toast({ title: msg });
     }
     setPendingFormStatus(null);
