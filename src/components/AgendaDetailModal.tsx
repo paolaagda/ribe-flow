@@ -142,6 +142,94 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
     updateVisit({ products: visit.products.filter(p => p !== productName) });
   };
 
+  const handleBankRegistrationComplete = (data: { bankId: string; bankName: string; pendingDocs: string[]; pendingDocIds: string[]; unfilledFieldIds: string[]; unfilledFieldNames: string[]; fieldValues: Record<string, string> }) => {
+    const pName = partner?.name || visit.prospectPartner || '';
+    const details = Object.entries(data.fieldValues).map(([, v]) => v).filter(Boolean).join(' | ');
+
+    // Auto-generate task comments
+    const now = new Date().toISOString();
+    const autoTasks: VisitComment[] = [];
+    data.pendingDocIds.forEach((docId, i) => {
+      autoTasks.push({
+        id: `auto-doc-${Date.now()}-${i}`,
+        userId: user?.id || '',
+        text: `📄 Enviar: ${data.pendingDocs[i]} (${data.bankName})`,
+        type: 'task',
+        taskCompleted: false,
+        taskCategory: 'document',
+        taskSourceId: docId,
+        taskBankName: data.bankName,
+        createdAt: now,
+      });
+    });
+    data.unfilledFieldIds.forEach((fieldId, i) => {
+      autoTasks.push({
+        id: `auto-field-${Date.now()}-${i}`,
+        userId: user?.id || '',
+        text: `🧾 Preencher: ${data.unfilledFieldNames[i]} (${data.bankName})`,
+        type: 'task',
+        taskCompleted: false,
+        taskCategory: 'data',
+        taskSourceId: fieldId,
+        taskBankName: data.bankName,
+        createdAt: now,
+      });
+    });
+
+    // Add auto tasks as comments to the visit
+    if (autoTasks.length > 0) {
+      updateVisit({ comments: [...(visit.comments || []), ...autoTasks] });
+    }
+
+    // Create registration
+    const newReg = addRegistration({
+      partnerId: visit.partnerId || '',
+      bank: data.bankName,
+      cnpj: partner?.cnpj || visit.prospectCnpj || '',
+      commercialUserId: user?.id || '',
+      observation: `Solicitação via compromisso. ${details ? `Dados: ${details}` : ''}${data.pendingDocs.length > 0 ? ` | Docs pendentes: ${data.pendingDocs.join(', ')}` : ''}`,
+      status: 'Não iniciado',
+      solicitation: 'Substabelecido',
+      handlingWith: 'Comercial',
+      code: '',
+      contractConfirmed: false,
+      isCritical: false,
+    });
+
+    // Send approval notification to the team manager
+    const userTeam = teams.find(t =>
+      t.commercialIds.includes(user?.id || '') ||
+      t.ascomIds.includes(user?.id || '') ||
+      t.managerId === user?.id ||
+      t.directorId === user?.id ||
+      (t.cadastroIds || []).includes(user?.id || '')
+    );
+    const managerId = userTeam?.managerId;
+    if (managerId && managerId !== user?.id) {
+      addNotification({
+        type: 'registration_approval',
+        visitId: visit.id,
+        fromUserId: user?.id || '',
+        toUserId: managerId,
+        partnerId: visit.partnerId || '',
+        partnerName: pName,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        time: '',
+        status: 'pending',
+        message: `📋 ${user?.name || 'Comercial'} solicita aprovação de cadastro no banco ${data.bankName} para ${pName}.${data.pendingDocs.length > 0 ? ` (${data.pendingDocs.length} docs pendentes)` : ''}`,
+        registrationId: newReg.id,
+        bankName: data.bankName,
+      });
+    }
+
+    setShowBankRegistration(false);
+    const totalTasks = autoTasks.length;
+    toast({
+      title: 'Cadastro solicitado',
+      description: `Aprovação enviada ao gerente.${totalTasks > 0 ? ` ${totalTasks} tarefa(s) gerada(s) automaticamente.` : ''}`,
+    });
+  };
+
   // Available options (active only, not already selected)
   const availableBanks = getActiveBanks().filter(b => !visit.banks.includes(b.name));
   const availableProducts = getActiveItems('products').filter(p => !visit.products.includes(p));
