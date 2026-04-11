@@ -263,13 +263,6 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             </div>
           )}
 
-          {/* Observations (legacy) */}
-          {visit.observations && (
-            <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">Observações</p>
-              <p className="text-sm bg-muted/50 rounded-md p-2">{visit.observations}</p>
-            </div>
-          )}
 
           {/* Inconclusive reason */}
           {visit.status === 'Inconclusa' && visit.inconclusiveReason && (
