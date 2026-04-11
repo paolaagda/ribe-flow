@@ -48,11 +48,15 @@ interface AgendaDetailModalProps {
 export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, onDelete, onAcceptInvite, onRejectInvite, onLeaveVisit, onAddComment, onToggleTask, onScheduleFollowUp }: AgendaDetailModalProps) {
   const { canWrite } = usePermission();
   const { user } = useAuth();
+  const { toast } = useToast();
   const { getAvatar } = useUserAvatars();
   const { getPartnerById } = usePartners();
   const { visits, setVisits } = useVisits();
   const { getActiveBanks } = useInfoData();
   const { getActiveItems } = useSystemData();
+  const { addRegistration } = useRegistrations();
+  const { addNotification } = useNotifications();
+  const [teams] = useLocalStorage<Team[]>('ribercred_teams', initialTeams);
   const { hasActive, activeCount, regs } = useRegistrationBadge(visit?.partnerId);
   const commentsRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -61,6 +65,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   const [summaryDraft, setSummaryDraft] = useState('');
   const [banksPopoverOpen, setBanksPopoverOpen] = useState(false);
   const [productsPopoverOpen, setProductsPopoverOpen] = useState(false);
+  const [showBankRegistration, setShowBankRegistration] = useState(false);
 
   if (!visit) return null;
 
