@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 interface JustificationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  targetStatus: 'Reagendada' | 'Cancelada';
+  targetStatus: 'Reagendada' | 'Cancelada' | 'Inconclusa';
   onConfirm: (reason: string) => void;
 }
 
@@ -20,10 +20,11 @@ export default function JustificationModal({ open, onOpenChange, targetStatus, o
 
   const { getActiveItems } = useSystemData();
   const isReschedule = targetStatus === 'Reagendada';
-  const reasons = getActiveItems(isReschedule ? 'rescheduleReasons' : 'cancelReasons');
-  const title = isReschedule ? 'Selecione o motivo do reagendamento' : 'Selecione o motivo do cancelamento';
+  const isInconclusive = targetStatus === 'Inconclusa';
+  const reasons = getActiveItems(isReschedule ? 'rescheduleReasons' : isInconclusive ? 'inconclusiveReasons' : 'cancelReasons');
+  const title = isReschedule ? 'Selecione o motivo do reagendamento' : isInconclusive ? 'Selecione o motivo da agenda inconclusa' : 'Selecione o motivo do cancelamento';
   const Icon = isReschedule ? AlertTriangle : XCircle;
-  const accentClass = isReschedule ? 'text-warning' : 'text-destructive';
+  const accentClass = isReschedule ? 'text-warning' : isInconclusive ? 'text-purple-600 dark:text-purple-400' : 'text-destructive';
 
   const handleConfirm = () => {
     if (!reason) return;
@@ -67,7 +68,7 @@ export default function JustificationModal({ open, onOpenChange, targetStatus, o
                 exit={{ opacity: 0, y: -4 }}
                 className={cn(
                   'text-xs p-2 rounded-md border',
-                  isReschedule ? 'bg-warning/10 border-warning/20 text-warning' : 'bg-destructive/10 border-destructive/20 text-destructive'
+                  isReschedule ? 'bg-warning/10 border-warning/20 text-warning' : isInconclusive ? 'bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400' : 'bg-destructive/10 border-destructive/20 text-destructive'
                 )}
               >
                 Motivo selecionado: <span className="font-medium">{reason}</span>
@@ -83,7 +84,7 @@ export default function JustificationModal({ open, onOpenChange, targetStatus, o
             disabled={!reason}
             className={cn(
               !reason && 'opacity-50 cursor-not-allowed',
-              isReschedule ? 'bg-warning text-warning-foreground hover:bg-warning/90' : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+              isReschedule ? 'bg-warning text-warning-foreground hover:bg-warning/90' : isInconclusive ? 'bg-purple-600 text-white hover:bg-purple-600/90' : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
             )}
           >
             Confirmar
