@@ -14,7 +14,7 @@ import { useSystemData } from '@/hooks/useSystemData';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus, FileText, CalendarPlus, ListTodo, Plus } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus, FileText, CalendarPlus, Plus } from 'lucide-react';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
