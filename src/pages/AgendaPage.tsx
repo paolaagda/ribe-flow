@@ -1840,28 +1840,53 @@ export default function AgendaPage() {
                   <>
                     <div className="space-y-2">
                       <Label>Status</Label>
-                      <Select
-                        value={formData.status}
-                        onValueChange={(v) => {
-                          const newStatus = v as VisitStatus;
-                          if (newStatus === "Reagendada" || newStatus === "Cancelada") {
-                            setPendingFormStatus(newStatus);
-                            setShowJustificationModal(true);
-                          } else {
-                            setFormData({ ...formData, status: newStatus, rescheduleReason: "", cancelReason: "", completionOutcome: newStatus === "Concluída" ? formData.completionOutcome : "", completionReasonCode: newStatus === "Concluída" ? formData.completionReasonCode : "" });
-                          }
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Planejada">Planejada</SelectItem>
-                          <SelectItem value="Concluída">Concluída</SelectItem>
-                          <SelectItem value="Reagendada">Reagendada</SelectItem>
-                          <SelectItem value="Cancelada">Cancelada</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      {(() => {
+                        const FINAL_STATUSES: VisitStatus[] = ["Concluída", "Cancelada", "Inconclusa"];
+                        const isComercial = user?.role === "comercial";
+                        const isStatusLocked = isComercial && editingVisit && FINAL_STATUSES.includes(editingVisit.status);
+                        
+                        if (isStatusLocked) {
+                          return (
+                            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/50 border border-border/50">
+                              <Badge variant="outline" className={cn("text-xs capitalize", statusBgClasses[formData.status])}>
+                                {formData.status}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">Status final — não pode ser alterado</span>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <Select
+                            value={formData.status}
+                            onValueChange={(v) => {
+                              const newStatus = v as VisitStatus;
+                              if (newStatus === "Reagendada" || newStatus === "Cancelada" || newStatus === "Inconclusa") {
+                                setPendingFormStatus(newStatus);
+                                setShowJustificationModal(true);
+                              } else if (isComercial && FINAL_STATUSES.includes(newStatus)) {
+                                setPendingFinalStatus(newStatus);
+                                setShowFinalStatusConfirm(true);
+                              } else {
+                                setFormData({ ...formData, status: newStatus, rescheduleReason: "", cancelReason: "", inconclusiveReason: "" });
+                              }
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Planejada">Planejada</SelectItem>
+                              <SelectItem value="Concluída">Concluída</SelectItem>
+                              <SelectItem value="Reagendada">Reagendada</SelectItem>
+                              <SelectItem value="Cancelada">Cancelada</SelectItem>
+                              {formData.type === "prospecção" && (
+                                <SelectItem value="Inconclusa">Inconclusa</SelectItem>
+                              )}
+                            </SelectContent>
+                          </Select>
+                        );
+                      })()}
                     </div>
 
                     {/* Display selected reason */}
