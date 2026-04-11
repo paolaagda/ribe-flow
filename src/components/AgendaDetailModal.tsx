@@ -237,19 +237,42 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto p-0">
-        {/* ── Header: Type icon + Status + Partner name ── */}
-        <div className="px-5 pt-5 pb-3 space-y-2.5">
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className={cn('text-xs capitalize gap-1.5 px-2 py-0.5', visit.type === 'visita' ? 'bg-info/10 text-info' : 'bg-warning/10 text-warning')}>
-              <TypeIcon className="h-3.5 w-3.5" />
-              {typeLabel}
-            </Badge>
-            <Badge variant="outline" className={cn('text-[10px] capitalize', statusBgClasses[visit.status])}>
+        {/* ── Header: Icon + Name + Status ── */}
+        <div className="px-5 pt-5 pb-2">
+          <div className="flex items-center gap-2.5">
+            <div className={cn(
+              'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
+              visit.type === 'visita' ? 'bg-info/10' : 'bg-warning/10'
+            )}>
+              <TypeIcon className={cn('h-4 w-4', visit.type === 'visita' ? 'text-info' : 'text-warning')} />
+            </div>
+            <div className="flex-1 min-w-0">
+              {partner ? (
+                <button
+                  onClick={handlePartnerClick}
+                  className="text-left text-lg font-bold leading-snug hover:text-primary hover:underline underline-offset-2 transition-colors truncate block max-w-full"
+                >
+                  {partnerName}
+                </button>
+              ) : (
+                <p className="text-lg font-bold leading-snug truncate">{partnerName}</p>
+              )}
+            </div>
+            <Badge variant="outline" className={cn('text-xs capitalize shrink-0', statusBgClasses[visit.status])}>
               {visit.status}
             </Badge>
+          </div>
+
+          {/* Address */}
+          {partnerAddress && (
+            <p className="text-xs text-muted-foreground mt-1.5 pl-[42px]">{partnerAddress}</p>
+          )}
+
+          {/* Partner meta badges */}
+          <div className="flex items-center gap-2 flex-wrap mt-2 pl-[42px]">
             {partner && visit.type === 'visita' && (
               <Badge variant="outline" className={cn(
-                'text-[9px] w-4 h-4 p-0 flex items-center justify-center font-bold',
+                'text-[10px] w-5 h-5 p-0 flex items-center justify-center font-bold',
                 partner.partnerClass === 'A' ? 'bg-success/10 text-success border-success/20' :
                 partner.partnerClass === 'B' ? 'bg-info/10 text-info border-info/20' :
                 partner.partnerClass === 'C' ? 'bg-warning/10 text-warning border-warning/20' :
@@ -257,264 +280,240 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
               )}>{partner.partnerClass}</Badge>
             )}
             {partner && (
-              <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 capitalize",
+              <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 capitalize",
                 partner.potential === 'alto' ? 'bg-success/10 text-success border-success/20' :
                 partner.potential === 'médio' ? 'bg-info/10 text-info border-info/20' :
                 'bg-muted/50 text-muted-foreground border-border/30'
               )}>Potencial {partner.potential}</Badge>
             )}
-          </div>
-
-          {/* Partner name – clickable */}
-          <div>
-            {partner ? (
-              <button
-                onClick={handlePartnerClick}
-                className="text-left text-base font-bold leading-snug hover:text-primary hover:underline underline-offset-2 transition-colors"
-              >
-                {partnerName}
-              </button>
-            ) : (
-              <p className="text-base font-bold leading-snug">{partnerName}</p>
-            )}
             {lastVisitInfo && (
-              <span className="text-[10px] text-muted-foreground/70 block mt-0.5">{lastVisitInfo}</span>
+              <span className="text-[10px] text-muted-foreground/70">{lastVisitInfo}</span>
             )}
+            {visit.structures.length > 0 && visit.structures.map(s => (
+              <Badge key={s} variant="outline" className="text-[10px]">{s}</Badge>
+            ))}
+          </div>
+
+          {/* Commercial user */}
+          <div className="flex items-center gap-1.5 mt-1.5 pl-[42px] text-xs text-muted-foreground">
+            <User className="h-3 w-3 shrink-0" />
+            <span>{visitUser?.name || '—'}</span>
           </div>
         </div>
 
-        <Separator className="opacity-50" />
-
-        {/* ── Partner summary block ── */}
-        <div className="px-5 py-3 space-y-2.5">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-            {partnerAddress && (
-              <div className="flex items-center gap-2 text-muted-foreground col-span-2 min-w-0">
-                <MapPin className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{partnerAddress}</span>
-              </div>
-            )}
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <User className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">Comercial: <span className="font-medium text-foreground">{visitUser?.name || '—'}</span></span>
-            </div>
-            {partner?.phone && (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <span className="text-xs">{partner.phone}</span>
-              </div>
-            )}
+        {/* ── Visit date / time / period / medio row ── */}
+        <div className="px-5 py-3 flex items-center gap-3 flex-wrap text-sm text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <CalendarIcon className="h-3.5 w-3.5" />
+            <span>{format(parseISO(visit.date), "dd 'de' MMMM, yyyy", { locale: ptBR })}</span>
           </div>
+          <Badge variant="outline" className="text-[10px] capitalize">{visit.period}</Badge>
+          {visit.time ? (
+            <span className="flex items-center gap-1 text-xs"><Clock className="h-3 w-3" />{visit.time}</span>
+          ) : (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground/60"><Clock className="h-3 w-3" />Sem horário</span>
+          )}
+          <Badge variant="outline" className="text-[10px] capitalize">{visit.medio}</Badge>
+        </div>
 
-          {/* Structures – now part of the top summary */}
-          {visit.structures.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-              {visit.structures.map(s => (
-                <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
-              ))}
-            </div>
+        {/* Potential value */}
+        <div className="px-5 pb-3 flex items-center gap-2">
+          <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+          {visit.potentialValue ? (
+            <Badge
+              variant="outline"
+              className={cn(
+                'text-xs font-semibold',
+                visit.potentialValue >= 1000000
+                  ? 'bg-warning/10 text-warning border-warning/20'
+                  : 'text-foreground',
+              )}
+            >
+              {formatCentavos(visit.potentialValue)}
+            </Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground italic">Potencial não informado</span>
           )}
         </div>
 
-        <Separator className="opacity-50" />
-
-        {/* ── Visit details ── */}
-        <div className="px-5 py-3 space-y-4">
-          {/* Date, period, time, medio */}
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <CalendarIcon className="h-3.5 w-3.5" />
-              <span>{format(parseISO(visit.date), "dd 'de' MMMM, yyyy", { locale: ptBR })}</span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Badge variant="outline" className="text-[10px] capitalize">{visit.period}</Badge>
-              {visit.time ? (
-                <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{visit.time}</span>
-              ) : (
-                <span className="flex items-center gap-1 text-muted-foreground/60"><Clock className="h-3 w-3" />Sem horário</span>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs capitalize">{visit.medio}</Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-              {visit.potentialValue ? (
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    'text-xs font-semibold',
-                    visit.potentialValue >= 1000000
-                      ? 'bg-warning/10 text-warning border-warning/20'
-                      : 'text-foreground',
-                  )}
-                >
-                  {formatCentavos(visit.potentialValue)}
-                </Badge>
-              ) : (
-                <span className="text-xs text-muted-foreground italic">Potencial não informado</span>
-              )}
-            </div>
-          </div>
-
-          {/* Missing summary banner */}
-          {visit.status === 'Concluída' && !visit.summary?.trim() && !editingSummary && (
-            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/30 border border-border/30">
-              <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-              <p className="text-xs text-muted-foreground flex-1">Resumo da visita ainda não preenchido</p>
-              <Button variant="ghost" size="sm" className="h-6 text-xs px-2" onClick={handleStartEditSummary}>
-                Preencher
+        {/* ── Summary (editable) ── */}
+        <div className="px-5 pb-3 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-muted-foreground">Resumo da {visit.type === 'visita' ? 'visita' : 'prospecção'}</p>
+            {!editingSummary && (
+              <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full text-muted-foreground hover:text-foreground" onClick={handleStartEditSummary}>
+                <Pencil className="h-3 w-3" />
               </Button>
-            </div>
-          )}
-
-          {/* Reschedule/Cancel/Inconclusive reasons */}
-          {visit.status === 'Reagendada' && visit.rescheduleReason && (
-            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-sm">
-              <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-              <div>
-                <p className="text-xs font-medium text-warning">Motivo do reagendamento</p>
-                <p className="text-sm">{visit.rescheduleReason}</p>
+            )}
+          </div>
+          {editingSummary ? (
+            <div className="space-y-2">
+              <Textarea
+                value={summaryDraft}
+                onChange={e => setSummaryDraft(e.target.value)}
+                placeholder="Escreva o resumo..."
+                className="min-h-[60px] text-sm"
+                autoFocus
+              />
+              <div className="flex items-center gap-2 justify-end">
+                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingSummary(false)}>
+                  Cancelar
+                </Button>
+                <Button size="sm" className="h-7 text-xs gap-1" onClick={handleSaveSummary}>
+                  <Check className="h-3 w-3" /> Salvar
+                </Button>
               </div>
             </div>
-          )}
-
-          {visit.status === 'Cancelada' && visit.cancelReason && (
-            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-sm">
-              <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
-              <div>
-                <p className="text-xs font-medium text-destructive">Motivo do cancelamento</p>
-                <p className="text-sm">{visit.cancelReason}</p>
-              </div>
-            </div>
-          )}
-
-          {visit.status === 'Inconclusa' && visit.inconclusiveReason && (
-            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm">
-              <AlertTriangle className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Motivo do compromisso inconcluso</p>
-                <p className="text-sm">{visit.inconclusiveReason}</p>
-              </div>
-            </div>
-          )}
-
-          {/* ── Banks (editable) ── */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Landmark className="h-3.5 w-3.5" />
-                Bancos
-              </div>
-              <Popover open={banksPopoverOpen} onOpenChange={setBanksPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full text-muted-foreground hover:text-foreground">
-                    <Plus className="h-3.5 w-3.5" />
+          ) : (
+            visit.summary?.trim() ? (
+              <p className="text-sm bg-muted/30 rounded-lg p-3 cursor-pointer hover:bg-muted/50 transition-colors leading-relaxed" onClick={handleStartEditSummary}>{visit.summary}</p>
+            ) : (
+              !editingSummary && visit.status === 'Concluída' ? (
+                <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/30 border border-border/30">
+                  <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <p className="text-xs text-muted-foreground flex-1">Resumo ainda não preenchido</p>
+                  <Button variant="ghost" size="sm" className="h-6 text-xs px-2" onClick={handleStartEditSummary}>
+                    Preencher
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-48 p-1.5 max-h-52 overflow-y-auto" align="end">
-                  {availableBanks.length === 0 ? (
-                    <p className="text-xs text-muted-foreground text-center py-2">Todos os bancos já adicionados</p>
-                  ) : (
-                    availableBanks.map(b => (
-                      <button
-                        key={b.id}
-                        className="flex items-center w-full px-2 py-1.5 text-xs rounded-md hover:bg-accent text-left transition-colors"
-                        onClick={() => handleAddBank(b.name)}
-                      >
-                        {b.name}
-                      </button>
-                    ))
-                  )}
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {visit.banks.length === 0 ? (
-                <span className="text-xs text-muted-foreground italic">Nenhum banco selecionado</span>
+                </div>
               ) : (
-                visit.banks.map(b => (
-                  <Badge
-                    key={b}
-                    variant="outline"
-                    className="text-xs gap-1 cursor-pointer hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors group"
-                    onClick={() => handleRemoveBank(b)}
-                  >
-                    {b}
-                    <X className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </Badge>
-                ))
-              )}
+                <p className="text-xs text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors" onClick={handleStartEditSummary}>Clique para adicionar um resumo</p>
+              )
+            )
+          )}
+        </div>
+
+        {/* Reschedule/Cancel/Inconclusive reasons */}
+        {visit.status === 'Reagendada' && visit.rescheduleReason && (
+          <div className="mx-5 mb-3 flex items-start gap-2 p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-sm">
+            <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-medium text-warning">Motivo do reagendamento</p>
+              <p className="text-sm">{visit.rescheduleReason}</p>
             </div>
           </div>
+        )}
 
-          {/* ── Products (editable) ── */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Package className="h-3.5 w-3.5" />
-                Produtos
-              </div>
-              <Popover open={productsPopoverOpen} onOpenChange={setProductsPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full text-muted-foreground hover:text-foreground">
-                    <Plus className="h-3.5 w-3.5" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-56 p-1.5 max-h-52 overflow-y-auto" align="end">
-                  {availableProducts.length === 0 ? (
-                    <p className="text-xs text-muted-foreground text-center py-2">Todos os produtos já adicionados</p>
-                  ) : (
-                    availableProducts.map(p => (
-                      <button
-                        key={p}
-                        className="flex items-center w-full px-2 py-1.5 text-xs rounded-md hover:bg-accent text-left transition-colors"
-                        onClick={() => handleAddProduct(p)}
-                      >
-                        {p}
-                      </button>
-                    ))
-                  )}
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {visit.products.length === 0 ? (
-                <span className="text-xs text-muted-foreground italic">Nenhum produto selecionado</span>
-              ) : (
-                visit.products.map(p => (
-                  <Badge
-                    key={p}
-                    variant="outline"
-                    className="text-xs gap-1 cursor-pointer hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors group"
-                    onClick={() => handleRemoveProduct(p)}
-                  >
-                    {p}
-                    <X className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </Badge>
-                ))
-              )}
+        {visit.status === 'Cancelada' && visit.cancelReason && (
+          <div className="mx-5 mb-3 flex items-start gap-2 p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-sm">
+            <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-medium text-destructive">Motivo do cancelamento</p>
+              <p className="text-sm">{visit.cancelReason}</p>
             </div>
           </div>
+        )}
 
-          {/* Registration indicator */}
-          {hasActive && (
-            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-info/10 border border-info/20 text-sm">
-              <FileText className="h-4 w-4 text-info shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-info">Cadastro em andamento ({activeCount})</p>
-                {regs.map(r => (
-                  <div key={r.id} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Badge variant="outline" className="text-[9px]">{r.bank}</Badge>
-                    <span>{r.status}</span>
-                    <span>• {r.handlingWith}</span>
-                  </div>
-                ))}
-              </div>
+        {visit.status === 'Inconclusa' && visit.inconclusiveReason && (
+          <div className="mx-5 mb-3 flex items-start gap-2 p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm">
+            <AlertTriangle className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Motivo do compromisso inconcluso</p>
+              <p className="text-sm">{visit.inconclusiveReason}</p>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* ── Solicitar Cadastro ── */}
+        {/* ── Banks (editable) ── */}
+        <div className="px-5 pb-2 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Landmark className="h-3.5 w-3.5" />
+              Bancos
+            </div>
+            <Popover open={banksPopoverOpen} onOpenChange={setBanksPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon" className="h-6 w-6 rounded-full border-dashed border-muted-foreground/40 text-muted-foreground hover:text-foreground">
+                  <Plus className="h-3.5 w-3.5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-1.5 max-h-52 overflow-y-auto" align="end">
+                {availableBanks.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-2">Todos os bancos já adicionados</p>
+                ) : (
+                  availableBanks.map(b => (
+                    <button
+                      key={b.id}
+                      className="flex items-center w-full px-2 py-1.5 text-xs rounded-md hover:bg-accent text-left transition-colors"
+                      onClick={() => handleAddBank(b.name)}
+                    >
+                      {b.name}
+                    </button>
+                  ))
+                )}
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {visit.banks.length === 0 ? (
+              <span className="text-xs text-muted-foreground italic">Nenhum banco selecionado</span>
+            ) : (
+              visit.banks.map(b => (
+                <Badge
+                  key={b}
+                  variant="secondary"
+                  className="text-xs gap-1 cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors group px-2.5 py-1"
+                  onClick={() => handleRemoveBank(b)}
+                >
+                  {b}
+                  <X className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Badge>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* ── Products (editable) ── */}
+        <div className="px-5 pb-3 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Package className="h-3.5 w-3.5" />
+              Produtos
+            </div>
+            <Popover open={productsPopoverOpen} onOpenChange={setProductsPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon" className="h-6 w-6 rounded-full border-dashed border-muted-foreground/40 text-muted-foreground hover:text-foreground">
+                  <Plus className="h-3.5 w-3.5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-1.5 max-h-52 overflow-y-auto" align="end">
+                {availableProducts.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-2">Todos os produtos já adicionados</p>
+                ) : (
+                  availableProducts.map(p => (
+                    <button
+                      key={p}
+                      className="flex items-center w-full px-2 py-1.5 text-xs rounded-md hover:bg-accent text-left transition-colors"
+                      onClick={() => handleAddProduct(p)}
+                    >
+                      {p}
+                    </button>
+                  ))
+                )}
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {visit.products.length === 0 ? (
+              <span className="text-xs text-muted-foreground italic">Nenhum produto selecionado</span>
+            ) : (
+              visit.products.map(p => (
+                <Badge
+                  key={p}
+                  variant="secondary"
+                  className="text-xs gap-1 cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors group px-2.5 py-1"
+                  onClick={() => handleRemoveProduct(p)}
+                >
+                  {p}
+                  <X className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Badge>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* ── Solicitar Cadastro ── */}
+        <div className="px-5 pb-3 space-y-2.5">
           {showBankRegistration ? (
             <BankRegistrationFlow
               partnerId={visit.partnerId || `prospect-${visit.prospectCnpj}`}
@@ -531,52 +530,47 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
                 onClick={() => setShowBankRegistration(true)}
               >
                 <Landmark className="h-4 w-4" />
-                Solicitar Cadastro
+                Cadastrar Banco
               </Button>
             )
           )}
 
-          {/* ── Summary (editable) ── */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">Resumo da visita</p>
-              {!editingSummary && (
-                <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full text-muted-foreground hover:text-foreground" onClick={handleStartEditSummary}>
-                  <Pencil className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
-            {editingSummary ? (
-              <div className="space-y-2">
-                <Textarea
-                  value={summaryDraft}
-                  onChange={e => setSummaryDraft(e.target.value)}
-                  placeholder="Escreva o resumo da visita..."
-                  className="min-h-[60px] text-sm"
-                  autoFocus
-                />
-                <div className="flex items-center gap-2 justify-end">
-                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingSummary(false)}>
-                    Cancelar
-                  </Button>
-                  <Button size="sm" className="h-7 text-xs gap-1" onClick={handleSaveSummary}>
-                    <Check className="h-3 w-3" /> Salvar
-                  </Button>
-                </div>
+          {/* Registration indicator */}
+          {hasActive && (
+            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-info/5 border border-info/15">
+              <FileText className="h-4 w-4 text-info shrink-0 mt-0.5" />
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-info">Cadastro em andamento ({activeCount})</p>
+                {regs.map(r => (
+                  <div key={r.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant="secondary" className="text-[10px] px-1.5">{r.bank}</Badge>
+                    <span>{r.status}</span>
+                    <span>• {r.handlingWith}</span>
+                  </div>
+                ))}
               </div>
-            ) : (
-              visit.summary?.trim() ? (
-                <p className="text-sm bg-muted/50 rounded-md p-2 cursor-pointer hover:bg-muted/70 transition-colors" onClick={handleStartEditSummary}>{visit.summary}</p>
-              ) : (
-                <p className="text-xs text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors" onClick={handleStartEditSummary}>Clique para adicionar um resumo</p>
-              )
+            </div>
+          )}
+        </div>
+
+        <Separator className="opacity-50" />
+
+        {/* ── Comments ── */}
+        <div className="px-5 py-3 space-y-3">
+          <div ref={commentsRef}>
+            {onAddComment && onToggleTask && (
+              <AgendaComments
+                comments={visit.comments || []}
+                onAddComment={(text, type, parentId) => onAddComment(visit.id, text, type, parentId)}
+                onToggleTask={(commentId) => onToggleTask(visit.id, commentId)}
+              />
             )}
           </div>
 
           {/* Participants */}
           {visit.invitedUsers && visit.invitedUsers.length > 0 && (
             <>
-              <Separator />
+              <Separator className="opacity-50" />
               <div className="space-y-2">
                 <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                   <Users className="h-3.5 w-3.5" />
@@ -626,22 +620,10 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             </div>
           )}
 
-          {/* Comments */}
-          <Separator />
-          <div ref={commentsRef}>
-            {onAddComment && onToggleTask && (
-              <AgendaComments
-                comments={visit.comments || []}
-                onAddComment={(text, type, parentId) => onAddComment(visit.id, text, type, parentId)}
-                onToggleTask={(commentId) => onToggleTask(visit.id, commentId)}
-              />
-            )}
-          </div>
-
           {/* Quick actions for completed visits */}
           {visit.status === 'Concluída' && canWrite('agenda.create') && onScheduleFollowUp && (
             <>
-              <Separator />
+              <Separator className="opacity-50" />
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => onScheduleFollowUp(visit.partnerId)}>
                   <CalendarPlus className="h-3.5 w-3.5" /> Agendar follow-up
