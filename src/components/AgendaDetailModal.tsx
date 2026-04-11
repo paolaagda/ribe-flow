@@ -368,11 +368,11 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
                   ) : (
                     availableProducts.map(p => (
                       <button
-                        key={p.id}
+                        key={p}
                         className="flex items-center w-full px-2 py-1.5 text-xs rounded-md hover:bg-accent text-left transition-colors"
-                        onClick={() => handleAddProduct(p.label)}
+                        onClick={() => handleAddProduct(p)}
                       >
-                        {p.label}
+                        {p}
                       </button>
                     ))
                   )}
