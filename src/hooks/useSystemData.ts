@@ -9,12 +9,13 @@ export interface SystemItem {
   active: boolean;
 }
 
-export type SystemCategory = 'products' | 'rescheduleReasons' | 'cancelReasons' | 'storeStructures' | 'periods' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers' | 'inviteRejectionReasons' | 'registrationRejectionReasons' | 'completionReasons_visita_presencial' | 'completionReasons_visita_remota' | 'completionReasons_prospeccao_presencial' | 'completionReasons_prospeccao_remota';
+export type SystemCategory = 'products' | 'rescheduleReasons' | 'cancelReasons' | 'inconclusiveReasons' | 'storeStructures' | 'periods' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers' | 'inviteRejectionReasons' | 'registrationRejectionReasons' | 'completionReasons_visita_presencial' | 'completionReasons_visita_remota' | 'completionReasons_prospeccao_presencial' | 'completionReasons_prospeccao_remota';
 
 const categoryLabels: Record<SystemCategory, string> = {
   products: 'Produtos',
   rescheduleReasons: 'Justificativas de Reagendamento',
   cancelReasons: 'Justificativas de Cancelamento',
+  inconclusiveReasons: 'Justificativas de Agenda Inconclusa',
   storeStructures: 'Tipos de Loja',
   periods: 'Períodos da Agenda',
   registrationStatuses: 'Status de Cadastro',
@@ -36,6 +37,16 @@ const initialData: Record<SystemCategory, SystemItem[]> = {
   products: buildInitial(PRODUCTS),
   rescheduleReasons: buildInitial(RESCHEDULE_REASONS),
   cancelReasons: buildInitial(CANCEL_REASONS),
+  inconclusiveReasons: buildInitial([
+    'Parceiro não pôde atender',
+    'Responsável ausente',
+    'Loja fechada',
+    'Problema de conexão/chamada',
+    'Parceiro sem interesse no momento',
+    'Não conseguiu contato com o decisor',
+    'Prospecção sem avanço',
+    'Parceiro pediu retorno futuro',
+  ]),
   storeStructures: buildInitial(STORE_STRUCTURES),
   periods: buildInitial(['Manhã', 'Tarde']),
   registrationStatuses: buildInitial(REGISTRATION_STATUSES),

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -91,7 +92,6 @@ import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from "@/li
 import { useLastVisitPotential } from "@/hooks/useLastVisitPotential";
 import { AnimatePresence, motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -158,7 +158,9 @@ export default function AgendaPage() {
   const [editingVisit, setEditingVisit] = useState<Visit | null>(null);
   const [hasDragged, setHasDragged] = useState(false);
   const [pendingDrop, setPendingDrop] = useState<{ visitId: string; newDate: string; day: Date } | null>(null);
-  const [pendingFormStatus, setPendingFormStatus] = useState<"Reagendada" | "Cancelada" | null>(null);
+  const [pendingFormStatus, setPendingFormStatus] = useState<"Reagendada" | "Cancelada" | "Inconclusa" | null>(null);
+  const [showFinalStatusConfirm, setShowFinalStatusConfirm] = useState(false);
+  
   const [showJustificationModal, setShowJustificationModal] = useState(false);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [showTodayPanel, setShowTodayPanel] = useState(false);
@@ -205,8 +207,7 @@ export default function AgendaPage() {
     invitedUserIds: [] as string[],
     rescheduleReason: "",
     cancelReason: "",
-    completionOutcome: "" as "" | "completed_as_planned" | "completed_without_success",
-    completionReasonCode: "",
+    inconclusiveReason: "",
   });
 
   const resetForm = () => {
@@ -232,8 +233,7 @@ export default function AgendaPage() {
       invitedUserIds: [],
       rescheduleReason: "",
       cancelReason: "",
-      completionOutcome: "",
-      completionReasonCode: "",
+      inconclusiveReason: "",
     });
     setFormStep(0);
     setShowBankRegistration(false);
@@ -434,12 +434,14 @@ export default function AgendaPage() {
       setPendingDrop(null);
     } else if (pendingFormStatus) {
       // Form status change
-      const reasonField = pendingFormStatus === "Reagendada" ? "rescheduleReason" : "cancelReason";
+      const reasonField = pendingFormStatus === "Reagendada" ? "rescheduleReason" : pendingFormStatus === "Inconclusa" ? "inconclusiveReason" : "cancelReason";
       setFormData((prev) => ({ ...prev, status: pendingFormStatus as VisitStatus, [reasonField]: reason }));
       const msg =
         pendingFormStatus === "Reagendada"
           ? "Reagendamento registrado com sucesso"
-          : "Cancelamento registrado com sucesso";
+          : pendingFormStatus === "Inconclusa"
+            ? "Agenda marcada como inconclusa"
+            : "Cancelamento registrado com sucesso";
       toast({ title: msg });
     }
     setPendingFormStatus(null);
@@ -500,6 +502,8 @@ export default function AgendaPage() {
     return true;
   }, [formData]);
 
+  const FINAL_STATUSES: VisitStatus[] = ["Concluída", "Cancelada", "Inconclusa"];
+
   const handleSave = () => {
     if (!formData.date || !isValid(parseISO(formData.date))) {
       toast({
@@ -509,15 +513,14 @@ export default function AgendaPage() {
       });
       return;
     }
-    if (formData.status === "Concluída") {
-      if (!formData.completionOutcome) {
-        toast({ title: "Resultado obrigatório", description: "Informe se o objetivo da agenda foi alcançado.", variant: "destructive" });
-        return;
-      }
-      if (formData.completionOutcome === "completed_without_success" && !formData.completionReasonCode) {
-        toast({ title: "Justificativa obrigatória", description: "Selecione o motivo pelo qual o objetivo não foi alcançado.", variant: "destructive" });
-        return;
-      }
+    if (formData.status === "Inconclusa" && !formData.inconclusiveReason) {
+      toast({ title: "Justificativa obrigatória", description: "Selecione o motivo da agenda inconclusa.", variant: "destructive" });
+      return;
+    }
+    // Comercial: confirm final status before saving
+    if (user?.role === "comercial" && FINAL_STATUSES.includes(formData.status) && !showFinalStatusConfirm) {
+      setShowFinalStatusConfirm(true);
+      return;
     }
     const invitedUsers = formData.invitedUserIds.map((uid) => ({ userId: uid, status: "pending" as const }));
 
@@ -555,8 +558,9 @@ export default function AgendaPage() {
                 prospectEmail: formData.prospectEmail || undefined,
                 rescheduleReason: formData.rescheduleReason || undefined,
                 cancelReason: formData.cancelReason || undefined,
+                inconclusiveReason: formData.inconclusiveReason || undefined,
                 statusChangedAt:
-                  formData.status === "Reagendada" || formData.status === "Cancelada"
+                  ["Reagendada", "Cancelada", "Concluída", "Inconclusa"].includes(formData.status)
                     ? new Date().toISOString()
                     : v.statusChangedAt,
                 prospectPartner: formData.prospectPartner,
@@ -564,8 +568,6 @@ export default function AgendaPage() {
                 prospectAddress: formData.prospectAddress,
                 prospectPhone: formData.prospectPhone,
                 prospectContact: formData.prospectContact,
-                completionOutcome: formData.status === "Concluída" ? (formData.completionOutcome as Visit['completionOutcome']) || undefined : undefined,
-                completionReasonCode: formData.status === "Concluída" && formData.completionOutcome === "completed_without_success" ? formData.completionReasonCode || undefined : undefined,
                 invitedUsers: [
                   ...(v.invitedUsers || []),
                   ...invitedUsers.filter((iu) => !v.invitedUsers?.some((e) => e.userId === iu.userId)),
@@ -598,13 +600,12 @@ export default function AgendaPage() {
         prospectEmail: formData.prospectEmail || undefined,
         rescheduleReason: formData.rescheduleReason || undefined,
         cancelReason: formData.cancelReason || undefined,
+        inconclusiveReason: formData.inconclusiveReason || undefined,
         prospectPartner: formData.prospectPartner,
         prospectCnpj: formData.prospectCnpj,
         prospectAddress: formData.prospectAddress,
         prospectPhone: formData.prospectPhone,
         prospectContact: formData.prospectContact,
-        completionOutcome: formData.status === "Concluída" ? (formData.completionOutcome as Visit['completionOutcome']) || undefined : undefined,
-        completionReasonCode: formData.status === "Concluída" && formData.completionOutcome === "completed_without_success" ? formData.completionReasonCode || undefined : undefined,
         comments: [...pendingAutoTasks],
       };
       setVisits((prev) => [...prev, newVisit]);
@@ -678,8 +679,7 @@ export default function AgendaPage() {
       invitedUserIds: visit.invitedUsers?.map((iu) => iu.userId) || [],
       rescheduleReason: visit.rescheduleReason || "",
       cancelReason: visit.cancelReason || "",
-      completionOutcome: visit.completionOutcome || "",
-      completionReasonCode: visit.completionReasonCode || "",
+      inconclusiveReason: visit.inconclusiveReason || "",
     });
     setFormStep(0);
     setShowForm(true);
@@ -907,6 +907,7 @@ export default function AgendaPage() {
                     <SelectItem value="Concluída">Concluída</SelectItem>
                     <SelectItem value="Reagendada">Reagendada</SelectItem>
                     <SelectItem value="Cancelada">Cancelada</SelectItem>
+                    <SelectItem value="Inconclusa">Inconclusa</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={filterType} onValueChange={setFilterType}>
@@ -1849,28 +1850,50 @@ export default function AgendaPage() {
                   <>
                     <div className="space-y-2">
                       <Label>Status</Label>
-                      <Select
-                        value={formData.status}
-                        onValueChange={(v) => {
-                          const newStatus = v as VisitStatus;
-                          if (newStatus === "Reagendada" || newStatus === "Cancelada") {
-                            setPendingFormStatus(newStatus);
-                            setShowJustificationModal(true);
-                          } else {
-                            setFormData({ ...formData, status: newStatus, rescheduleReason: "", cancelReason: "", completionOutcome: newStatus === "Concluída" ? formData.completionOutcome : "", completionReasonCode: newStatus === "Concluída" ? formData.completionReasonCode : "" });
-                          }
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Planejada">Planejada</SelectItem>
-                          <SelectItem value="Concluída">Concluída</SelectItem>
-                          <SelectItem value="Reagendada">Reagendada</SelectItem>
-                          <SelectItem value="Cancelada">Cancelada</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      {(() => {
+                        const FINAL_STATUSES: VisitStatus[] = ["Concluída", "Cancelada", "Inconclusa"];
+                        const isComercial = user?.role === "comercial";
+                        const isStatusLocked = isComercial && editingVisit && FINAL_STATUSES.includes(editingVisit.status);
+                        
+                        if (isStatusLocked) {
+                          return (
+                            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/50 border border-border/50">
+                              <Badge variant="outline" className={cn("text-xs capitalize", statusBgClasses[formData.status])}>
+                                {formData.status}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">Status final — não pode ser alterado</span>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <Select
+                            value={formData.status}
+                            onValueChange={(v) => {
+                              const newStatus = v as VisitStatus;
+                              if (newStatus === "Reagendada" || newStatus === "Cancelada" || newStatus === "Inconclusa") {
+                                setPendingFormStatus(newStatus);
+                                setShowJustificationModal(true);
+                              } else {
+                                setFormData({ ...formData, status: newStatus, rescheduleReason: "", cancelReason: "", inconclusiveReason: "" });
+                              }
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Planejada">Planejada</SelectItem>
+                              <SelectItem value="Concluída">Concluída</SelectItem>
+                              <SelectItem value="Reagendada">Reagendada</SelectItem>
+                              <SelectItem value="Cancelada">Cancelada</SelectItem>
+                              {formData.type === "prospecção" && (
+                                <SelectItem value="Inconclusa">Inconclusa</SelectItem>
+                              )}
+                            </SelectContent>
+                          </Select>
+                        );
+                      })()}
                     </div>
 
                     {/* Display selected reason */}
@@ -1895,6 +1918,17 @@ export default function AgendaPage() {
                         >
                           <p className="text-xs font-medium text-destructive">Motivo do cancelamento</p>
                           <p className="text-sm">{formData.cancelReason}</p>
+                        </motion.div>
+                      )}
+                      {formData.status === "Inconclusa" && formData.inconclusiveReason && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm overflow-hidden"
+                        >
+                          <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Motivo da agenda inconclusa</p>
+                          <p className="text-sm">{formData.inconclusiveReason}</p>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -1949,61 +1983,7 @@ export default function AgendaPage() {
                   />
                 </div>
 
-                {/* Resultado da agenda — only when status is Concluída */}
-                {formData.status === "Concluída" && (
-                  <div className="space-y-3 p-3 rounded-lg border border-border/50 bg-muted/20">
-                    <Label className="text-sm font-semibold">Resultado da agenda</Label>
-                    <p className="text-xs text-muted-foreground">O objetivo da agenda foi alcançado?</p>
-                    <RadioGroup
-                      value={formData.completionOutcome}
-                      onValueChange={(v) => setFormData({ ...formData, completionOutcome: v as typeof formData.completionOutcome, completionReasonCode: "" })}
-                      className="flex gap-4"
-                    >
-                      <div className="flex items-center gap-2">
-                        <RadioGroupItem value="completed_as_planned" id="outcome-yes" />
-                        <Label htmlFor="outcome-yes" className="text-sm cursor-pointer">Sim</Label>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <RadioGroupItem value="completed_without_success" id="outcome-no" />
-                        <Label htmlFor="outcome-no" className="text-sm cursor-pointer">Não</Label>
-                      </div>
-                    </RadioGroup>
 
-                    <AnimatePresence>
-                      {formData.completionOutcome === "completed_without_success" && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="space-y-2 overflow-hidden"
-                        >
-                          <p className="text-xs text-muted-foreground">
-                            A agenda foi concluída operacionalmente, mas o objetivo planejado não foi alcançado.
-                          </p>
-                          <Select
-                            value={formData.completionReasonCode}
-                            onValueChange={(v) => setFormData({ ...formData, completionReasonCode: v })}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o motivo..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {(() => {
-                                const typeKey = formData.type === "prospecção" ? "prospeccao" : "visita";
-                                const medioKey = formData.medio === "remoto" ? "remota" : "presencial";
-                                const categoryKey = `completionReasons_${typeKey}_${medioKey}` as import('@/hooks/useSystemData').SystemCategory;
-                                const reasons = getActiveItems(categoryKey);
-                                return reasons.map((r) => (
-                                  <SelectItem key={r} value={r}>{r}</SelectItem>
-                                ));
-                              })()}
-                            </SelectContent>
-                          </Select>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                )}
 
                 {/* Bank Registrations added */}
                 {bankRegistrations.length > 0 && (
@@ -2211,6 +2191,27 @@ export default function AgendaPage() {
         onOpenChange={setShowInviteRejectionModal}
         onConfirm={handleConfirmRejectVisitInvite}
       />
+
+      {/* Final status confirmation for Comercial */}
+      <AlertDialog open={showFinalStatusConfirm} onOpenChange={setShowFinalStatusConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar alteração de status</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ao definir este status como final, ele não poderá mais ser alterado pelo perfil Comercial. Deseja continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowFinalStatusConfirm(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              setShowFinalStatusConfirm(false);
+              handleSave();
+            }}>
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageTransition>
   );
 }

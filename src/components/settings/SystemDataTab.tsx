@@ -14,6 +14,7 @@ const categoryIcons: Record<string, React.ElementType> = {
   products: Package,
   rescheduleReasons: AlertTriangle,
   cancelReasons: XCircle,
+  inconclusiveReasons: AlertTriangle,
   storeStructures: Store,
   periods: Clock,
   registrationStatuses: FileCheck,
@@ -37,7 +38,7 @@ const sections: CategorySection[] = [
   {
     title: 'Agenda',
     description: 'Dados utilizados nos formulários e filtros da página Agenda.',
-    categories: ['periods', 'rescheduleReasons', 'cancelReasons', 'inviteRejectionReasons'],
+    categories: ['periods', 'rescheduleReasons', 'cancelReasons', 'inconclusiveReasons', 'inviteRejectionReasons'],
   },
   {
     title: 'Resultado da Agenda',

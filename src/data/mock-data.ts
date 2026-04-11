@@ -14,7 +14,7 @@ export interface User {
   active: boolean;
 }
 
-export type VisitStatus = 'Planejada' | 'Concluída' | 'Reagendada' | 'Cancelada';
+export type VisitStatus = 'Planejada' | 'Concluída' | 'Reagendada' | 'Cancelada' | 'Inconclusa';
 export type VisitType = 'visita' | 'prospecção';
 export type VisitMedio = 'presencial' | 'remoto';
 
@@ -100,6 +100,7 @@ export interface Visit {
   prospectEmail?: string;
   rescheduleReason?: string;
   cancelReason?: string;
+  inconclusiveReason?: string;
   statusChangedAt?: string;
   comments: VisitComment[];
   prospectPartner?: string;
@@ -398,6 +399,7 @@ export const statusColors: Record<VisitStatus, string> = {
   'Concluída': 'hsl(142 76% 36%)',
   'Reagendada': 'hsl(45 93% 47%)',
   'Cancelada': 'hsl(0 84% 60%)',
+  'Inconclusa': 'hsl(280 60% 55%)',
 };
 
 export const statusBgClasses: Record<VisitStatus, string> = {
@@ -405,6 +407,7 @@ export const statusBgClasses: Record<VisitStatus, string> = {
   'Concluída': 'bg-success/10 text-success border-success/20',
   'Reagendada': 'bg-warning/10 text-warning border-warning/20',
   'Cancelada': 'bg-destructive/10 text-destructive border-destructive/20',
+  'Inconclusa': 'bg-purple-500/10 text-purple-600 border-purple-500/20 dark:text-purple-400',
 };
 
 export function getPartnerById(id: string) {
