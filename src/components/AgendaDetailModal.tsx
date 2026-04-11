@@ -14,7 +14,7 @@ import { useSystemData } from '@/hooks/useSystemData';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus, FileText, CalendarPlus, ListTodo, Plus } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus, FileText, CalendarPlus, Plus } from 'lucide-react';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
@@ -639,23 +639,12 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
           </div>
 
           {/* Quick actions for completed visits */}
-          {visit.status === 'Concluída' && canWrite('agenda.create') && (onScheduleFollowUp || onToggleTask) && (
+          {visit.status === 'Concluída' && canWrite('agenda.create') && onScheduleFollowUp && (
             <>
               <Separator />
               <div className="flex items-center gap-2">
-                {onScheduleFollowUp && (
-                  <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => onScheduleFollowUp(visit.partnerId)}>
-                    <CalendarPlus className="h-3.5 w-3.5" /> Agendar follow-up
-                  </Button>
-                )}
-                <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => {
-                  commentsRef.current?.scrollIntoView({ behavior: 'smooth' });
-                  setTimeout(() => {
-                    const taskInput = commentsRef.current?.querySelector('input, textarea') as HTMLElement;
-                    taskInput?.focus();
-                  }, 400);
-                }}>
-                  <ListTodo className="h-3.5 w-3.5" /> Nova tarefa
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => onScheduleFollowUp(visit.partnerId)}>
+                  <CalendarPlus className="h-3.5 w-3.5" /> Agendar follow-up
                 </Button>
               </div>
             </>

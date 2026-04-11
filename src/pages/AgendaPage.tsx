@@ -2017,6 +2017,7 @@ export default function AgendaPage() {
         onAddComment={handleAddComment}
         onToggleTask={handleToggleTask}
         onScheduleFollowUp={(partnerId) => {
+          const currentVisit = selectedVisit;
           setShowDetail(false);
           const tomorrow = new Date();
           tomorrow.setDate(tomorrow.getDate() + 1);
@@ -2026,8 +2027,17 @@ export default function AgendaPage() {
             ...prev,
             partnerId,
             date: format(tomorrow, "yyyy-MM-dd"),
-            type: "visita",
-            structures: partner?.structures || [],
+            type: currentVisit?.type || "visita",
+            medio: currentVisit?.medio || "presencial",
+            structures: partner?.structures || currentVisit?.structures || [],
+            banks: currentVisit?.banks || [],
+            products: currentVisit?.products || [],
+            potentialValue: currentVisit?.potentialValue ? formatCentavos(currentVisit.potentialValue) : "",
+            prospectPartner: currentVisit?.prospectPartner || "",
+            prospectCnpj: currentVisit?.prospectCnpj || "",
+            prospectAddress: currentVisit?.prospectAddress || "",
+            prospectPhone: currentVisit?.prospectPhone || "",
+            prospectContact: currentVisit?.prospectContact || "",
           }));
           setShowForm(true);
         }}
