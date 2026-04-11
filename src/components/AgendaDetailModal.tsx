@@ -514,6 +514,28 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             </div>
           )}
 
+          {/* ── Solicitar Cadastro ── */}
+          {showBankRegistration ? (
+            <BankRegistrationFlow
+              partnerId={visit.partnerId || `prospect-${visit.prospectCnpj}`}
+              partnerName={partner?.name || visit.prospectPartner || ''}
+              onComplete={handleBankRegistrationComplete}
+              onCancel={() => setShowBankRegistration(false)}
+            />
+          ) : (
+            (visit.partnerId || visit.prospectPartner) && canWrite('agenda.create') && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full gap-2 border-dashed border-primary/40 text-primary hover:bg-primary/5"
+                onClick={() => setShowBankRegistration(true)}
+              >
+                <Landmark className="h-4 w-4" />
+                Solicitar Cadastro
+              </Button>
+            )
+          )}
+
           {/* ── Summary (editable) ── */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
