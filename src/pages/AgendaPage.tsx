@@ -549,8 +549,9 @@ export default function AgendaPage() {
                 prospectEmail: formData.prospectEmail || undefined,
                 rescheduleReason: formData.rescheduleReason || undefined,
                 cancelReason: formData.cancelReason || undefined,
+                inconclusiveReason: formData.inconclusiveReason || undefined,
                 statusChangedAt:
-                  formData.status === "Reagendada" || formData.status === "Cancelada"
+                  ["Reagendada", "Cancelada", "Concluída", "Inconclusa"].includes(formData.status)
                     ? new Date().toISOString()
                     : v.statusChangedAt,
                 prospectPartner: formData.prospectPartner,
@@ -558,8 +559,6 @@ export default function AgendaPage() {
                 prospectAddress: formData.prospectAddress,
                 prospectPhone: formData.prospectPhone,
                 prospectContact: formData.prospectContact,
-                completionOutcome: formData.status === "Concluída" ? (formData.completionOutcome as Visit['completionOutcome']) || undefined : undefined,
-                completionReasonCode: formData.status === "Concluída" && formData.completionOutcome === "completed_without_success" ? formData.completionReasonCode || undefined : undefined,
                 invitedUsers: [
                   ...(v.invitedUsers || []),
                   ...invitedUsers.filter((iu) => !v.invitedUsers?.some((e) => e.userId === iu.userId)),
@@ -592,13 +591,12 @@ export default function AgendaPage() {
         prospectEmail: formData.prospectEmail || undefined,
         rescheduleReason: formData.rescheduleReason || undefined,
         cancelReason: formData.cancelReason || undefined,
+        inconclusiveReason: formData.inconclusiveReason || undefined,
         prospectPartner: formData.prospectPartner,
         prospectCnpj: formData.prospectCnpj,
         prospectAddress: formData.prospectAddress,
         prospectPhone: formData.prospectPhone,
         prospectContact: formData.prospectContact,
-        completionOutcome: formData.status === "Concluída" ? (formData.completionOutcome as Visit['completionOutcome']) || undefined : undefined,
-        completionReasonCode: formData.status === "Concluída" && formData.completionOutcome === "completed_without_success" ? formData.completionReasonCode || undefined : undefined,
         comments: [...pendingAutoTasks],
       };
       setVisits((prev) => [...prev, newVisit]);
@@ -672,8 +670,7 @@ export default function AgendaPage() {
       invitedUserIds: visit.invitedUsers?.map((iu) => iu.userId) || [],
       rescheduleReason: visit.rescheduleReason || "",
       cancelReason: visit.cancelReason || "",
-      completionOutcome: visit.completionOutcome || "",
-      completionReasonCode: visit.completionReasonCode || "",
+      inconclusiveReason: visit.inconclusiveReason || "",
     });
     setFormStep(0);
     setShowForm(true);
