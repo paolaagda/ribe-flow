@@ -509,15 +509,9 @@ export default function AgendaPage() {
       });
       return;
     }
-    if (formData.status === "Concluída") {
-      if (!formData.completionOutcome) {
-        toast({ title: "Resultado obrigatório", description: "Informe se o objetivo da agenda foi alcançado.", variant: "destructive" });
-        return;
-      }
-      if (formData.completionOutcome === "completed_without_success" && !formData.completionReasonCode) {
-        toast({ title: "Justificativa obrigatória", description: "Selecione o motivo pelo qual o objetivo não foi alcançado.", variant: "destructive" });
-        return;
-      }
+    if (formData.status === "Inconclusa" && !formData.inconclusiveReason) {
+      toast({ title: "Justificativa obrigatória", description: "Selecione o motivo da agenda inconclusa.", variant: "destructive" });
+      return;
     }
     const invitedUsers = formData.invitedUserIds.map((uid) => ({ userId: uid, status: "pending" as const }));
 
