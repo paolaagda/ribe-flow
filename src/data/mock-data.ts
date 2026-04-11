@@ -100,6 +100,7 @@ export interface Visit {
   prospectEmail?: string;
   rescheduleReason?: string;
   cancelReason?: string;
+  inconclusiveReason?: string;
   statusChangedAt?: string;
   comments: VisitComment[];
   prospectPartner?: string;
