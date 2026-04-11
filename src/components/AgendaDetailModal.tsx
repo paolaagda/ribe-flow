@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Visit, getUserById, statusBgClasses, cargoLabels } from '@/data/mock-data';
+import { Visit, VisitComment, getUserById, statusBgClasses, cargoLabels } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useVisits } from '@/hooks/useVisits';
 import { useInfoData } from '@/hooks/useInfoData';
@@ -24,6 +24,12 @@ import AgendaComments from '@/components/agenda/AgendaComments';
 import { useRegistrationBadge } from '@/hooks/useRegistrationBadge';
 import { useNavigate } from 'react-router-dom';
 import { Textarea } from '@/components/ui/textarea';
+import BankRegistrationFlow from '@/components/agenda/BankRegistrationFlow';
+import { useRegistrations } from '@/hooks/useRegistrations';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { Team, initialTeams } from '@/data/teams';
+import { useToast } from '@/hooks/use-toast';
 
 interface AgendaDetailModalProps {
   visit: Visit | null;
