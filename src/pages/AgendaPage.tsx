@@ -81,7 +81,7 @@ import InviteRejectionModal from "@/components/agenda/InviteRejectionModal";
 
 import InlineTasksPanel from "@/components/agenda/InlineTasksPanel";
 import AgendaMap from "@/components/agenda/AgendaMap";
-import BankRegistrationFlow from "@/components/agenda/BankRegistrationFlow";
+// BankRegistrationFlow moved to AgendaDetailModal
 import SmartInsights from "@/components/shared/SmartInsights";
 import AnimatedFilterContent from "@/components/shared/AnimatedFilterContent";
 import { usePermission } from "@/hooks/usePermission";
@@ -169,9 +169,7 @@ export default function AgendaPage() {
   const [showTasksPanel, setShowTasksPanel] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
-  const [showBankRegistration, setShowBankRegistration] = useState(false);
-  const [bankRegistrations, setBankRegistrations] = useState<Array<{ bankName: string; pendingDocs: string[] }>>([]);
-  const [pendingAutoTasks, setPendingAutoTasks] = useState<VisitComment[]>([]);
+  // Bank registration flow moved to modal
 
   // (New visit from partner detail is now handled locally in PartnerDetailView)
 
