@@ -109,7 +109,7 @@ export default function AgendaPage() {
   const { getActiveItems } = useSystemData();
   const { getActiveBanks } = useInfoData();
   const infoBankNames = getActiveBanks().map((b) => b.name);
-  const { registrations, addRegistration } = useRegistrations();
+  const { registrations } = useRegistrations();
   const { addLog } = useAuditLog();
 
   const [teams] = useLocalStorage<Team[]>("ribercred_teams", initialTeams);
