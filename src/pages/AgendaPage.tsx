@@ -2196,18 +2196,22 @@ export default function AgendaPage() {
       <AlertDialog open={showFinalStatusConfirm} onOpenChange={setShowFinalStatusConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar alteração de status</AlertDialogTitle>
+            <AlertDialogTitle>
+              {formData.status === 'Cancelada' && 'Tem certeza que quer cancelar?'}
+              {formData.status === 'Concluída' && 'Tem certeza que quer concluir?'}
+              {formData.status === 'Inconclusa' && 'Tem certeza que quer inconcluir?'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Ao definir este status como final, ele não poderá mais ser alterado pelo perfil Comercial. Deseja continuar?
+              Essa ação não poderá ser revertida.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowFinalStatusConfirm(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setShowFinalStatusConfirm(false)}>Recusar</AlertDialogCancel>
             <AlertDialogAction onClick={() => {
               setShowFinalStatusConfirm(false);
               handleSave();
             }}>
-              Confirmar
+              Aceitar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
