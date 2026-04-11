@@ -75,7 +75,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
       <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <span>Detalhes da Agenda</span>
+            <span>Detalhes do Compromisso</span>
             <Badge variant="outline" className={cn('text-[10px] capitalize', statusBgClasses[visit.status])}>
               {visit.status}
             </Badge>
@@ -269,7 +269,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             <div className="flex items-start gap-2 p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm">
               <AlertTriangle className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Motivo da agenda inconclusa</p>
+                <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Motivo do compromisso inconcluso</p>
                 <p className="text-sm">{visit.inconclusiveReason}</p>
               </div>
             </div>
@@ -366,7 +366,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
         <div className="flex items-center justify-between pt-2">
           {myInvite?.status === 'accepted' && !isResponsibleCommercial && onLeaveVisit && (
             <Button variant="ghost" size="sm" className="gap-1 text-destructive hover:text-destructive" onClick={() => { onLeaveVisit(visit.id); onOpenChange(false); }}>
-              <LogOut className="h-3.5 w-3.5" /> Sair da agenda
+              <LogOut className="h-3.5 w-3.5" /> Sair do compromisso
             </Button>
           )}
           <div className="flex-1" />
@@ -394,7 +394,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             )}
             {canEditVisit && (
               <Button onClick={() => onEdit(visit)} className="gap-1.5">
-                <Pencil className="h-3.5 w-3.5" /> Editar agenda
+                <Pencil className="h-3.5 w-3.5" /> Editar compromisso
               </Button>
             )}
           </div>

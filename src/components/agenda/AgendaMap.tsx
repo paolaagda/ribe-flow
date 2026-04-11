@@ -56,12 +56,12 @@ export default function AgendaMap({ visits, getPartnerById }: AgendaMapProps) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <MapPin className="h-4 w-4" /> Mapa de Agendas
+            <MapPin className="h-4 w-4" /> Mapa de Compromissos
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-10 text-center">
           <Navigation className="h-12 w-12 text-muted-foreground/30 mb-3" />
-          <p className="text-muted-foreground text-sm">Nenhuma agenda com localização</p>
+          <p className="text-muted-foreground text-sm">Nenhum compromisso com localização</p>
         </CardContent>
       </Card>
     );
@@ -71,8 +71,8 @@ export default function AgendaMap({ visits, getPartnerById }: AgendaMapProps) {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
-          <MapPin className="h-4 w-4" /> Mapa de Agendas
-          <span className="text-xs font-normal text-muted-foreground ml-auto">{visitPartners.length} agendas • {points.length} locais</span>
+            <MapPin className="h-4 w-4" /> Mapa de Compromissos
+          <span className="text-xs font-normal text-muted-foreground ml-auto">{visitPartners.length} compromissos • {points.length} locais</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -105,7 +105,7 @@ export default function AgendaMap({ visits, getPartnerById }: AgendaMapProps) {
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="font-medium text-xs">{p.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{p.city} • {p.count} agenda{p.count > 1 ? 's' : ''}</p>
+                  <p className="text-[10px] text-muted-foreground">{p.city} • {p.count} compromisso{p.count > 1 ? 's' : ''}</p>
                 </TooltipContent>
               </Tooltip>
             ))}
@@ -114,7 +114,7 @@ export default function AgendaMap({ visits, getPartnerById }: AgendaMapProps) {
 
         <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1"><Route className="h-3 w-3" />{points.length} locais</span>
-          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{visitPartners.length} agendas mapeadas</span>
+          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{visitPartners.length} compromissos mapeados</span>
         </div>
       </CardContent>
     </Card>

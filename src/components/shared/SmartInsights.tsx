@@ -135,7 +135,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
       });
       if (periodVisitsAB.length > 0) {
         const concludedAB = periodVisitsAB.filter(v => v.status === 'Concluída').length;
-        result.push({ id: 'agenda_visitas_ab_periodo', icon: <Star className="h-3 w-3 shrink-0" />, text: `${concludedAB} de ${periodVisitsAB.length} agendas A/B concluídas no período`, variant: concludedAB >= periodVisitsAB.length * 0.5 ? 'success' : 'info' });
+        result.push({ id: 'agenda_visitas_ab_periodo', icon: <Star className="h-3 w-3 shrink-0" />, text: `${concludedAB} de ${periodVisitsAB.length} compromissos A/B concluídos no período`, variant: concludedAB >= periodVisitsAB.length * 0.5 ? 'success' : 'info' });
       }
     }
 
@@ -153,7 +153,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
       }
       const canceladas = contextVisits.filter(v => v.status === 'Cancelada').length;
       if (canceladas > 3) {
-        result.push({ id: 'camp_canceladas', icon: <AlertTriangle className="h-3 w-3 shrink-0" />, text: `${canceladas} agendas canceladas — atenção ao deflator`, variant: 'warning' });
+        result.push({ id: 'camp_canceladas', icon: <AlertTriangle className="h-3 w-3 shrink-0" />, text: `${canceladas} compromissos cancelados — atenção ao deflator`, variant: 'warning' });
       }
       if (concludedCount >= 5) {
         result.push({ id: 'camp_acima_media', icon: <TrendingUp className="h-3 w-3 shrink-0" />, text: 'Você está acima da média da equipe!', variant: 'success' });
