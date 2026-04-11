@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Visit, getUserById, statusBgClasses, cargoLabels } from '@/data/mock-data';
+import { Visit, VisitComment, getUserById, statusBgClasses, cargoLabels } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useVisits } from '@/hooks/useVisits';
 import { useInfoData } from '@/hooks/useInfoData';
@@ -24,6 +24,12 @@ import AgendaComments from '@/components/agenda/AgendaComments';
 import { useRegistrationBadge } from '@/hooks/useRegistrationBadge';
 import { useNavigate } from 'react-router-dom';
 import { Textarea } from '@/components/ui/textarea';
+import BankRegistrationFlow from '@/components/agenda/BankRegistrationFlow';
+import { useRegistrations } from '@/hooks/useRegistrations';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { Team, initialTeams } from '@/data/teams';
+import { useToast } from '@/hooks/use-toast';
 
 interface AgendaDetailModalProps {
   visit: Visit | null;
@@ -42,11 +48,15 @@ interface AgendaDetailModalProps {
 export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, onDelete, onAcceptInvite, onRejectInvite, onLeaveVisit, onAddComment, onToggleTask, onScheduleFollowUp }: AgendaDetailModalProps) {
   const { canWrite } = usePermission();
   const { user } = useAuth();
+  const { toast } = useToast();
   const { getAvatar } = useUserAvatars();
   const { getPartnerById } = usePartners();
   const { visits, setVisits } = useVisits();
   const { getActiveBanks } = useInfoData();
   const { getActiveItems } = useSystemData();
+  const { addRegistration } = useRegistrations();
+  const { addNotification } = useNotifications();
+  const [teams] = useLocalStorage<Team[]>('ribercred_teams', initialTeams);
   const { hasActive, activeCount, regs } = useRegistrationBadge(visit?.partnerId);
   const commentsRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -55,6 +65,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   const [summaryDraft, setSummaryDraft] = useState('');
   const [banksPopoverOpen, setBanksPopoverOpen] = useState(false);
   const [productsPopoverOpen, setProductsPopoverOpen] = useState(false);
+  const [showBankRegistration, setShowBankRegistration] = useState(false);
 
   if (!visit) return null;
 
@@ -129,6 +140,94 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
 
   const handleRemoveProduct = (productName: string) => {
     updateVisit({ products: visit.products.filter(p => p !== productName) });
+  };
+
+  const handleBankRegistrationComplete = (data: { bankId: string; bankName: string; pendingDocs: string[]; pendingDocIds: string[]; unfilledFieldIds: string[]; unfilledFieldNames: string[]; fieldValues: Record<string, string> }) => {
+    const pName = partner?.name || visit.prospectPartner || '';
+    const details = Object.entries(data.fieldValues).map(([, v]) => v).filter(Boolean).join(' | ');
+
+    // Auto-generate task comments
+    const now = new Date().toISOString();
+    const autoTasks: VisitComment[] = [];
+    data.pendingDocIds.forEach((docId, i) => {
+      autoTasks.push({
+        id: `auto-doc-${Date.now()}-${i}`,
+        userId: user?.id || '',
+        text: `📄 Enviar: ${data.pendingDocs[i]} (${data.bankName})`,
+        type: 'task',
+        taskCompleted: false,
+        taskCategory: 'document',
+        taskSourceId: docId,
+        taskBankName: data.bankName,
+        createdAt: now,
+      });
+    });
+    data.unfilledFieldIds.forEach((fieldId, i) => {
+      autoTasks.push({
+        id: `auto-field-${Date.now()}-${i}`,
+        userId: user?.id || '',
+        text: `🧾 Preencher: ${data.unfilledFieldNames[i]} (${data.bankName})`,
+        type: 'task',
+        taskCompleted: false,
+        taskCategory: 'data',
+        taskSourceId: fieldId,
+        taskBankName: data.bankName,
+        createdAt: now,
+      });
+    });
+
+    // Add auto tasks as comments to the visit
+    if (autoTasks.length > 0) {
+      updateVisit({ comments: [...(visit.comments || []), ...autoTasks] });
+    }
+
+    // Create registration
+    const newReg = addRegistration({
+      partnerId: visit.partnerId || '',
+      bank: data.bankName,
+      cnpj: partner?.cnpj || visit.prospectCnpj || '',
+      commercialUserId: user?.id || '',
+      observation: `Solicitação via compromisso. ${details ? `Dados: ${details}` : ''}${data.pendingDocs.length > 0 ? ` | Docs pendentes: ${data.pendingDocs.join(', ')}` : ''}`,
+      status: 'Não iniciado',
+      solicitation: 'Substabelecido',
+      handlingWith: 'Comercial',
+      code: '',
+      contractConfirmed: false,
+      isCritical: false,
+    });
+
+    // Send approval notification to the team manager
+    const userTeam = teams.find(t =>
+      t.commercialIds.includes(user?.id || '') ||
+      t.ascomIds.includes(user?.id || '') ||
+      t.managerId === user?.id ||
+      t.directorId === user?.id ||
+      (t.cadastroIds || []).includes(user?.id || '')
+    );
+    const managerId = userTeam?.managerId;
+    if (managerId && managerId !== user?.id) {
+      addNotification({
+        type: 'registration_approval',
+        visitId: visit.id,
+        fromUserId: user?.id || '',
+        toUserId: managerId,
+        partnerId: visit.partnerId || '',
+        partnerName: pName,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        time: '',
+        status: 'pending',
+        message: `📋 ${user?.name || 'Comercial'} solicita aprovação de cadastro no banco ${data.bankName} para ${pName}.${data.pendingDocs.length > 0 ? ` (${data.pendingDocs.length} docs pendentes)` : ''}`,
+        registrationId: newReg.id,
+        bankName: data.bankName,
+      });
+    }
+
+    setShowBankRegistration(false);
+    const totalTasks = autoTasks.length;
+    toast({
+      title: 'Cadastro solicitado',
+      description: `Aprovação enviada ao gerente.${totalTasks > 0 ? ` ${totalTasks} tarefa(s) gerada(s) automaticamente.` : ''}`,
+    });
   };
 
   // Available options (active only, not already selected)
@@ -413,6 +512,28 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
                 ))}
               </div>
             </div>
+          )}
+
+          {/* ── Solicitar Cadastro ── */}
+          {showBankRegistration ? (
+            <BankRegistrationFlow
+              partnerId={visit.partnerId || `prospect-${visit.prospectCnpj}`}
+              partnerName={partner?.name || visit.prospectPartner || ''}
+              onComplete={handleBankRegistrationComplete}
+              onCancel={() => setShowBankRegistration(false)}
+            />
+          ) : (
+            (visit.partnerId || visit.prospectPartner) && canWrite('agenda.create') && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full gap-2 border-dashed border-primary/40 text-primary hover:bg-primary/5"
+                onClick={() => setShowBankRegistration(true)}
+              >
+                <Landmark className="h-4 w-4" />
+                Solicitar Cadastro
+              </Button>
+            )
           )}
 
           {/* ── Summary (editable) ── */}
