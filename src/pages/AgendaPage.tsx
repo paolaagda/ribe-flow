@@ -234,9 +234,7 @@ export default function AgendaPage() {
       inconclusiveReason: "",
     });
     setFormStep(0);
-    setShowBankRegistration(false);
-    setBankRegistrations([]);
-    setPendingAutoTasks([]);
+    // Bank registration state cleaned up (moved to modal)
   };
 
   // Auto-suggest potential value from last visit
@@ -604,7 +602,7 @@ export default function AgendaPage() {
         prospectAddress: formData.prospectAddress,
         prospectPhone: formData.prospectPhone,
         prospectContact: formData.prospectContact,
-        comments: [...pendingAutoTasks],
+        comments: [],
       };
       setVisits((prev) => [...prev, newVisit]);
 
