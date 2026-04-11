@@ -1913,6 +1913,17 @@ export default function AgendaPage() {
                           <p className="text-sm">{formData.cancelReason}</p>
                         </motion.div>
                       )}
+                      {formData.status === "Inconclusa" && formData.inconclusiveReason && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm overflow-hidden"
+                        >
+                          <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Motivo da agenda inconclusa</p>
+                          <p className="text-sm">{formData.inconclusiveReason}</p>
+                        </motion.div>
+                      )}
                     </AnimatePresence>
                   </>
                 )}
