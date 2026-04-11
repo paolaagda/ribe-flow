@@ -1968,7 +1968,7 @@ export default function AgendaPage() {
               </div>
             )}
 
-            {formStep === 2 && !showBankRegistration && (
+            {formStep === 2 && (
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Resumo da visita</Label>
@@ -1978,149 +1978,10 @@ export default function AgendaPage() {
                     placeholder="Resumo geral da visita..."
                   />
                 </div>
-
-
-
-                {/* Bank Registrations added */}
-                {bankRegistrations.length > 0 && (
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Cadastros de banco solicitados:</Label>
-                    {bankRegistrations.map((br, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-2 rounded-md bg-primary/10 border border-primary/20 px-3 py-2"
-                      >
-                        <LandmarkIcon className="h-4 w-4 text-primary shrink-0" />
-                        <span className="text-sm font-medium">{br.bankName}</span>
-                        {br.pendingDocs.length > 0 && (
-                          <Badge variant="outline" className="text-[10px] ml-auto">
-                            {br.pendingDocs.length} docs pendentes
-                          </Badge>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Cadastrar Banco button */}
-                {(formData.partnerId || formData.prospectPartner) && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full gap-2 border-dashed border-primary/40 text-primary hover:bg-primary/5"
-                    onClick={() => setShowBankRegistration(true)}
-                  >
-                    <LandmarkIcon className="h-4 w-4" />
-                    Cadastrar Banco
-                  </Button>
-                )}
               </div>
             )}
 
-            {formStep === 2 && showBankRegistration && (
-              <BankRegistrationFlow
-                partnerId={formData.partnerId || `prospect-${formData.prospectCnpj}`}
-                partnerName={
-                  formData.type === "visita"
-                    ? getPartnerById(formData.partnerId)?.name || ""
-                    : formData.prospectPartner || ""
-                }
-                onComplete={(data) => {
-                  setBankRegistrations((prev) => [...prev, { bankName: data.bankName, pendingDocs: data.pendingDocs }]);
-                  const pName =
-                    formData.type === "visita"
-                      ? getPartnerById(formData.partnerId)?.name || ""
-                      : formData.prospectPartner || "";
-                  const details = Object.entries(data.fieldValues)
-                    .map(([, v]) => v)
-                    .filter(Boolean)
-                    .join(" | ");
-
-                  // Auto-generate tasks for pending docs
-                  const now = new Date().toISOString();
-                  const autoTasks: VisitComment[] = [];
-                  data.pendingDocIds.forEach((docId, i) => {
-                    autoTasks.push({
-                      id: `auto-doc-${Date.now()}-${i}`,
-                      userId: user?.id || "",
-                      text: `📄 Enviar: ${data.pendingDocs[i]} (${data.bankName})`,
-                      type: "task",
-                      taskCompleted: false,
-                      taskCategory: "document",
-                      taskSourceId: docId,
-                      taskBankName: data.bankName,
-                      createdAt: now,
-                    });
-                  });
-                  // Auto-generate tasks for unfilled operational fields
-                  data.unfilledFieldIds.forEach((fieldId, i) => {
-                    autoTasks.push({
-                      id: `auto-field-${Date.now()}-${i}`,
-                      userId: user?.id || "",
-                      text: `🧾 Preencher: ${data.unfilledFieldNames[i]} (${data.bankName})`,
-                      type: "task",
-                      taskCompleted: false,
-                      taskCategory: "data",
-                      taskSourceId: fieldId,
-                      taskBankName: data.bankName,
-                      createdAt: now,
-                    });
-                  });
-                  setPendingAutoTasks((prev) => [...prev, ...autoTasks]);
-
-                  const newReg = addRegistration({
-                    partnerId: formData.partnerId || "",
-                    bank: data.bankName,
-                    cnpj:
-                      formData.type === "visita"
-                        ? getPartnerById(formData.partnerId)?.cnpj || ""
-                        : formData.prospectCnpj || "",
-                    commercialUserId: user?.id || "",
-                    observation: `Solicitação via agenda. ${details ? `Dados: ${details}` : ""}${data.pendingDocs.length > 0 ? ` | Docs pendentes: ${data.pendingDocs.join(", ")}` : ""}`,
-                    status: "Não iniciado",
-                    solicitation: "Substabelecido",
-                    handlingWith: "Comercial",
-                    code: "",
-                    contractConfirmed: false, isCritical: false,
-                  });
-                  // Send approval notification to the team manager (gerente)
-                  const userTeam = teams.find(
-                    (t) =>
-                      t.commercialIds.includes(user?.id || "") ||
-                      t.ascomIds.includes(user?.id || "") ||
-                      t.managerId === user?.id ||
-                      t.directorId === user?.id ||
-                      (t.cadastroIds || []).includes(user?.id || ""),
-                  );
-                  const managerId = userTeam?.managerId;
-                  if (managerId && managerId !== user?.id) {
-                    addNotification({
-                      type: "registration_approval",
-                      visitId: "",
-                      fromUserId: user?.id || "",
-                      toUserId: managerId,
-                      partnerId: formData.partnerId || "",
-                      partnerName: pName,
-                      date: format(new Date(), "yyyy-MM-dd"),
-                      time: "",
-                      status: "pending",
-                      message: `📋 ${user?.name || "Comercial"} solicita aprovação de cadastro no banco ${data.bankName} para ${pName}.${data.pendingDocs.length > 0 ? ` (${data.pendingDocs.length} docs pendentes)` : ""}`,
-                      registrationId: newReg.id,
-                      bankName: data.bankName,
-                    });
-                  }
-                  setShowBankRegistration(false);
-                  const totalTasks = autoTasks.length;
-                  toast({
-                    title: "Cadastro solicitado",
-                    description: `Aprovação enviada ao gerente.${totalTasks > 0 ? ` ${totalTasks} tarefa(s) gerada(s) automaticamente.` : ""}`,
-                  });
-                }}
-                onCancel={() => setShowBankRegistration(false)}
-              />
-            )}
-
-            {!showBankRegistration && (
+            {(
               <DialogFooter className="flex gap-2">
                 {formStep > 0 && (
                   <Button variant="outline" onClick={() => setFormStep(formStep - 1)}>
