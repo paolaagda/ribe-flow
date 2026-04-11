@@ -50,7 +50,9 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
 
   const myInvite = user ? visit.invitedUsers?.find(iu => iu.userId === user.id) : null;
   const isResponsibleCommercial = user?.id === visit.userId;
-  const canEditVisit = canWrite('agenda.edit') && (isResponsibleCommercial || user?.id === visit.createdBy || user?.role !== 'comercial');
+  const FINAL_STATUSES = ['Concluída', 'Cancelada', 'Inconclusa'];
+  const isStatusLocked = user?.role === 'comercial' && FINAL_STATUSES.includes(visit.status);
+  const canEditVisit = canWrite('agenda.edit') && (isResponsibleCommercial || user?.id === visit.createdBy || user?.role !== 'comercial') && !isStatusLocked;
 
   // Calculate last visit to this partner
   const lastVisitInfo = partner && visit.type === 'visita' ? (() => {
