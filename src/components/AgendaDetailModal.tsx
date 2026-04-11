@@ -133,7 +133,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
 
   // Available options (active only, not already selected)
   const availableBanks = getActiveBanks().filter(b => !visit.banks.includes(b.name));
-  const availableProducts = getActiveItems('products').filter(p => !visit.products.includes(p.label));
+  const availableProducts = getActiveItems('products').filter(p => !visit.products.includes(p));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
