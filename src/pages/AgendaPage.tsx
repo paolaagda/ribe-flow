@@ -158,7 +158,9 @@ export default function AgendaPage() {
   const [editingVisit, setEditingVisit] = useState<Visit | null>(null);
   const [hasDragged, setHasDragged] = useState(false);
   const [pendingDrop, setPendingDrop] = useState<{ visitId: string; newDate: string; day: Date } | null>(null);
-  const [pendingFormStatus, setPendingFormStatus] = useState<"Reagendada" | "Cancelada" | null>(null);
+  const [pendingFormStatus, setPendingFormStatus] = useState<"Reagendada" | "Cancelada" | "Inconclusa" | null>(null);
+  const [showFinalStatusConfirm, setShowFinalStatusConfirm] = useState(false);
+  const [pendingFinalStatus, setPendingFinalStatus] = useState<VisitStatus | null>(null);
   const [showJustificationModal, setShowJustificationModal] = useState(false);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [showTodayPanel, setShowTodayPanel] = useState(false);
@@ -205,8 +207,7 @@ export default function AgendaPage() {
     invitedUserIds: [] as string[],
     rescheduleReason: "",
     cancelReason: "",
-    completionOutcome: "" as "" | "completed_as_planned" | "completed_without_success",
-    completionReasonCode: "",
+    inconclusiveReason: "",
   });
 
   const resetForm = () => {
@@ -232,8 +233,7 @@ export default function AgendaPage() {
       invitedUserIds: [],
       rescheduleReason: "",
       cancelReason: "",
-      completionOutcome: "",
-      completionReasonCode: "",
+      inconclusiveReason: "",
     });
     setFormStep(0);
     setShowBankRegistration(false);
