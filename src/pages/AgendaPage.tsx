@@ -502,6 +502,8 @@ export default function AgendaPage() {
     return true;
   }, [formData]);
 
+  const FINAL_STATUSES: VisitStatus[] = ["Concluída", "Cancelada", "Inconclusa"];
+
   const handleSave = () => {
     if (!formData.date || !isValid(parseISO(formData.date))) {
       toast({
@@ -513,6 +515,11 @@ export default function AgendaPage() {
     }
     if (formData.status === "Inconclusa" && !formData.inconclusiveReason) {
       toast({ title: "Justificativa obrigatória", description: "Selecione o motivo da agenda inconclusa.", variant: "destructive" });
+      return;
+    }
+    // Comercial: confirm final status before saving
+    if (user?.role === "comercial" && FINAL_STATUSES.includes(formData.status) && !showFinalStatusConfirm) {
+      setShowFinalStatusConfirm(true);
       return;
     }
     const invitedUsers = formData.invitedUserIds.map((uid) => ({ userId: uid, status: "pending" as const }));
