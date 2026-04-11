@@ -908,6 +908,7 @@ export default function AgendaPage() {
                     <SelectItem value="Concluída">Concluída</SelectItem>
                     <SelectItem value="Reagendada">Reagendada</SelectItem>
                     <SelectItem value="Cancelada">Cancelada</SelectItem>
+                    <SelectItem value="Inconclusa">Inconclusa</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={filterType} onValueChange={setFilterType}>
