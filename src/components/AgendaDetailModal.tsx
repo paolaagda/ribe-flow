@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -19,6 +19,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { formatCentavos } from '@/lib/currency';
 import AgendaComments from '@/components/agenda/AgendaComments';
 import { useRegistrationBadge } from '@/hooks/useRegistrationBadge';
+import { useNavigate } from 'react-router-dom';
 
 interface AgendaDetailModalProps {
   visit: Visit | null;
@@ -42,11 +43,13 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   const { visits } = useVisits();
   const { hasActive, activeCount, regs } = useRegistrationBadge(visit?.partnerId);
   const commentsRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   if (!visit) return null;
 
   const partner = getPartnerById(visit.partnerId);
   const visitUser = getUserById(visit.userId);
   const typeLabel = visit.type === 'visita' ? 'Visita' : 'Prospecção';
+  const TypeIcon = visit.type === 'visita' ? Handshake : UserPlus;
 
   const myInvite = user ? visit.invitedUsers?.find(iu => iu.userId === user.id) : null;
   const isResponsibleCommercial = user?.id === visit.userId;
@@ -54,7 +57,6 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   const isStatusLocked = user?.role === 'comercial' && FINAL_STATUSES.includes(visit.status);
   const canEditVisit = canWrite('agenda.edit') && (isResponsibleCommercial || user?.id === visit.createdBy || user?.role !== 'comercial') && !isStatusLocked;
 
-  // Calculate last visit to this partner
   const lastVisitInfo = partner && visit.type === 'visita' ? (() => {
     const lastConcluded = visits
       .filter(v => v.partnerId === visit.partnerId && v.status === 'Concluída' && v.id !== visit.id)
@@ -70,43 +72,135 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
     rejected: { label: 'Recusado', className: 'bg-destructive/10 text-destructive border-destructive/20' },
   };
 
+  const partnerName = partner?.name || visit.prospectPartner;
+  const partnerAddress = partner?.address || visit.prospectAddress;
+
+  const handlePartnerClick = () => {
+    if (partner) {
+      onOpenChange(false);
+      navigate(`/parceiros?id=${partner.id}`);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <span>Detalhes do Compromisso</span>
+      <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto p-0">
+        {/* ── Header: Type icon + Status + Partner name ── */}
+        <div className="px-5 pt-5 pb-3 space-y-2.5">
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className={cn('text-xs capitalize gap-1.5 px-2 py-0.5', visit.type === 'visita' ? 'bg-info/10 text-info' : 'bg-warning/10 text-warning')}>
+              <TypeIcon className="h-3.5 w-3.5" />
+              {typeLabel}
+            </Badge>
             <Badge variant="outline" className={cn('text-[10px] capitalize', statusBgClasses[visit.status])}>
               {visit.status}
             </Badge>
-          </DialogTitle>
-        </DialogHeader>
+            {partner && visit.type === 'visita' && (
+              <Badge variant="outline" className={cn(
+                'text-[9px] w-4 h-4 p-0 flex items-center justify-center font-bold',
+                partner.partnerClass === 'A' ? 'bg-success/10 text-success border-success/20' :
+                partner.partnerClass === 'B' ? 'bg-info/10 text-info border-info/20' :
+                partner.partnerClass === 'C' ? 'bg-warning/10 text-warning border-warning/20' :
+                'bg-muted text-muted-foreground border-muted-foreground/20'
+              )}>{partner.partnerClass}</Badge>
+            )}
+            {partner && (
+              <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 capitalize",
+                partner.potential === 'alto' ? 'bg-success/10 text-success border-success/20' :
+                partner.potential === 'médio' ? 'bg-info/10 text-info border-info/20' :
+                'bg-muted/50 text-muted-foreground border-border/30'
+              )}>Potencial {partner.potential}</Badge>
+            )}
+          </div>
 
-        <div className="space-y-4">
-          {/* Partner & Type */}
+          {/* Partner name – clickable */}
           <div>
-            <p className="text-base font-semibold">{partner?.name || visit.prospectPartner}</p>
-            <p className="text-xs text-muted-foreground">{partner?.address || visit.prospectAddress}</p>
-            {/* Visual aids: potential + last visit */}
-            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-              {partner && visit.type === 'visita' && (
-                <Badge variant="outline" className={cn(
-                  'text-[9px] w-4 h-4 p-0 flex items-center justify-center font-bold',
-                  partner.partnerClass === 'A' ? 'bg-success/10 text-success border-success/20' :
-                  partner.partnerClass === 'B' ? 'bg-info/10 text-info border-info/20' :
-                  partner.partnerClass === 'C' ? 'bg-warning/10 text-warning border-warning/20' :
-                  'bg-muted text-muted-foreground border-muted-foreground/20'
-                )}>{partner.partnerClass}</Badge>
+            {partner ? (
+              <button
+                onClick={handlePartnerClick}
+                className="text-left text-base font-bold leading-snug hover:text-primary hover:underline underline-offset-2 transition-colors"
+              >
+                {partnerName}
+              </button>
+            ) : (
+              <p className="text-base font-bold leading-snug">{partnerName}</p>
+            )}
+            {lastVisitInfo && (
+              <span className="text-[10px] text-muted-foreground/70 block mt-0.5">{lastVisitInfo}</span>
+            )}
+          </div>
+        </div>
+
+        <Separator className="opacity-50" />
+
+        {/* ── Partner summary block ── */}
+        <div className="px-5 py-3 space-y-2.5">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+            {partnerAddress && (
+              <div className="flex items-center gap-2 text-muted-foreground col-span-2 min-w-0">
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{partnerAddress}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <User className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">Comercial: <span className="font-medium text-foreground">{visitUser?.name || '—'}</span></span>
+            </div>
+            {partner?.phone && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span className="text-xs">{partner.phone}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Structures – now part of the top summary */}
+          {visit.structures.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              {visit.structures.map(s => (
+                <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Separator className="opacity-50" />
+
+        {/* ── Visit details ── */}
+        <div className="px-5 py-3 space-y-4">
+          {/* Date, period, time, medio */}
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <CalendarIcon className="h-3.5 w-3.5" />
+              <span>{format(parseISO(visit.date), "dd 'de' MMMM, yyyy", { locale: ptBR })}</span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Badge variant="outline" className="text-[10px] capitalize">{visit.period}</Badge>
+              {visit.time ? (
+                <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{visit.time}</span>
+              ) : (
+                <span className="flex items-center gap-1 text-muted-foreground/60"><Clock className="h-3 w-3" />Sem horário</span>
               )}
-              {partner && (
-                <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 capitalize",
-                  partner.potential === 'alto' ? 'bg-success/10 text-success border-success/20' :
-                  partner.potential === 'médio' ? 'bg-info/10 text-info border-info/20' :
-                  'bg-muted/50 text-muted-foreground border-border/30'
-                )}>Potencial {partner.potential}</Badge>
-              )}
-              {lastVisitInfo && (
-                <span className="text-[10px] text-muted-foreground/70">{lastVisitInfo}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs capitalize">{visit.medio}</Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+              {visit.potentialValue ? (
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    'text-xs font-semibold',
+                    visit.potentialValue >= 1000000
+                      ? 'bg-warning/10 text-warning border-warning/20'
+                      : 'text-foreground',
+                  )}
+                >
+                  {formatCentavos(visit.potentialValue)}
+                </Badge>
+              ) : (
+                <span className="text-xs text-muted-foreground italic">Potencial não informado</span>
               )}
             </div>
           </div>
@@ -124,72 +218,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <CalendarIcon className="h-3.5 w-3.5" />
-              <span>{format(parseISO(visit.date), "dd 'de' MMMM, yyyy", { locale: ptBR })}</span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Badge variant="outline" className="text-[10px] capitalize">{visit.period}</Badge>
-              {visit.time ? (
-                <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{visit.time}</span>
-              ) : (
-                <span className="flex items-center gap-1 text-muted-foreground/60"><Clock className="h-3 w-3" />Sem horário</span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <User className="h-3.5 w-3.5" />
-              <span>{visitUser?.name}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className={cn('text-xs capitalize gap-1', visit.type === 'visita' ? 'bg-info/10 text-info' : 'bg-warning/10 text-warning')}>
-                {visit.type === 'visita' ? <Handshake className="h-3 w-3" /> : <UserPlus className="h-3 w-3" />}
-                {typeLabel}
-              </Badge>
-              <Badge variant="outline" className="text-xs capitalize">{visit.medio}</Badge>
-            </div>
-          </div>
-
-          {/* Potential Value */}
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-            {visit.potentialValue ? (
-              <Badge
-                variant="outline"
-                className={cn(
-                  'text-xs font-semibold',
-                  visit.potentialValue >= 1000000
-                    ? 'bg-warning/10 text-warning border-warning/20'
-                    : 'text-foreground',
-                )}
-              >
-                {formatCentavos(visit.potentialValue)}
-              </Badge>
-            ) : (
-              <span className="text-xs text-muted-foreground italic">Potencial não informado</span>
-            )}
-          </div>
-
-          {/* Registration indicator */}
-          {hasActive && (
-            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-info/10 border border-info/20 text-sm">
-              <FileText className="h-4 w-4 text-info shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-info">Cadastro em andamento ({activeCount})</p>
-                {regs.map(r => (
-                  <div key={r.id} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Badge variant="outline" className="text-[9px]">{r.bank}</Badge>
-                    <span>{r.status}</span>
-                    <span>• {r.handlingWith}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <Separator />
-
-          {/* Reschedule/Cancel Reason */}
+          {/* Reschedule/Cancel/Inconclusive reasons */}
           {visit.status === 'Reagendada' && visit.rescheduleReason && (
             <div className="flex items-start gap-2 p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-sm">
               <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
@@ -210,61 +239,6 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             </div>
           )}
 
-          {/* Structures */}
-          {visit.structures.length > 0 && (
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Building2 className="h-3.5 w-3.5" />
-                Estrutura da loja
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {visit.structures.map(s => (
-                  <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Banks */}
-          {visit.banks.length > 0 && (
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Landmark className="h-3.5 w-3.5" />
-                Bancos
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {visit.banks.map(b => (
-                  <Badge key={b} variant="outline" className="text-xs">{b}</Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Products */}
-          {visit.products.length > 0 && (
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Package className="h-3.5 w-3.5" />
-                Produtos
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {visit.products.map(p => (
-                  <Badge key={p} variant="outline" className="text-xs">{p}</Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Summary */}
-          {visit.summary && (
-            <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">Resumo da visita</p>
-              <p className="text-sm bg-muted/50 rounded-md p-2">{visit.summary}</p>
-            </div>
-          )}
-
-
-          {/* Inconclusive reason */}
           {visit.status === 'Inconclusa' && visit.inconclusiveReason && (
             <div className="flex items-start gap-2 p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm">
               <AlertTriangle className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
@@ -274,6 +248,64 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
               </div>
             </div>
           )}
+
+          {/* ── Banks, Products, Registration ── */}
+          <div className="space-y-3">
+            {visit.banks.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <Landmark className="h-3.5 w-3.5" />
+                  Bancos
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {visit.banks.map(b => (
+                    <Badge key={b} variant="outline" className="text-xs">{b}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {visit.products.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <Package className="h-3.5 w-3.5" />
+                  Produtos
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {visit.products.map(p => (
+                    <Badge key={p} variant="outline" className="text-xs">{p}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Registration indicator */}
+            {hasActive && (
+              <div className="flex items-start gap-2 p-2.5 rounded-lg bg-info/10 border border-info/20 text-sm">
+                <FileText className="h-4 w-4 text-info shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-info">Cadastro em andamento ({activeCount})</p>
+                  {regs.map(r => (
+                    <div key={r.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Badge variant="outline" className="text-[9px]">{r.bank}</Badge>
+                      <span>{r.status}</span>
+                      <span>• {r.handlingWith}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Summary */}
+          {visit.summary && (
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Resumo da visita</p>
+              <p className="text-sm bg-muted/50 rounded-md p-2">{visit.summary}</p>
+            </div>
+          )}
+
+          {/* Participants */}
           {visit.invitedUsers && visit.invitedUsers.length > 0 && (
             <>
               <Separator />
@@ -314,7 +346,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             </>
           )}
 
-          {/* Invite actions for current user */}
+          {/* Invite actions */}
           {myInvite?.status === 'pending' && onAcceptInvite && onRejectInvite && (
             <div className="flex items-center gap-2 pt-1">
               <Button size="sm" className="gap-1 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => onAcceptInvite(visit.id)}>
@@ -350,7 +382,6 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
                 )}
                 <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => {
                   commentsRef.current?.scrollIntoView({ behavior: 'smooth' });
-                  // Focus the task input after scrolling
                   setTimeout(() => {
                     const taskInput = commentsRef.current?.querySelector('input, textarea') as HTMLElement;
                     taskInput?.focus();
@@ -363,7 +394,8 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-2">
+        {/* Footer actions */}
+        <div className="flex items-center justify-between px-5 pb-5 pt-2">
           {myInvite?.status === 'accepted' && !isResponsibleCommercial && onLeaveVisit && (
             <Button variant="ghost" size="sm" className="gap-1 text-destructive hover:text-destructive" onClick={() => { onLeaveVisit(visit.id); onOpenChange(false); }}>
               <LogOut className="h-3.5 w-3.5" /> Sair do compromisso
