@@ -89,7 +89,7 @@ export default function NewVisitDialog({ open, onOpenChange, partner }: Props) {
 
   const handleSave = () => {
     if (!formData.period) {
-      toast({ title: 'Período obrigatório', description: 'Selecione o período da agenda.', variant: 'destructive' });
+      toast({ title: 'Período obrigatório', description: 'Selecione o período do compromisso.', variant: 'destructive' });
       return;
     }
     if (!formData.date) {
@@ -161,7 +161,7 @@ export default function NewVisitDialog({ open, onOpenChange, partner }: Props) {
       title: 'Visita salva!',
       description: potentialValue
         ? `Potencial: ${formatCentavos(potentialValue)}`
-        : 'A visita foi adicionada à agenda.',
+        : 'A visita foi adicionada aos compromissos.',
     });
 
     onOpenChange(false);

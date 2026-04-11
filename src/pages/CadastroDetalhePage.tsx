@@ -394,7 +394,7 @@ export default function CadastroDetalhePage() {
               </CardHeader>
               <CardContent className="pt-0">
                 {linkedVisits.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">Nenhuma agenda vinculada.</p>
+                  <p className="text-sm text-muted-foreground text-center py-4">Nenhum compromisso vinculado.</p>
                 ) : (
                   <div className="space-y-2">
                     {linkedVisits.map(v => {

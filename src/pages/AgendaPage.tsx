@@ -440,7 +440,7 @@ export default function AgendaPage() {
         pendingFormStatus === "Reagendada"
           ? "Reagendamento registrado com sucesso"
           : pendingFormStatus === "Inconclusa"
-            ? "Agenda marcada como inconclusa"
+            ? "Compromisso marcado como inconcluso"
             : "Cancelamento registrado com sucesso";
       toast({ title: msg });
     }
@@ -508,13 +508,13 @@ export default function AgendaPage() {
     if (!formData.date || !isValid(parseISO(formData.date))) {
       toast({
         title: "Data inválida",
-        description: "Selecione uma data válida para a agenda.",
+        description: "Selecione uma data válida para o compromisso.",
         variant: "destructive",
       });
       return;
     }
     if (formData.status === "Inconclusa" && !formData.inconclusiveReason) {
-      toast({ title: "Justificativa obrigatória", description: "Selecione o motivo da agenda inconclusa.", variant: "destructive" });
+      toast({ title: "Justificativa obrigatória", description: "Selecione o motivo do compromisso inconcluso.", variant: "destructive" });
       return;
     }
     // Comercial: confirm final status before saving
@@ -637,7 +637,7 @@ export default function AgendaPage() {
         title: `${label} salva!`,
         description: potentialValue
           ? `Potencial: ${formatCentavos(potentialValue)}`
-          : `A ${label.toLowerCase()} foi adicionada à agenda.`,
+          : `A ${label.toLowerCase()} foi adicionada aos compromissos.`,
       });
     }
     setShowForm(false);
@@ -992,7 +992,7 @@ export default function AgendaPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-ds-sm">
           <AnimatedKpiCard
             icon={CalendarDays}
-            label="Agendas hoje"
+            label="Agenda do dia"
             value={todayIndicators.concluidas}
             secondaryValue={todayIndicators.total}
             color="text-info"
@@ -1016,7 +1016,7 @@ export default function AgendaPage() {
           />
           <AnimatedKpiCard
             icon={CheckCircle}
-            label="Agendas"
+            label="Compromissos"
             value={indicators.totalConcluidas}
             secondaryValue={indicators.totalAgendas}
             color="text-success"
@@ -1053,7 +1053,7 @@ export default function AgendaPage() {
                     <Plus className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-ds-sm font-semibold text-primary">Nova agenda</p>
+                    <p className="text-ds-sm font-semibold text-primary">Novo compromisso</p>
                   </div>
                 </CardContent>
               </Card>
@@ -1602,7 +1602,7 @@ export default function AgendaPage() {
           <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {editingVisit ? "Editar Agenda" : "Nova Agenda"} — Etapa {formStep + 1}/3
+                {editingVisit ? "Editar Compromisso" : "Novo Compromisso"} — Etapa {formStep + 1}/3
               </DialogTitle>
             </DialogHeader>
 

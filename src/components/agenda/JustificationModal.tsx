@@ -22,7 +22,7 @@ export default function JustificationModal({ open, onOpenChange, targetStatus, o
   const isReschedule = targetStatus === 'Reagendada';
   const isInconclusive = targetStatus === 'Inconclusa';
   const reasons = getActiveItems(isReschedule ? 'rescheduleReasons' : isInconclusive ? 'inconclusiveReasons' : 'cancelReasons');
-  const title = isReschedule ? 'Selecione o motivo do reagendamento' : isInconclusive ? 'Selecione o motivo da agenda inconclusa' : 'Selecione o motivo do cancelamento';
+  const title = isReschedule ? 'Selecione o motivo do reagendamento' : isInconclusive ? 'Selecione o motivo do compromisso inconcluso' : 'Selecione o motivo do cancelamento';
   const Icon = isReschedule ? AlertTriangle : XCircle;
   const accentClass = isReschedule ? 'text-warning' : isInconclusive ? 'text-purple-600 dark:text-purple-400' : 'text-destructive';
 

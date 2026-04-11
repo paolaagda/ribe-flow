@@ -15,7 +15,7 @@ const categoryLabels: Record<SystemCategory, string> = {
   products: 'Produtos',
   rescheduleReasons: 'Justificativas de Reagendamento',
   cancelReasons: 'Justificativas de Cancelamento',
-  inconclusiveReasons: 'Justificativas de Agenda Inconclusa',
+  inconclusiveReasons: 'Justificativas de Compromisso Inconcluso',
   storeStructures: 'Tipos de Loja',
   periods: 'Períodos da Agenda',
   registrationStatuses: 'Status de Cadastro',
