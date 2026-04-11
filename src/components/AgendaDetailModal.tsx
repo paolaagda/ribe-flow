@@ -1,17 +1,20 @@
-import { useRef } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Visit, getUserById, statusBgClasses, cargoLabels } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useVisits } from '@/hooks/useVisits';
+import { useInfoData } from '@/hooks/useInfoData';
+import { useSystemData } from '@/hooks/useSystemData';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus, FileText, CalendarPlus, ListTodo } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, User, Pencil, Building2, Landmark, Package, Users, LogOut, Check, X, Trash2, DollarSign, AlertTriangle, Handshake, UserPlus, FileText, CalendarPlus, ListTodo, Plus } from 'lucide-react';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
@@ -20,6 +23,7 @@ import { formatCentavos } from '@/lib/currency';
 import AgendaComments from '@/components/agenda/AgendaComments';
 import { useRegistrationBadge } from '@/hooks/useRegistrationBadge';
 import { useNavigate } from 'react-router-dom';
+import { Textarea } from '@/components/ui/textarea';
 
 interface AgendaDetailModalProps {
   visit: Visit | null;
@@ -40,10 +44,18 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   const { user } = useAuth();
   const { getAvatar } = useUserAvatars();
   const { getPartnerById } = usePartners();
-  const { visits } = useVisits();
+  const { visits, setVisits } = useVisits();
+  const { getActiveBanks } = useInfoData();
+  const { getActiveItems } = useSystemData();
   const { hasActive, activeCount, regs } = useRegistrationBadge(visit?.partnerId);
   const commentsRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  const [editingSummary, setEditingSummary] = useState(false);
+  const [summaryDraft, setSummaryDraft] = useState('');
+  const [banksPopoverOpen, setBanksPopoverOpen] = useState(false);
+  const [productsPopoverOpen, setProductsPopoverOpen] = useState(false);
+
   if (!visit) return null;
 
   const partner = getPartnerById(visit.partnerId);
@@ -81,6 +93,47 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
       navigate(`/parceiros?id=${partner.id}`);
     }
   };
+
+  // ── Inline update helpers ──
+  const updateVisit = (updates: Partial<Visit>) => {
+    setVisits(prev => prev.map(v => v.id === visit.id ? { ...v, ...updates } : v));
+  };
+
+  const handleSaveSummary = () => {
+    updateVisit({ summary: summaryDraft.trim() });
+    setEditingSummary(false);
+  };
+
+  const handleStartEditSummary = () => {
+    setSummaryDraft(visit.summary || '');
+    setEditingSummary(true);
+  };
+
+  const handleAddBank = (bankName: string) => {
+    if (!visit.banks.includes(bankName)) {
+      updateVisit({ banks: [...visit.banks, bankName] });
+    }
+    setBanksPopoverOpen(false);
+  };
+
+  const handleRemoveBank = (bankName: string) => {
+    updateVisit({ banks: visit.banks.filter(b => b !== bankName) });
+  };
+
+  const handleAddProduct = (productName: string) => {
+    if (!visit.products.includes(productName)) {
+      updateVisit({ products: [...visit.products, productName] });
+    }
+    setProductsPopoverOpen(false);
+  };
+
+  const handleRemoveProduct = (productName: string) => {
+    updateVisit({ products: visit.products.filter(p => p !== productName) });
+  };
+
+  // Available options (active only, not already selected)
+  const availableBanks = getActiveBanks().filter(b => !visit.banks.includes(b.name));
+  const availableProducts = getActiveItems('products').filter(p => !visit.products.includes(p.label));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -206,15 +259,13 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
           </div>
 
           {/* Missing summary banner */}
-          {visit.status === 'Concluída' && !visit.summary?.trim() && (
+          {visit.status === 'Concluída' && !visit.summary?.trim() && !editingSummary && (
             <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/30 border border-border/30">
               <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
               <p className="text-xs text-muted-foreground flex-1">Resumo da visita ainda não preenchido</p>
-              {canEditVisit && (
-                <Button variant="ghost" size="sm" className="h-6 text-xs px-2" onClick={() => onEdit(visit)}>
-                  Editar
-                </Button>
-              )}
+              <Button variant="ghost" size="sm" className="h-6 text-xs px-2" onClick={handleStartEditSummary}>
+                Preencher
+              </Button>
             </div>
           )}
 
@@ -249,61 +300,157 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             </div>
           )}
 
-          {/* ── Banks, Products, Registration ── */}
-          <div className="space-y-3">
-            {visit.banks.length > 0 && (
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <Landmark className="h-3.5 w-3.5" />
-                  Bancos
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {visit.banks.map(b => (
-                    <Badge key={b} variant="outline" className="text-xs">{b}</Badge>
-                  ))}
-                </div>
+          {/* ── Banks (editable) ── */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <Landmark className="h-3.5 w-3.5" />
+                Bancos
               </div>
-            )}
-
-            {visit.products.length > 0 && (
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <Package className="h-3.5 w-3.5" />
-                  Produtos
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {visit.products.map(p => (
-                    <Badge key={p} variant="outline" className="text-xs">{p}</Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Registration indicator */}
-            {hasActive && (
-              <div className="flex items-start gap-2 p-2.5 rounded-lg bg-info/10 border border-info/20 text-sm">
-                <FileText className="h-4 w-4 text-info shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-info">Cadastro em andamento ({activeCount})</p>
-                  {regs.map(r => (
-                    <div key={r.id} className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge variant="outline" className="text-[9px]">{r.bank}</Badge>
-                      <span>{r.status}</span>
-                      <span>• {r.handlingWith}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              <Popover open={banksPopoverOpen} onOpenChange={setBanksPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full text-muted-foreground hover:text-foreground">
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48 p-1.5 max-h-52 overflow-y-auto" align="end">
+                  {availableBanks.length === 0 ? (
+                    <p className="text-xs text-muted-foreground text-center py-2">Todos os bancos já adicionados</p>
+                  ) : (
+                    availableBanks.map(b => (
+                      <button
+                        key={b.id}
+                        className="flex items-center w-full px-2 py-1.5 text-xs rounded-md hover:bg-accent text-left transition-colors"
+                        onClick={() => handleAddBank(b.name)}
+                      >
+                        {b.name}
+                      </button>
+                    ))
+                  )}
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {visit.banks.length === 0 ? (
+                <span className="text-xs text-muted-foreground italic">Nenhum banco selecionado</span>
+              ) : (
+                visit.banks.map(b => (
+                  <Badge
+                    key={b}
+                    variant="outline"
+                    className="text-xs gap-1 cursor-pointer hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors group"
+                    onClick={() => handleRemoveBank(b)}
+                  >
+                    {b}
+                    <X className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Badge>
+                ))
+              )}
+            </div>
           </div>
 
-          {/* Summary */}
-          {visit.summary && (
-            <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">Resumo da visita</p>
-              <p className="text-sm bg-muted/50 rounded-md p-2">{visit.summary}</p>
+          {/* ── Products (editable) ── */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <Package className="h-3.5 w-3.5" />
+                Produtos
+              </div>
+              <Popover open={productsPopoverOpen} onOpenChange={setProductsPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full text-muted-foreground hover:text-foreground">
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-1.5 max-h-52 overflow-y-auto" align="end">
+                  {availableProducts.length === 0 ? (
+                    <p className="text-xs text-muted-foreground text-center py-2">Todos os produtos já adicionados</p>
+                  ) : (
+                    availableProducts.map(p => (
+                      <button
+                        key={p.id}
+                        className="flex items-center w-full px-2 py-1.5 text-xs rounded-md hover:bg-accent text-left transition-colors"
+                        onClick={() => handleAddProduct(p.label)}
+                      >
+                        {p.label}
+                      </button>
+                    ))
+                  )}
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {visit.products.length === 0 ? (
+                <span className="text-xs text-muted-foreground italic">Nenhum produto selecionado</span>
+              ) : (
+                visit.products.map(p => (
+                  <Badge
+                    key={p}
+                    variant="outline"
+                    className="text-xs gap-1 cursor-pointer hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors group"
+                    onClick={() => handleRemoveProduct(p)}
+                  >
+                    {p}
+                    <X className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Badge>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Registration indicator */}
+          {hasActive && (
+            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-info/10 border border-info/20 text-sm">
+              <FileText className="h-4 w-4 text-info shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-info">Cadastro em andamento ({activeCount})</p>
+                {regs.map(r => (
+                  <div key={r.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant="outline" className="text-[9px]">{r.bank}</Badge>
+                    <span>{r.status}</span>
+                    <span>• {r.handlingWith}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
+
+          {/* ── Summary (editable) ── */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-muted-foreground">Resumo da visita</p>
+              {!editingSummary && (
+                <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full text-muted-foreground hover:text-foreground" onClick={handleStartEditSummary}>
+                  <Pencil className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+            {editingSummary ? (
+              <div className="space-y-2">
+                <Textarea
+                  value={summaryDraft}
+                  onChange={e => setSummaryDraft(e.target.value)}
+                  placeholder="Escreva o resumo da visita..."
+                  className="min-h-[60px] text-sm"
+                  autoFocus
+                />
+                <div className="flex items-center gap-2 justify-end">
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingSummary(false)}>
+                    Cancelar
+                  </Button>
+                  <Button size="sm" className="h-7 text-xs gap-1" onClick={handleSaveSummary}>
+                    <Check className="h-3 w-3" /> Salvar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              visit.summary?.trim() ? (
+                <p className="text-sm bg-muted/50 rounded-md p-2 cursor-pointer hover:bg-muted/70 transition-colors" onClick={handleStartEditSummary}>{visit.summary}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors" onClick={handleStartEditSummary}>Clique para adicionar um resumo</p>
+              )
+            )}
+          </div>
 
           {/* Participants */}
           {visit.invitedUsers && visit.invitedUsers.length > 0 && (
