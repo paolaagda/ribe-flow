@@ -1873,9 +1873,6 @@ export default function AgendaPage() {
                               if (newStatus === "Reagendada" || newStatus === "Cancelada" || newStatus === "Inconclusa") {
                                 setPendingFormStatus(newStatus);
                                 setShowJustificationModal(true);
-                              } else if (isComercial && FINAL_STATUSES.includes(newStatus)) {
-                                setPendingFinalStatus(newStatus);
-                                setShowFinalStatusConfirm(true);
                               } else {
                                 setFormData({ ...formData, status: newStatus, rescheduleReason: "", cancelReason: "", inconclusiveReason: "" });
                               }
