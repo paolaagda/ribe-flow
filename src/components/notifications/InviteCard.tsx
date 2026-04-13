@@ -57,6 +57,21 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
         isNew && 'notification-new',
       )}
     >
+      {/* Mark as read button */}
+      {!notification.read && onMarkAsRead && (
+        <div className="flex justify-end mb-1 -mt-0.5 -mr-0.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-1.5 text-[10px] gap-1 text-muted-foreground hover:text-foreground"
+            onClick={() => onMarkAsRead(notification.id)}
+          >
+            <MailCheck className="h-3 w-3" />
+            Marcar como lida
+          </Button>
+        </div>
+      )}
+
       {/* Tags */}
       <div className="flex items-center gap-1.5 mb-2">
         {isRegistrationApproval && isPending && (
