@@ -176,6 +176,44 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     setRejectingId(null);
   };
 
+  const handleValidateItem = (notif: AppNotification) => {
+    if (notif.type === 'doc_validation_submitted' && notif.partnerId && notif.docName) {
+      // Find doc id from docName — use the notification's docName field
+      // The docName is stored on the notification; we need the docId which we can derive
+      // For simplicity, we'll search the validation store by matching
+      validateDoc(notif.partnerId, notif.docName);
+      acceptInvite(notif.id);
+      toast({ title: '✅ Documento validado', description: `${notif.docName} para ${notif.partnerName}` });
+    } else if (notif.type === 'reg_validation_submitted' && notif.registrationId) {
+      validateRegistration(notif.registrationId);
+      acceptInvite(notif.id);
+      toast({ title: '✅ Cadastro validado', description: `${notif.bankName || ''} para ${notif.partnerName}` });
+    }
+  };
+
+  const handleRejectItem = (notif: AppNotification) => {
+    setRejectingValidationNotif(notif);
+    setDocRejectModalOpen(true);
+  };
+
+  const handleConfirmRejectItem = (reason: string) => {
+    const notif = rejectingValidationNotif;
+    if (!notif) return;
+
+    if (notif.type === 'doc_validation_submitted' && notif.partnerId && notif.docName) {
+      rejectDoc(notif.partnerId, notif.docName, reason);
+      acceptInvite(notif.id);
+      toast({ title: '📄 Documento devolvido', description: `Motivo: ${reason}` });
+    } else if (notif.type === 'reg_validation_submitted' && notif.registrationId) {
+      rejectRegistration(notif.registrationId, reason);
+      acceptInvite(notif.id);
+      toast({ title: '🏦 Cadastro devolvido', description: `Motivo: ${reason}` });
+    }
+
+    setDocRejectModalOpen(false);
+    setRejectingValidationNotif(null);
+  };
+
   return (
     <>
     <Popover>
