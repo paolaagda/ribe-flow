@@ -2063,12 +2063,14 @@ export default function AgendaPage() {
           if (!open) handleJustificationCancel();
         }}
         targetStatus={pendingFormStatus || "Reagendada"}
+        medio={(formData.medio as 'presencial' | 'remoto') || 'presencial'}
         onConfirm={handleJustificationConfirm}
       />
 
       <InviteRejectionModal
         open={showInviteRejectionModal}
         onOpenChange={setShowInviteRejectionModal}
+        medio={rejectingVisitId ? (visits.find(v => v.id === rejectingVisitId)?.medio || 'presencial') : 'presencial'}
         onConfirm={handleConfirmRejectVisitInvite}
       />
 
