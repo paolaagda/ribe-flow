@@ -162,6 +162,56 @@ export function useTasks() {
     return Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
   }, []);
 
+  /**
+   * Auto-create a pending document task for the Comercial when Cadastro rejects
+   * a document and no active equivalent task exists.
+   * Returns true if a task was created, false if one already existed.
+   */
+  const createDocPendingTask = useCallback((
+    partnerId: string,
+    docId: string,
+    docName: string,
+    reason: string,
+    responsibleUserId: string,
+  ): boolean => {
+    // Check for existing active doc task for this partner + doc
+    const existing = allTasks.find(t =>
+      t.visit.partnerId === partnerId &&
+      t.task.taskCategory === 'document' &&
+      t.task.taskSourceId === docId &&
+      !t.task.taskCompleted
+    );
+    if (existing) return false;
+
+    // Find the most recent visit for this partner to attach the task
+    const partnerVisits = visits
+      .filter(v => v.partnerId === partnerId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    const targetVisit = partnerVisits[0];
+    if (!targetVisit) return false;
+
+    const newTaskComment: VisitComment = {
+      id: `auto-doc-${docId}-${Date.now()}`,
+      userId: responsibleUserId,
+      text: `Pendência documental: ${docName} — ${reason}`,
+      type: 'task',
+      taskCompleted: false,
+      taskCategory: 'document',
+      taskSourceId: docId,
+      taskDocStatus: 'returned_for_correction',
+      taskReturnReason: reason,
+      createdAt: new Date().toISOString(),
+    };
+
+    setVisits(prev => prev.map(v => {
+      if (v.id !== targetVisit.id) return v;
+      return { ...v, comments: [...v.comments, newTaskComment] };
+    }));
+
+    return true;
+  }, [allTasks, visits, setVisits]);
+
   return {
     allTasks,
     pendingTasks,
@@ -172,6 +222,7 @@ export function useTasks() {
     toggleTask,
     returnTaskForCorrection,
     markTaskValidated,
+    createDocPendingTask,
     getDaysPending,
   };
 }
