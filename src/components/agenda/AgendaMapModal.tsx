@@ -348,7 +348,7 @@ export default function AgendaMapModal({
         ) : (
           <TooltipProvider delayDuration={200}>
             <div
-              ref={containerObserver}
+              ref={mapContainerRef}
               className="relative w-full h-[400px] bg-muted/30 rounded-lg border border-border overflow-hidden cursor-grab active:cursor-grabbing touch-none select-none"
               onWheel={handleWheel}
               onTouchStart={handleTouchStart}
@@ -359,7 +359,7 @@ export default function AgendaMapModal({
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
             >
-              {/* Zoomable canvas layer (grid + route lines) — markers are OUTSIDE this */}
+              {/* Single zoom/pan container */}
               <div
                 className="absolute inset-0 origin-center"
                 style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
@@ -391,102 +391,95 @@ export default function AgendaMapModal({
                     />
                   )}
                 </svg>
-              </div>
 
-              {/* FIXED-SIZE markers layer — positioned via pixel math, not CSS transform */}
-
-              {/* Route direction arrows (mid-segment, fixed size) */}
-              {routeArrows.map((arrow, i) => {
-                const { px, py } = getPixelPos(arrow.x, arrow.y, containerSize.w, containerSize.h);
-                return (
+                {/* Route direction arrows — counter-scaled to stay fixed size */}
+                {routeArrows.map((arrow, i) => (
                   <div
                     key={`arrow-${i}`}
                     className="absolute z-[5] pointer-events-none"
                     style={{
-                      left: px,
-                      top: py,
-                      transform: `translate(-50%, -50%) rotate(${arrow.angle}deg)`,
+                      left: `${arrow.x}%`,
+                      top: `${arrow.y}%`,
+                      transform: `translate(-50%, -50%) scale(${markerInverseScale}) rotate(${arrow.angle}deg)`,
                     }}
                   >
                     <ArrowRight className="h-3 w-3 text-primary/50" />
                   </div>
-                );
-              })}
+                ))}
 
-              {/* Suggestion markers (fixed size) */}
-              {showSuggestions && suggestions.map((s, i) => {
-                const { x, y } = toXY(s.lat, s.lng);
-                const { px, py } = getPixelPos(x, y, containerSize.w, containerSize.h);
-                return (
-                  <Tooltip key={`sug-${s.id}`}>
-                    <TooltipTrigger asChild>
-                      <motion.div
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 0.85 }}
-                        transition={{ delay: i * 0.02, type: 'spring', stiffness: 300 }}
-                        className="absolute cursor-pointer z-[8]"
-                        style={{ left: px, top: py, transform: 'translate(-50%, -50%)' }}
-                        onClick={() => setSelectedPoint({ type: 'suggestion', partner: s })}
-                      >
-                        <div className={cn(
-                          'w-6 h-6 rounded border-2 flex items-center justify-center text-[10px] font-bold shadow-sm',
-                          CLASS_COLORS[s.partnerClass] || CLASS_COLORS.D,
-                        )}>
-                          {s.partnerClass}
-                        </div>
-                      </motion.div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="font-medium text-xs">{s.name}</p>
-                      <p className="text-[10px] text-muted-foreground">Classe {s.partnerClass} • Sugestão</p>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })}
-
-              {/* Visit markers (fixed size) */}
-              {visitPoints.map((vp, i) => {
-                const { x, y } = toXY(vp.partner.lat, vp.partner.lng);
-                const { px, py } = getPixelPos(x, y, containerSize.w, containerSize.h);
-                const isVisita = vp.visit.type === 'visita';
-                return (
-                  <Tooltip key={`vis-${vp.visit.id}`}>
-                    <TooltipTrigger asChild>
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: i * 0.05, type: 'spring', stiffness: 400 }}
-                        className="absolute cursor-pointer z-10"
-                        style={{ left: px, top: py, transform: 'translate(-50%, -50%)' }}
-                        onClick={() => setSelectedPoint({ type: 'visit', visit: vp.visit, partner: vp.partner, index: i })}
-                      >
-                        <div className="relative">
+                {/* Suggestion markers — counter-scaled */}
+                {showSuggestions && suggestions.map((s, i) => {
+                  const { x, y } = toXY(s.lat, s.lng);
+                  return (
+                    <Tooltip key={`sug-${s.id}`}>
+                      <TooltipTrigger asChild>
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: markerInverseScale, opacity: 0.85 }}
+                          transition={{ delay: i * 0.02, type: 'spring', stiffness: 300 }}
+                          className="absolute cursor-pointer z-[8]"
+                          style={{ left: `${x}%`, top: `${y}%`, transform: `translate(-50%, -50%) scale(${markerInverseScale})` }}
+                          onClick={() => setSelectedPoint({ type: 'suggestion', partner: s })}
+                        >
                           <div className={cn(
-                            'w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-background',
-                            isVisita ? 'bg-primary text-primary-foreground' : 'bg-violet-600 text-white',
+                            'w-6 h-6 rounded border-2 flex items-center justify-center text-[10px] font-bold shadow-sm',
+                            CLASS_COLORS[s.partnerClass] || CLASS_COLORS.D,
                           )}>
-                            {isVisita ? <Handshake className="h-3.5 w-3.5" /> : <UserPlus className="h-3.5 w-3.5" />}
+                            {s.partnerClass}
                           </div>
-                          <span className={cn(
-                            'absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center border border-background shadow-sm',
-                            isVisita ? 'bg-primary text-primary-foreground' : 'bg-violet-600 text-white',
-                          )}>
-                            {i + 1}
-                          </span>
-                        </div>
-                      </motion.div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="font-medium text-xs">{i + 1}º — {vp.partner.name}</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {isVisita ? 'Visita' : 'Prospecção'} • {format(parseISO(vp.visit.date), 'dd/MM')} {vp.visit.time || ''}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })}
+                        </motion.div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="font-medium text-xs">{s.name}</p>
+                        <p className="text-[10px] text-muted-foreground">Classe {s.partnerClass} • Sugestão</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
 
-              {/* Zoom controls */}
+                {/* Visit markers — counter-scaled */}
+                {visitPoints.map((vp, i) => {
+                  const { x, y } = toXY(vp.partner.lat, vp.partner.lng);
+                  const isVisita = vp.visit.type === 'visita';
+                  return (
+                    <Tooltip key={`vis-${vp.visit.id}`}>
+                      <TooltipTrigger asChild>
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: markerInverseScale }}
+                          transition={{ delay: i * 0.05, type: 'spring', stiffness: 400 }}
+                          className="absolute cursor-pointer z-10"
+                          style={{ left: `${x}%`, top: `${y}%`, transform: `translate(-50%, -50%) scale(${markerInverseScale})` }}
+                          onClick={() => setSelectedPoint({ type: 'visit', visit: vp.visit, partner: vp.partner, index: i })}
+                        >
+                          <div className="relative">
+                            <div className={cn(
+                              'w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-background',
+                              isVisita ? 'bg-primary text-primary-foreground' : 'bg-violet-600 text-white',
+                            )}>
+                              {isVisita ? <Handshake className="h-3.5 w-3.5" /> : <UserPlus className="h-3.5 w-3.5" />}
+                            </div>
+                            <span className={cn(
+                              'absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center border border-background shadow-sm',
+                              isVisita ? 'bg-primary text-primary-foreground' : 'bg-violet-600 text-white',
+                            )}>
+                              {i + 1}
+                            </span>
+                          </div>
+                        </motion.div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="font-medium text-xs">{i + 1}º — {vp.partner.name}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {isVisita ? 'Visita' : 'Prospecção'} • {format(parseISO(vp.visit.date), 'dd/MM')} {vp.visit.time || ''}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </div>{/* end zoom/pan wrapper */}
+
+              {/* Zoom controls — outside zoom layer */}
               <div className="absolute bottom-2 right-2 z-20 flex items-center gap-1">
                 <Button variant="outline" size="icon" className="h-7 w-7 bg-card/90 backdrop-blur-sm" onClick={() => setZoom(prev => clampZoom(prev + 0.3))}>
                   <ZoomIn className="h-3.5 w-3.5" />
