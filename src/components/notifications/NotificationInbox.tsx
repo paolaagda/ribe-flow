@@ -34,6 +34,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   const { addLog } = useAuditLog();
   const { updateRegistration } = useRegistrations();
   const { user } = useAuth();
+  const { visits } = useVisits();
 
   const prevCountRef = useRef(unreadCount);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
