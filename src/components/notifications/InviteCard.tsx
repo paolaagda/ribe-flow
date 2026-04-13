@@ -6,7 +6,7 @@ import { getUserById } from '@/data/mock-data';
 import { format, parseISO, isToday, isTomorrow, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Check, X, Eye, CalendarIcon, Clock, User, Landmark, FileCheck } from 'lucide-react';
+import { Check, X, Eye, CalendarIcon, Clock, User, Landmark, FileCheck, MailCheck } from 'lucide-react';
 
 interface InviteCardProps {
   notification: AppNotification;
