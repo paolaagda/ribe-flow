@@ -251,7 +251,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
               Ações {pendingInvites.length > 0 && `(${pendingInvites.length})`}
             </TabsTrigger>
             <TabsTrigger value="recent" className="flex-1 text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
-              Recentes
+              Recentes {recentNotifications.filter(n => !n.read).length > 0 && `(${recentNotifications.filter(n => !n.read).length})`}
             </TabsTrigger>
             <TabsTrigger value="history" className="flex-1 text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
               Histórico
