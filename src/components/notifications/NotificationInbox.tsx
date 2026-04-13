@@ -177,13 +177,11 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   };
 
   const handleValidateItem = (notif: AppNotification) => {
-    if (notif.type === 'doc_validation_submitted' && notif.partnerId && notif.docName) {
-      // Find doc id from docName — use the notification's docName field
-      // The docName is stored on the notification; we need the docId which we can derive
-      // For simplicity, we'll search the validation store by matching
-      validateDoc(notif.partnerId, notif.docName);
+    if (notif.type === 'doc_validation_submitted' && notif.partnerId && (notif.docId || notif.docName)) {
+      const docIdentifier = notif.docId || notif.docName || '';
+      validateDoc(notif.partnerId, docIdentifier);
       acceptInvite(notif.id);
-      toast({ title: '✅ Documento validado', description: `${notif.docName} para ${notif.partnerName}` });
+      toast({ title: '✅ Documento validado', description: `${notif.docName || ''} para ${notif.partnerName}` });
     } else if (notif.type === 'reg_validation_submitted' && notif.registrationId) {
       validateRegistration(notif.registrationId);
       acceptInvite(notif.id);
