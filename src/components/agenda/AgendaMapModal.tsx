@@ -415,6 +415,21 @@ export default function AgendaMapModal({
             </Button>
           </div>
 
+          {hasGlobalView && (
+            <Select value={filterCommercial} onValueChange={v => { setFilterCommercial(v); setSelectedPoint(null); }}>
+              <SelectTrigger className="w-36 h-8 text-xs">
+                <User className="h-3 w-3 mr-1" />
+                <SelectValue placeholder="Comercial" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {mockUsers.filter(u => u.role === 'comercial' && u.active).map(u => (
+                  <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
           <Button
             variant={showSuggestions ? 'default' : 'outline'}
             size="sm"
