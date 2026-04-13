@@ -50,7 +50,7 @@ interface AgendaDetailModalProps {
 }
 
 export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, onDelete, onAcceptInvite, onRejectInvite, onLeaveVisit, onAddComment, onToggleTask, onScheduleFollowUp }: AgendaDetailModalProps) {
-  const { canWrite } = usePermission();
+  const { canRead, canWrite } = usePermission();
   const { user } = useAuth();
   const { toast } = useToast();
   const { getAvatar } = useUserAvatars();
@@ -94,7 +94,9 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   const isResponsibleCommercial = user?.id === visit.userId;
   const FINAL_STATUSES = ['Concluída', 'Cancelada', 'Inconclusa'];
   const isStatusLocked = user?.role === 'comercial' && FINAL_STATUSES.includes(visit.status);
-  const canEditVisit = canWrite('agenda.edit') && (isResponsibleCommercial || user?.id === visit.createdBy || user?.role !== 'comercial') && !isStatusLocked;
+  const isOwnerOrManager = isResponsibleCommercial || user?.id === visit.createdBy || !['comercial', 'cadastro'].includes(user?.role || '');
+  const canEditFields = canWrite('agenda.edit') && isOwnerOrManager;
+  const canEditVisit = canEditFields && !isStatusLocked;
 
   const lastVisitInfo = partner && visit.type === 'visita' ? (() => {
     const lastConcluded = visits
@@ -358,15 +360,15 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto p-0">
           {/* ── Header ── */}
-          <div className="px-5 pt-5 pb-3">
-            <div className="flex items-center gap-2.5">
+          <div className="px-5 pt-5 pb-3 pr-12">
+            <div className="flex items-start gap-2.5">
               <div className={cn(
-                'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
+                'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
                 visit.type === 'visita' ? 'bg-info/10' : 'bg-warning/10'
               )}>
                 <TypeIcon className={cn('h-4 w-4', visit.type === 'visita' ? 'text-info' : 'text-warning')} />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 space-y-1">
                 {partner ? (
                   <button
                     onClick={handlePartnerClick}
@@ -377,24 +379,28 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
                 ) : (
                   <p className="text-lg font-bold leading-snug truncate">{partnerName}</p>
                 )}
+                {/* Status — editable select, below partner name */}
+                {isStatusLocked ? (
+                  <Badge variant="outline" className={cn('text-xs capitalize', statusBgClasses[visit.status])}>
+                    {visit.status}
+                  </Badge>
+                ) : canEditFields ? (
+                  <Select value={visit.status} onValueChange={handleStatusChange}>
+                    <SelectTrigger className={cn('h-7 w-auto min-w-0 gap-1 border px-2 text-xs font-medium capitalize', statusBgClasses[visit.status])}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {allStatuses.map(s => (
+                        <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Badge variant="outline" className={cn('text-xs capitalize', statusBgClasses[visit.status])}>
+                    {visit.status}
+                  </Badge>
+                )}
               </div>
-              {/* Status — editable select */}
-              {isStatusLocked ? (
-                <Badge variant="outline" className={cn('text-xs capitalize shrink-0', statusBgClasses[visit.status])}>
-                  {visit.status}
-                </Badge>
-              ) : (
-                <Select value={visit.status} onValueChange={handleStatusChange}>
-                  <SelectTrigger className={cn('h-7 w-auto min-w-0 gap-1 border px-2 text-xs font-medium capitalize shrink-0', statusBgClasses[visit.status])}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allStatuses.map(s => (
-                      <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
             </div>
 
             {/* Address */}
@@ -437,118 +443,112 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
 
           <Separator className="opacity-40" />
 
-          {/* ── Date / Period / Time / Medio — all editable ── */}
+          {/* ── Date / Period / Time / Medio — editable with permissions ── */}
           <div className="px-5 py-2.5 flex items-center gap-2 flex-wrap">
             {/* Date */}
-            <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
-              <PopoverTrigger asChild>
-                <button className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md px-1.5 py-0.5 hover:bg-muted/50">
-                  <CalendarIcon className="h-3.5 w-3.5" />
-                  <span>{format(parseISO(visit.date), "dd/MM/yyyy")}</span>
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={parseISO(visit.date)}
-                  onSelect={handleDateChange}
-                  className="p-3 pointer-events-auto"
-                  locale={ptBR}
-                />
-              </PopoverContent>
-            </Popover>
+            {canEditFields ? (
+              <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md px-1.5 py-0.5 hover:bg-muted/50">
+                    <CalendarIcon className="h-3.5 w-3.5" />
+                    <span>{format(parseISO(visit.date), "dd/MM/yyyy")}</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={parseISO(visit.date)} onSelect={handleDateChange} className="p-3 pointer-events-auto" locale={ptBR} />
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground px-1.5 py-0.5">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {format(parseISO(visit.date), "dd/MM/yyyy")}
+              </span>
+            )}
 
             <span className="text-muted-foreground/30">·</span>
 
             {/* Period */}
-            <Select value={visit.period} onValueChange={handlePeriodChange}>
-              <SelectTrigger className="h-6 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 text-xs text-muted-foreground hover:text-foreground capitalize shadow-none">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {activePeriods.map(p => (
-                  <SelectItem key={p} value={p.toLowerCase()} className="text-xs capitalize">{p}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {canEditFields ? (
+              <Select value={visit.period} onValueChange={handlePeriodChange}>
+                <SelectTrigger className="h-6 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 text-xs text-muted-foreground hover:text-foreground capitalize shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {activePeriods.map(p => (
+                    <SelectItem key={p} value={p.toLowerCase()} className="text-xs capitalize">{p}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <span className="text-xs text-muted-foreground capitalize px-1.5">{visit.period}</span>
+            )}
 
             <span className="text-muted-foreground/30">·</span>
 
             {/* Time */}
-            {editingTime ? (
+            {canEditFields && editingTime ? (
               <div className="flex items-center gap-1">
-                <Input
-                  type="time"
-                  value={timeDraft}
-                  onChange={e => setTimeDraft(e.target.value)}
-                  className="h-6 w-24 text-xs px-1.5"
-                  autoFocus
-                  onKeyDown={e => { if (e.key === 'Enter') handleSaveTime(); if (e.key === 'Escape') setEditingTime(false); }}
-                />
+                <Input type="time" value={timeDraft} onChange={e => setTimeDraft(e.target.value)} className="h-6 w-24 text-xs px-1.5" autoFocus onKeyDown={e => { if (e.key === 'Enter') handleSaveTime(); if (e.key === 'Escape') setEditingTime(false); }} />
                 <Button variant="ghost" size="icon" className="h-5 w-5" onClick={handleSaveTime}><Check className="h-3 w-3" /></Button>
                 <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => setEditingTime(false)}><X className="h-3 w-3" /></Button>
               </div>
-            ) : (
-              <button
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-md px-1.5 py-0.5 hover:bg-muted/50"
-                onClick={handleStartEditTime}
-              >
+            ) : canEditFields ? (
+              <button className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-md px-1.5 py-0.5 hover:bg-muted/50" onClick={handleStartEditTime}>
                 <Clock className="h-3 w-3" />
                 {visit.time || 'Sem horário'}
               </button>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground px-1.5 py-0.5">
+                <Clock className="h-3 w-3" />
+                {visit.time || 'Sem horário'}
+              </span>
             )}
 
             <span className="text-muted-foreground/30">·</span>
 
             {/* Medio */}
-            <Select value={visit.medio} onValueChange={handleMedioChange}>
-              <SelectTrigger className="h-6 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 text-xs text-muted-foreground hover:text-foreground capitalize shadow-none">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="presencial" className="text-xs">Presencial</SelectItem>
-                <SelectItem value="remoto" className="text-xs">Remoto</SelectItem>
-              </SelectContent>
-            </Select>
+            {canEditFields ? (
+              <Select value={visit.medio} onValueChange={handleMedioChange}>
+                <SelectTrigger className="h-6 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 text-xs text-muted-foreground hover:text-foreground capitalize shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="presencial" className="text-xs">Presencial</SelectItem>
+                  <SelectItem value="remoto" className="text-xs">Remoto</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <span className="text-xs text-muted-foreground capitalize px-1.5">{visit.medio}</span>
+            )}
           </div>
 
-          {/* ── Potential value — editable ── */}
+          {/* ── Potential value — editable with permissions ── */}
           <div className="px-5 pb-2.5 flex items-center gap-2">
             <DollarSign className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-            {editingPotential ? (
+            {canEditFields && editingPotential ? (
               <div className="flex items-center gap-1">
-                <Input
-                  value={potentialDraft}
-                  onChange={e => setPotentialDraft(formatCurrencyInput(e.target.value))}
-                  className="h-7 w-36 text-xs"
-                  placeholder="R$ 0,00"
-                  autoFocus
-                  onKeyDown={e => { if (e.key === 'Enter') handleSavePotential(); if (e.key === 'Escape') setEditingPotential(false); }}
-                />
+                <Input value={potentialDraft} onChange={e => setPotentialDraft(formatCurrencyInput(e.target.value))} className="h-7 w-36 text-xs" placeholder="R$ 0,00" autoFocus onKeyDown={e => { if (e.key === 'Enter') handleSavePotential(); if (e.key === 'Escape') setEditingPotential(false); }} />
                 <Button variant="ghost" size="icon" className="h-5 w-5" onClick={handleSavePotential}><Check className="h-3 w-3" /></Button>
                 <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => setEditingPotential(false)}><X className="h-3 w-3" /></Button>
               </div>
-            ) : (
-              <button
-                className="inline-flex items-center gap-1 hover:bg-muted/50 rounded-md px-1.5 py-0.5 transition-colors"
-                onClick={handleStartEditPotential}
-              >
+            ) : canEditFields ? (
+              <button className="inline-flex items-center gap-1 hover:bg-muted/50 rounded-md px-1.5 py-0.5 transition-colors" onClick={handleStartEditPotential}>
                 {visit.potentialValue ? (
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      'text-xs font-semibold',
-                      visit.potentialValue >= 1000000
-                        ? 'bg-warning/10 text-warning border-warning/20'
-                        : 'text-foreground',
-                    )}
-                  >
+                  <Badge variant="outline" className={cn('text-xs font-semibold', visit.potentialValue >= 1000000 ? 'bg-warning/10 text-warning border-warning/20' : 'text-foreground')}>
                     {formatCentavos(visit.potentialValue)}
                   </Badge>
                 ) : (
                   <span className="text-xs text-muted-foreground italic">Potencial não informado</span>
                 )}
               </button>
+            ) : (
+              visit.potentialValue ? (
+                <Badge variant="outline" className={cn('text-xs font-semibold', visit.potentialValue >= 1000000 ? 'bg-warning/10 text-warning border-warning/20' : 'text-foreground')}>
+                  {formatCentavos(visit.potentialValue)}
+                </Badge>
+              ) : (
+                <span className="text-xs text-muted-foreground italic">Potencial não informado</span>
+              )
             )}
           </div>
 
@@ -773,40 +773,42 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
 
           <Separator className="opacity-40" />
 
-          {/* ── Participants — editable ── */}
+          {/* ── Participants — editable with permissions ── */}
           <div className="px-5 py-3 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <Users className="h-3.5 w-3.5" />
                 Participantes
               </div>
-              <Popover open={invitedPopoverOpen} onOpenChange={setInvitedPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-5 w-5 rounded-full border-dashed border-muted-foreground/40 text-muted-foreground hover:text-foreground">
-                    <Plus className="h-3 w-3" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-52 p-1.5 max-h-52 overflow-y-auto" align="end">
-                  {invitableUsers.length === 0 ? (
-                    <p className="text-xs text-muted-foreground text-center py-2">Nenhum usuário disponível</p>
-                  ) : (
-                    invitableUsers.map(u => (
-                      <button
-                        key={u.id}
-                        className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded-md hover:bg-accent text-left transition-colors"
-                        onClick={() => handleAddInvitee(u.id)}
-                      >
-                        <Avatar className="h-5 w-5">
-                          <AvatarImage src={u.avatar} />
-                          <AvatarFallback className="text-[8px]">{u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</AvatarFallback>
-                        </Avatar>
-                        <span className="flex-1 truncate">{u.name}</span>
-                        <Badge variant="secondary" className="text-[9px] px-1">{cargoLabels[u.role]}</Badge>
-                      </button>
-                    ))
-                  )}
-                </PopoverContent>
-              </Popover>
+              {canEditFields && (
+                <Popover open={invitedPopoverOpen} onOpenChange={setInvitedPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="icon" className="h-5 w-5 rounded-full border-dashed border-muted-foreground/40 text-muted-foreground hover:text-foreground">
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-52 p-1.5 max-h-52 overflow-y-auto" align="end">
+                    {invitableUsers.length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-2">Nenhum usuário disponível</p>
+                    ) : (
+                      invitableUsers.map(u => (
+                        <button
+                          key={u.id}
+                          className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded-md hover:bg-accent text-left transition-colors"
+                          onClick={() => handleAddInvitee(u.id)}
+                        >
+                          <Avatar className="h-5 w-5">
+                            <AvatarImage src={u.avatar} />
+                            <AvatarFallback className="text-[8px]">{u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</AvatarFallback>
+                          </Avatar>
+                          <span className="flex-1 truncate">{u.name}</span>
+                          <Badge variant="secondary" className="text-[9px] px-1">{cargoLabels[u.role]}</Badge>
+                        </button>
+                      ))
+                    )}
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
 
             {visit.invitedUsers && visit.invitedUsers.length > 0 && (
@@ -834,12 +836,14 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
                       <Badge variant="outline" className={cn('text-[10px]', badge.className)}>
                         {badge.label}
                       </Badge>
-                      <button
-                        className="h-4 w-4 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
-                        onClick={() => handleRemoveInvitee(iu.userId)}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
+                      {canEditFields && (
+                        <button
+                          className="h-4 w-4 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                          onClick={() => handleRemoveInvitee(iu.userId)}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
