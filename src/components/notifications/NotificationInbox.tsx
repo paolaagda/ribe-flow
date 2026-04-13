@@ -221,6 +221,18 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     if (notif.type === 'doc_validation_submitted' && notif.partnerId && (notif.docId || notif.docName)) {
       const docIdentifier = notif.docId || notif.docName || '';
       rejectDoc(notif.partnerId, docIdentifier, reason);
+      // Sync task: return for correction or auto-create
+      const taskRef = findDocTask(notif.partnerId, docIdentifier);
+      if (taskRef) {
+        returnTaskForCorrection(taskRef.visitId, taskRef.commentId, reason);
+      } else {
+        const partner = getPartnerById(notif.partnerId);
+        const docs = getActiveDocuments();
+        const docName = docs.find(d => d.id === docIdentifier)?.name || notif.docName || docIdentifier;
+        if (partner) {
+          createDocPendingTask(notif.partnerId, docIdentifier, docName, reason, partner.responsibleUserId);
+        }
+      }
       acceptInvite(notif.id);
       toast({ title: '📄 Documento devolvido', description: `Motivo: ${reason}` });
     } else if (notif.type === 'reg_validation_submitted' && notif.registrationId) {
