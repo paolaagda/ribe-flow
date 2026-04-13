@@ -40,8 +40,21 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   const { addLog } = useAuditLog();
   const { updateRegistration, validateRegistration, rejectRegistration } = useRegistrations();
   const { validateDoc, rejectDoc, revokeValidation } = useDocumentValidation();
+  const { returnTaskForCorrection, markTaskValidated, createDocPendingTask } = useTasks();
+  const { getPartnerById } = usePartners();
+  const { getActiveDocuments } = useInfoData();
   const { user } = useAuth();
   const { visits } = useVisits();
+
+  // Find the task linked to a document for syncing (same logic as PartnerDocuments)
+  const findDocTask = (partnerId: string, docId: string) => {
+    for (const visit of visits) {
+      if (visit.partnerId !== partnerId) continue;
+      const comment = visit.comments.find(c => c.type === 'task' && c.taskCategory === 'document' && c.taskSourceId === docId);
+      if (comment) return { visitId: visit.id, commentId: comment.id };
+    }
+    return null;
+  };
 
   const isCadastroUser = user?.role === 'cadastro' || user?.role === 'gerente' || user?.role === 'diretor';
 
