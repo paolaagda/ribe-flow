@@ -96,10 +96,11 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
   const myInvite = user ? visit.invitedUsers?.find(iu => iu.userId === user.id) : null;
   const isResponsibleCommercial = user?.id === visit.userId;
   const FINAL_STATUSES = ['Concluída', 'Cancelada', 'Inconclusa'];
-  const isStatusLocked = user?.role === 'comercial' && FINAL_STATUSES.includes(visit.status);
+  const isStatusFinal = FINAL_STATUSES.includes(visit.status);
+  const isStatusLocked = user?.role === 'comercial' && isStatusFinal;
   const isOwnerOrManager = isResponsibleCommercial || user?.id === visit.createdBy || !['comercial', 'cadastro'].includes(user?.role || '');
-  const canEditFields = canWrite('agenda.edit') && isOwnerOrManager;
-  const canEditVisit = canEditFields && !isStatusLocked;
+  const canEditFields = canWrite('agenda.edit') && isOwnerOrManager && !isStatusFinal;
+  const canEditVisit = canWrite('agenda.edit') && isOwnerOrManager && !isStatusLocked;
 
   const lastVisitInfo = partner && visit.type === 'visita' ? (() => {
     const lastConcluded = visits
@@ -170,7 +171,13 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
   // ── Date/Period/Time/Medio/Potential/Convidados inline editing ──
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      updateVisit({ date: format(date, 'yyyy-MM-dd') });
+      const newDateStr = format(date, 'yyyy-MM-dd');
+      if (newDateStr !== visit.date) {
+        // Date change = reschedule, require justification
+        setPendingDate(newDateStr);
+        setPendingStatus('Reagendada');
+        setShowJustification(true);
+      }
       setDatePopoverOpen(false);
     }
   };
@@ -239,10 +246,36 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
   const handleJustificationConfirm = (reason: string) => {
     if (!pendingStatus) return;
     const reasonField = pendingStatus === 'Reagendada' ? 'rescheduleReason' : pendingStatus === 'Inconclusa' ? 'inconclusiveReason' : 'cancelReason';
+
+    // If this was triggered by a date change, apply date + reason but keep status as Reagendada
+    if (pendingDate) {
+      const updates: Partial<Visit> = {
+        date: pendingDate,
+        status: 'Reagendada' as VisitStatus,
+        [reasonField]: reason,
+        statusChangedAt: new Date().toISOString(),
+      };
+      // For Comercial + final status: confirm first
+      if (user?.role === 'comercial') {
+        updateVisit({ [reasonField]: reason });
+        setPendingFinalStatus('Reagendada');
+        setShowJustification(false);
+        setPendingStatus(null);
+        setPendingDate(null);
+        setShowFinalConfirm(true);
+        return;
+      }
+      updateVisit(updates);
+      setShowJustification(false);
+      setPendingStatus(null);
+      setPendingDate(null);
+      toast({ title: 'Reagendamento registrado' });
+      return;
+    }
+
     // For Comercial + final status: confirm first
     if (user?.role === 'comercial' && FINAL_STATUSES.includes(pendingStatus)) {
       setPendingFinalStatus(pendingStatus);
-      // Store reason temporarily
       updateVisit({ [reasonField]: reason });
       setShowJustification(false);
       setPendingStatus(null);
@@ -263,12 +296,18 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
 
   const handleFinalConfirm = () => {
     if (!pendingFinalStatus) return;
-    updateVisit({
+    const updates: Partial<Visit> = {
       status: pendingFinalStatus,
       statusChangedAt: new Date().toISOString(),
-    });
+    };
+    // If there was a pending date (date change → reschedule confirmation)
+    if (pendingDate) {
+      updates.date = pendingDate;
+    }
+    updateVisit(updates);
     setShowFinalConfirm(false);
     setPendingFinalStatus(null);
+    setPendingDate(null);
     toast({ title: `Compromisso ${pendingFinalStatus.toLowerCase()}` });
   };
 
@@ -393,7 +432,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
                   <Badge variant="outline" className={cn('text-xs capitalize', statusBgClasses[visit.status])}>
                     {visit.status}
                   </Badge>
-                ) : canEditFields ? (
+                ) : canEditVisit ? (
                   <Select value={visit.status} onValueChange={handleStatusChange}>
                     <SelectTrigger className={cn('h-7 w-auto min-w-0 gap-1 border px-2 text-xs font-medium capitalize', statusBgClasses[visit.status])}>
                       <SelectValue />
@@ -566,7 +605,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
           {/* ── Summary (editable) ── */}
           <div className="px-5 py-3 space-y-1.5">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">Resumo da {visit.type === 'visita' ? 'visita' : 'prospecção'}</p>
+              <p className="text-xs font-medium text-muted-foreground">Resumo</p>
               {!editingSummary && (
                 <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full text-muted-foreground hover:text-foreground" onClick={handleStartEditSummary}>
                   <Pencil className="h-3 w-3" />
