@@ -354,6 +354,14 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
       })()}
       onConfirm={handleConfirmReject}
     />
+    <DocumentRejectModal
+      open={docRejectModalOpen}
+      onOpenChange={setDocRejectModalOpen}
+      docName={rejectingValidationNotif?.type === 'reg_validation_submitted'
+        ? `Cadastro ${rejectingValidationNotif?.bankName || ''}`
+        : (rejectingValidationNotif?.docName || 'Documento')}
+      onConfirm={handleConfirmRejectItem}
+    />
     </>
   );
 });
