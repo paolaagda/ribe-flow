@@ -8,6 +8,7 @@ import { useDocumentValidation, DocValidationStatus } from '@/hooks/useDocumentV
 import { useAuth } from '@/contexts/AuthContext';
 import { useVisits } from '@/hooks/useVisits';
 import { useTasks } from '@/hooks/useTasks';
+import { usePartners } from '@/hooks/usePartners';
 import DocumentRejectModal from './DocumentRejectModal';
 import { FileText, FileCheck, Clock, XCircle, CheckCircle2, RotateCcw, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -28,8 +29,9 @@ export default function PartnerDocuments({ partnerId }: Props) {
   const { getActiveDocuments } = useInfoData();
   const documents = getActiveDocuments();
   const { getDocStatus, validateDoc, rejectDoc, revokeValidation } = useDocumentValidation();
-  const { returnTaskForCorrection, markTaskValidated } = useTasks();
+  const { returnTaskForCorrection, markTaskValidated, createDocPendingTask } = useTasks();
   const { visits } = useVisits();
+  const { getPartnerById } = usePartners();
   const { user } = useAuth();
 
   const [rejectModal, setRejectModal] = useState<{ open: boolean; docId: string; docName: string }>({ open: false, docId: '', docName: '' });
@@ -55,16 +57,34 @@ export default function PartnerDocuments({ partnerId }: Props) {
 
   const handleReject = (docId: string, reason: string) => {
     rejectDoc(partnerId, docId, reason);
-    // Sync task back to returned
+    // Sync existing task back to returned
     const taskRef = findDocTask(docId);
-    if (taskRef) returnTaskForCorrection(taskRef.visitId, taskRef.commentId, reason);
+    if (taskRef) {
+      returnTaskForCorrection(taskRef.visitId, taskRef.commentId, reason);
+    } else {
+      // No existing task — auto-create pending doc task for Comercial
+      const partner = getPartnerById(partnerId);
+      const docName = documents.find(d => d.id === docId)?.name || docId;
+      if (partner) {
+        createDocPendingTask(partnerId, docId, docName, reason, partner.responsibleUserId);
+      }
+    }
   };
 
   const handleRevoke = (docId: string, reason: string) => {
     revokeValidation(partnerId, docId, reason);
-    // Sync task back to returned
+    // Sync existing task back to returned
     const taskRef = findDocTask(docId);
-    if (taskRef) returnTaskForCorrection(taskRef.visitId, taskRef.commentId, reason);
+    if (taskRef) {
+      returnTaskForCorrection(taskRef.visitId, taskRef.commentId, reason);
+    } else {
+      // No existing task — auto-create pending doc task for Comercial
+      const partner = getPartnerById(partnerId);
+      const docName = documents.find(d => d.id === docId)?.name || docId;
+      if (partner) {
+        createDocPendingTask(partnerId, docId, docName, reason, partner.responsibleUserId);
+      }
+    }
   };
 
   if (documents.length === 0) return null;
@@ -96,6 +116,13 @@ export default function PartnerDocuments({ partnerId }: Props) {
             const entry = getDocStatus(partnerId, doc.id);
             const config = statusConfig[entry.status];
             const StatusIcon = config.icon;
+
+            // Cadastro can validate any non-validated doc directly
+            const canApprove = isCadastro && ['pending', 'in_validation', 'rejected'].includes(entry.status);
+            // Cadastro can reject in_validation or pending docs
+            const canReject = isCadastro && ['pending', 'in_validation', 'rejected'].includes(entry.status);
+            // Cadastro can revoke validated docs
+            const canRevoke = isCadastro && entry.status === 'validated';
 
             return (
               <motion.div
@@ -138,8 +165,8 @@ export default function PartnerDocuments({ partnerId }: Props) {
                   {config.label}
                 </Badge>
 
-                {/* Cadastro actions */}
-                {isCadastro && entry.status === 'in_validation' && (
+                {/* Cadastro actions: approve/reject for non-validated docs */}
+                {(canApprove || canReject) && (
                   <div className="flex items-center gap-1 shrink-0">
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -171,7 +198,7 @@ export default function PartnerDocuments({ partnerId }: Props) {
                 )}
 
                 {/* Cadastro can revoke validated docs */}
-                {isCadastro && entry.status === 'validated' && (
+                {canRevoke && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
