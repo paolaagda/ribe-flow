@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { usePartners } from '@/hooks/usePartners';
 import { useInfoData } from '@/hooks/useInfoData';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useDocumentValidation } from '@/hooks/useDocumentValidation';
 import { Registration } from '@/data/registrations';
 import { differenceInDays } from 'date-fns';
 import { AlertTriangle, UserCog, Users, Building2, ClipboardList } from 'lucide-react';
