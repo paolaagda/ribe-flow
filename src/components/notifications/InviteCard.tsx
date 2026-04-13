@@ -15,10 +15,11 @@ interface InviteCardProps {
   onViewDetails?: (notification: AppNotification) => void;
   onValidateItem?: (notification: AppNotification) => void;
   onRejectItem?: (notification: AppNotification) => void;
+  onMarkAsRead?: (id: string) => void;
   canActOnValidation?: boolean;
 }
 
-export default function InviteCard({ notification, onAccept, onReject, onViewDetails, onValidateItem, onRejectItem, canActOnValidation }: InviteCardProps) {
+export default function InviteCard({ notification, onAccept, onReject, onViewDetails, onValidateItem, onRejectItem, onMarkAsRead, canActOnValidation }: InviteCardProps) {
   const fromUser = getUserById(notification.fromUserId);
   const visitDate = notification.date ? parseISO(notification.date) : null;
   const validDate = visitDate && isValid(visitDate);
