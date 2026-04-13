@@ -275,7 +275,7 @@ export default function AgendaMapModal({
 
         {/* Controls */}
         <div className="flex items-center gap-2 flex-wrap">
-          <Select value={mapView} onValueChange={v => { setMapView(v as any); setSelectedPoint(null); }}>
+          <Select value={mapView} onValueChange={v => { setMapView(v as any); setSelectedPoint(null); setZoom(1); setPan({ x: 0, y: 0 }); }}>
             <SelectTrigger className="w-28 h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
@@ -285,6 +285,19 @@ export default function AgendaMapModal({
               <SelectItem value="month">Mês</SelectItem>
             </SelectContent>
           </Select>
+
+          {/* Period navigation */}
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={goBack}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-xs font-medium text-foreground min-w-[120px] text-center whitespace-nowrap">
+              {getPeriodLabel(navDate, mapView)}
+            </span>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={goForward}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
 
           <Button
             variant={showSuggestions ? 'default' : 'outline'}
@@ -313,7 +326,18 @@ export default function AgendaMapModal({
           </div>
         ) : (
           <TooltipProvider delayDuration={200}>
-            <div className="relative w-full h-[400px] bg-muted/30 rounded-lg border border-border overflow-hidden">
+            <div
+              ref={mapContainerRef}
+              className="relative w-full h-[400px] bg-muted/30 rounded-lg border border-border overflow-hidden cursor-grab active:cursor-grabbing touch-none"
+              onWheel={handleWheel}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            >
               {/* Dot grid background */}
               <div className="absolute inset-0 opacity-10" style={{
                 backgroundImage: 'radial-gradient(circle, hsl(var(--muted-foreground)) 1px, transparent 1px)',
