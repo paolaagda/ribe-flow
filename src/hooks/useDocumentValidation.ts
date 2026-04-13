@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNotificationContext } from '@/contexts/NotificationContext';
+import { useNotificationContextSafe } from '@/contexts/NotificationContext';
 import { mockUsers, mockPartners } from '@/data/mock-data';
 import { getRandomMessage } from '@/data/notification-messages';
 import { useInfoData } from '@/hooks/useInfoData';
@@ -21,7 +21,7 @@ type ValidationStore = Record<string, Record<string, DocValidationEntry>>;
 
 export function useDocumentValidation() {
   const { user } = useAuth();
-  const { addNotification } = useNotificationContext();
+  const { addNotification } = useNotificationContextSafe();
   const [store, setStore] = useLocalStorage<ValidationStore>('ribercred_partner_doc_validation_v1', {});
   const { getActiveDocuments } = useInfoData();
 

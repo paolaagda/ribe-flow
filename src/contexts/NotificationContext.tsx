@@ -248,3 +248,15 @@ export function useNotificationContext() {
   if (!ctx) throw new Error('useNotificationContext must be used within NotificationProvider');
   return ctx;
 }
+
+// Safe version that returns a no-op when outside provider (for domain hooks)
+const noopAddNotification = (() => {
+  const noop: NotificationContextValue['addNotification'] = (notif) => ({ ...notif, id: '', createdAt: '', read: false } as AppNotification);
+  return noop;
+})();
+
+export function useNotificationContextSafe() {
+  const ctx = React.useContext(NotificationContext);
+  if (!ctx) return { addNotification: noopAddNotification };
+  return ctx;
+}
