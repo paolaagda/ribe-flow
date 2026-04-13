@@ -3,7 +3,7 @@ import { useVisits } from '@/hooks/useVisits';
 import { useTasks } from '@/hooks/useTasks';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useInfoData } from '@/hooks/useInfoData';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useDocumentValidation } from '@/hooks/useDocumentValidation';
 import { Partner } from '@/data/mock-data';
 import { differenceInDays, parseISO } from 'date-fns';
 
