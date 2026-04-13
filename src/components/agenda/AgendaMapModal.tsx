@@ -18,9 +18,9 @@ import { useNavigate } from 'react-router-dom';
 interface AgendaMapModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  visits: Visit[];
-  currentDate: Date;
-  view: 'day' | 'week' | 'month';
+  visits?: Visit[];
+  currentDate?: Date;
+  view?: 'day' | 'week' | 'month';
   onOpenVisitDetail?: (visit: Visit) => void;
 }
 
@@ -46,15 +46,17 @@ const CLASS_COLORS: Record<string, string> = {
 export default function AgendaMapModal({
   open,
   onOpenChange,
-  visits,
-  currentDate,
-  view,
+  visits: visitsProp,
+  currentDate: currentDateProp,
+  view: viewProp,
   onOpenVisitDetail,
 }: AgendaMapModalProps) {
   const { partners, getPartnerById } = usePartners();
   const { visits: allVisits } = useVisits();
   const navigate = useNavigate();
-  const [mapView, setMapView] = useState<'day' | 'week' | 'month'>(view);
+  const internalDate = currentDateProp ?? new Date();
+  const [mapView, setMapView] = useState<'day' | 'week' | 'month'>(viewProp ?? 'week');
+  const visits = visitsProp ?? allVisits;
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<null | { type: 'visit'; visit: Visit; partner?: Partner } | { type: 'suggestion'; partner: Partner }>(null);
 
