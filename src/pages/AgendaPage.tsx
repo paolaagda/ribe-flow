@@ -96,6 +96,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  AGENDA_MAP_CREATE_VISIT_EVENT,
+  AGENDA_MAP_OPEN_VISIT_DETAIL_EVENT,
+  type AgendaMapCreateVisitPayload,
+  type AgendaMapOpenVisitDetailPayload,
+} from "@/lib/agenda-map-actions";
 
 type ViewMode = "day" | "week" | "month";
 
@@ -180,37 +186,88 @@ export default function AgendaPage() {
     });
   }, [visits]);
 
-  // Handle createVisit from map suggestion
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const createPartnerId = params.get('createVisit');
-    const createDate = params.get('date');
-    if (createPartnerId) {
-      const partner = getPartnerById(createPartnerId);
+  const openVisitDetailFromMap = useCallback(
+    (visitId: string) => {
+      const visit = visits.find((currentVisit) => currentVisit.id === visitId);
+      if (!visit) return false;
+
+      setShowForm(false);
+      setEditingVisit(null);
+      setSelectedVisit(visit);
+      setShowDetail(true);
+      return true;
+    },
+    [visits],
+  );
+
+  const openCreateVisitFromMap = useCallback(
+    (partnerId: string, suggestedDate?: string) => {
+      const partner = getPartnerById(partnerId);
+
+      setShowDetail(false);
+      setSelectedVisit(null);
+      setEditingVisit(null);
+      setPendingDrop(null);
+      setPendingFormStatus(null);
+      setShowFinalStatusConfirm(false);
       resetForm();
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        partnerId: createPartnerId,
-        date: createDate || format(new Date(), 'yyyy-MM-dd'),
+        partnerId,
+        date: suggestedDate || format(new Date(), 'yyyy-MM-dd'),
         type: 'visita',
         medio: 'presencial',
         structures: partner?.structures || [],
       }));
       setShowForm(true);
-      window.history.replaceState({}, '', '/agenda');
+    },
+    [getPartnerById],
+  );
+
+  useEffect(() => {
+    const handleOpenVisitDetail = (event: Event) => {
+      const detail = (event as CustomEvent<AgendaMapOpenVisitDetailPayload>).detail;
+      if (detail?.visitId) {
+        openVisitDetailFromMap(detail.visitId);
+      }
+    };
+
+    const handleCreateVisit = (event: Event) => {
+      const detail = (event as CustomEvent<AgendaMapCreateVisitPayload>).detail;
+      if (detail?.partnerId) {
+        openCreateVisitFromMap(detail.partnerId, detail.suggestedDate);
+      }
+    };
+
+    window.addEventListener(AGENDA_MAP_OPEN_VISIT_DETAIL_EVENT, handleOpenVisitDetail);
+    window.addEventListener(AGENDA_MAP_CREATE_VISIT_EVENT, handleCreateVisit);
+
+    return () => {
+      window.removeEventListener(AGENDA_MAP_OPEN_VISIT_DETAIL_EVENT, handleOpenVisitDetail);
+      window.removeEventListener(AGENDA_MAP_CREATE_VISIT_EVENT, handleCreateVisit);
+    };
+  }, [openCreateVisitFromMap, openVisitDetailFromMap]);
+
+  useEffect(() => {
+    const createPartnerId = searchParams.get('createVisit');
+    const createDate = searchParams.get('date');
+    const openVisitId = searchParams.get('openVisit');
+
+    if (createPartnerId) {
+      openCreateVisitFromMap(createPartnerId, createDate || undefined);
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete('createVisit');
+      nextParams.delete('date');
+      setSearchParams(nextParams, { replace: true });
+      return;
     }
 
-    // Handle openVisit from map detail action
-    const openVisitId = params.get('openVisit');
-    if (openVisitId) {
-      const visit = visits.find(v => v.id === openVisitId);
-      if (visit) {
-        setSelectedVisit(visit);
-        setShowDetail(true);
-      }
-      window.history.replaceState({}, '', '/agenda');
+    if (openVisitId && openVisitDetailFromMap(openVisitId)) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete('openVisit');
+      setSearchParams(nextParams, { replace: true });
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [openCreateVisitFromMap, openVisitDetailFromMap, searchParams, setSearchParams]);
 
   const togglePanel = (panel: "today" | "tasks") => {
     if (panel === "today") {

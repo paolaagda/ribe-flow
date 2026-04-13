@@ -23,6 +23,12 @@ import { useTheme } from '@/hooks/useTheme';
 import { Moon, Sun } from 'lucide-react';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import {
+  AGENDA_MAP_CREATE_VISIT_EVENT,
+  AGENDA_MAP_OPEN_VISIT_DETAIL_EVENT,
+  type AgendaMapCreateVisitPayload,
+  type AgendaMapOpenVisitDetailPayload,
+} from '@/lib/agenda-map-actions';
+import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -50,7 +56,25 @@ function ThemeToggleButton() {
 
 function MapButton() {
   const [showMap, setShowMap] = React.useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const runAgendaMapAction = React.useCallback(
+    (eventName: string, detail: AgendaMapCreateVisitPayload | AgendaMapOpenVisitDetailPayload, fallbackUrl: string) => {
+      setShowMap(false);
+
+      window.requestAnimationFrame(() => {
+        if (location.pathname === '/agenda') {
+          window.dispatchEvent(new CustomEvent(eventName, { detail }));
+          return;
+        }
+
+        navigate(fallbackUrl);
+      });
+    },
+    [location.pathname, navigate],
+  );
+
   return (
     <>
       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowMap(true)} title="Mapa de compromissos">
@@ -59,9 +83,19 @@ function MapButton() {
       <AgendaMapModal
         open={showMap}
         onOpenChange={setShowMap}
+        onOpenVisitDetail={(visit) => {
+          runAgendaMapAction(
+            AGENDA_MAP_OPEN_VISIT_DETAIL_EVENT,
+            { visitId: visit.id },
+            `/agenda?openVisit=${visit.id}`,
+          );
+        }}
         onCreateVisitFromSuggestion={(partnerId, suggestedDate) => {
-          setShowMap(false);
-          navigate(`/agenda?createVisit=${partnerId}&date=${suggestedDate}`);
+          runAgendaMapAction(
+            AGENDA_MAP_CREATE_VISIT_EVENT,
+            { partnerId, suggestedDate },
+            `/agenda?createVisit=${partnerId}&date=${suggestedDate}`,
+          );
         }}
       />
     </>

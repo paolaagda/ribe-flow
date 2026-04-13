@@ -263,12 +263,50 @@ export default function AgendaMapModal({
     if (visitPoints.length === 0) return format(new Date(), 'yyyy-MM-dd');
     let closest = visitPoints[0];
     let minDist = Infinity;
+
+    const getVisitMomentValue = (visit: Visit) => {
+      const periodHour = visit.period === 'tarde' ? '13:00' : '08:00';
+      return `${visit.date}T${visit.time || periodHour}`;
+    };
+
     for (const vp of visitPoints) {
       const dist = haversineDistance(partner.lat, partner.lng, vp.partner.lat, vp.partner.lng);
-      if (dist < minDist) { minDist = dist; closest = vp; }
+
+      if (dist < minDist) {
+        minDist = dist;
+        closest = vp;
+        continue;
+      }
+
+      if (Math.abs(dist - minDist) < 0.001 && getVisitMomentValue(vp.visit) < getVisitMomentValue(closest.visit)) {
+        closest = vp;
+      }
     }
+
     return closest.visit.date;
   }, [visitPoints]);
+
+  const handleOpenVisitDetail = useCallback((visit: Visit) => {
+    if (onOpenVisitDetail) {
+      onOpenVisitDetail(visit);
+      return;
+    }
+
+    onOpenChange(false);
+    navigate(`/agenda?openVisit=${visit.id}`);
+  }, [navigate, onOpenChange, onOpenVisitDetail]);
+
+  const handleCreateVisit = useCallback((partner: Partner) => {
+    const suggestedDate = getClosestVisitDate(partner);
+
+    if (onCreateVisitFromSuggestion) {
+      onCreateVisitFromSuggestion(partner.id, suggestedDate);
+      return;
+    }
+
+    onOpenChange(false);
+    navigate(`/agenda?createVisit=${partner.id}&date=${suggestedDate}`);
+  }, [getClosestVisitDate, navigate, onCreateVisitFromSuggestion, onOpenChange]);
 
   // Route SVG path
   const routeSvgPath = useMemo(() => {
@@ -588,10 +626,7 @@ export default function AgendaMapModal({
                     </div>
                     <Button
                       size="sm" variant="outline" className="h-7 text-xs gap-1"
-                      onClick={() => {
-                        onOpenChange(false);
-                        navigate(`/agenda?openVisit=${selectedPoint.visit.id}`);
-                      }}
+                      onClick={() => handleOpenVisitDetail(selectedPoint.visit)}
                     >
                       <ExternalLink className="h-3 w-3" /> Ver detalhe
                     </Button>
@@ -628,11 +663,7 @@ export default function AgendaMapModal({
                       </Button>
                       <Button
                         size="sm" className="h-7 text-xs gap-1"
-                        onClick={() => {
-                          const suggestedDate = getClosestVisitDate(selectedPoint.partner);
-                          onOpenChange(false);
-                          navigate(`/agenda?createVisit=${selectedPoint.partner.id}&date=${suggestedDate}`);
-                        }}
+                        onClick={() => handleCreateVisit(selectedPoint.partner)}
                       >
                         <CalendarPlus className="h-3 w-3" /> Criar compromisso
                       </Button>
@@ -728,10 +759,8 @@ export default function AgendaMapModal({
                   <Button
                     size="sm" className="h-7 text-xs gap-1"
                     onClick={() => {
-                      const suggestedDate = getClosestVisitDate(partnerDetailTarget);
                       setPartnerDetailTarget(null);
-                      onOpenChange(false);
-                      navigate(`/agenda?createVisit=${partnerDetailTarget.id}&date=${suggestedDate}`);
+                      handleCreateVisit(partnerDetailTarget);
                     }}
                   >
                     <CalendarPlus className="h-3 w-3" /> Criar compromisso
