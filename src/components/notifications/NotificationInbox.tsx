@@ -197,6 +197,9 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     if (notif.type === 'doc_validation_submitted' && notif.partnerId && (notif.docId || notif.docName)) {
       const docIdentifier = notif.docId || notif.docName || '';
       validateDoc(notif.partnerId, docIdentifier);
+      // Sync task to validated
+      const taskRef = findDocTask(notif.partnerId, docIdentifier);
+      if (taskRef) markTaskValidated(taskRef.visitId, taskRef.commentId);
       acceptInvite(notif.id);
       toast({ title: '✅ Documento validado', description: `${notif.docName || ''} para ${notif.partnerName}` });
     } else if (notif.type === 'reg_validation_submitted' && notif.registrationId) {
