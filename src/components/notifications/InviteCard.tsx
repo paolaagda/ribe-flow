@@ -28,7 +28,9 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
 
   const isRegistrationApproval = notification.type === 'registration_approval';
   const isRegistrationResult = notification.type === 'registration_approved' || notification.type === 'registration_rejected';
-
+  const isDocValidation = notification.type === 'doc_validation_submitted' || notification.type === 'doc_validation_rejected';
+  const isRegValidation = notification.type === 'reg_validation_submitted' || notification.type === 'reg_validation_rejected';
+  const isValidationNotif = isDocValidation || isRegValidation;
   // Highlight if created within last 5 seconds
   const isNew = useMemo(() => {
     const created = new Date(notification.createdAt).getTime();
