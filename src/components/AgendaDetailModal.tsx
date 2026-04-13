@@ -49,7 +49,7 @@ interface AgendaDetailModalProps {
   onScheduleFollowUp?: (partnerId: string) => void;
 }
 
-export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, onDelete, onAcceptInvite, onRejectInvite, onLeaveVisit, onAddComment, onToggleTask, onScheduleFollowUp }: AgendaDetailModalProps) {
+export default function AgendaDetailModal({ visit: initialVisit, open, onOpenChange, onEdit, onDelete, onAcceptInvite, onRejectInvite, onLeaveVisit, onAddComment, onToggleTask, onScheduleFollowUp }: AgendaDetailModalProps) {
   const { canRead, canWrite } = usePermission();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -61,7 +61,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   const { addRegistration } = useRegistrations();
   const { addNotification } = useNotifications();
   const [teams] = useLocalStorage<Team[]>('ribercred_teams', initialTeams);
-  const { hasActive, activeCount, regs } = useRegistrationBadge(visit?.partnerId);
+  const { hasActive, activeCount, regs } = useRegistrationBadge(initialVisit?.partnerId);
   const commentsRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -83,7 +83,9 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   const [showFinalConfirm, setShowFinalConfirm] = useState(false);
   const [pendingFinalStatus, setPendingFinalStatus] = useState<VisitStatus | null>(null);
 
-  if (!visit) return null;
+  if (!initialVisit) return null;
+
+  const visit = visits.find((currentVisit) => currentVisit.id === initialVisit.id) ?? initialVisit;
 
   const partner = getPartnerById(visit.partnerId);
   const visitUser = getUserById(visit.userId);
@@ -124,9 +126,13 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   };
 
   // ── Inline update helpers ──
-  const updateVisit = (updates: Partial<Visit>) => {
-    setVisits(prev => prev.map(v => v.id === visit.id ? { ...v, ...updates } : v));
-  };
+  const updateVisit = useCallback((updates: Partial<Visit> | ((currentVisit: Visit) => Partial<Visit> | null)) => {
+    setVisits(prev => prev.map(currentVisit => {
+      if (currentVisit.id !== visit.id) return currentVisit;
+      const resolvedUpdates = typeof updates === 'function' ? updates(currentVisit) : updates;
+      return resolvedUpdates ? { ...currentVisit, ...resolvedUpdates } : currentVisit;
+    }));
+  }, [setVisits, visit.id]);
 
   const handleSaveSummary = () => {
     updateVisit({ summary: summaryDraft.trim() });
@@ -139,25 +145,25 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   };
 
   const handleAddBank = (bankName: string) => {
-    if (!visit.banks.includes(bankName)) {
-      updateVisit({ banks: [...visit.banks, bankName] });
-    }
+    updateVisit(currentVisit => currentVisit.banks.includes(bankName)
+      ? null
+      : { banks: [...currentVisit.banks, bankName] });
     setBanksPopoverOpen(false);
   };
 
   const handleRemoveBank = (bankName: string) => {
-    updateVisit({ banks: visit.banks.filter(b => b !== bankName) });
+    updateVisit(currentVisit => ({ banks: currentVisit.banks.filter(b => b !== bankName) }));
   };
 
   const handleAddProduct = (productName: string) => {
-    if (!visit.products.includes(productName)) {
-      updateVisit({ products: [...visit.products, productName] });
-    }
+    updateVisit(currentVisit => currentVisit.products.includes(productName)
+      ? null
+      : { products: [...currentVisit.products, productName] });
     setProductsPopoverOpen(false);
   };
 
   const handleRemoveProduct = (productName: string) => {
-    updateVisit({ products: visit.products.filter(p => p !== productName) });
+    updateVisit(currentVisit => ({ products: currentVisit.products.filter(p => p !== productName) }));
   };
 
   // ── Date/Period/Time/Medio/Potential/Convidados inline editing ──
@@ -198,15 +204,17 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   };
 
   const handleAddInvitee = (userId: string) => {
-    const existing = visit.invitedUsers || [];
-    if (!existing.some(iu => iu.userId === userId)) {
-      updateVisit({ invitedUsers: [...existing, { userId, status: 'pending' }] });
-    }
+    updateVisit(currentVisit => {
+      const existing = currentVisit.invitedUsers || [];
+      return existing.some(iu => iu.userId === userId)
+        ? null
+        : { invitedUsers: [...existing, { userId, status: 'pending' }] };
+    });
     setInvitedPopoverOpen(false);
   };
 
   const handleRemoveInvitee = (userId: string) => {
-    updateVisit({ invitedUsers: (visit.invitedUsers || []).filter(iu => iu.userId !== userId) });
+    updateVisit(currentVisit => ({ invitedUsers: (currentVisit.invitedUsers || []).filter(iu => iu.userId !== userId) }));
   };
 
   // ── Status change with business rules ──
@@ -297,7 +305,7 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
     });
 
     if (autoTasks.length > 0) {
-      updateVisit({ comments: [...(visit.comments || []), ...autoTasks] });
+      updateVisit(currentVisit => ({ comments: [...(currentVisit.comments || []), ...autoTasks] }));
     }
 
     const newReg = addRegistration({

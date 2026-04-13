@@ -171,6 +171,13 @@ export default function AgendaPage() {
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
   // Bank registration flow moved to modal
 
+  useEffect(() => {
+    setSelectedVisit((currentSelectedVisit) => {
+      if (!currentSelectedVisit) return null;
+      return visits.find((currentVisit) => currentVisit.id === currentSelectedVisit.id) ?? currentSelectedVisit;
+    });
+  }, [visits]);
+
   // (New visit from partner detail is now handled locally in PartnerDetailView)
 
   const togglePanel = (panel: "today" | "tasks") => {
