@@ -6,7 +6,7 @@ import { getUserById } from '@/data/mock-data';
 import { format, parseISO, isToday, isTomorrow, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Check, X, Eye, CalendarIcon, Clock, User, Landmark, FileCheck } from 'lucide-react';
+import { Check, X, Eye, CalendarIcon, Clock, User, Landmark, FileCheck, MailCheck } from 'lucide-react';
 
 interface InviteCardProps {
   notification: AppNotification;
@@ -15,10 +15,11 @@ interface InviteCardProps {
   onViewDetails?: (notification: AppNotification) => void;
   onValidateItem?: (notification: AppNotification) => void;
   onRejectItem?: (notification: AppNotification) => void;
+  onMarkAsRead?: (id: string) => void;
   canActOnValidation?: boolean;
 }
 
-export default function InviteCard({ notification, onAccept, onReject, onViewDetails, onValidateItem, onRejectItem, canActOnValidation }: InviteCardProps) {
+export default function InviteCard({ notification, onAccept, onReject, onViewDetails, onValidateItem, onRejectItem, onMarkAsRead, canActOnValidation }: InviteCardProps) {
   const fromUser = getUserById(notification.fromUserId);
   const visitDate = notification.date ? parseISO(notification.date) : null;
   const validDate = visitDate && isValid(visitDate);
@@ -56,6 +57,21 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
         isNew && 'notification-new',
       )}
     >
+      {/* Mark as read button */}
+      {!notification.read && onMarkAsRead && (
+        <div className="flex justify-end mb-1 -mt-0.5 -mr-0.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-1.5 text-[10px] gap-1 text-muted-foreground hover:text-foreground"
+            onClick={() => onMarkAsRead(notification.id)}
+          >
+            <MailCheck className="h-3 w-3" />
+            Marcar como lida
+          </Button>
+        </div>
+      )}
+
       {/* Tags */}
       <div className="flex items-center gap-1.5 mb-2">
         {isRegistrationApproval && isPending && (
