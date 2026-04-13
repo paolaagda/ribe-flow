@@ -17,6 +17,7 @@ import CadastroDetalhePage from "@/pages/CadastroDetalhePage";
 import ColaboradorPerfilPage from "@/pages/ColaboradorPerfilPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import InformacoesUteisPage from "@/pages/InformacoesUteisPage";
+import LinksUteisPage from "@/pages/LinksUteisPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ function AppRoutes() {
       <Route path="/analises" element={<ProtectedRoute><AnalisesPage /></ProtectedRoute>} />
       <Route path="/parceiros" element={<ProtectedRoute><ParceirosPage /></ProtectedRoute>} />
       <Route path="/informacoes" element={<ProtectedRoute><InformacoesUteisPage /></ProtectedRoute>} />
+      <Route path="/links" element={<ProtectedRoute><LinksUteisPage /></ProtectedRoute>} />
       <Route path="/configuracoes" element={<ProtectedRoute><ConfiguracoesPage /></ProtectedRoute>} />
       <Route path="/cadastro" element={<ProtectedRoute><CadastroPage /></ProtectedRoute>} />
       <Route path="/cadastro/:id" element={<ProtectedRoute><CadastroDetalhePage /></ProtectedRoute>} />
