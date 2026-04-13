@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -126,13 +126,13 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
   };
 
   // ── Inline update helpers ──
-  const updateVisit = useCallback((updates: Partial<Visit> | ((currentVisit: Visit) => Partial<Visit> | null)) => {
+  const updateVisit = (updates: Partial<Visit> | ((currentVisit: Visit) => Partial<Visit> | null)) => {
     setVisits(prev => prev.map(currentVisit => {
       if (currentVisit.id !== visit.id) return currentVisit;
       const resolvedUpdates = typeof updates === 'function' ? updates(currentVisit) : updates;
       return resolvedUpdates ? { ...currentVisit, ...resolvedUpdates } : currentVisit;
     }));
-  }, [setVisits, visit.id]);
+  };
 
   const handleSaveSummary = () => {
     updateVisit({ summary: summaryDraft.trim() });
