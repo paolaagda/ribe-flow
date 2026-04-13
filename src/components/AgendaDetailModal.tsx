@@ -522,43 +522,33 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
             )}
           </div>
 
-          {/* ── Potential value — editable ── */}
+          {/* ── Potential value — editable with permissions ── */}
           <div className="px-5 pb-2.5 flex items-center gap-2">
             <DollarSign className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-            {editingPotential ? (
+            {canEditFields && editingPotential ? (
               <div className="flex items-center gap-1">
-                <Input
-                  value={potentialDraft}
-                  onChange={e => setPotentialDraft(formatCurrencyInput(e.target.value))}
-                  className="h-7 w-36 text-xs"
-                  placeholder="R$ 0,00"
-                  autoFocus
-                  onKeyDown={e => { if (e.key === 'Enter') handleSavePotential(); if (e.key === 'Escape') setEditingPotential(false); }}
-                />
+                <Input value={potentialDraft} onChange={e => setPotentialDraft(formatCurrencyInput(e.target.value))} className="h-7 w-36 text-xs" placeholder="R$ 0,00" autoFocus onKeyDown={e => { if (e.key === 'Enter') handleSavePotential(); if (e.key === 'Escape') setEditingPotential(false); }} />
                 <Button variant="ghost" size="icon" className="h-5 w-5" onClick={handleSavePotential}><Check className="h-3 w-3" /></Button>
                 <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => setEditingPotential(false)}><X className="h-3 w-3" /></Button>
               </div>
-            ) : (
-              <button
-                className="inline-flex items-center gap-1 hover:bg-muted/50 rounded-md px-1.5 py-0.5 transition-colors"
-                onClick={handleStartEditPotential}
-              >
+            ) : canEditFields ? (
+              <button className="inline-flex items-center gap-1 hover:bg-muted/50 rounded-md px-1.5 py-0.5 transition-colors" onClick={handleStartEditPotential}>
                 {visit.potentialValue ? (
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      'text-xs font-semibold',
-                      visit.potentialValue >= 1000000
-                        ? 'bg-warning/10 text-warning border-warning/20'
-                        : 'text-foreground',
-                    )}
-                  >
+                  <Badge variant="outline" className={cn('text-xs font-semibold', visit.potentialValue >= 1000000 ? 'bg-warning/10 text-warning border-warning/20' : 'text-foreground')}>
                     {formatCentavos(visit.potentialValue)}
                   </Badge>
                 ) : (
                   <span className="text-xs text-muted-foreground italic">Potencial não informado</span>
                 )}
               </button>
+            ) : (
+              visit.potentialValue ? (
+                <Badge variant="outline" className={cn('text-xs font-semibold', visit.potentialValue >= 1000000 ? 'bg-warning/10 text-warning border-warning/20' : 'text-foreground')}>
+                  {formatCentavos(visit.potentialValue)}
+                </Badge>
+              ) : (
+                <span className="text-xs text-muted-foreground italic">Potencial não informado</span>
+              )
             )}
           </div>
 
