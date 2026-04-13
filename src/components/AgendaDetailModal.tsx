@@ -836,12 +836,14 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
                       <Badge variant="outline" className={cn('text-[10px]', badge.className)}>
                         {badge.label}
                       </Badge>
-                      <button
-                        className="h-4 w-4 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
-                        onClick={() => handleRemoveInvitee(iu.userId)}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
+                      {canEditFields && (
+                        <button
+                          className="h-4 w-4 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                          onClick={() => handleRemoveInvitee(iu.userId)}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
