@@ -338,6 +338,10 @@ export default function AgendaMapModal({
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
             >
+              <div
+                className="absolute inset-0 origin-center transition-transform duration-100"
+                style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
+              >
               {/* Dot grid background */}
               <div className="absolute inset-0 opacity-10" style={{
                 backgroundImage: 'radial-gradient(circle, hsl(var(--muted-foreground)) 1px, transparent 1px)',
