@@ -54,7 +54,7 @@ export default function AnimatedKpiCard({ icon: Icon, label, value, secondaryVal
         className={cn(
           'h-full border-border/50 overflow-hidden relative group',
           onClick ? 'card-interactive cursor-pointer' : 'card-flat',
-          active && 'ring-2 ring-primary/30 border-primary/20 card-glow',
+          active && 'ring-2 ring-primary border-primary bg-primary/8 shadow-md shadow-primary/15',
         )}
         onClick={onClick}
       >
