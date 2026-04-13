@@ -248,7 +248,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
         <Tabs defaultValue="invites" className="w-full">
           <TabsList className="w-full justify-center rounded-none border-b bg-transparent h-9">
             <TabsTrigger value="invites" className="flex-1 text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
-              Convites {pendingInvites.length > 0 && `(${pendingInvites.length})`}
+              Ações {pendingInvites.length > 0 && `(${pendingInvites.length})`}
             </TabsTrigger>
             <TabsTrigger value="recent" className="flex-1 text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
               Recentes
