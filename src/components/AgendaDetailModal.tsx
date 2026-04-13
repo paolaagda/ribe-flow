@@ -443,79 +443,83 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
 
           <Separator className="opacity-40" />
 
-          {/* ── Date / Period / Time / Medio — all editable ── */}
+          {/* ── Date / Period / Time / Medio — editable with permissions ── */}
           <div className="px-5 py-2.5 flex items-center gap-2 flex-wrap">
             {/* Date */}
-            <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
-              <PopoverTrigger asChild>
-                <button className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md px-1.5 py-0.5 hover:bg-muted/50">
-                  <CalendarIcon className="h-3.5 w-3.5" />
-                  <span>{format(parseISO(visit.date), "dd/MM/yyyy")}</span>
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={parseISO(visit.date)}
-                  onSelect={handleDateChange}
-                  className="p-3 pointer-events-auto"
-                  locale={ptBR}
-                />
-              </PopoverContent>
-            </Popover>
+            {canEditFields ? (
+              <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md px-1.5 py-0.5 hover:bg-muted/50">
+                    <CalendarIcon className="h-3.5 w-3.5" />
+                    <span>{format(parseISO(visit.date), "dd/MM/yyyy")}</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={parseISO(visit.date)} onSelect={handleDateChange} className="p-3 pointer-events-auto" locale={ptBR} />
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground px-1.5 py-0.5">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {format(parseISO(visit.date), "dd/MM/yyyy")}
+              </span>
+            )}
 
             <span className="text-muted-foreground/30">·</span>
 
             {/* Period */}
-            <Select value={visit.period} onValueChange={handlePeriodChange}>
-              <SelectTrigger className="h-6 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 text-xs text-muted-foreground hover:text-foreground capitalize shadow-none">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {activePeriods.map(p => (
-                  <SelectItem key={p} value={p.toLowerCase()} className="text-xs capitalize">{p}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {canEditFields ? (
+              <Select value={visit.period} onValueChange={handlePeriodChange}>
+                <SelectTrigger className="h-6 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 text-xs text-muted-foreground hover:text-foreground capitalize shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {activePeriods.map(p => (
+                    <SelectItem key={p} value={p.toLowerCase()} className="text-xs capitalize">{p}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <span className="text-xs text-muted-foreground capitalize px-1.5">{visit.period}</span>
+            )}
 
             <span className="text-muted-foreground/30">·</span>
 
             {/* Time */}
-            {editingTime ? (
+            {canEditFields && editingTime ? (
               <div className="flex items-center gap-1">
-                <Input
-                  type="time"
-                  value={timeDraft}
-                  onChange={e => setTimeDraft(e.target.value)}
-                  className="h-6 w-24 text-xs px-1.5"
-                  autoFocus
-                  onKeyDown={e => { if (e.key === 'Enter') handleSaveTime(); if (e.key === 'Escape') setEditingTime(false); }}
-                />
+                <Input type="time" value={timeDraft} onChange={e => setTimeDraft(e.target.value)} className="h-6 w-24 text-xs px-1.5" autoFocus onKeyDown={e => { if (e.key === 'Enter') handleSaveTime(); if (e.key === 'Escape') setEditingTime(false); }} />
                 <Button variant="ghost" size="icon" className="h-5 w-5" onClick={handleSaveTime}><Check className="h-3 w-3" /></Button>
                 <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => setEditingTime(false)}><X className="h-3 w-3" /></Button>
               </div>
-            ) : (
-              <button
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-md px-1.5 py-0.5 hover:bg-muted/50"
-                onClick={handleStartEditTime}
-              >
+            ) : canEditFields ? (
+              <button className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-md px-1.5 py-0.5 hover:bg-muted/50" onClick={handleStartEditTime}>
                 <Clock className="h-3 w-3" />
                 {visit.time || 'Sem horário'}
               </button>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground px-1.5 py-0.5">
+                <Clock className="h-3 w-3" />
+                {visit.time || 'Sem horário'}
+              </span>
             )}
 
             <span className="text-muted-foreground/30">·</span>
 
             {/* Medio */}
-            <Select value={visit.medio} onValueChange={handleMedioChange}>
-              <SelectTrigger className="h-6 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 text-xs text-muted-foreground hover:text-foreground capitalize shadow-none">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="presencial" className="text-xs">Presencial</SelectItem>
-                <SelectItem value="remoto" className="text-xs">Remoto</SelectItem>
-              </SelectContent>
-            </Select>
+            {canEditFields ? (
+              <Select value={visit.medio} onValueChange={handleMedioChange}>
+                <SelectTrigger className="h-6 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 text-xs text-muted-foreground hover:text-foreground capitalize shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="presencial" className="text-xs">Presencial</SelectItem>
+                  <SelectItem value="remoto" className="text-xs">Remoto</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <span className="text-xs text-muted-foreground capitalize px-1.5">{visit.medio}</span>
+            )}
           </div>
 
           {/* ── Potential value — editable ── */}
