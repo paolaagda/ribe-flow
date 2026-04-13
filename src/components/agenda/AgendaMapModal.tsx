@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MapPin, Navigation, Eye, EyeOff, Handshake, UserPlus, ExternalLink, CalendarPlus, Clock, ArrowRight, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw, Building2, User, DollarSign } from 'lucide-react';
-import { Visit, Partner, getUserById } from '@/data/mock-data';
+import { Visit, Partner, getUserById, mockUsers } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useVisits } from '@/hooks/useVisits';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { format, parseISO, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -90,10 +91,34 @@ export default function AgendaMapModal({
 }: AgendaMapModalProps) {
   const { partners, getPartnerById } = usePartners();
   const { visits: allVisits } = useVisits();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [navDate, setNavDate] = useState<Date>(() => currentDateProp ?? new Date());
   const [mapView, setMapView] = useState<'day' | 'week' | 'month'>(viewProp ?? 'week');
-  const visits = visitsProp ?? allVisits;
+  const [filterCommercial, setFilterCommercial] = useState<string>('all');
+
+  const GLOBAL_VIEW_ROLES = ['diretor', 'gerente', 'ascom'];
+  const hasGlobalView = user ? GLOBAL_VIEW_ROLES.includes(user.role) : false;
+
+  // Apply same visibility rules as Agenda
+  const visibleVisits = useMemo(() => {
+    const base = visitsProp ?? allVisits;
+    if (!user) return base;
+    if (!hasGlobalView) {
+      // Comercial/Cadastro: own visits, created by them, or accepted invites
+      return base.filter(
+        v => v.userId === user.id || v.createdBy === user.id ||
+          v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted')
+      );
+    }
+    // Global view roles can optionally filter by commercial
+    if (filterCommercial !== 'all') {
+      return base.filter(v => v.userId === filterCommercial);
+    }
+    return base;
+  }, [visitsProp, allVisits, user, hasGlobalView, filterCommercial]);
+
+  const visits = visibleVisits;
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [partnerDetailTarget, setPartnerDetailTarget] = useState<Partner | null>(null);
 
@@ -389,6 +414,21 @@ export default function AgendaMapModal({
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
+
+          {hasGlobalView && (
+            <Select value={filterCommercial} onValueChange={v => { setFilterCommercial(v); setSelectedPoint(null); }}>
+              <SelectTrigger className="w-36 h-8 text-xs">
+                <User className="h-3 w-3 mr-1" />
+                <SelectValue placeholder="Comercial" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {mockUsers.filter(u => u.role === 'comercial' && u.active).map(u => (
+                  <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
 
           <Button
             variant={showSuggestions ? 'default' : 'outline'}
