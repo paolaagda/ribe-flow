@@ -49,9 +49,16 @@ export default function PartnerListItemCard({ partner, operationalData, onClick,
         {/* Row 1: Identity + Criticality */}
         <div className="flex items-start justify-between gap-2 pb-2.5">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="icon-container-sm icon-container-primary transition-transform duration-300 group-hover:scale-105 shrink-0">
-              <Building2 className="h-4 w-4 text-primary" />
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="icon-container-sm icon-container-primary transition-transform duration-300 group-hover:scale-105 shrink-0 cursor-default">
+                  <Building2 className="h-4 w-4 text-primary" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                Criticidade: {cc.label}
+              </TooltipContent>
+            </Tooltip>
             <div className="min-w-0">
               <p className="text-ds-sm font-semibold truncate">{partner.name}</p>
               <p className="text-ds-xs text-muted-foreground truncate">{city}</p>
