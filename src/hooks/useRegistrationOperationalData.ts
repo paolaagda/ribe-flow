@@ -112,7 +112,7 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
       isBlocked,
       partnerName: partner?.name || 'Parceiro removido',
     };
-  }, [checkedDocs, activeDocuments, totalDocsCount, getPartnerById]);
+  }, [getDocPendingCount, activeDocIds, activeDocuments, totalDocsCount, getPartnerById]);
 
   // Build the 5 summary cards
   const summaryCards = useMemo((): SummaryCardData[] => {
