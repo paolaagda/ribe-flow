@@ -2039,7 +2039,7 @@ export default function AgendaPage() {
           setFormData(prev => ({
             ...prev,
             partnerId,
-            date: format(tomorrow, "yyyy-MM-dd"),
+            date: format(followUpDate, "yyyy-MM-dd"),
             type: currentVisit?.type || "visita",
             medio: currentVisit?.medio || "presencial",
             structures: partner?.structures || currentVisit?.structures || [],
