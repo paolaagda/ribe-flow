@@ -2,7 +2,7 @@ import { useMemo, useCallback } from 'react';
 import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useDocumentValidation } from '@/hooks/useDocumentValidation';
 import { VisitComment, Visit, Partner } from '@/data/mock-data';
 
 export interface TaskItem {
@@ -17,10 +17,7 @@ export function useTasks() {
   const { visits, setVisits } = useVisits();
   const { getPartnerById } = usePartners();
   const { user } = useAuth();
-  const [checkedDocs, setCheckedDocs] = useLocalStorage<Record<string, string[]>>(
-    'ribercred_partner_docs_v1',
-    {}
-  );
+  const { submitForValidation, resetToPending } = useDocumentValidation();
 
   const allTasks = useMemo<TaskItem[]>(() => {
     const tasks: TaskItem[] = [];
@@ -79,36 +76,87 @@ export function useTasks() {
 
       const isNowCompleted = !comment.taskCompleted;
 
-      // Sync: if it's a document task being completed, mark doc as received in partner checklist
-      if (comment.taskCategory === 'document' && comment.taskSourceId && isNowCompleted) {
+      // Document tasks: use validation flow instead of direct sync
+      if (comment.taskCategory === 'document' && comment.taskSourceId) {
         const partnerId = visit.partnerId;
-        setCheckedDocs(prevDocs => {
-          const current = prevDocs[partnerId] || [];
-          if (current.includes(comment.taskSourceId!)) return prevDocs;
-          return { ...prevDocs, [partnerId]: [...current, comment.taskSourceId!] };
-        });
-      }
-
-      // Sync: if it's a document task being uncompleted, remove doc from partner checklist
-      if (comment.taskCategory === 'document' && comment.taskSourceId && !isNowCompleted) {
-        const partnerId = visit.partnerId;
-        setCheckedDocs(prevDocs => {
-          const current = prevDocs[partnerId] || [];
-          return { ...prevDocs, [partnerId]: current.filter(id => id !== comment.taskSourceId) };
-        });
+        if (isNowCompleted) {
+          // Comercial marks done -> submit for validation (NOT auto-validate)
+          submitForValidation(partnerId, comment.taskSourceId);
+        } else {
+          // Comercial unchecks -> reset to pending
+          resetToPending(partnerId, comment.taskSourceId);
+        }
       }
 
       return prev.map(v => {
         if (v.id !== visitId) return v;
         return {
           ...v,
-          comments: v.comments.map(c =>
-            c.id === commentId ? { ...c, taskCompleted: !c.taskCompleted } : c
-          ),
+          comments: v.comments.map(c => {
+            if (c.id !== commentId) return c;
+            if (c.taskCategory === 'document' && c.taskSourceId) {
+              // Document task: set doc-specific status
+              if (isNowCompleted) {
+                return {
+                  ...c,
+                  taskCompleted: true,
+                  taskDocStatus: 'submitted_for_validation' as const,
+                  taskReturnReason: undefined,
+                };
+              } else {
+                return {
+                  ...c,
+                  taskCompleted: false,
+                  taskDocStatus: 'pending' as const,
+                  taskReturnReason: undefined,
+                };
+              }
+            }
+            // Non-document tasks: simple toggle
+            return { ...c, taskCompleted: !c.taskCompleted };
+          }),
         };
       });
     });
-  }, [setVisits, setCheckedDocs]);
+  }, [setVisits, submitForValidation, resetToPending]);
+
+  // Called by Cadastro when rejecting a document - reverts the task
+  const returnTaskForCorrection = useCallback((visitId: string, commentId: string, reason: string) => {
+    setVisits(prev => prev.map(v => {
+      if (v.id !== visitId) return v;
+      return {
+        ...v,
+        comments: v.comments.map(c => {
+          if (c.id !== commentId) return c;
+          return {
+            ...c,
+            taskCompleted: false,
+            taskDocStatus: 'returned_for_correction' as const,
+            taskReturnReason: reason,
+          };
+        }),
+      };
+    }));
+  }, [setVisits]);
+
+  // Called by Cadastro when validating a document - marks task as validated
+  const markTaskValidated = useCallback((visitId: string, commentId: string) => {
+    setVisits(prev => prev.map(v => {
+      if (v.id !== visitId) return v;
+      return {
+        ...v,
+        comments: v.comments.map(c => {
+          if (c.id !== commentId) return c;
+          return {
+            ...c,
+            taskCompleted: true,
+            taskDocStatus: 'validated' as const,
+            taskReturnReason: undefined,
+          };
+        }),
+      };
+    }));
+  }, [setVisits]);
 
   const getDaysPending = useCallback((createdAt: string) => {
     return Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
@@ -122,6 +170,8 @@ export function useTasks() {
     getTasksByPartnerId,
     getTasksByVisitId,
     toggleTask,
+    returnTaskForCorrection,
+    markTaskValidated,
     getDaysPending,
   };
 }
