@@ -25,8 +25,7 @@ export function usePartnerOperationalData(visiblePartners: Partner[]) {
   const { visits } = useVisits();
   const { getTasksByPartnerId } = useTasks();
   const { registrations } = useRegistrations();
-  const { getActiveDocuments } = useInfoData();
-  const [checkedDocs] = useLocalStorage<Record<string, string[]>>('ribercred_partner_docs_v1', {});
+  const { getPendingValidationCount: getDocPendingCount } = useDocumentValidation();
 
   const activeDocuments = useMemo(() => getActiveDocuments(), [getActiveDocuments]);
   const totalDocsCount = activeDocuments.length;
