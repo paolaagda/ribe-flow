@@ -170,7 +170,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const pendingInvites = useMemo(() => notifications.filter(n => actionableTypes.includes(n.type) && n.status === 'pending'), [notifications]);
   const recentNotifications = useMemo(() =>
     notifications
-      .filter(n => !((n.type === 'invite' || n.type === 'registration_approval') && n.status === 'pending'))
+      .filter(n => !(actionableTypes.includes(n.type) && n.status === 'pending'))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 20),
     [notifications]
