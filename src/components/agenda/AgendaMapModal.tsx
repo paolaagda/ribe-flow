@@ -152,20 +152,20 @@ export default function AgendaMapModal({
   const periodVisits = useMemo(() => {
     let start: Date, end: Date;
     if (mapView === 'month') {
-      start = startOfMonth(internalDate);
-      end = endOfMonth(internalDate);
+      start = startOfMonth(navDate);
+      end = endOfMonth(navDate);
     } else if (mapView === 'week') {
-      start = startOfWeek(internalDate, { locale: ptBR });
-      end = endOfWeek(internalDate, { locale: ptBR });
+      start = startOfWeek(navDate, { locale: ptBR });
+      end = endOfWeek(navDate, { locale: ptBR });
     } else {
-      start = new Date(internalDate); start.setHours(0, 0, 0, 0);
-      end = new Date(internalDate); end.setHours(23, 59, 59, 999);
+      start = new Date(navDate); start.setHours(0, 0, 0, 0);
+      end = new Date(navDate); end.setHours(23, 59, 59, 999);
     }
     return visits.filter(v => {
       const d = parseISO(v.date);
       return isWithinInterval(d, { start, end });
     });
-  }, [visits, mapView, internalDate]);
+  }, [visits, mapView, navDate]);
 
   // Visit points with coordinates, sorted by date+time for route direction
   const visitPoints = useMemo(() => {
