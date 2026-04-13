@@ -472,6 +472,7 @@ export default function AgendaMapModal({
                 </div>
               )}
             </div>
+          </TooltipProvider>
         )}
 
         {/* Legend */}
