@@ -53,6 +53,7 @@ import {
   CalendarRange,
   Filter,
   Crown,
+  Map,
 } from "lucide-react";
 import {
   format,
