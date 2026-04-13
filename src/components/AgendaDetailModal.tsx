@@ -94,7 +94,9 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
   const isResponsibleCommercial = user?.id === visit.userId;
   const FINAL_STATUSES = ['Concluída', 'Cancelada', 'Inconclusa'];
   const isStatusLocked = user?.role === 'comercial' && FINAL_STATUSES.includes(visit.status);
-  const canEditVisit = canWrite('agenda.edit') && (isResponsibleCommercial || user?.id === visit.createdBy || user?.role !== 'comercial') && !isStatusLocked;
+  const isOwnerOrManager = isResponsibleCommercial || user?.id === visit.createdBy || !['comercial', 'cadastro'].includes(user?.role || '');
+  const canEditFields = canWrite('agenda.edit') && isOwnerOrManager;
+  const canEditVisit = canEditFields && !isStatusLocked;
 
   const lastVisitInfo = partner && visit.type === 'visita' ? (() => {
     const lastConcluded = visits
