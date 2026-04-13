@@ -196,8 +196,30 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
               <Eye className="h-3 w-3" />
               Detalhes
             </Button>
-          )}
+      )}
+
+      {/* Validation actions for Cadastro on submitted items */}
+      {canActOnValidation && (notification.type === 'doc_validation_submitted' || notification.type === 'reg_validation_submitted') && (
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            className="h-7 text-xs gap-1 bg-success hover:bg-success/90 text-success-foreground"
+            onClick={() => onValidateItem?.(notification)}
+          >
+            <Check className="h-3 w-3" />
+            Validar
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-7 text-xs gap-1"
+            onClick={() => onRejectItem?.(notification)}
+          >
+            <X className="h-3 w-3" />
+            Recusar
+          </Button>
         </div>
+      )}
       )}
     </div>
   );
