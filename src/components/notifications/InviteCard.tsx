@@ -13,9 +13,12 @@ interface InviteCardProps {
   onAccept: (id: string) => void;
   onReject: (id: string) => void;
   onViewDetails?: (notification: AppNotification) => void;
+  onValidateItem?: (notification: AppNotification) => void;
+  onRejectItem?: (notification: AppNotification) => void;
+  canActOnValidation?: boolean;
 }
 
-export default function InviteCard({ notification, onAccept, onReject, onViewDetails }: InviteCardProps) {
+export default function InviteCard({ notification, onAccept, onReject, onViewDetails, onValidateItem, onRejectItem, canActOnValidation }: InviteCardProps) {
   const fromUser = getUserById(notification.fromUserId);
   const visitDate = notification.date ? parseISO(notification.date) : null;
   const validDate = visitDate && isValid(visitDate);
@@ -194,6 +197,29 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
               Detalhes
             </Button>
           )}
+        </div>
+      )}
+
+      {/* Validation actions for Cadastro on submitted items */}
+      {canActOnValidation && (notification.type === 'doc_validation_submitted' || notification.type === 'reg_validation_submitted') && (
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            className="h-7 text-xs gap-1 bg-success hover:bg-success/90 text-success-foreground"
+            onClick={() => onValidateItem?.(notification)}
+          >
+            <Check className="h-3 w-3" />
+            Validar
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-7 text-xs gap-1"
+            onClick={() => onRejectItem?.(notification)}
+          >
+            <X className="h-3 w-3" />
+            Recusar
+          </Button>
         </div>
       )}
     </div>

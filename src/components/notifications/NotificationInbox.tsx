@@ -5,14 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications, AppNotification } from '@/hooks/useNotifications';
 import { useVisits } from '@/hooks/useVisits';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useRegistrations } from '@/hooks/useRegistrations';
+import { useDocumentValidation } from '@/hooks/useDocumentValidation';
 import { useToast } from '@/hooks/use-toast';
 import { getRandomMessage } from '@/data/notification-messages';
 import InviteCard from './InviteCard';
 import InviteRejectionModal from '@/components/agenda/InviteRejectionModal';
+import DocumentRejectModal from '@/components/partners/DocumentRejectModal';
 import { cn } from '@/lib/utils';
 import { getEmptyStateMessage } from '@/data/notification-messages';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,13 +34,18 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   } = useNotifications();
   const { toast } = useToast();
   const { addLog } = useAuditLog();
-  const { updateRegistration } = useRegistrations();
+  const { updateRegistration, validateRegistration, rejectRegistration } = useRegistrations();
+  const { validateDoc, rejectDoc, revokeValidation } = useDocumentValidation();
   const { user } = useAuth();
   const { visits } = useVisits();
+
+  const isCadastroUser = user?.role === 'cadastro' || user?.role === 'gerente' || user?.role === 'diretor';
 
   const prevCountRef = useRef(unreadCount);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [docRejectModalOpen, setDocRejectModalOpen] = useState(false);
+  const [rejectingValidationNotif, setRejectingValidationNotif] = useState<AppNotification | null>(null);
 
   useEffect(() => {
     ensureInitialized();
@@ -169,6 +176,43 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     setRejectingId(null);
   };
 
+  const handleValidateItem = (notif: AppNotification) => {
+    if (notif.type === 'doc_validation_submitted' && notif.partnerId && (notif.docId || notif.docName)) {
+      const docIdentifier = notif.docId || notif.docName || '';
+      validateDoc(notif.partnerId, docIdentifier);
+      acceptInvite(notif.id);
+      toast({ title: '✅ Documento validado', description: `${notif.docName || ''} para ${notif.partnerName}` });
+    } else if (notif.type === 'reg_validation_submitted' && notif.registrationId) {
+      validateRegistration(notif.registrationId);
+      acceptInvite(notif.id);
+      toast({ title: '✅ Cadastro validado', description: `${notif.bankName || ''} para ${notif.partnerName}` });
+    }
+  };
+
+  const handleRejectItem = (notif: AppNotification) => {
+    setRejectingValidationNotif(notif);
+    setDocRejectModalOpen(true);
+  };
+
+  const handleConfirmRejectItem = (reason: string) => {
+    const notif = rejectingValidationNotif;
+    if (!notif) return;
+
+    if (notif.type === 'doc_validation_submitted' && notif.partnerId && (notif.docId || notif.docName)) {
+      const docIdentifier = notif.docId || notif.docName || '';
+      rejectDoc(notif.partnerId, docIdentifier, reason);
+      acceptInvite(notif.id);
+      toast({ title: '📄 Documento devolvido', description: `Motivo: ${reason}` });
+    } else if (notif.type === 'reg_validation_submitted' && notif.registrationId) {
+      rejectRegistration(notif.registrationId, reason);
+      acceptInvite(notif.id);
+      toast({ title: '🏦 Cadastro devolvido', description: `Motivo: ${reason}` });
+    }
+
+    setDocRejectModalOpen(false);
+    setRejectingValidationNotif(null);
+  };
+
   return (
     <>
     <Popover>
@@ -227,6 +271,9 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
                       notification={n}
                       onAccept={handleAccept}
                       onReject={handleReject}
+                      onValidateItem={handleValidateItem}
+                      onRejectItem={handleRejectItem}
+                      canActOnValidation={isCadastroUser}
                     />
                   ))}
                 </div>
@@ -248,6 +295,9 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
                       notification={n}
                       onAccept={handleAccept}
                       onReject={handleReject}
+                      onValidateItem={handleValidateItem}
+                      onRejectItem={handleRejectItem}
+                      canActOnValidation={isCadastroUser}
                     />
                   ))}
                 </div>
@@ -269,6 +319,9 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
                       notification={n}
                       onAccept={handleAccept}
                       onReject={handleReject}
+                      onValidateItem={handleValidateItem}
+                      onRejectItem={handleRejectItem}
+                      canActOnValidation={isCadastroUser}
                     />
                   ))}
                   {history.length > 20 && (
@@ -300,6 +353,14 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
         return (visit?.medio as 'presencial' | 'remoto') || 'presencial';
       })()}
       onConfirm={handleConfirmReject}
+    />
+    <DocumentRejectModal
+      open={docRejectModalOpen}
+      onOpenChange={setDocRejectModalOpen}
+      docName={rejectingValidationNotif?.type === 'reg_validation_submitted'
+        ? `Cadastro ${rejectingValidationNotif?.bankName || ''}`
+        : (rejectingValidationNotif?.docName || 'Documento')}
+      onConfirm={handleConfirmRejectItem}
     />
     </>
   );

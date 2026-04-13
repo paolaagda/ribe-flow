@@ -82,6 +82,7 @@ export function useDocumentValidation() {
           documento: docName,
         }),
         docName,
+        docId,
       });
     });
   }, [addNotification, user, getDocName]);

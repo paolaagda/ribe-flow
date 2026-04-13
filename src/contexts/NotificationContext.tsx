@@ -27,6 +27,7 @@ export interface AppNotification {
   registrationId?: string;
   bankName?: string;
   docName?: string;
+  docId?: string;
 }
 
 interface NotificationContextValue {
