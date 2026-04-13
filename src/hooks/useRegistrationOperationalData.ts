@@ -69,10 +69,11 @@ function isStalledOver7(daysSinceLastUpdate: number): boolean {
 export function useRegistrationOperationalData(registrations: Registration[]) {
   const { getPartnerById } = usePartners();
   const { getActiveDocuments } = useInfoData();
-  const [checkedDocs] = useLocalStorage<Record<string, string[]>>('ribercred_partner_docs_v1', {});
+  const { getPendingValidationCount: getDocPendingCount } = useDocumentValidation();
 
   const activeDocuments = useMemo(() => getActiveDocuments(), [getActiveDocuments]);
   const totalDocsCount = activeDocuments.length;
+  const activeDocIds = useMemo(() => activeDocuments.map(d => d.id), [activeDocuments]);
 
   const getRegData = useCallback((reg: Registration): RegistrationOperationalData => {
     const today = new Date();
@@ -83,9 +84,7 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
       : reg.requestedAt;
     const daysSinceLastUpdate = differenceInDays(today, new Date(lastUpdateDate));
 
-    const partnerChecked = checkedDocs[reg.partnerId] || [];
-    const validChecked = partnerChecked.filter(id => activeDocuments.some(d => d.id === id)).length;
-    const pendingDocsCount = Math.max(0, totalDocsCount - validChecked);
+    const pendingDocsCount = getDocPendingCount(reg.partnerId, activeDocIds);
 
     let criticality: RegistrationCriticality = 'baixa';
     const isTerminal = ['Concluído', 'Cancelado'].includes(reg.status);
