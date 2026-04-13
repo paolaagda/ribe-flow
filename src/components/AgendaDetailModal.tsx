@@ -969,7 +969,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
       {/* Justification modal for status changes */}
       <JustificationModal
         open={showJustification}
-        onOpenChange={(o) => { if (!o) { setShowJustification(false); setPendingStatus(null); } }}
+        onOpenChange={(o) => { if (!o) { setShowJustification(false); setPendingStatus(null); setPendingDate(null); } }}
         targetStatus={pendingStatus || 'Reagendada'}
         onConfirm={handleJustificationConfirm}
       />
