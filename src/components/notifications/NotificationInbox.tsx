@@ -271,6 +271,9 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
                       notification={n}
                       onAccept={handleAccept}
                       onReject={handleReject}
+                      onValidateItem={handleValidateItem}
+                      onRejectItem={handleRejectItem}
+                      canActOnValidation={isCadastroUser}
                     />
                   ))}
                 </div>
@@ -292,6 +295,9 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
                       notification={n}
                       onAccept={handleAccept}
                       onReject={handleReject}
+                      onValidateItem={handleValidateItem}
+                      onRejectItem={handleRejectItem}
+                      canActOnValidation={isCadastroUser}
                     />
                   ))}
                 </div>
@@ -313,6 +319,9 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
                       notification={n}
                       onAccept={handleAccept}
                       onReject={handleReject}
+                      onValidateItem={handleValidateItem}
+                      onRejectItem={handleRejectItem}
+                      canActOnValidation={isCadastroUser}
                     />
                   ))}
                   {history.length > 20 && (
