@@ -25,7 +25,8 @@ export type SystemCategory =
   | 'prospeccaoInconclusaPresencial'
   | 'prospeccaoInconclusaRemota'
   | 'recusaConvidadoPresencial'
-  | 'recusaConvidadoRemota';
+  | 'recusaConvidadoRemota'
+  | 'documentRejectionReasons';
 
 const categoryLabels: Record<SystemCategory, string> = {
   products: 'Produtos',
