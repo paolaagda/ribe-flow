@@ -283,15 +283,8 @@ export default function AgendaMapModal({
     return arrows;
   }, [visitPoints, toXY]);
 
-  // Container dimensions ref for pixel position calc
-  const [containerSize, setContainerSize] = useState({ w: 800, h: 400 });
-  const containerObserver = useCallback((node: HTMLDivElement | null) => {
-    mapContainerRef.current = node;
-    if (node) {
-      const rect = node.getBoundingClientRect();
-      setContainerSize({ w: rect.width, h: rect.height });
-    }
-  }, []);
+
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
