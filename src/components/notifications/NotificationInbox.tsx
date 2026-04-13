@@ -10,6 +10,9 @@ import { useVisits } from '@/hooks/useVisits';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useDocumentValidation } from '@/hooks/useDocumentValidation';
+import { useTasks } from '@/hooks/useTasks';
+import { usePartners } from '@/hooks/usePartners';
+import { useInfoData } from '@/hooks/useInfoData';
 import { useToast } from '@/hooks/use-toast';
 import { getRandomMessage } from '@/data/notification-messages';
 import InviteCard from './InviteCard';
@@ -37,8 +40,21 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   const { addLog } = useAuditLog();
   const { updateRegistration, validateRegistration, rejectRegistration } = useRegistrations();
   const { validateDoc, rejectDoc, revokeValidation } = useDocumentValidation();
+  const { returnTaskForCorrection, markTaskValidated, createDocPendingTask } = useTasks();
+  const { getPartnerById } = usePartners();
+  const { getActiveDocuments } = useInfoData();
   const { user } = useAuth();
   const { visits } = useVisits();
+
+  // Find the task linked to a document for syncing (same logic as PartnerDocuments)
+  const findDocTask = (partnerId: string, docId: string) => {
+    for (const visit of visits) {
+      if (visit.partnerId !== partnerId) continue;
+      const comment = visit.comments.find(c => c.type === 'task' && c.taskCategory === 'document' && c.taskSourceId === docId);
+      if (comment) return { visitId: visit.id, commentId: comment.id };
+    }
+    return null;
+  };
 
   const isCadastroUser = user?.role === 'cadastro' || user?.role === 'gerente' || user?.role === 'diretor';
 
@@ -181,6 +197,9 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     if (notif.type === 'doc_validation_submitted' && notif.partnerId && (notif.docId || notif.docName)) {
       const docIdentifier = notif.docId || notif.docName || '';
       validateDoc(notif.partnerId, docIdentifier);
+      // Sync task to validated
+      const taskRef = findDocTask(notif.partnerId, docIdentifier);
+      if (taskRef) markTaskValidated(taskRef.visitId, taskRef.commentId);
       acceptInvite(notif.id);
       toast({ title: '✅ Documento validado', description: `${notif.docName || ''} para ${notif.partnerName}` });
     } else if (notif.type === 'reg_validation_submitted' && notif.registrationId) {
@@ -202,6 +221,18 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     if (notif.type === 'doc_validation_submitted' && notif.partnerId && (notif.docId || notif.docName)) {
       const docIdentifier = notif.docId || notif.docName || '';
       rejectDoc(notif.partnerId, docIdentifier, reason);
+      // Sync task: return for correction or auto-create
+      const taskRef = findDocTask(notif.partnerId, docIdentifier);
+      if (taskRef) {
+        returnTaskForCorrection(taskRef.visitId, taskRef.commentId, reason);
+      } else {
+        const partner = getPartnerById(notif.partnerId);
+        const docs = getActiveDocuments();
+        const docName = docs.find(d => d.id === docIdentifier)?.name || notif.docName || docIdentifier;
+        if (partner) {
+          createDocPendingTask(notif.partnerId, docIdentifier, docName, reason, partner.responsibleUserId);
+        }
+      }
       acceptInvite(notif.id);
       toast({ title: '📄 Documento devolvido', description: `Motivo: ${reason}` });
     } else if (notif.type === 'reg_validation_submitted' && notif.registrationId) {
