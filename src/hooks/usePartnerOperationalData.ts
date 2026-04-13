@@ -25,10 +25,12 @@ export function usePartnerOperationalData(visiblePartners: Partner[]) {
   const { visits } = useVisits();
   const { getTasksByPartnerId } = useTasks();
   const { registrations } = useRegistrations();
+  const { getActiveDocuments } = useInfoData();
   const { getPendingValidationCount: getDocPendingCount } = useDocumentValidation();
 
   const activeDocuments = useMemo(() => getActiveDocuments(), [getActiveDocuments]);
   const totalDocsCount = activeDocuments.length;
+  const activeDocIds = useMemo(() => activeDocuments.map(d => d.id), [activeDocuments]);
 
   const getPartnerData = useCallback((partnerId: string): PartnerOperationalData => {
     const today = new Date();
@@ -41,9 +43,8 @@ export function usePartnerOperationalData(visiblePartners: Partner[]) {
       return days >= 10;
     });
 
-    // Documents — reuse existing checkedDocs localStorage
-    const partnerChecked = checkedDocs[partnerId] || [];
-    const pendingDocs = totalDocsCount - partnerChecked.filter(id => activeDocuments.some(d => d.id === id)).length;
+    // Documents — use validation store
+    const pendingDocs = getDocPendingCount(partnerId, activeDocIds);
 
     // Registrations
     const partnerRegs = registrations.filter(r => r.partnerId === partnerId);
