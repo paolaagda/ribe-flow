@@ -5,6 +5,7 @@ import { PartnerOperationalData, Criticality } from '@/hooks/usePartnerOperation
 import { usePermission } from '@/hooks/usePermission';
 import { Building2, MapPin, User, CheckSquare, FileText, Landmark, ChevronRight, ArrowRight, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
