@@ -366,7 +366,8 @@ export default function AgendaMapModal({
           </Button>
 
           <span className="text-xs text-muted-foreground ml-auto">
-            {visitPoints.length} compromisso{visitPoints.length !== 1 ? 's' : ''}
+            {periodVisits.length} compromisso{periodVisits.length !== 1 ? 's' : ''} no período
+            {visitPoints.length < periodVisits.length && ` (${visitPoints.length} com localização)`}
             {showSuggestions && ` • ${suggestions.length} sugestão(ões)`}
           </span>
         </div>
