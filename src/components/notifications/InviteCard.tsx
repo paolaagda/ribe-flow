@@ -196,6 +196,8 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
               <Eye className="h-3 w-3" />
               Detalhes
             </Button>
+          )}
+        </div>
       )}
 
       {/* Validation actions for Cadastro on submitted items */}
