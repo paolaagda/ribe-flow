@@ -121,7 +121,6 @@ export default function AgendaMapModal({
   const visits = visibleVisits;
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [partnerDetailTarget, setPartnerDetailTarget] = useState<Partner | null>(null);
-  const [partnerDetailTarget, setPartnerDetailTarget] = useState<Partner | null>(null);
 
   // Zoom & pan
   const [zoom, setZoom] = useState(1);
