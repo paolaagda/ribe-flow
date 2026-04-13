@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { MapPin, Navigation, Route, Eye, EyeOff, Handshake, UserPlus, ExternalLink, CalendarPlus, Clock } from 'lucide-react';
-import { Visit, Partner, getUserById, cargoLabels } from '@/data/mock-data';
+import { MapPin, Navigation, Eye, EyeOff, Handshake, UserPlus, ExternalLink, CalendarPlus, Clock, ArrowRight } from 'lucide-react';
+import { Visit, Partner, getUserById } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useVisits } from '@/hooks/useVisits';
 import { cn } from '@/lib/utils';
@@ -22,6 +22,7 @@ interface AgendaMapModalProps {
   currentDate?: Date;
   view?: 'day' | 'week' | 'month';
   onOpenVisitDetail?: (visit: Visit) => void;
+  onCreateVisitFromSuggestion?: (partnerId: string, suggestedDate: string) => void;
 }
 
 const RADIUS_KM = 100;
@@ -50,6 +51,7 @@ export default function AgendaMapModal({
   currentDate: currentDateProp,
   view: viewProp,
   onOpenVisitDetail,
+  onCreateVisitFromSuggestion,
 }: AgendaMapModalProps) {
   const { partners, getPartnerById } = usePartners();
   const { visits: allVisits } = useVisits();
@@ -58,7 +60,7 @@ export default function AgendaMapModal({
   const [mapView, setMapView] = useState<'day' | 'week' | 'month'>(viewProp ?? 'week');
   const visits = visitsProp ?? allVisits;
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedPoint, setSelectedPoint] = useState<null | { type: 'visit'; visit: Visit; partner?: Partner } | { type: 'suggestion'; partner: Partner }>(null);
+  const [selectedPoint, setSelectedPoint] = useState<null | { type: 'visit'; visit: Visit; partner?: Partner; index: number } | { type: 'suggestion'; partner: Partner }>(null);
 
   // Filter visits by the selected period
   const periodVisits = useMemo(() => {
@@ -79,14 +81,21 @@ export default function AgendaMapModal({
     });
   }, [visits, mapView, internalDate]);
 
-  // Visit points with coordinates
+  // Visit points with coordinates, sorted by date+time for route direction
   const visitPoints = useMemo(() => {
     return periodVisits
       .map(v => {
         const partner = getPartnerById(v.partnerId);
         return { visit: v, partner };
       })
-      .filter((p): p is { visit: Visit; partner: Partner } => !!p.partner && p.partner.lat !== 0);
+      .filter((p): p is { visit: Visit; partner: Partner } => !!p.partner && p.partner.lat !== 0)
+      .sort((a, b) => {
+        const dateComp = a.visit.date.localeCompare(b.visit.date);
+        if (dateComp !== 0) return dateComp;
+        const timeA = a.visit.time || '99:99';
+        const timeB = b.visit.time || '99:99';
+        return timeA.localeCompare(timeB);
+      });
   }, [periodVisits, getPartnerById]);
 
   // Suggested partners within 100km of any visit
@@ -139,7 +148,35 @@ export default function AgendaMapModal({
     return concluded[0]?.date || null;
   }, [allVisits]);
 
-  const periodLabel = mapView === 'day' ? 'Dia' : mapView === 'week' ? 'Semana' : 'Mês';
+  // Find the closest visit date for a suggestion partner
+  const getClosestVisitDate = useCallback((partner: Partner) => {
+    if (visitPoints.length === 0) return format(new Date(), 'yyyy-MM-dd');
+    let closest = visitPoints[0];
+    let minDist = Infinity;
+    for (const vp of visitPoints) {
+      const dist = haversineDistance(partner.lat, partner.lng, vp.partner.lat, vp.partner.lng);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = vp;
+      }
+    }
+    return closest.visit.date;
+  }, [visitPoints]);
+
+  // Generate arrow points along the route segments
+  const routeArrows = useMemo(() => {
+    if (visitPoints.length < 2) return [];
+    const arrows: { x: number; y: number; angle: number }[] = [];
+    for (let i = 0; i < visitPoints.length - 1; i++) {
+      const p1 = toXY(visitPoints[i].partner.lat, visitPoints[i].partner.lng);
+      const p2 = toXY(visitPoints[i + 1].partner.lat, visitPoints[i + 1].partner.lng);
+      const mx = (p1.x + p2.x) / 2;
+      const my = (p1.y + p2.y) / 2;
+      const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI);
+      arrows.push({ x: mx, y: my, angle });
+    }
+    return arrows;
+  }, [visitPoints, toXY]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -197,25 +234,49 @@ export default function AgendaMapModal({
                 backgroundSize: '20px 20px',
               }} />
 
-              {/* Route lines for visits */}
+              {/* Route lines with directional arrows */}
               <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                {visitPoints.length > 1 && (
-                  <motion.polyline
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1.5, ease: 'easeInOut' }}
-                    points={visitPoints.map(vp => {
-                      const { x, y } = toXY(vp.partner.lat, vp.partner.lng);
-                      return `${x},${y}`;
-                    }).join(' ')}
-                    fill="none"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="0.4"
-                    strokeDasharray="2 1"
-                    strokeLinecap="round"
-                  />
-                )}
+                <defs>
+                  <marker id="arrowhead" markerWidth="4" markerHeight="3" refX="2" refY="1.5" orient="auto">
+                    <polygon points="0 0, 4 1.5, 0 3" fill="hsl(var(--primary))" opacity="0.7" />
+                  </marker>
+                </defs>
+                {visitPoints.length > 1 && visitPoints.map((_, i) => {
+                  if (i >= visitPoints.length - 1) return null;
+                  const p1 = toXY(visitPoints[i].partner.lat, visitPoints[i].partner.lng);
+                  const p2 = toXY(visitPoints[i + 1].partner.lat, visitPoints[i + 1].partner.lng);
+                  return (
+                    <motion.line
+                      key={`route-${i}`}
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 0.8, delay: i * 0.2, ease: 'easeInOut' }}
+                      x1={p1.x} y1={p1.y}
+                      x2={p2.x} y2={p2.y}
+                      stroke="hsl(var(--primary))"
+                      strokeWidth="0.35"
+                      strokeDasharray="1.5 0.8"
+                      strokeLinecap="round"
+                      markerEnd="url(#arrowhead)"
+                    />
+                  );
+                })}
               </svg>
+
+              {/* Route direction arrows (mid-segment) */}
+              {routeArrows.map((arrow, i) => (
+                <div
+                  key={`arrow-${i}`}
+                  className="absolute z-[5] pointer-events-none"
+                  style={{
+                    left: `${arrow.x}%`,
+                    top: `${arrow.y}%`,
+                    transform: `translate(-50%, -50%) rotate(${arrow.angle}deg)`,
+                  }}
+                >
+                  <ArrowRight className="h-3 w-3 text-primary/50" />
+                </div>
+              ))}
 
               {/* Suggestion markers */}
               {showSuggestions && suggestions.map((s, i) => {
@@ -225,7 +286,7 @@ export default function AgendaMapModal({
                     <TooltipTrigger asChild>
                       <motion.div
                         initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
+                        animate={{ scale: 1, opacity: 0.85 }}
                         transition={{ delay: i * 0.02, type: 'spring', stiffness: 300 }}
                         className="absolute cursor-pointer"
                         style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
@@ -247,7 +308,7 @@ export default function AgendaMapModal({
                 );
               })}
 
-              {/* Visit markers */}
+              {/* Visit markers with order number */}
               {visitPoints.map((vp, i) => {
                 const { x, y } = toXY(vp.partner.lat, vp.partner.lng);
                 const isVisita = vp.visit.type === 'visita';
@@ -260,20 +321,29 @@ export default function AgendaMapModal({
                         transition={{ delay: i * 0.05, type: 'spring', stiffness: 400 }}
                         className="absolute cursor-pointer z-10"
                         style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
-                        onClick={() => setSelectedPoint({ type: 'visit', visit: vp.visit, partner: vp.partner })}
+                        onClick={() => setSelectedPoint({ type: 'visit', visit: vp.visit, partner: vp.partner, index: i })}
                       >
-                        <div className={cn(
-                          'w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-background',
-                          isVisita ? 'bg-primary text-primary-foreground' : 'bg-violet-600 text-white',
-                        )}>
-                          {isVisita ? <Handshake className="h-3.5 w-3.5" /> : <UserPlus className="h-3.5 w-3.5" />}
+                        <div className="relative">
+                          <div className={cn(
+                            'w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-background',
+                            isVisita ? 'bg-primary text-primary-foreground' : 'bg-violet-600 text-white',
+                          )}>
+                            {isVisita ? <Handshake className="h-3.5 w-3.5" /> : <UserPlus className="h-3.5 w-3.5" />}
+                          </div>
+                          {/* Order badge */}
+                          <span className={cn(
+                            'absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center border border-background shadow-sm',
+                            isVisita ? 'bg-primary text-primary-foreground' : 'bg-violet-600 text-white',
+                          )}>
+                            {i + 1}
+                          </span>
                         </div>
                       </motion.div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="font-medium text-xs">{vp.partner.name}</p>
+                      <p className="font-medium text-xs">{i + 1}º — {vp.partner.name}</p>
                       <p className="text-[10px] text-muted-foreground">
-                        {isVisita ? 'Visita' : 'Prospecção'} • {vp.visit.date} {vp.visit.time || ''}
+                        {isVisita ? 'Visita' : 'Prospecção'} • {format(parseISO(vp.visit.date), 'dd/MM')} {vp.visit.time || ''}
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -296,6 +366,10 @@ export default function AgendaMapModal({
               <UserPlus className="h-2.5 w-2.5 text-white" />
             </span>
             Prospecção
+          </span>
+          <span className="flex items-center gap-1.5">
+            <ArrowRight className="h-3 w-3 text-primary/60" />
+            Percurso
           </span>
           {showSuggestions && (
             <span className="flex items-center gap-1.5">
@@ -320,7 +394,15 @@ export default function AgendaMapModal({
                 {selectedPoint.type === 'visit' ? (
                   <>
                     <div className="flex items-center justify-between">
-                      <p className="font-semibold text-sm">{selectedPoint.partner?.name || selectedPoint.visit.partnerId}</p>
+                      <p className="font-semibold text-sm flex items-center gap-1.5">
+                        <span className={cn(
+                          'w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center',
+                          selectedPoint.visit.type === 'visita' ? 'bg-primary text-primary-foreground' : 'bg-violet-600 text-white',
+                        )}>
+                          {selectedPoint.index + 1}
+                        </span>
+                        {selectedPoint.partner?.name || selectedPoint.visit.partnerId}
+                      </p>
                       <Badge variant="outline" className="text-[10px]">
                         {selectedPoint.visit.type === 'visita' ? 'Visita' : 'Prospecção'}
                       </Badge>
@@ -378,7 +460,28 @@ export default function AgendaMapModal({
                       >
                         <ExternalLink className="h-3 w-3" /> Ver parceiro
                       </Button>
+                      {onCreateVisitFromSuggestion && (
+                        <Button
+                          size="sm"
+                          className="h-7 text-xs gap-1"
+                          onClick={() => {
+                            const suggestedDate = getClosestVisitDate(selectedPoint.partner);
+                            onCreateVisitFromSuggestion(selectedPoint.partner.id, suggestedDate);
+                            onOpenChange(false);
+                          }}
+                        >
+                          <CalendarPlus className="h-3 w-3" /> Criar compromisso
+                        </Button>
+                      )}
                     </div>
+                    {(() => {
+                      const closestDate = getClosestVisitDate(selectedPoint.partner);
+                      return (
+                        <p className="text-[10px] text-muted-foreground/70 italic">
+                          Data sugerida: {format(parseISO(closestDate), 'dd/MM/yyyy')} (compromisso mais próximo)
+                        </p>
+                      );
+                    })()}
                   </>
                 )}
               </div>

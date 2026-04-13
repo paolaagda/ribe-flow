@@ -50,12 +50,20 @@ function ThemeToggleButton() {
 
 function MapButton() {
   const [showMap, setShowMap] = React.useState(false);
+  const navigate = useNavigate();
   return (
     <>
       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowMap(true)} title="Mapa de compromissos">
         <MapIcon className="h-4 w-4" />
       </Button>
-      <AgendaMapModal open={showMap} onOpenChange={setShowMap} />
+      <AgendaMapModal
+        open={showMap}
+        onOpenChange={setShowMap}
+        onCreateVisitFromSuggestion={(partnerId, suggestedDate) => {
+          setShowMap(false);
+          navigate(`/agenda?createVisit=${partnerId}&date=${suggestedDate}`);
+        }}
+      />
     </>
   );
 }
