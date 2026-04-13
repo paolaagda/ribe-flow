@@ -50,7 +50,7 @@ interface AgendaDetailModalProps {
 }
 
 export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, onDelete, onAcceptInvite, onRejectInvite, onLeaveVisit, onAddComment, onToggleTask, onScheduleFollowUp }: AgendaDetailModalProps) {
-  const { canWrite } = usePermission();
+  const { canRead, canWrite } = usePermission();
   const { user } = useAuth();
   const { toast } = useToast();
   const { getAvatar } = useUserAvatars();
