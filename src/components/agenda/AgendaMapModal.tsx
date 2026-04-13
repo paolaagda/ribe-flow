@@ -95,6 +95,7 @@ export default function AgendaMapModal({
   const [mapView, setMapView] = useState<'day' | 'week' | 'month'>(viewProp ?? 'week');
   const visits = visitsProp ?? allVisits;
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [partnerDetailTarget, setPartnerDetailTarget] = useState<Partner | null>(null);
 
   // Zoom & pan
   const [zoom, setZoom] = useState(1);
