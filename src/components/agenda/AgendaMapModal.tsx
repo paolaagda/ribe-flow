@@ -91,11 +91,36 @@ export default function AgendaMapModal({
 }: AgendaMapModalProps) {
   const { partners, getPartnerById } = usePartners();
   const { visits: allVisits } = useVisits();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [navDate, setNavDate] = useState<Date>(() => currentDateProp ?? new Date());
   const [mapView, setMapView] = useState<'day' | 'week' | 'month'>(viewProp ?? 'week');
-  const visits = visitsProp ?? allVisits;
+  const [filterCommercial, setFilterCommercial] = useState<string>('all');
+
+  const GLOBAL_VIEW_ROLES = ['diretor', 'gerente', 'ascom'];
+  const hasGlobalView = user ? GLOBAL_VIEW_ROLES.includes(user.role) : false;
+
+  // Apply same visibility rules as Agenda
+  const visibleVisits = useMemo(() => {
+    const base = visitsProp ?? allVisits;
+    if (!user) return base;
+    if (!hasGlobalView) {
+      // Comercial/Cadastro: own visits, created by them, or accepted invites
+      return base.filter(
+        v => v.userId === user.id || v.createdBy === user.id ||
+          v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted')
+      );
+    }
+    // Global view roles can optionally filter by commercial
+    if (filterCommercial !== 'all') {
+      return base.filter(v => v.userId === filterCommercial);
+    }
+    return base;
+  }, [visitsProp, allVisits, user, hasGlobalView, filterCommercial]);
+
+  const visits = visibleVisits;
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [partnerDetailTarget, setPartnerDetailTarget] = useState<Partner | null>(null);
   const [partnerDetailTarget, setPartnerDetailTarget] = useState<Partner | null>(null);
 
   // Zoom & pan
