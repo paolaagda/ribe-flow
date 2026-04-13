@@ -5,6 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { cn } from '@/lib/utils';
 import { CheckSquare, AlertTriangle, Clock, Calendar } from 'lucide-react';
+import TaskDocBadge from '@/components/shared/TaskDocBadge';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { motion } from 'framer-motion';
@@ -86,6 +87,9 @@ export default function PartnerTasksSection({ partnerId }: Props) {
                     <Badge variant="destructive" className="text-[9px] px-1 py-0 gap-0.5">
                       <AlertTriangle className="h-2.5 w-2.5" /> Atrasada
                     </Badge>
+                  )}
+                  {item.task.taskCategory === 'document' && (
+                    <TaskDocBadge status={item.task.taskDocStatus} returnReason={item.task.taskReturnReason} />
                   )}
                 </div>
               </div>

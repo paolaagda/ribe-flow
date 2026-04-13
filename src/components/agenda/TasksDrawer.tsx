@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { Clock, AlertTriangle, CheckCircle2, ListTodo, CalendarIcon, Filter, X } from 'lucide-react';
+import TaskDocBadge from '@/components/shared/TaskDocBadge';
 import { format, parseISO, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -294,7 +295,10 @@ function TaskRow({ item, onToggle, onOpen, daysPending, completed }: {
           {isOverdue && (
             <Badge variant="destructive" className="text-[9px] px-1 py-0">{daysPending}d</Badge>
           )}
-          {completed && (
+          {item.task.taskCategory === 'document' && (
+            <TaskDocBadge status={item.task.taskDocStatus} returnReason={item.task.taskReturnReason} />
+          )}
+          {completed && !item.task.taskDocStatus && (
             <Badge variant="secondary" className="text-[9px] px-1 py-0 gap-0.5">
               <CheckCircle2 className="h-2.5 w-2.5" /> Feita
             </Badge>
