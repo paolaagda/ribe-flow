@@ -360,15 +360,15 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto p-0">
           {/* ── Header ── */}
-          <div className="px-5 pt-5 pb-3">
-            <div className="flex items-center gap-2.5">
+          <div className="px-5 pt-5 pb-3 pr-12">
+            <div className="flex items-start gap-2.5">
               <div className={cn(
-                'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
+                'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
                 visit.type === 'visita' ? 'bg-info/10' : 'bg-warning/10'
               )}>
                 <TypeIcon className={cn('h-4 w-4', visit.type === 'visita' ? 'text-info' : 'text-warning')} />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 space-y-1">
                 {partner ? (
                   <button
                     onClick={handlePartnerClick}
@@ -379,24 +379,28 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
                 ) : (
                   <p className="text-lg font-bold leading-snug truncate">{partnerName}</p>
                 )}
+                {/* Status — editable select, below partner name */}
+                {isStatusLocked ? (
+                  <Badge variant="outline" className={cn('text-xs capitalize', statusBgClasses[visit.status])}>
+                    {visit.status}
+                  </Badge>
+                ) : canEditFields ? (
+                  <Select value={visit.status} onValueChange={handleStatusChange}>
+                    <SelectTrigger className={cn('h-7 w-auto min-w-0 gap-1 border px-2 text-xs font-medium capitalize', statusBgClasses[visit.status])}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {allStatuses.map(s => (
+                        <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Badge variant="outline" className={cn('text-xs capitalize', statusBgClasses[visit.status])}>
+                    {visit.status}
+                  </Badge>
+                )}
               </div>
-              {/* Status — editable select */}
-              {isStatusLocked ? (
-                <Badge variant="outline" className={cn('text-xs capitalize shrink-0', statusBgClasses[visit.status])}>
-                  {visit.status}
-                </Badge>
-              ) : (
-                <Select value={visit.status} onValueChange={handleStatusChange}>
-                  <SelectTrigger className={cn('h-7 w-auto min-w-0 gap-1 border px-2 text-xs font-medium capitalize shrink-0', statusBgClasses[visit.status])}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allStatuses.map(s => (
-                      <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
             </div>
 
             {/* Address */}
