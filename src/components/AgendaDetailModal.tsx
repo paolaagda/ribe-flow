@@ -773,40 +773,42 @@ export default function AgendaDetailModal({ visit, open, onOpenChange, onEdit, o
 
           <Separator className="opacity-40" />
 
-          {/* ── Participants — editable ── */}
+          {/* ── Participants — editable with permissions ── */}
           <div className="px-5 py-3 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <Users className="h-3.5 w-3.5" />
                 Participantes
               </div>
-              <Popover open={invitedPopoverOpen} onOpenChange={setInvitedPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-5 w-5 rounded-full border-dashed border-muted-foreground/40 text-muted-foreground hover:text-foreground">
-                    <Plus className="h-3 w-3" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-52 p-1.5 max-h-52 overflow-y-auto" align="end">
-                  {invitableUsers.length === 0 ? (
-                    <p className="text-xs text-muted-foreground text-center py-2">Nenhum usuário disponível</p>
-                  ) : (
-                    invitableUsers.map(u => (
-                      <button
-                        key={u.id}
-                        className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded-md hover:bg-accent text-left transition-colors"
-                        onClick={() => handleAddInvitee(u.id)}
-                      >
-                        <Avatar className="h-5 w-5">
-                          <AvatarImage src={u.avatar} />
-                          <AvatarFallback className="text-[8px]">{u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</AvatarFallback>
-                        </Avatar>
-                        <span className="flex-1 truncate">{u.name}</span>
-                        <Badge variant="secondary" className="text-[9px] px-1">{cargoLabels[u.role]}</Badge>
-                      </button>
-                    ))
-                  )}
-                </PopoverContent>
-              </Popover>
+              {canEditFields && (
+                <Popover open={invitedPopoverOpen} onOpenChange={setInvitedPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="icon" className="h-5 w-5 rounded-full border-dashed border-muted-foreground/40 text-muted-foreground hover:text-foreground">
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-52 p-1.5 max-h-52 overflow-y-auto" align="end">
+                    {invitableUsers.length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-2">Nenhum usuário disponível</p>
+                    ) : (
+                      invitableUsers.map(u => (
+                        <button
+                          key={u.id}
+                          className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded-md hover:bg-accent text-left transition-colors"
+                          onClick={() => handleAddInvitee(u.id)}
+                        >
+                          <Avatar className="h-5 w-5">
+                            <AvatarImage src={u.avatar} />
+                            <AvatarFallback className="text-[8px]">{u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</AvatarFallback>
+                          </Avatar>
+                          <span className="flex-1 truncate">{u.name}</span>
+                          <Badge variant="secondary" className="text-[9px] px-1">{cargoLabels[u.role]}</Badge>
+                        </button>
+                      ))
+                    )}
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
 
             {visit.invitedUsers && visit.invitedUsers.length > 0 && (
