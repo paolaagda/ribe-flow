@@ -166,14 +166,15 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, [allNotifications, user]);
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
-  const actionableTypes: NotificationType[] = ['invite', 'registration_approval', 'doc_validation_submitted', 'reg_validation_submitted'];
-  const pendingInvites = useMemo(() => notifications.filter(n => actionableTypes.includes(n.type) && n.status === 'pending'), [notifications]);
+  const ACTIONABLE_TYPES: NotificationType[] = ['invite', 'registration_approval', 'doc_validation_submitted', 'reg_validation_submitted'];
+  const isActionable = useCallback((n: AppNotification) => ACTIONABLE_TYPES.includes(n.type) && n.status === 'pending', []);
+  const pendingInvites = useMemo(() => notifications.filter(isActionable), [notifications, isActionable]);
   const recentNotifications = useMemo(() =>
     notifications
-      .filter(n => !(actionableTypes.includes(n.type) && n.status === 'pending'))
+      .filter(n => !isActionable(n))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 20),
-    [notifications]
+    [notifications, isActionable]
   );
   const history = useMemo(() =>
     notifications
