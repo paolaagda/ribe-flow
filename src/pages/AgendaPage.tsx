@@ -199,6 +199,17 @@ export default function AgendaPage() {
       setShowForm(true);
       window.history.replaceState({}, '', '/agenda');
     }
+
+    // Handle openVisit from map detail action
+    const openVisitId = params.get('openVisit');
+    if (openVisitId) {
+      const visit = visits.find(v => v.id === openVisitId);
+      if (visit) {
+        setSelectedVisit(visit);
+        setShowDetail(true);
+      }
+      window.history.replaceState({}, '', '/agenda');
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const togglePanel = (panel: "today" | "tasks") => {

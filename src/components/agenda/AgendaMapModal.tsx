@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, Navigation, Eye, EyeOff, Handshake, UserPlus, ExternalLink, CalendarPlus, Clock, ArrowRight, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { MapPin, Navigation, Eye, EyeOff, Handshake, UserPlus, ExternalLink, CalendarPlus, Clock, ArrowRight, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw, Building2, User, DollarSign } from 'lucide-react';
 import { Visit, Partner, getUserById } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useVisits } from '@/hooks/useVisits';
@@ -13,6 +13,7 @@ import { format, parseISO, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isW
 import { ptBR } from 'date-fns/locale';
 import { formatCentavos } from '@/lib/currency';
 import { useNavigate } from 'react-router-dom';
+import { Separator } from '@/components/ui/separator';
 
 interface AgendaMapModalProps {
   open: boolean;
@@ -94,6 +95,7 @@ export default function AgendaMapModal({
   const [mapView, setMapView] = useState<'day' | 'week' | 'month'>(viewProp ?? 'week');
   const visits = visitsProp ?? allVisits;
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [partnerDetailTarget, setPartnerDetailTarget] = useState<Partner | null>(null);
 
   // Zoom & pan
   const [zoom, setZoom] = useState(1);
@@ -585,7 +587,10 @@ export default function AgendaMapModal({
                     </div>
                     <Button
                       size="sm" variant="outline" className="h-7 text-xs gap-1"
-                      onClick={() => { onOpenVisitDetail?.(selectedPoint.visit); onOpenChange(false); }}
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate(`/agenda?openVisit=${selectedPoint.visit.id}`);
+                      }}
                     >
                       <ExternalLink className="h-3 w-3" /> Ver detalhe
                     </Button>
@@ -616,22 +621,20 @@ export default function AgendaMapModal({
                     <div className="flex gap-2">
                       <Button
                         size="sm" variant="outline" className="h-7 text-xs gap-1"
-                        onClick={() => { navigate(`/parceiros?partner=${selectedPoint.partner.id}`); onOpenChange(false); }}
+                        onClick={() => setPartnerDetailTarget(selectedPoint.partner)}
                       >
-                        <ExternalLink className="h-3 w-3" /> Ver parceiro
+                        <Building2 className="h-3 w-3" /> Ver parceiro
                       </Button>
-                      {onCreateVisitFromSuggestion && (
-                        <Button
-                          size="sm" className="h-7 text-xs gap-1"
-                          onClick={() => {
-                            const suggestedDate = getClosestVisitDate(selectedPoint.partner);
-                            onCreateVisitFromSuggestion(selectedPoint.partner.id, suggestedDate);
-                            onOpenChange(false);
-                          }}
-                        >
-                          <CalendarPlus className="h-3 w-3" /> Criar compromisso
-                        </Button>
-                      )}
+                      <Button
+                        size="sm" className="h-7 text-xs gap-1"
+                        onClick={() => {
+                          const suggestedDate = getClosestVisitDate(selectedPoint.partner);
+                          onOpenChange(false);
+                          navigate(`/agenda?createVisit=${selectedPoint.partner.id}&date=${suggestedDate}`);
+                        }}
+                      >
+                        <CalendarPlus className="h-3 w-3" /> Criar compromisso
+                      </Button>
                     </div>
                     {(() => {
                       const closestDate = getClosestVisitDate(selectedPoint.partner);
@@ -647,6 +650,96 @@ export default function AgendaMapModal({
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Partner detail inline modal */}
+        <Dialog open={!!partnerDetailTarget} onOpenChange={(open) => !open && setPartnerDetailTarget(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-base">
+                <Building2 className="h-4 w-4" /> {partnerDetailTarget?.name}
+              </DialogTitle>
+            </DialogHeader>
+            {partnerDetailTarget && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="outline" className={cn('text-xs', CLASS_COLORS[partnerDetailTarget.partnerClass])}>
+                    Classe {partnerDetailTarget.partnerClass}
+                  </Badge>
+                  {partnerDetailTarget.potential && (
+                    <Badge variant="secondary" className="text-xs">
+                      Potencial {partnerDetailTarget.potential}
+                    </Badge>
+                  )}
+                </div>
+
+                <Separator />
+
+                <div className="grid gap-2 text-sm">
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
+                    <span className="text-muted-foreground">{partnerDetailTarget.address}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      {getUserById(partnerDetailTarget.responsibleUserId)?.name || '—'}
+                    </span>
+                  </div>
+                  {partnerDetailTarget.averageProduction > 0 && (
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-muted-foreground">
+                        Produção média: {formatCentavos(partnerDetailTarget.averageProduction)}
+                      </span>
+                    </div>
+                  )}
+                  {(() => {
+                    const lastDate = getLastVisitDate(partnerDetailTarget.id);
+                    return lastDate ? (
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-muted-foreground">
+                          Última visita: {format(parseISO(lastDate), 'dd/MM/yyyy')}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-muted-foreground/60">Sem visitas anteriores</span>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                <Separator />
+
+                <div className="flex gap-2">
+                  <Button
+                    size="sm" variant="outline" className="h-7 text-xs gap-1"
+                    onClick={() => {
+                      setPartnerDetailTarget(null);
+                      onOpenChange(false);
+                      navigate(`/parceiros?partner=${partnerDetailTarget.id}`);
+                    }}
+                  >
+                    <ExternalLink className="h-3 w-3" /> Abrir ficha completa
+                  </Button>
+                  <Button
+                    size="sm" className="h-7 text-xs gap-1"
+                    onClick={() => {
+                      const suggestedDate = getClosestVisitDate(partnerDetailTarget);
+                      setPartnerDetailTarget(null);
+                      onOpenChange(false);
+                      navigate(`/agenda?createVisit=${partnerDetailTarget.id}&date=${suggestedDate}`);
+                    }}
+                  >
+                    <CalendarPlus className="h-3 w-3" /> Criar compromisso
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );
