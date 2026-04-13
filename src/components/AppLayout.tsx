@@ -48,6 +48,18 @@ function ThemeToggleButton() {
   );
 }
 
+function MapButton() {
+  const [showMap, setShowMap] = React.useState(false);
+  return (
+    <>
+      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowMap(true)} title="Mapa de compromissos">
+        <MapIcon className="h-4 w-4" />
+      </Button>
+      <AgendaMapModal open={showMap} onOpenChange={setShowMap} />
+    </>
+  );
+}
+
 const navItems = [
   { title: 'Agenda', url: '/agenda', icon: CalendarDays, permKey: 'agenda.view' },
   { title: 'Campanhas', url: '/campanhas', icon: Trophy, permKey: 'campaigns.view' },
