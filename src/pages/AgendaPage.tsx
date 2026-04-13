@@ -53,6 +53,7 @@ import {
   CalendarRange,
   Filter,
   Crown,
+  Map as MapIcon,
 } from "lucide-react";
 import {
   format,
@@ -80,7 +81,7 @@ import JustificationModal from "@/components/agenda/JustificationModal";
 import InviteRejectionModal from "@/components/agenda/InviteRejectionModal";
 
 import InlineTasksPanel from "@/components/agenda/InlineTasksPanel";
-import AgendaMap from "@/components/agenda/AgendaMap";
+import AgendaMapModal from "@/components/agenda/AgendaMapModal";
 // BankRegistrationFlow moved to AgendaDetailModal
 import SmartInsights from "@/components/shared/SmartInsights";
 import AnimatedFilterContent from "@/components/shared/AnimatedFilterContent";
@@ -169,6 +170,7 @@ export default function AgendaPage() {
   const [showTasksPanel, setShowTasksPanel] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
+  const [showMapModal, setShowMapModal] = useState(false);
   // Bank registration flow moved to modal
 
   useEffect(() => {
@@ -865,20 +867,31 @@ export default function AgendaPage() {
               </Button>
             </div>
           </div>
-          <Button
-            variant={showFilters ? "secondary" : "ghost"}
-            size="sm"
-            className="h-7 text-xs gap-1.5 relative shrink-0"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter className="h-3.5 w-3.5" />
-            Filtros
-            {(filterStatus !== "all" || filterType !== "all" || dateRange.from || dateRange.to) && (
-              <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary text-[9px] text-primary-foreground flex items-center justify-center">
-                !
-              </span>
-            )}
-          </Button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setShowMapModal(true)}
+              title="Mapa de compromissos"
+            >
+              <MapIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={showFilters ? "secondary" : "ghost"}
+              size="sm"
+              className="h-7 text-xs gap-1.5 relative"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-3.5 w-3.5" />
+              Filtros
+              {(filterStatus !== "all" || filterType !== "all" || dateRange.from || dateRange.to) && (
+                <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary text-[9px] text-primary-foreground flex items-center justify-center">
+                  !
+                </span>
+              )}
+            </Button>
+          </div>
         </div>
 
         <AnimatePresence>
@@ -1588,8 +1601,18 @@ export default function AgendaPage() {
           </div>
         )}
 
-        {/* Map with filtered visit pins — scoped to current view period */}
-        <AgendaMap visits={viewFilteredVisits} getPartnerById={getPartnerById} />
+        {/* Map modal */}
+        <AgendaMapModal
+          open={showMapModal}
+          onOpenChange={setShowMapModal}
+          visits={filteredVisits}
+          currentDate={currentDate}
+          view={view}
+          onOpenVisitDetail={(visit) => {
+            setSelectedVisit(visit);
+            setShowDetail(true);
+          }}
+        />
 
         {/* Create/Edit Visit Dialog */}
         <Dialog
