@@ -41,13 +41,15 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
     <div
       className={cn(
         'rounded-lg border p-3 transition-all duration-200',
-        isPending && !isRegistrationApproval && 'bg-card hover:shadow-md hover:-translate-y-0.5 border-primary/20',
+        isPending && !isRegistrationApproval && !isValidationNotif && 'bg-card hover:shadow-md hover:-translate-y-0.5 border-primary/20',
         isPending && isRegistrationApproval && 'bg-card hover:shadow-md hover:-translate-y-0.5 border-warning/30 bg-warning/5',
         isAccepted && 'bg-muted/30 border-border',
         isRejected && 'bg-muted/20 border-border opacity-60',
-        !notification.read && isPending && !isRegistrationApproval && 'ring-1 ring-primary/30',
+        !notification.read && isPending && !isRegistrationApproval && !isValidationNotif && 'ring-1 ring-primary/30',
         !notification.read && isPending && isRegistrationApproval && 'ring-1 ring-warning/40',
         isRegistrationResult && !notification.read && 'bg-card border-primary/20',
+        isValidationNotif && !notification.read && 'bg-card border-info/20 ring-1 ring-info/20',
+        isValidationNotif && notification.read && 'bg-muted/30 border-border',
         isNew && 'notification-new',
       )}
     >
@@ -73,7 +75,24 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
             <Landmark className="h-2.5 w-2.5" /> {notification.bankName}
           </Badge>
         )}
-        {!isRegistrationApproval && !isRegistrationResult && (
+        {notification.type === 'doc_validation_submitted' && (
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-warning/10 text-warning border-warning/20">📄 Doc em validação</Badge>
+        )}
+        {notification.type === 'doc_validation_rejected' && (
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-destructive/10 text-destructive border-destructive/20">📄 Doc devolvido</Badge>
+        )}
+        {notification.type === 'reg_validation_submitted' && (
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-warning/10 text-warning border-warning/20">🏦 Cadastro em validação</Badge>
+        )}
+        {notification.type === 'reg_validation_rejected' && (
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-destructive/10 text-destructive border-destructive/20">🏦 Cadastro devolvido</Badge>
+        )}
+        {notification.docName && (
+          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+            {notification.docName}
+          </Badge>
+        )}
+        {!isRegistrationApproval && !isRegistrationResult && !isValidationNotif && (
           <>
             {isDateToday && (
               <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-destructive text-destructive-foreground">Hoje</Badge>
