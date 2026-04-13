@@ -90,7 +90,7 @@ export function usePartnerOperationalData(visiblePartners: Partner[]) {
       criticality,
       nextAction,
     };
-  }, [visits, getTasksByPartnerId, registrations, checkedDocs, activeDocuments, totalDocsCount]);
+  }, [visits, getTasksByPartnerId, registrations, getDocPendingCount, activeDocIds, activeDocuments, totalDocsCount]);
 
   // Aggregated summaries for the listing page
   const summary = useMemo(() => {
