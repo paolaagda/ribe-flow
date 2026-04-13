@@ -80,7 +80,7 @@ import JustificationModal from "@/components/agenda/JustificationModal";
 import InviteRejectionModal from "@/components/agenda/InviteRejectionModal";
 
 import InlineTasksPanel from "@/components/agenda/InlineTasksPanel";
-import AgendaMap from "@/components/agenda/AgendaMap";
+import AgendaMapModal from "@/components/agenda/AgendaMapModal";
 // BankRegistrationFlow moved to AgendaDetailModal
 import SmartInsights from "@/components/shared/SmartInsights";
 import AnimatedFilterContent from "@/components/shared/AnimatedFilterContent";
@@ -169,6 +169,7 @@ export default function AgendaPage() {
   const [showTasksPanel, setShowTasksPanel] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
+  const [showMapModal, setShowMapModal] = useState(false);
   // Bank registration flow moved to modal
 
   useEffect(() => {
@@ -1588,8 +1589,18 @@ export default function AgendaPage() {
           </div>
         )}
 
-        {/* Map with filtered visit pins — scoped to current view period */}
-        <AgendaMap visits={viewFilteredVisits} getPartnerById={getPartnerById} />
+        {/* Map modal */}
+        <AgendaMapModal
+          open={showMapModal}
+          onOpenChange={setShowMapModal}
+          visits={filteredVisits}
+          currentDate={currentDate}
+          view={view}
+          onOpenVisitDetail={(visit) => {
+            setSelectedVisit(visit);
+            setShowDetail(true);
+          }}
+        />
 
         {/* Create/Edit Visit Dialog */}
         <Dialog
