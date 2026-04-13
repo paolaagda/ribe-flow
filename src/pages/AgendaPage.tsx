@@ -2026,8 +2026,14 @@ export default function AgendaPage() {
         onScheduleFollowUp={(partnerId) => {
           const currentVisit = selectedVisit;
           setShowDetail(false);
-          const tomorrow = new Date();
-          tomorrow.setDate(tomorrow.getDate() + 1);
+          // Calculate 5 business days from today
+          const followUpDate = new Date();
+          let businessDays = 0;
+          while (businessDays < 5) {
+            followUpDate.setDate(followUpDate.getDate() + 1);
+            const dow = followUpDate.getDay();
+            if (dow !== 0 && dow !== 6) businessDays++;
+          }
           const partner = getPartnerById(partnerId);
           resetForm();
           setFormData(prev => ({
