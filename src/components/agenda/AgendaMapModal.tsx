@@ -463,8 +463,15 @@ export default function AgendaMapModal({
                   </Tooltip>
                 );
               })}
+              </div>{/* end zoom/pan wrapper */}
+
+              {/* Zoom indicator */}
+              {zoom !== 1 && (
+                <div className="absolute bottom-2 right-2 z-20 bg-card/90 backdrop-blur-sm rounded px-2 py-1 text-[10px] text-muted-foreground border border-border">
+                  {Math.round(zoom * 100)}%
+                </div>
+              )}
             </div>
-          </TooltipProvider>
         )}
 
         {/* Legend */}
