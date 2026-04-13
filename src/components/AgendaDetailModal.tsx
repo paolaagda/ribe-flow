@@ -971,6 +971,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
         open={showJustification}
         onOpenChange={(o) => { if (!o) { setShowJustification(false); setPendingStatus(null); setPendingDate(null); } }}
         targetStatus={pendingStatus || 'Reagendada'}
+        medio={visit.medio}
         onConfirm={handleJustificationConfirm}
       />
 

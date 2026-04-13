@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { useSystemData } from '@/hooks/useSystemData';
+import { useSystemData, getJustificationCategory } from '@/hooks/useSystemData';
 import { AlertTriangle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -12,16 +12,19 @@ interface JustificationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   targetStatus: 'Reagendada' | 'Cancelada' | 'Inconclusa';
+  medio?: 'presencial' | 'remoto';
   onConfirm: (reason: string) => void;
 }
 
-export default function JustificationModal({ open, onOpenChange, targetStatus, onConfirm }: JustificationModalProps) {
+export default function JustificationModal({ open, onOpenChange, targetStatus, medio = 'presencial', onConfirm }: JustificationModalProps) {
   const [reason, setReason] = useState('');
 
   const { getActiveItems } = useSystemData();
+  const category = getJustificationCategory(targetStatus, medio);
+  const reasons = getActiveItems(category);
+
   const isReschedule = targetStatus === 'Reagendada';
   const isInconclusive = targetStatus === 'Inconclusa';
-  const reasons = getActiveItems(isReschedule ? 'rescheduleReasons' : isInconclusive ? 'inconclusiveReasons' : 'cancelReasons');
   const title = isReschedule ? 'Selecione o motivo do reagendamento' : isInconclusive ? 'Selecione o motivo do compromisso inconcluso' : 'Selecione o motivo do cancelamento';
   const Icon = isReschedule ? AlertTriangle : XCircle;
   const accentClass = isReschedule ? 'text-warning' : isInconclusive ? 'text-purple-600 dark:text-purple-400' : 'text-destructive';

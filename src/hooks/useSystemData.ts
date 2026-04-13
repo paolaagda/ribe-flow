@@ -1,6 +1,6 @@
 import { useLocalStorage } from './useLocalStorage';
 import { useCallback } from 'react';
-import { PRODUCTS, RESCHEDULE_REASONS, CANCEL_REASONS, STORE_STRUCTURES } from '@/data/mock-data';
+import { PRODUCTS, STORE_STRUCTURES } from '@/data/mock-data';
 import { REGISTRATION_STATUSES, REGISTRATION_SOLICITATIONS, REGISTRATION_HANDLERS } from '@/data/registrations';
 
 export interface SystemItem {
@@ -9,24 +9,40 @@ export interface SystemItem {
   active: boolean;
 }
 
-export type SystemCategory = 'products' | 'rescheduleReasons' | 'cancelReasons' | 'inconclusiveReasons' | 'storeStructures' | 'periods' | 'registrationStatuses' | 'registrationSolicitations' | 'registrationHandlers' | 'inviteRejectionReasons' | 'registrationRejectionReasons' | 'completionReasons_visita_presencial' | 'completionReasons_visita_remota' | 'completionReasons_prospeccao_presencial' | 'completionReasons_prospeccao_remota';
+export type SystemCategory =
+  | 'products'
+  | 'storeStructures'
+  | 'periods'
+  | 'registrationStatuses'
+  | 'registrationSolicitations'
+  | 'registrationHandlers'
+  | 'registrationRejectionReasons'
+  // 8 format-specific justification categories
+  | 'reagendamentoPresencial'
+  | 'reagendamentoRemota'
+  | 'cancelamentoPresencial'
+  | 'cancelamentoRemota'
+  | 'prospeccaoInconclusaPresencial'
+  | 'prospeccaoInconclusaRemota'
+  | 'recusaConvidadoPresencial'
+  | 'recusaConvidadoRemota';
 
 const categoryLabels: Record<SystemCategory, string> = {
   products: 'Produtos',
-  rescheduleReasons: 'Justificativas de Reagendamento',
-  cancelReasons: 'Justificativas de Cancelamento',
-  inconclusiveReasons: 'Justificativas de Compromisso Inconcluso',
   storeStructures: 'Tipos de Loja',
   periods: 'Períodos da Agenda',
   registrationStatuses: 'Status de Cadastro',
   registrationSolicitations: 'Tipos de Solicitação',
   registrationHandlers: 'Tratando Com',
-  inviteRejectionReasons: 'Justificativas de Rejeição de Convite',
   registrationRejectionReasons: 'Justificativas de Recusa de Cadastro',
-  completionReasons_visita_presencial: 'Visita presencial',
-  completionReasons_visita_remota: 'Visita remota',
-  completionReasons_prospeccao_presencial: 'Prospecção presencial',
-  completionReasons_prospeccao_remota: 'Prospecção remota',
+  reagendamentoPresencial: 'Reagendamento presencial',
+  reagendamentoRemota: 'Reagendamento remota',
+  cancelamentoPresencial: 'Cancelamento presencial',
+  cancelamentoRemota: 'Cancelamento remota',
+  prospeccaoInconclusaPresencial: 'Prospecção inconclusa presencial',
+  prospeccaoInconclusaRemota: 'Prospecção inconclusa remota',
+  recusaConvidadoPresencial: 'Recusa de convidado presencial',
+  recusaConvidadoRemota: 'Recusa de convidado remota',
 };
 
 function buildInitial(items: readonly string[]): SystemItem[] {
@@ -35,30 +51,11 @@ function buildInitial(items: readonly string[]): SystemItem[] {
 
 const initialData: Record<SystemCategory, SystemItem[]> = {
   products: buildInitial(PRODUCTS),
-  rescheduleReasons: buildInitial(RESCHEDULE_REASONS),
-  cancelReasons: buildInitial(CANCEL_REASONS),
-  inconclusiveReasons: buildInitial([
-    'Parceiro não pôde atender',
-    'Responsável ausente',
-    'Loja fechada',
-    'Problema de conexão/chamada',
-    'Parceiro sem interesse no momento',
-    'Não conseguiu contato com o decisor',
-    'Prospecção sem avanço',
-    'Parceiro pediu retorno futuro',
-  ]),
   storeStructures: buildInitial(STORE_STRUCTURES),
   periods: buildInitial(['Manhã', 'Tarde']),
   registrationStatuses: buildInitial(REGISTRATION_STATUSES),
   registrationSolicitations: buildInitial(REGISTRATION_SOLICITATIONS),
   registrationHandlers: buildInitial(REGISTRATION_HANDLERS),
-  inviteRejectionReasons: buildInitial([
-    'Conflito de agenda',
-    'Não é responsável pelo parceiro',
-    'Já estou em outra visita',
-    'Não faz parte da minha função',
-    'Sem necessidade de participação',
-  ]),
   registrationRejectionReasons: buildInitial([
     'Documentação incompleta',
     'Parceiro não atende requisitos mínimos',
@@ -67,26 +64,36 @@ const initialData: Record<SystemCategory, SystemItem[]> = {
     'Dados inconsistentes',
     'Fora da área de atuação',
   ]),
-  completionReasons_visita_presencial: buildInitial([
-    'Loja fechada',
+  reagendamentoPresencial: buildInitial([
     'Parceiro ausente',
-    'Responsável não estava no local',
-    'Parceiro sem tempo para atendimento',
-    'Visita não pôde ser realizada no momento',
-    'Parceiro pediu reagendamento',
+    'Loja fechada',
+    'Responsável indisponível',
     'Problema operacional no local',
-    'Não foi possível avançar na pauta da visita',
-  ]),
-  completionReasons_visita_remota: buildInitial([
-    'Parceiro não atendeu',
-    'Parceiro não respondeu',
-    'Responsável indisponível no horário',
-    'Problema de conexão/chamada',
-    'Reunião remota não aconteceu',
     'Parceiro pediu reagendamento',
-    'Não foi possível avançar na pauta da visita',
+    'Conflito de agenda do comercial',
   ]),
-  completionReasons_prospeccao_presencial: buildInitial([
+  reagendamentoRemota: buildInitial([
+    'Parceiro não atendeu',
+    'Parceiro pediu reagendamento',
+    'Problema de conexão/chamada',
+    'Responsável indisponível no horário',
+    'Conflito de agenda do comercial',
+  ]),
+  cancelamentoPresencial: buildInitial([
+    'Parceiro encerrou atividades',
+    'Parceiro não deseja mais atendimento',
+    'Região fora de cobertura',
+    'Solicitação do gerente',
+    'Duplicidade de compromisso',
+  ]),
+  cancelamentoRemota: buildInitial([
+    'Parceiro encerrou atividades',
+    'Parceiro não deseja mais atendimento',
+    'Solicitação do gerente',
+    'Duplicidade de compromisso',
+    'Sem retorno após múltiplas tentativas',
+  ]),
+  prospeccaoInconclusaPresencial: buildInitial([
     'Loja fechada',
     'Responsável ausente',
     'Não conseguiu falar com o decisor',
@@ -97,7 +104,7 @@ const initialData: Record<SystemCategory, SystemItem[]> = {
     'Pediu retorno futuro',
     'Prospecção realizada, mas sem avanço',
   ]),
-  completionReasons_prospeccao_remota: buildInitial([
+  prospeccaoInconclusaRemota: buildInitial([
     'Não atendeu',
     'Não respondeu',
     'Não conseguiu falar com o decisor',
@@ -108,24 +115,60 @@ const initialData: Record<SystemCategory, SystemItem[]> = {
     'Pediu retorno futuro',
     'Prospecção realizada, mas sem avanço',
   ]),
+  recusaConvidadoPresencial: buildInitial([
+    'Conflito de agenda',
+    'Não é responsável pelo parceiro',
+    'Já estou em outra visita',
+    'Não faz parte da minha função',
+    'Sem necessidade de participação',
+  ]),
+  recusaConvidadoRemota: buildInitial([
+    'Conflito de agenda',
+    'Não é responsável pelo parceiro',
+    'Já estou em outra reunião',
+    'Não faz parte da minha função',
+    'Sem necessidade de participação',
+  ]),
 };
 
 export { categoryLabels };
 
+// Helper to resolve the correct justification category based on status and medio
+export function getJustificationCategory(
+  targetStatus: 'Reagendada' | 'Cancelada' | 'Inconclusa',
+  medio: 'presencial' | 'remoto'
+): SystemCategory {
+  const isPresencial = medio === 'presencial';
+  switch (targetStatus) {
+    case 'Reagendada':
+      return isPresencial ? 'reagendamentoPresencial' : 'reagendamentoRemota';
+    case 'Cancelada':
+      return isPresencial ? 'cancelamentoPresencial' : 'cancelamentoRemota';
+    case 'Inconclusa':
+      return isPresencial ? 'prospeccaoInconclusaPresencial' : 'prospeccaoInconclusaRemota';
+  }
+}
+
+export function getInviteRejectionCategory(
+  medio: 'presencial' | 'remoto'
+): SystemCategory {
+  return medio === 'presencial' ? 'recusaConvidadoPresencial' : 'recusaConvidadoRemota';
+}
+
 export function useSystemData() {
-  const [data, setData] = useLocalStorage<Record<SystemCategory, SystemItem[]>>('ribercred_system_data', initialData);
+  const [data, setData] = useLocalStorage<Record<SystemCategory, SystemItem[]>>('ribercred_system_data_v2', initialData);
 
   const addItem = useCallback((category: SystemCategory, label: string) => {
     setData(prev => ({
       ...prev,
-      [category]: [...prev[category], { id: `sys-${Date.now()}`, label, active: true }],
+      [category]: [...(prev[category] || []), { id: `sys-${Date.now()}`, label, active: true }],
     }));
   }, [setData]);
 
   const toggleItem = useCallback((category: SystemCategory, id: string) => {
     setData(prev => ({
       ...prev,
-      [category]: prev[category].map(item =>
+      [category]: (prev[category] || []).map(item =>
         item.id === id ? { ...item, active: !item.active } : item
       ),
     }));

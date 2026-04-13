@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useVisits } from '@/hooks/useVisits';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useToast } from '@/hooks/use-toast';
@@ -33,6 +34,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   const { addLog } = useAuditLog();
   const { updateRegistration } = useRegistrations();
   const { user } = useAuth();
+  const { visits } = useVisits();
 
   const prevCountRef = useRef(unreadCount);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
@@ -292,6 +294,11 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     <InviteRejectionModal
       open={rejectModalOpen}
       onOpenChange={setRejectModalOpen}
+      medio={(() => {
+        const notif = rejectingId ? pendingInvites.find(n => n.id === rejectingId) : null;
+        const visit = notif?.visitId ? visits.find(v => v.id === notif.visitId) : null;
+        return (visit?.medio as 'presencial' | 'remoto') || 'presencial';
+      })()}
       onConfirm={handleConfirmReject}
     />
     </>

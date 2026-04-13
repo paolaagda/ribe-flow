@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { useSystemData } from '@/hooks/useSystemData';
+import { useSystemData, getInviteRejectionCategory } from '@/hooks/useSystemData';
 import { XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -11,13 +11,15 @@ import { cn } from '@/lib/utils';
 interface InviteRejectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  medio?: 'presencial' | 'remoto';
   onConfirm: (reason: string) => void;
 }
 
-export default function InviteRejectionModal({ open, onOpenChange, onConfirm }: InviteRejectionModalProps) {
+export default function InviteRejectionModal({ open, onOpenChange, medio = 'presencial', onConfirm }: InviteRejectionModalProps) {
   const [reason, setReason] = useState('');
   const { getActiveItems } = useSystemData();
-  const reasons = getActiveItems('inviteRejectionReasons');
+  const category = getInviteRejectionCategory(medio);
+  const reasons = getActiveItems(category);
 
   const handleConfirm = () => {
     if (!reason) return;
