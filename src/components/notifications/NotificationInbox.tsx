@@ -28,6 +28,7 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     acceptInvite,
     rejectInvite,
     addNotification,
+    markAsRead,
     markAllAsRead,
     clearHistory,
     ensureInitialized,
