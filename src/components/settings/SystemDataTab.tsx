@@ -52,7 +52,7 @@ const sections: CategorySection[] = [
   {
     title: 'Agenda',
     description: 'Dados utilizados nos formulários e filtros da página Agenda.',
-    categories: ['periods'],
+    categories: ['periods', 'products'],
   },
   {
     title: 'Cadastro',
@@ -62,7 +62,7 @@ const sections: CategorySection[] = [
   {
     title: 'Geral',
     description: 'Dados compartilhados entre diversas páginas do sistema.',
-    categories: ['products', 'storeStructures'],
+    categories: ['storeStructures'],
   },
 ];
 
