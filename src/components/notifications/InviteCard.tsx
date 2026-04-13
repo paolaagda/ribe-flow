@@ -220,7 +220,6 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
           </Button>
         </div>
       )}
-      )}
     </div>
   );
 }
