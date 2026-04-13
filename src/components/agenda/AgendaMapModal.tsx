@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { MapPin, Navigation, Eye, EyeOff, Handshake, UserPlus, ExternalLink, CalendarPlus, Clock, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Navigation, Eye, EyeOff, Handshake, UserPlus, ExternalLink, CalendarPlus, Clock, ArrowRight, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { Visit, Partner, getUserById } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useVisits } from '@/hooks/useVisits';
@@ -71,7 +71,7 @@ export default function AgendaMapModal({
   const visits = visitsProp ?? allVisits;
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // Zoom & pan state
+  // Zoom & pan state — zoom affects canvas coordinates, NOT marker sizes
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const isPanning = useRef(false);
@@ -79,9 +79,12 @@ export default function AgendaMapModal({
   const pinchStart = useRef<number | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
+  const clampZoom = (v: number) => Math.min(5, Math.max(0.5, v));
+
   const handleWheel = useCallback((e: WheelEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    setZoom(prev => Math.min(5, Math.max(0.5, prev - e.deltaY * 0.002)));
+    e.preventDefault();
+    setZoom(prev => clampZoom(prev - e.deltaY * 0.002));
   }, []);
 
   const handleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
@@ -102,7 +105,7 @@ export default function AgendaMapModal({
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const dist = Math.sqrt(dx * dx + dy * dy);
       const scale = dist / pinchStart.current;
-      setZoom(prev => Math.min(5, Math.max(0.5, prev * scale)));
+      setZoom(prev => clampZoom(prev * scale));
       pinchStart.current = dist;
     } else if (e.touches.length === 1 && isPanning.current) {
       const dx = e.touches[0].clientX - panStart.current.x;
@@ -116,7 +119,6 @@ export default function AgendaMapModal({
     isPanning.current = false;
   }, []);
 
-  // Mouse pan for desktop
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
     isPanning.current = true;
@@ -134,21 +136,27 @@ export default function AgendaMapModal({
     isPanning.current = false;
   }, []);
 
+  const resetView = useCallback(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, []);
+
   // Navigation
   const goBack = useCallback(() => {
     setSelectedPoint(null);
-    setZoom(1); setPan({ x: 0, y: 0 });
+    resetView();
     setNavDate(prev => mapView === 'day' ? subDays(prev, 1) : mapView === 'week' ? subWeeks(prev, 1) : subMonths(prev, 1));
-  }, [mapView]);
+  }, [mapView, resetView]);
 
   const goForward = useCallback(() => {
     setSelectedPoint(null);
-    setZoom(1); setPan({ x: 0, y: 0 });
+    resetView();
     setNavDate(prev => mapView === 'day' ? addDays(prev, 1) : mapView === 'week' ? addWeeks(prev, 1) : addMonths(prev, 1));
-  }, [mapView]);
+  }, [mapView, resetView]);
+
   const [selectedPoint, setSelectedPoint] = useState<null | { type: 'visit'; visit: Visit; partner?: Partner; index: number } | { type: 'suggestion'; partner: Partner }>(null);
 
-  // Filter visits by the selected period
+  // Filter visits by selected period
   const periodVisits = useMemo(() => {
     let start: Date, end: Date;
     if (mapView === 'month') {
@@ -167,34 +175,27 @@ export default function AgendaMapModal({
     });
   }, [visits, mapView, navDate]);
 
-  // Visit points with coordinates, sorted by date+time for route direction
+  // Visit points sorted chronologically for route
   const visitPoints = useMemo(() => {
     return periodVisits
-      .map(v => {
-        const partner = getPartnerById(v.partnerId);
-        return { visit: v, partner };
-      })
+      .map(v => ({ visit: v, partner: getPartnerById(v.partnerId) }))
       .filter((p): p is { visit: Visit; partner: Partner } => !!p.partner && p.partner.lat !== 0)
       .sort((a, b) => {
         const dateComp = a.visit.date.localeCompare(b.visit.date);
         if (dateComp !== 0) return dateComp;
-        const timeA = a.visit.time || '99:99';
-        const timeB = b.visit.time || '99:99';
-        return timeA.localeCompare(timeB);
+        return (a.visit.time || '99:99').localeCompare(b.visit.time || '99:99');
       });
   }, [periodVisits, getPartnerById]);
 
-  // Suggested partners within 100km of any visit
+  // Suggestions within 100km
   const suggestions = useMemo(() => {
     if (!showSuggestions || visitPoints.length === 0) return [];
     const visitPartnerIds = new Set(visitPoints.map(vp => vp.partner.id));
     const suggested = new Map<string, Partner>();
-
     for (const vp of visitPoints) {
       for (const p of partners) {
         if (visitPartnerIds.has(p.id) || suggested.has(p.id) || p.lat === 0) continue;
-        const dist = haversineDistance(vp.partner.lat, vp.partner.lng, p.lat, p.lng);
-        if (dist <= RADIUS_KM) {
+        if (haversineDistance(vp.partner.lat, vp.partner.lng, p.lat, p.lng) <= RADIUS_KM) {
           suggested.set(p.id, p);
         }
       }
@@ -202,12 +203,10 @@ export default function AgendaMapModal({
     return Array.from(suggested.values());
   }, [showSuggestions, visitPoints, partners]);
 
-  // Compute map bounds
+  // Map bounds → coordinate conversion
   const allMapPoints = useMemo(() => {
     const pts: { lat: number; lng: number }[] = visitPoints.map(vp => ({ lat: vp.partner.lat, lng: vp.partner.lng }));
-    if (showSuggestions) {
-      suggestions.forEach(s => pts.push({ lat: s.lat, lng: s.lng }));
-    }
+    if (showSuggestions) suggestions.forEach(s => pts.push({ lat: s.lat, lng: s.lng }));
     return pts;
   }, [visitPoints, suggestions, showSuggestions]);
 
@@ -219,14 +218,25 @@ export default function AgendaMapModal({
     const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
     const latRange = maxLat - minLat || 1;
     const lngRange = maxLng - minLng || 1;
-    const pad = 0.1;
+    const pad = 0.12;
     return {
       x: pad * 100 + ((lng - minLng) / lngRange) * (100 - pad * 200),
       y: pad * 100 + ((maxLat - lat) / latRange) * (100 - pad * 200),
     };
   }, [allMapPoints]);
 
-  // Last visit date for a partner
+  // Convert % to px-based position given container + zoom + pan
+  const getPixelPos = useCallback((xPct: number, yPct: number, containerW: number, containerH: number) => {
+    const baseX = (xPct / 100) * containerW;
+    const baseY = (yPct / 100) * containerH;
+    const cx = containerW / 2;
+    const cy = containerH / 2;
+    return {
+      px: cx + (baseX - cx) * zoom + pan.x,
+      py: cy + (baseY - cy) * zoom + pan.y,
+    };
+  }, [zoom, pan]);
+
   const getLastVisitDate = useCallback((partnerId: string) => {
     const concluded = allVisits
       .filter(v => v.partnerId === partnerId && v.status === 'Concluída')
@@ -234,22 +244,40 @@ export default function AgendaMapModal({
     return concluded[0]?.date || null;
   }, [allVisits]);
 
-  // Find the closest visit date for a suggestion partner
   const getClosestVisitDate = useCallback((partner: Partner) => {
     if (visitPoints.length === 0) return format(new Date(), 'yyyy-MM-dd');
     let closest = visitPoints[0];
     let minDist = Infinity;
     for (const vp of visitPoints) {
       const dist = haversineDistance(partner.lat, partner.lng, vp.partner.lat, vp.partner.lng);
-      if (dist < minDist) {
-        minDist = dist;
-        closest = vp;
-      }
+      if (dist < minDist) { minDist = dist; closest = vp; }
     }
     return closest.visit.date;
   }, [visitPoints]);
 
-  // Generate arrow points along the route segments
+  // Build SVG route path as quadratic curves for a smoother simulated route
+  const routeSvgPath = useMemo(() => {
+    if (visitPoints.length < 2) return '';
+    const pts = visitPoints.map(vp => toXY(vp.partner.lat, vp.partner.lng));
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+      const prev = pts[i - 1];
+      const curr = pts[i];
+      // offset control point perpendicular to segment for a slight curve
+      const mx = (prev.x + curr.x) / 2;
+      const my = (prev.y + curr.y) / 2;
+      const dx = curr.x - prev.x;
+      const dy = curr.y - prev.y;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      const offset = Math.min(len * 0.15, 4); // subtle curve
+      const cpx = mx + (-dy / len) * offset;
+      const cpy = my + (dx / len) * offset;
+      d += ` Q ${cpx} ${cpy}, ${curr.x} ${curr.y}`;
+    }
+    return d;
+  }, [visitPoints, toXY]);
+
+  // Arrow positions along route segments
   const routeArrows = useMemo(() => {
     if (visitPoints.length < 2) return [];
     const arrows: { x: number; y: number; angle: number }[] = [];
@@ -264,6 +292,16 @@ export default function AgendaMapModal({
     return arrows;
   }, [visitPoints, toXY]);
 
+  // Container dimensions ref for pixel position calc
+  const [containerSize, setContainerSize] = useState({ w: 800, h: 400 });
+  const containerObserver = useCallback((node: HTMLDivElement | null) => {
+    mapContainerRef.current = node;
+    if (node) {
+      const rect = node.getBoundingClientRect();
+      setContainerSize({ w: rect.width, h: rect.height });
+    }
+  }, []);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -275,7 +313,7 @@ export default function AgendaMapModal({
 
         {/* Controls */}
         <div className="flex items-center gap-2 flex-wrap">
-          <Select value={mapView} onValueChange={v => { setMapView(v as any); setSelectedPoint(null); setZoom(1); setPan({ x: 0, y: 0 }); }}>
+          <Select value={mapView} onValueChange={v => { setMapView(v as any); setSelectedPoint(null); resetView(); }}>
             <SelectTrigger className="w-28 h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
@@ -286,7 +324,6 @@ export default function AgendaMapModal({
             </SelectContent>
           </Select>
 
-          {/* Period navigation */}
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={goBack}>
               <ChevronLeft className="h-4 w-4" />
@@ -327,8 +364,8 @@ export default function AgendaMapModal({
         ) : (
           <TooltipProvider delayDuration={200}>
             <div
-              ref={mapContainerRef}
-              className="relative w-full h-[400px] bg-muted/30 rounded-lg border border-border overflow-hidden cursor-grab active:cursor-grabbing touch-none"
+              ref={containerObserver}
+              className="relative w-full h-[400px] bg-muted/30 rounded-lg border border-border overflow-hidden cursor-grab active:cursor-grabbing touch-none select-none"
               onWheel={handleWheel}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -338,63 +375,64 @@ export default function AgendaMapModal({
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
             >
+              {/* Zoomable canvas layer (grid + route lines) — markers are OUTSIDE this */}
               <div
-                className="absolute inset-0 origin-center transition-transform duration-100"
+                className="absolute inset-0 origin-center"
                 style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
               >
-              {/* Dot grid background */}
-              <div className="absolute inset-0 opacity-10" style={{
-                backgroundImage: 'radial-gradient(circle, hsl(var(--muted-foreground)) 1px, transparent 1px)',
-                backgroundSize: '20px 20px',
-              }} />
+                {/* Dot grid */}
+                <div className="absolute inset-0 opacity-10" style={{
+                  backgroundImage: 'radial-gradient(circle, hsl(var(--muted-foreground)) 1px, transparent 1px)',
+                  backgroundSize: '20px 20px',
+                }} />
 
-              {/* Route lines with directional arrows */}
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <defs>
-                  <marker id="arrowhead" markerWidth="4" markerHeight="3" refX="2" refY="1.5" orient="auto">
-                    <polygon points="0 0, 4 1.5, 0 3" fill="hsl(var(--primary))" opacity="0.7" />
-                  </marker>
-                </defs>
-                {visitPoints.length > 1 && visitPoints.map((_, i) => {
-                  if (i >= visitPoints.length - 1) return null;
-                  const p1 = toXY(visitPoints[i].partner.lat, visitPoints[i].partner.lng);
-                  const p2 = toXY(visitPoints[i + 1].partner.lat, visitPoints[i + 1].partner.lng);
-                  return (
-                    <motion.line
-                      key={`route-${i}`}
+                {/* Route line — curved path */}
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <defs>
+                    <marker id="routeArrow" markerWidth="6" markerHeight="4" refX="3" refY="2" orient="auto">
+                      <polygon points="0 0, 6 2, 0 4" fill="hsl(var(--primary))" opacity="0.5" />
+                    </marker>
+                  </defs>
+                  {routeSvgPath && (
+                    <motion.path
                       initial={{ pathLength: 0, opacity: 0 }}
                       animate={{ pathLength: 1, opacity: 1 }}
-                      transition={{ duration: 0.8, delay: i * 0.2, ease: 'easeInOut' }}
-                      x1={p1.x} y1={p1.y}
-                      x2={p2.x} y2={p2.y}
+                      transition={{ duration: 1.2, ease: 'easeInOut' }}
+                      d={routeSvgPath}
+                      fill="none"
                       stroke="hsl(var(--primary))"
-                      strokeWidth="0.35"
-                      strokeDasharray="1.5 0.8"
+                      strokeWidth={0.4 / zoom}
+                      strokeDasharray={`${2 / zoom} ${1 / zoom}`}
                       strokeLinecap="round"
-                      markerEnd="url(#arrowhead)"
                     />
-                  );
-                })}
-              </svg>
+                  )}
+                </svg>
+              </div>
 
-              {/* Route direction arrows (mid-segment) */}
-              {routeArrows.map((arrow, i) => (
-                <div
-                  key={`arrow-${i}`}
-                  className="absolute z-[5] pointer-events-none"
-                  style={{
-                    left: `${arrow.x}%`,
-                    top: `${arrow.y}%`,
-                    transform: `translate(-50%, -50%) rotate(${arrow.angle}deg)`,
-                  }}
-                >
-                  <ArrowRight className="h-3 w-3 text-primary/50" />
-                </div>
-              ))}
+              {/* FIXED-SIZE markers layer — positioned via pixel math, not CSS transform */}
 
-              {/* Suggestion markers */}
+              {/* Route direction arrows (mid-segment, fixed size) */}
+              {routeArrows.map((arrow, i) => {
+                const { px, py } = getPixelPos(arrow.x, arrow.y, containerSize.w, containerSize.h);
+                return (
+                  <div
+                    key={`arrow-${i}`}
+                    className="absolute z-[5] pointer-events-none"
+                    style={{
+                      left: px,
+                      top: py,
+                      transform: `translate(-50%, -50%) rotate(${arrow.angle}deg)`,
+                    }}
+                  >
+                    <ArrowRight className="h-3 w-3 text-primary/50" />
+                  </div>
+                );
+              })}
+
+              {/* Suggestion markers (fixed size) */}
               {showSuggestions && suggestions.map((s, i) => {
                 const { x, y } = toXY(s.lat, s.lng);
+                const { px, py } = getPixelPos(x, y, containerSize.w, containerSize.h);
                 return (
                   <Tooltip key={`sug-${s.id}`}>
                     <TooltipTrigger asChild>
@@ -402,8 +440,8 @@ export default function AgendaMapModal({
                         initial={{ scale: 0, opacity: 0 }}
                         animate={{ scale: 1, opacity: 0.85 }}
                         transition={{ delay: i * 0.02, type: 'spring', stiffness: 300 }}
-                        className="absolute cursor-pointer"
-                        style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
+                        className="absolute cursor-pointer z-[8]"
+                        style={{ left: px, top: py, transform: 'translate(-50%, -50%)' }}
                         onClick={() => setSelectedPoint({ type: 'suggestion', partner: s })}
                       >
                         <div className={cn(
@@ -422,9 +460,10 @@ export default function AgendaMapModal({
                 );
               })}
 
-              {/* Visit markers with order number */}
+              {/* Visit markers (fixed size) */}
               {visitPoints.map((vp, i) => {
                 const { x, y } = toXY(vp.partner.lat, vp.partner.lng);
+                const { px, py } = getPixelPos(x, y, containerSize.w, containerSize.h);
                 const isVisita = vp.visit.type === 'visita';
                 return (
                   <Tooltip key={`vis-${vp.visit.id}`}>
@@ -434,7 +473,7 @@ export default function AgendaMapModal({
                         animate={{ scale: 1 }}
                         transition={{ delay: i * 0.05, type: 'spring', stiffness: 400 }}
                         className="absolute cursor-pointer z-10"
-                        style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
+                        style={{ left: px, top: py, transform: 'translate(-50%, -50%)' }}
                         onClick={() => setSelectedPoint({ type: 'visit', visit: vp.visit, partner: vp.partner, index: i })}
                       >
                         <div className="relative">
@@ -444,7 +483,6 @@ export default function AgendaMapModal({
                           )}>
                             {isVisita ? <Handshake className="h-3.5 w-3.5" /> : <UserPlus className="h-3.5 w-3.5" />}
                           </div>
-                          {/* Order badge */}
                           <span className={cn(
                             'absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center border border-background shadow-sm',
                             isVisita ? 'bg-primary text-primary-foreground' : 'bg-violet-600 text-white',
@@ -463,14 +501,26 @@ export default function AgendaMapModal({
                   </Tooltip>
                 );
               })}
-              </div>{/* end zoom/pan wrapper */}
 
-              {/* Zoom indicator */}
-              {zoom !== 1 && (
-                <div className="absolute bottom-2 right-2 z-20 bg-card/90 backdrop-blur-sm rounded px-2 py-1 text-[10px] text-muted-foreground border border-border">
-                  {Math.round(zoom * 100)}%
-                </div>
-              )}
+              {/* Zoom controls */}
+              <div className="absolute bottom-2 right-2 z-20 flex items-center gap-1">
+                <Button variant="outline" size="icon" className="h-7 w-7 bg-card/90 backdrop-blur-sm" onClick={() => setZoom(prev => clampZoom(prev + 0.3))}>
+                  <ZoomIn className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="outline" size="icon" className="h-7 w-7 bg-card/90 backdrop-blur-sm" onClick={() => setZoom(prev => clampZoom(prev - 0.3))}>
+                  <ZoomOut className="h-3.5 w-3.5" />
+                </Button>
+                {(zoom !== 1 || pan.x !== 0 || pan.y !== 0) && (
+                  <Button variant="outline" size="icon" className="h-7 w-7 bg-card/90 backdrop-blur-sm" onClick={resetView}>
+                    <RotateCcw className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+                {zoom !== 1 && (
+                  <span className="bg-card/90 backdrop-blur-sm rounded px-1.5 py-0.5 text-[10px] text-muted-foreground border border-border">
+                    {Math.round(zoom * 100)}%
+                  </span>
+                )}
+              </div>
             </div>
           </TooltipProvider>
         )}
