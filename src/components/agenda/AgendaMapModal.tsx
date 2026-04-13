@@ -225,17 +225,8 @@ export default function AgendaMapModal({
     };
   }, [allMapPoints]);
 
-  // Convert % to px-based position given container + zoom + pan
-  const getPixelPos = useCallback((xPct: number, yPct: number, containerW: number, containerH: number) => {
-    const baseX = (xPct / 100) * containerW;
-    const baseY = (yPct / 100) * containerH;
-    const cx = containerW / 2;
-    const cy = containerH / 2;
-    return {
-      px: cx + (baseX - cx) * zoom + pan.x,
-      py: cy + (baseY - cy) * zoom + pan.y,
-    };
-  }, [zoom, pan]);
+  // Marker inverse scale to keep fixed size regardless of zoom
+  const markerInverseScale = 1 / zoom;
 
   const getLastVisitDate = useCallback((partnerId: string) => {
     const concluded = allVisits
