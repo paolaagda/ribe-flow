@@ -13,6 +13,9 @@ interface InviteCardProps {
   onAccept: (id: string) => void;
   onReject: (id: string) => void;
   onViewDetails?: (notification: AppNotification) => void;
+  onValidateItem?: (notification: AppNotification) => void;
+  onRejectItem?: (notification: AppNotification) => void;
+  canActOnValidation?: boolean;
 }
 
 export default function InviteCard({ notification, onAccept, onReject, onViewDetails }: InviteCardProps) {
