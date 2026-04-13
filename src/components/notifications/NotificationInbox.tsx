@@ -198,8 +198,9 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     const notif = rejectingValidationNotif;
     if (!notif) return;
 
-    if (notif.type === 'doc_validation_submitted' && notif.partnerId && notif.docName) {
-      rejectDoc(notif.partnerId, notif.docName, reason);
+    if (notif.type === 'doc_validation_submitted' && notif.partnerId && (notif.docId || notif.docName)) {
+      const docIdentifier = notif.docId || notif.docName || '';
+      rejectDoc(notif.partnerId, docIdentifier, reason);
       acceptInvite(notif.id);
       toast({ title: '📄 Documento devolvido', description: `Motivo: ${reason}` });
     } else if (notif.type === 'reg_validation_submitted' && notif.registrationId) {
