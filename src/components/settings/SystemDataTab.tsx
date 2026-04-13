@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useSystemData, SystemCategory, categoryLabels } from '@/hooks/useSystemData';
-import { Plus, Package, Store, Clock, FileCheck, FileText, Users, ShieldX, CalendarClock, XCircle, AlertTriangle, UserX } from 'lucide-react';
+import { Plus, Package, Store, Clock, FileCheck, FileText, Users, ShieldX, CalendarClock, XCircle, AlertTriangle, UserX, FileX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import InfoDataSection from './InfoDataSection';
 
@@ -26,6 +26,7 @@ const categoryIcons: Record<string, React.ElementType> = {
   prospeccaoInconclusaRemota: AlertTriangle,
   recusaConvidadoPresencial: UserX,
   recusaConvidadoRemota: UserX,
+  documentRejectionReasons: FileX,
 };
 
 interface CategorySection {
@@ -48,6 +49,11 @@ const sections: CategorySection[] = [
       'recusaConvidadoPresencial',
       'recusaConvidadoRemota',
     ],
+  },
+  {
+    title: 'Documentação',
+    description: 'Motivos utilizados na validação e devolução de documentos entre Comercial e Cadastro.',
+    categories: ['documentRejectionReasons'],
   },
   {
     title: 'Agenda',

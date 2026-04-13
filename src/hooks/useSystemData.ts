@@ -25,7 +25,8 @@ export type SystemCategory =
   | 'prospeccaoInconclusaPresencial'
   | 'prospeccaoInconclusaRemota'
   | 'recusaConvidadoPresencial'
-  | 'recusaConvidadoRemota';
+  | 'recusaConvidadoRemota'
+  | 'documentRejectionReasons';
 
 const categoryLabels: Record<SystemCategory, string> = {
   products: 'Produtos',
@@ -43,6 +44,7 @@ const categoryLabels: Record<SystemCategory, string> = {
   prospeccaoInconclusaRemota: 'Prospecção inconclusa remota',
   recusaConvidadoPresencial: 'Recusa de convidado presencial',
   recusaConvidadoRemota: 'Recusa de convidado remota',
+  documentRejectionReasons: 'Motivos de Devolução de Documento',
 };
 
 function buildInitial(items: readonly string[]): SystemItem[] {
@@ -128,6 +130,14 @@ const initialData: Record<SystemCategory, SystemItem[]> = {
     'Já estou em outra reunião',
     'Não faz parte da minha função',
     'Sem necessidade de participação',
+  ]),
+  documentRejectionReasons: buildInitial([
+    'Documento ilegível',
+    'Documento incompleto',
+    'Documento incorreto',
+    'Documento vencido',
+    'Informações divergentes',
+    'Formato não aceito',
   ]),
 };
 

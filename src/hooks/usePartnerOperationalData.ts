@@ -3,7 +3,7 @@ import { useVisits } from '@/hooks/useVisits';
 import { useTasks } from '@/hooks/useTasks';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { useInfoData } from '@/hooks/useInfoData';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useDocumentValidation } from '@/hooks/useDocumentValidation';
 import { Partner } from '@/data/mock-data';
 import { differenceInDays, parseISO } from 'date-fns';
 
@@ -26,10 +26,11 @@ export function usePartnerOperationalData(visiblePartners: Partner[]) {
   const { getTasksByPartnerId } = useTasks();
   const { registrations } = useRegistrations();
   const { getActiveDocuments } = useInfoData();
-  const [checkedDocs] = useLocalStorage<Record<string, string[]>>('ribercred_partner_docs_v1', {});
+  const { getPendingValidationCount: getDocPendingCount } = useDocumentValidation();
 
   const activeDocuments = useMemo(() => getActiveDocuments(), [getActiveDocuments]);
   const totalDocsCount = activeDocuments.length;
+  const activeDocIds = useMemo(() => activeDocuments.map(d => d.id), [activeDocuments]);
 
   const getPartnerData = useCallback((partnerId: string): PartnerOperationalData => {
     const today = new Date();
@@ -42,9 +43,8 @@ export function usePartnerOperationalData(visiblePartners: Partner[]) {
       return days >= 10;
     });
 
-    // Documents — reuse existing checkedDocs localStorage
-    const partnerChecked = checkedDocs[partnerId] || [];
-    const pendingDocs = totalDocsCount - partnerChecked.filter(id => activeDocuments.some(d => d.id === id)).length;
+    // Documents — use validation store
+    const pendingDocs = getDocPendingCount(partnerId, activeDocIds);
 
     // Registrations
     const partnerRegs = registrations.filter(r => r.partnerId === partnerId);
@@ -90,7 +90,7 @@ export function usePartnerOperationalData(visiblePartners: Partner[]) {
       criticality,
       nextAction,
     };
-  }, [visits, getTasksByPartnerId, registrations, checkedDocs, activeDocuments, totalDocsCount]);
+  }, [visits, getTasksByPartnerId, registrations, getDocPendingCount, activeDocIds, activeDocuments, totalDocsCount]);
 
   // Aggregated summaries for the listing page
   const summary = useMemo(() => {

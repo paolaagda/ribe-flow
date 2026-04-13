@@ -48,6 +48,8 @@ export interface InvitedUser {
 
 export type TaskCategory = 'document' | 'data' | 'general';
 
+export type TaskDocStatus = 'pending' | 'submitted_for_validation' | 'returned_for_correction' | 'validated';
+
 export interface VisitComment {
   id: string;
   userId: string;
@@ -57,6 +59,8 @@ export interface VisitComment {
   taskCategory?: TaskCategory;
   taskSourceId?: string; // doc id or field id for sync
   taskBankName?: string;
+  taskDocStatus?: TaskDocStatus;
+  taskReturnReason?: string;
   parentId?: string;
   createdAt: string;
 }

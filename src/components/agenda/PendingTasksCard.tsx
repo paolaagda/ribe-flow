@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { CheckSquare, AlertTriangle, Clock } from 'lucide-react';
+import TaskDocBadge from '@/components/shared/TaskDocBadge';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -98,6 +99,9 @@ function TaskRow({ item, onToggle, onOpen, daysPending }: {
             <Badge variant="destructive" className="text-[9px] px-1 py-0">
               {daysPending}d
             </Badge>
+          )}
+          {item.task.taskCategory === 'document' && (
+            <TaskDocBadge status={item.task.taskDocStatus} returnReason={item.task.taskReturnReason} />
           )}
         </div>
       </div>
