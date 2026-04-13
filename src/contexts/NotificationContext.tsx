@@ -178,9 +178,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   );
   const history = useMemo(() =>
     notifications
-      .filter(n => n.read)
+      .filter(n => n.read && !isActionable(n))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
-    [notifications]
+    [notifications, isActionable]
   );
 
   const addNotification = useCallback((notif: Omit<AppNotification, 'id' | 'createdAt' | 'read'>) => {

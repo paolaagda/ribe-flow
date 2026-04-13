@@ -217,7 +217,7 @@ export default function InviteCard({ notification, onAccept, onReject, onViewDet
       )}
 
       {/* Validation actions for Cadastro on submitted items */}
-      {canActOnValidation && (notification.type === 'doc_validation_submitted' || notification.type === 'reg_validation_submitted') && (
+      {isPending && canActOnValidation && (notification.type === 'doc_validation_submitted' || notification.type === 'reg_validation_submitted') && (
         <div className="flex items-center gap-2">
           <Button
             size="sm"
