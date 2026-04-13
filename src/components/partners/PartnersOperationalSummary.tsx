@@ -10,11 +10,15 @@ interface SummaryData {
   totalActiveRegistrations: number;
 }
 
+export type SummaryFilterKey = 'withPendencies' | 'pendingDocs' | 'openTasks' | 'activeRegistrations';
+
 interface Props {
   summary: SummaryData;
+  activeFilter: SummaryFilterKey | null;
+  onFilterToggle: (key: SummaryFilterKey) => void;
 }
 
-export default function PartnersOperationalSummary({ summary }: Props) {
+export default function PartnersOperationalSummary({ summary, activeFilter, onFilterToggle }: Props) {
   const { canRead } = usePermission();
   const canSeeRegistration = canRead('registration.view');
 
@@ -34,6 +38,8 @@ export default function PartnersOperationalSummary({ summary }: Props) {
         color="text-warning"
         delay={0.05}
         pulse={summary.withPendencies > 0}
+        onClick={() => onFilterToggle('withPendencies')}
+        active={activeFilter === 'withPendencies'}
       />
       <AnimatedKpiCard
         icon={FileText}
@@ -41,6 +47,8 @@ export default function PartnersOperationalSummary({ summary }: Props) {
         value={summary.totalPendingDocs}
         color="text-destructive"
         delay={0.1}
+        onClick={() => onFilterToggle('pendingDocs')}
+        active={activeFilter === 'pendingDocs'}
       />
       <AnimatedKpiCard
         icon={CheckSquare}
@@ -48,14 +56,18 @@ export default function PartnersOperationalSummary({ summary }: Props) {
         value={summary.totalOpenTasks}
         color="text-info"
         delay={0.15}
+        onClick={() => onFilterToggle('openTasks')}
+        active={activeFilter === 'openTasks'}
       />
       {canSeeRegistration && (
         <AnimatedKpiCard
           icon={Landmark}
-          label="Cadastro Ativo"
+          label="Cadastramentos"
           value={summary.totalActiveRegistrations}
           color="text-success"
           delay={0.2}
+          onClick={() => onFilterToggle('activeRegistrations')}
+          active={activeFilter === 'activeRegistrations'}
         />
       )}
     </div>

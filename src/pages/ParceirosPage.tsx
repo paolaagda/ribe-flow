@@ -6,7 +6,7 @@ import { getUserById } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useStores } from '@/hooks/useStores';
 import { useVisits } from '@/hooks/useVisits';
-import { Building2, MapPin, ShieldOff, Phone, Store as StoreIcon } from 'lucide-react';
+import { Building2, MapPin, ShieldOff, Phone, Store as StoreIcon, ChevronDown, ChevronUp, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,19 +17,29 @@ import { differenceInDays, parseISO } from 'date-fns';
 import PageHeader from '@/components/shared/PageHeader';
 import { usePagination } from '@/hooks/usePagination';
 import PaginationControls from '@/components/shared/PaginationControls';
-import PartnersOperationalSummary from '@/components/partners/PartnersOperationalSummary';
+import PartnersOperationalSummary, { SummaryFilterKey } from '@/components/partners/PartnersOperationalSummary';
 import PartnersFilterBar, { PartnerFilters, defaultFilters } from '@/components/partners/PartnersFilterBar';
 import PartnerListItemCard from '@/components/partners/PartnerListItemCard';
 import { usePartnerOperationalData } from '@/hooks/usePartnerOperationalData';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+const criticalityLegend = [
+  { color: 'bg-destructive', label: 'Alta criticidade' },
+  { color: 'bg-warning', label: 'Média criticidade' },
+  { color: 'bg-success', label: 'Baixa criticidade' },
+];
 
 export default function ParceirosPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'parceiros' | 'lojas'>('parceiros');
   const [filters, setFilters] = useState<PartnerFilters>(defaultFilters);
+  const [summaryFilter, setSummaryFilter] = useState<SummaryFilterKey | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(true);
   const { canRead, canWrite } = usePermission();
   const { user } = useAuth();
   const { partners } = usePartners();
@@ -52,6 +62,11 @@ export default function ParceirosPage() {
     const visiblePartnerIds = new Set(visiblePartners.map(p => p.id));
     return stores.filter(s => visiblePartnerIds.has(s.partnerId));
   }, [stores, visiblePartners]);
+
+  // Toggle summary card filter
+  const handleSummaryFilterToggle = (key: SummaryFilterKey) => {
+    setSummaryFilter(prev => prev === key ? null : key);
+  };
 
   // Apply smart insight filter first
   const insightFiltered = useMemo(() => {
@@ -92,7 +107,7 @@ export default function ParceirosPage() {
       base = base.filter(p => p.responsibleUserId === filters.responsibleUserId);
     }
 
-    // Toggle filters
+    // Toggle filters from filter bar
     if (filters.hasPendingDocs) {
       base = base.filter(p => getPartnerData(p.id).pendingDocsCount > 0);
     }
@@ -108,8 +123,22 @@ export default function ParceirosPage() {
       base = base.filter(p => p.partnerClass === filters.partnerClass);
     }
 
+    // Summary card filters
+    if (summaryFilter === 'withPendencies') {
+      base = base.filter(p => {
+        const d = getPartnerData(p.id);
+        return d.criticality === 'alta' || d.criticality === 'média';
+      });
+    } else if (summaryFilter === 'pendingDocs') {
+      base = base.filter(p => getPartnerData(p.id).pendingDocsCount > 0);
+    } else if (summaryFilter === 'openTasks') {
+      base = base.filter(p => getPartnerData(p.id).pendingTasksCount > 0);
+    } else if (summaryFilter === 'activeRegistrations') {
+      base = base.filter(p => getPartnerData(p.id).activeRegistrationsCount > 0);
+    }
+
     return base;
-  }, [insightFiltered, filters, getPartnerData]);
+  }, [insightFiltered, filters, getPartnerData, summaryFilter]);
 
   const filteredStores = useMemo(() => {
     const filteredPartnerIds = new Set(filtered.map(p => p.id));
@@ -128,6 +157,17 @@ export default function ParceirosPage() {
 
   const partnersPagination = usePagination(filtered, { pageSize: 9, scrollToTopRef: listRef as React.RefObject<HTMLElement> });
   const storesPagination = usePagination(filteredStores, { pageSize: 9, scrollToTopRef: listRef as React.RefObject<HTMLElement> });
+
+  // Count active filters (for collapsed indicator)
+  const hasActiveBarFilters = filters.criticality !== 'all' || filters.responsibleUserId !== 'all' || filters.hasPendingDocs || filters.hasOpenTasks || filters.hasActiveRegistration || filters.partnerClass !== 'all';
+  const activeFilterCount = [
+    filters.criticality !== 'all',
+    filters.responsibleUserId !== 'all',
+    filters.hasPendingDocs,
+    filters.hasOpenTasks,
+    filters.hasActiveRegistration,
+    filters.partnerClass !== 'all',
+  ].filter(Boolean).length;
 
   if (!canRead('partners.list')) {
     return (
@@ -155,16 +195,59 @@ export default function ParceirosPage() {
         )}
       </PageHeader>
 
-      <PartnersOperationalSummary summary={summary} />
+      <PartnersOperationalSummary
+        summary={summary}
+        activeFilter={summaryFilter}
+        onFilterToggle={handleSummaryFilterToggle}
+      />
 
       <SmartInsights page="parceiros" activeFilter={activeInsight} onFilterClick={setActiveInsight} scopedPartners={visiblePartners} />
 
-      <PartnersFilterBar
-        filters={filters}
-        onFiltersChange={setFilters}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-      />
+      {/* Collapsible filter bar */}
+      <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+        <div className="flex items-center justify-between">
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-muted-foreground hover:text-foreground h-7 px-2">
+              <Filter className="h-3.5 w-3.5" />
+              {filtersOpen ? 'Recolher filtros' : 'Expandir filtros'}
+              {!filtersOpen && hasActiveBarFilters && (
+                <Badge variant="default" className="h-4 px-1.5 text-[9px] ml-1">
+                  {activeFilterCount}
+                </Badge>
+              )}
+              {filtersOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            </Button>
+          </CollapsibleTrigger>
+
+          {/* Criticality legend */}
+          <TooltipProvider>
+            <div className="flex items-center gap-2">
+              {criticalityLegend.map(item => (
+                <Tooltip key={item.label}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-default">
+                      <span className={cn('w-2.5 h-2.5 rounded-sm shrink-0', item.color)} />
+                      <span className="text-[10px] text-muted-foreground hidden sm:inline">{item.label}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
+          </TooltipProvider>
+        </div>
+
+        <CollapsibleContent className="mt-1">
+          <PartnersFilterBar
+            filters={filters}
+            onFiltersChange={setFilters}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+          />
+        </CollapsibleContent>
+      </Collapsible>
 
       <div ref={listRef} />
 
