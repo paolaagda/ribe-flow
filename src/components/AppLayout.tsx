@@ -222,6 +222,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
             <Handshake className="h-4 w-4" />
           </button>
           <span className="font-bold text-sm flex-1">Canal Parceiro</span>
+          <MapButton />
           <ThemeToggleButton />
           <NotificationInbox />
         </header>
@@ -240,6 +241,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
           <header className="sticky top-0 z-40 h-14 flex items-center border-b border-border px-4 bg-card/80 backdrop-blur-lg">
             <SidebarTrigger className="mr-4" />
             <div className="ml-auto flex items-center gap-1">
+              <MapButton />
               <ThemeToggleButton />
               <NotificationInbox />
             </div>
