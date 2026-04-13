@@ -5,7 +5,7 @@ import { Team, initialTeams, getTeamByUserId, getTeamMembers } from '@/data/team
 import { mockUsers, Visit, User } from '@/data/mock-data';
 
 // Roles that have global visibility (can see all users' data)
-const GLOBAL_VIEW_ROLES = ['diretor', 'gerente', 'ascom'];
+const GLOBAL_VIEW_ROLES = ['diretor', 'gerente', 'ascom', 'cadastro'];
 
 export function useTeamFilter() {
   const { user } = useAuth();
