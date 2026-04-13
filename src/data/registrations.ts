@@ -21,6 +21,10 @@ export interface Registration {
   contractConfirmed: boolean;
   isCritical: boolean;
   updates: RegistrationUpdate[];
+  validationStatus?: 'pending' | 'in_validation' | 'validated' | 'rejected';
+  validationRejectionReason?: string;
+  validationSubmittedBy?: string;
+  validationUpdatedAt?: string;
 }
 
 export const REGISTRATION_STATUSES = [

@@ -2,10 +2,14 @@ import { useLocalStorage } from './useLocalStorage';
 import { useCallback } from 'react';
 import { Registration, mockRegistrations } from '@/data/registrations';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotificationContext } from '@/contexts/NotificationContext';
+import { mockUsers, mockPartners } from '@/data/mock-data';
+import { getRandomMessage } from '@/data/notification-messages';
 
 export function useRegistrations() {
   const [registrations, setRegistrations] = useLocalStorage<Registration[]>('ribercred_registrations', mockRegistrations);
   const { user } = useAuth();
+  const { addNotification } = useNotificationContext();
 
   const addRegistration = useCallback((reg: Omit<Registration, 'id' | 'requestedAt' | 'completedAt' | 'updates'>) => {
     const newReg: Registration = {
@@ -64,5 +68,117 @@ export function useRegistrations() {
     return registrations.find(r => r.id === id);
   }, [registrations]);
 
-  return { registrations, addRegistration, updateRegistration, deleteRegistration, getById };
+  // === Validation flow for bank registrations ===
+
+  const submitRegistrationForValidation = useCallback((id: string) => {
+    const reg = registrations.find(r => r.id === id);
+    if (!reg) return;
+
+    setRegistrations(prev => prev.map(r => {
+      if (r.id !== id) return r;
+      return {
+        ...r,
+        validationStatus: 'in_validation' as const,
+        validationSubmittedBy: user?.id,
+        validationUpdatedAt: new Date().toISOString(),
+      };
+    }));
+
+    // Notify Cadastro users — single dispatch
+    const partner = mockPartners.find(p => p.id === reg.partnerId);
+    const cadastroUsers = mockUsers.filter(u => u.role === 'cadastro' && u.active);
+    const today = new Date().toISOString().split('T')[0];
+
+    cadastroUsers.forEach(cadastroUser => {
+      addNotification({
+        type: 'reg_validation_submitted',
+        visitId: '',
+        fromUserId: user?.id || '',
+        toUserId: cadastroUser.id,
+        partnerId: reg.partnerId,
+        partnerName: partner?.name || '',
+        date: today,
+        time: '',
+        status: 'pending',
+        message: getRandomMessage('reg_validation_submitted', {
+          parceiro: partner?.name || '',
+          nome: user?.name || '',
+          banco: reg.bank,
+        }),
+        bankName: reg.bank,
+        registrationId: id,
+      });
+    });
+  }, [registrations, setRegistrations, user, addNotification]);
+
+  const validateRegistration = useCallback((id: string) => {
+    setRegistrations(prev => prev.map(r => {
+      if (r.id !== id) return r;
+      return {
+        ...r,
+        validationStatus: 'validated' as const,
+        validationRejectionReason: undefined,
+        validationUpdatedAt: new Date().toISOString(),
+      };
+    }));
+    // No notification on approval per requirements
+  }, [setRegistrations]);
+
+  const rejectRegistration = useCallback((id: string, reason: string) => {
+    const reg = registrations.find(r => r.id === id);
+    if (!reg) return;
+
+    setRegistrations(prev => prev.map(r => {
+      if (r.id !== id) return r;
+      return {
+        ...r,
+        validationStatus: 'rejected' as const,
+        validationRejectionReason: reason,
+        validationUpdatedAt: new Date().toISOString(),
+      };
+    }));
+
+    // Notify the Comercial who submitted — single dispatch
+    const submittedBy = reg.validationSubmittedBy || reg.commercialUserId;
+    if (submittedBy) {
+      const partner = mockPartners.find(p => p.id === reg.partnerId);
+      const today = new Date().toISOString().split('T')[0];
+
+      addNotification({
+        type: 'reg_validation_rejected',
+        visitId: '',
+        fromUserId: user?.id || '',
+        toUserId: submittedBy,
+        partnerId: reg.partnerId,
+        partnerName: partner?.name || '',
+        date: today,
+        time: '',
+        status: 'pending',
+        message: getRandomMessage('reg_validation_rejected', {
+          parceiro: partner?.name || '',
+          banco: reg.bank,
+          motivo: reason,
+        }),
+        bankName: reg.bank,
+        registrationId: id,
+        rejectionReason: reason,
+      });
+    }
+  }, [registrations, setRegistrations, user, addNotification]);
+
+  const revokeRegistrationValidation = useCallback((id: string, reason: string) => {
+    rejectRegistration(id, reason);
+  }, [rejectRegistration]);
+
+  return {
+    registrations,
+    addRegistration,
+    updateRegistration,
+    deleteRegistration,
+    getById,
+    submitRegistrationForValidation,
+    validateRegistration,
+    rejectRegistration,
+    revokeRegistrationValidation,
+  };
 }

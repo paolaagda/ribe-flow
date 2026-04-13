@@ -6,6 +6,9 @@ type MessageContext = {
   nome?: string;
   hora?: string;
   data?: string;
+  documento?: string;
+  banco?: string;
+  motivo?: string;
 };
 
 const templates: Record<string, string[]> = {
@@ -51,6 +54,27 @@ const templates: Record<string, string[]> = {
     'Nenhuma novidade no momento',
     'Quando alguém te convidar, aparecerá aqui',
   ],
+  doc_validation_submitted: [
+    '📄 Novo documento em validação — {documento} de {parceiro}',
+    '📄 {nome} enviou o documento {documento} de {parceiro} para validação',
+    '📄 Documento {documento} de {parceiro} aguardando análise',
+    '📄 {parceiro}: documento {documento} enviado para validação por {nome}',
+  ],
+  doc_validation_rejected: [
+    '⚠️ Documento devolvido — {documento} de {parceiro}. Motivo: {motivo}',
+    '⚠️ O documento {documento} de {parceiro} foi devolvido para correção. Motivo: {motivo}',
+    '⚠️ {parceiro}: documento {documento} rejeitado. Motivo: {motivo}',
+  ],
+  reg_validation_submitted: [
+    '🏦 Novo cadastro bancário em validação — {parceiro} no banco {banco}',
+    '🏦 {nome} enviou o cadastro de {parceiro} com {banco} para validação',
+    '🏦 Cadastro de {parceiro} no {banco} aguardando análise',
+  ],
+  reg_validation_rejected: [
+    '⚠️ Cadastro bancário devolvido — {parceiro} no {banco}. Motivo: {motivo}',
+    '⚠️ O cadastro de {parceiro} com {banco} foi devolvido para correção. Motivo: {motivo}',
+    '⚠️ {parceiro}: cadastro {banco} rejeitado. Motivo: {motivo}',
+  ],
 };
 
 const lastUsedIndex: Record<string, number> = {};
@@ -60,7 +84,10 @@ function interpolate(template: string, context: MessageContext): string {
     .replace(/\{parceiro\}/g, context.parceiro || '')
     .replace(/\{nome\}/g, context.nome || '')
     .replace(/\{hora\}/g, context.hora || '')
-    .replace(/\{data\}/g, context.data || '');
+    .replace(/\{data\}/g, context.data || '')
+    .replace(/\{documento\}/g, context.documento || '')
+    .replace(/\{banco\}/g, context.banco || '')
+    .replace(/\{motivo\}/g, context.motivo || '');
 }
 
 export function getRandomMessage(type: string, context: MessageContext = {}): string {
