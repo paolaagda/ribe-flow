@@ -294,6 +294,11 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
     <InviteRejectionModal
       open={rejectModalOpen}
       onOpenChange={setRejectModalOpen}
+      medio={(() => {
+        const notif = rejectingId ? pendingInvites.find(n => n.id === rejectingId) : null;
+        const visit = notif?.visitId ? visits.find(v => v.id === notif.visitId) : null;
+        return (visit?.medio as 'presencial' | 'remoto') || 'presencial';
+      })()}
       onConfirm={handleConfirmReject}
     />
     </>
