@@ -180,7 +180,26 @@ export default function AgendaPage() {
     });
   }, [visits]);
 
-  // (New visit from partner detail is now handled locally in PartnerDetailView)
+  // Handle createVisit from map suggestion
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const createPartnerId = params.get('createVisit');
+    const createDate = params.get('date');
+    if (createPartnerId) {
+      const partner = getPartnerById(createPartnerId);
+      resetForm();
+      setFormData(prev => ({
+        ...prev,
+        partnerId: createPartnerId,
+        date: createDate || format(new Date(), 'yyyy-MM-dd'),
+        type: 'visita',
+        medio: 'presencial',
+        structures: partner?.structures || [],
+      }));
+      setShowForm(true);
+      window.history.replaceState({}, '', '/agenda');
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const togglePanel = (panel: "today" | "tasks") => {
     if (panel === "today") {
