@@ -2,14 +2,14 @@ import { useLocalStorage } from './useLocalStorage';
 import { useCallback } from 'react';
 import { Registration, mockRegistrations } from '@/data/registrations';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNotificationContext } from '@/contexts/NotificationContext';
+import { useNotificationContextSafe } from '@/contexts/NotificationContext';
 import { mockUsers, mockPartners } from '@/data/mock-data';
 import { getRandomMessage } from '@/data/notification-messages';
 
 export function useRegistrations() {
   const [registrations, setRegistrations] = useLocalStorage<Registration[]>('ribercred_registrations', mockRegistrations);
   const { user } = useAuth();
-  const { addNotification } = useNotificationContext();
+  const { addNotification } = useNotificationContextSafe();
 
   const addRegistration = useCallback((reg: Omit<Registration, 'id' | 'requestedAt' | 'completedAt' | 'updates'>) => {
     const newReg: Registration = {
