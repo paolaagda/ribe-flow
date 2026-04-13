@@ -867,20 +867,31 @@ export default function AgendaPage() {
               </Button>
             </div>
           </div>
-          <Button
-            variant={showFilters ? "secondary" : "ghost"}
-            size="sm"
-            className="h-7 text-xs gap-1.5 relative shrink-0"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter className="h-3.5 w-3.5" />
-            Filtros
-            {(filterStatus !== "all" || filterType !== "all" || dateRange.from || dateRange.to) && (
-              <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary text-[9px] text-primary-foreground flex items-center justify-center">
-                !
-              </span>
-            )}
-          </Button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setShowMapModal(true)}
+              title="Mapa de compromissos"
+            >
+              <MapIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={showFilters ? "secondary" : "ghost"}
+              size="sm"
+              className="h-7 text-xs gap-1.5 relative"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-3.5 w-3.5" />
+              Filtros
+              {(filterStatus !== "all" || filterType !== "all" || dateRange.from || dateRange.to) && (
+                <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary text-[9px] text-primary-foreground flex items-center justify-center">
+                  !
+                </span>
+              )}
+            </Button>
+          </div>
         </div>
 
         <AnimatePresence>
