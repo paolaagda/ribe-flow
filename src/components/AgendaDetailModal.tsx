@@ -82,6 +82,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
   const [pendingStatus, setPendingStatus] = useState<'Reagendada' | 'Cancelada' | 'Inconclusa' | null>(null);
   const [showFinalConfirm, setShowFinalConfirm] = useState(false);
   const [pendingFinalStatus, setPendingFinalStatus] = useState<VisitStatus | null>(null);
+  const [pendingDate, setPendingDate] = useState<string | null>(null);
 
   if (!initialVisit) return null;
 
