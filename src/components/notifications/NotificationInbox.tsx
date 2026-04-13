@@ -34,13 +34,18 @@ const NotificationInbox = React.forwardRef<HTMLDivElement>(function Notification
   } = useNotifications();
   const { toast } = useToast();
   const { addLog } = useAuditLog();
-  const { updateRegistration } = useRegistrations();
+  const { updateRegistration, validateRegistration, rejectRegistration } = useRegistrations();
+  const { validateDoc, rejectDoc, revokeValidation } = useDocumentValidation();
   const { user } = useAuth();
   const { visits } = useVisits();
+
+  const isCadastroUser = user?.role === 'cadastro' || user?.role === 'gerente' || user?.role === 'diretor';
 
   const prevCountRef = useRef(unreadCount);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [docRejectModalOpen, setDocRejectModalOpen] = useState(false);
+  const [rejectingValidationNotif, setRejectingValidationNotif] = useState<AppNotification | null>(null);
 
   useEffect(() => {
     ensureInitialized();
