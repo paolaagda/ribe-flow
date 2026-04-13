@@ -11,11 +11,13 @@ import {
   ClipboardList,
   BookOpen,
   ExternalLink,
+  Map as MapIcon,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import MobileMenuDrawer from '@/components/MobileMenuDrawer';
 import NotificationInbox from '@/components/notifications/NotificationInbox';
+import AgendaMapModal from '@/components/agenda/AgendaMapModal';
 import { usePermission } from '@/hooks/usePermission';
 import { useTheme } from '@/hooks/useTheme';
 import { Moon, Sun } from 'lucide-react';
@@ -43,6 +45,18 @@ function ThemeToggleButton() {
     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleTheme}>
       {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </Button>
+  );
+}
+
+function MapButton() {
+  const [showMap, setShowMap] = React.useState(false);
+  return (
+    <>
+      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowMap(true)} title="Mapa de compromissos">
+        <MapIcon className="h-4 w-4" />
+      </Button>
+      <AgendaMapModal open={showMap} onOpenChange={setShowMap} />
+    </>
   );
 }
 
@@ -208,6 +222,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
             <Handshake className="h-4 w-4" />
           </button>
           <span className="font-bold text-sm flex-1">Canal Parceiro</span>
+          <MapButton />
           <ThemeToggleButton />
           <NotificationInbox />
         </header>
@@ -226,6 +241,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
           <header className="sticky top-0 z-40 h-14 flex items-center border-b border-border px-4 bg-card/80 backdrop-blur-lg">
             <SidebarTrigger className="mr-4" />
             <div className="ml-auto flex items-center gap-1">
+              <MapButton />
               <ThemeToggleButton />
               <NotificationInbox />
             </div>

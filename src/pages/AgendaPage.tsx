@@ -53,7 +53,7 @@ import {
   CalendarRange,
   Filter,
   Crown,
-  Map as MapIcon,
+  
 } from "lucide-react";
 import {
   format,
@@ -81,7 +81,7 @@ import JustificationModal from "@/components/agenda/JustificationModal";
 import InviteRejectionModal from "@/components/agenda/InviteRejectionModal";
 
 import InlineTasksPanel from "@/components/agenda/InlineTasksPanel";
-import AgendaMapModal from "@/components/agenda/AgendaMapModal";
+// AgendaMapModal moved to global header
 // BankRegistrationFlow moved to AgendaDetailModal
 import SmartInsights from "@/components/shared/SmartInsights";
 import AnimatedFilterContent from "@/components/shared/AnimatedFilterContent";
@@ -170,7 +170,7 @@ export default function AgendaPage() {
   const [showTasksPanel, setShowTasksPanel] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
-  const [showMapModal, setShowMapModal] = useState(false);
+  // showMapModal moved to global header
   // Bank registration flow moved to modal
 
   useEffect(() => {
@@ -868,15 +868,6 @@ export default function AgendaPage() {
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={() => setShowMapModal(true)}
-              title="Mapa de compromissos"
-            >
-              <MapIcon className="h-4 w-4" />
-            </Button>
             <Button
               variant={showFilters ? "secondary" : "ghost"}
               size="sm"
@@ -1601,18 +1592,7 @@ export default function AgendaPage() {
           </div>
         )}
 
-        {/* Map modal */}
-        <AgendaMapModal
-          open={showMapModal}
-          onOpenChange={setShowMapModal}
-          visits={filteredVisits}
-          currentDate={currentDate}
-          view={view}
-          onOpenVisitDetail={(visit) => {
-            setSelectedVisit(visit);
-            setShowDetail(true);
-          }}
-        />
+        {/* Map modal moved to global header */}
 
         {/* Create/Edit Visit Dialog */}
         <Dialog
