@@ -1,16 +1,16 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef, WheelEvent, TouchEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { MapPin, Navigation, Eye, EyeOff, Handshake, UserPlus, ExternalLink, CalendarPlus, Clock, ArrowRight } from 'lucide-react';
+import { MapPin, Navigation, Eye, EyeOff, Handshake, UserPlus, ExternalLink, CalendarPlus, Clock, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Visit, Partner, getUserById } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useVisits } from '@/hooks/useVisits';
 import { cn } from '@/lib/utils';
-import { format, parseISO, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { format, parseISO, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatCentavos } from '@/lib/currency';
 import { useNavigate } from 'react-router-dom';
@@ -44,6 +44,16 @@ const CLASS_COLORS: Record<string, string> = {
   D: 'bg-muted text-muted-foreground border-border',
 };
 
+function getPeriodLabel(date: Date, view: 'day' | 'week' | 'month'): string {
+  if (view === 'day') return format(date, 'dd/MM/yyyy');
+  if (view === 'week') {
+    const s = startOfWeek(date, { locale: ptBR });
+    const e = endOfWeek(date, { locale: ptBR });
+    return `${format(s, 'dd/MM/yyyy')} a ${format(e, 'dd/MM/yyyy')}`;
+  }
+  return format(date, "MMMM 'de' yyyy", { locale: ptBR }).replace(/^./, c => c.toUpperCase());
+}
+
 export default function AgendaMapModal({
   open,
   onOpenChange,
@@ -56,10 +66,86 @@ export default function AgendaMapModal({
   const { partners, getPartnerById } = usePartners();
   const { visits: allVisits } = useVisits();
   const navigate = useNavigate();
-  const internalDate = currentDateProp ?? new Date();
+  const [navDate, setNavDate] = useState<Date>(() => currentDateProp ?? new Date());
   const [mapView, setMapView] = useState<'day' | 'week' | 'month'>(viewProp ?? 'week');
   const visits = visitsProp ?? allVisits;
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Zoom & pan state
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const isPanning = useRef(false);
+  const panStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
+  const pinchStart = useRef<number | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleWheel = useCallback((e: WheelEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    setZoom(prev => Math.min(5, Math.max(0.5, prev - e.deltaY * 0.002)));
+  }, []);
+
+  const handleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchStart.current = Math.sqrt(dx * dx + dy * dy);
+    } else if (e.touches.length === 1) {
+      isPanning.current = true;
+      panStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, panX: pan.x, panY: pan.y };
+    }
+  }, [pan]);
+
+  const handleTouchMove = useCallback((e: TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 2 && pinchStart.current !== null) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const scale = dist / pinchStart.current;
+      setZoom(prev => Math.min(5, Math.max(0.5, prev * scale)));
+      pinchStart.current = dist;
+    } else if (e.touches.length === 1 && isPanning.current) {
+      const dx = e.touches[0].clientX - panStart.current.x;
+      const dy = e.touches[0].clientY - panStart.current.y;
+      setPan({ x: panStart.current.panX + dx, y: panStart.current.panY + dy });
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    pinchStart.current = null;
+    isPanning.current = false;
+  }, []);
+
+  // Mouse pan for desktop
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    isPanning.current = true;
+    panStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+  }, [pan]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isPanning.current) return;
+    const dx = e.clientX - panStart.current.x;
+    const dy = e.clientY - panStart.current.y;
+    setPan({ x: panStart.current.panX + dx, y: panStart.current.panY + dy });
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    isPanning.current = false;
+  }, []);
+
+  // Navigation
+  const goBack = useCallback(() => {
+    setSelectedPoint(null);
+    setZoom(1); setPan({ x: 0, y: 0 });
+    setNavDate(prev => mapView === 'day' ? subDays(prev, 1) : mapView === 'week' ? subWeeks(prev, 1) : subMonths(prev, 1));
+  }, [mapView]);
+
+  const goForward = useCallback(() => {
+    setSelectedPoint(null);
+    setZoom(1); setPan({ x: 0, y: 0 });
+    setNavDate(prev => mapView === 'day' ? addDays(prev, 1) : mapView === 'week' ? addWeeks(prev, 1) : addMonths(prev, 1));
+  }, [mapView]);
   const [selectedPoint, setSelectedPoint] = useState<null | { type: 'visit'; visit: Visit; partner?: Partner; index: number } | { type: 'suggestion'; partner: Partner }>(null);
 
   // Filter visits by the selected period
