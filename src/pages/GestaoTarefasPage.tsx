@@ -432,10 +432,23 @@ export default function GestaoTarefasPage() {
                 item={item}
                 getPartnerById={getPartnerById}
                 onConclude={handleConclude}
+                onClick={() => handleOpenDetail(item)}
               />
             ))}
           </div>
         )}
+
+        {/* Detail modal */}
+        <TaskDetailModal
+          item={selectedTask}
+          partner={selectedTask ? getPartnerById(selectedTask.visit.partnerId) : undefined}
+          open={showDetail}
+          onOpenChange={(open) => {
+            setShowDetail(open);
+            if (!open) setSelectedTask(null);
+          }}
+          onConclude={handleConcludeFromModal}
+        />
       </SectionContainer>
     </PageTransition>
   );
