@@ -216,6 +216,7 @@ export default function GestaoTarefasPage() {
 
   const handleConclude = useCallback((visitId: string, commentId: string) => {
     toggleTask(visitId, commentId);
+    toast.success('Tarefa concluída');
   }, [toggleTask]);
 
   const handleCancel = useCallback((visitId: string, commentId: string) => {
@@ -241,6 +242,7 @@ export default function GestaoTarefasPage() {
 
   const handleConcludeFromModal = useCallback((visitId: string, commentId: string) => {
     toggleTask(visitId, commentId);
+    toast.success('Tarefa concluída');
     setShowDetail(false);
     setSelectedTask(null);
   }, [toggleTask]);
