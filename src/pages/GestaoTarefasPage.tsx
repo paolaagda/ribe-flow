@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTasks, TaskItem } from '@/hooks/useTasks';
+import TaskDetailModal from '@/components/tarefas/TaskDetailModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePartners } from '@/hooks/usePartners';
 import { getUserById } from '@/data/mock-data';
@@ -141,6 +142,10 @@ export default function GestaoTarefasPage() {
   const [advCommercial, setAdvCommercial] = useState('all');
   const [advPartner, setAdvPartner] = useState('all');
 
+  // Detail modal
+  const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
+
   const hasActiveFilters = !!(search || scope !== 'todas' || status !== 'tudo' || priority !== 'todas' || advCommercial !== 'all' || advPartner !== 'all');
 
   const clearFilters = useCallback(() => {
@@ -235,6 +240,17 @@ export default function GestaoTarefasPage() {
 
   const handleConclude = useCallback((visitId: string, commentId: string) => {
     toggleTask(visitId, commentId);
+  }, [toggleTask]);
+
+  const handleOpenDetail = useCallback((item: TaskItem) => {
+    setSelectedTask(item);
+    setShowDetail(true);
+  }, []);
+
+  const handleConcludeFromModal = useCallback((visitId: string, commentId: string) => {
+    toggleTask(visitId, commentId);
+    setShowDetail(false);
+    setSelectedTask(null);
   }, [toggleTask]);
 
   return (
@@ -416,10 +432,23 @@ export default function GestaoTarefasPage() {
                 item={item}
                 getPartnerById={getPartnerById}
                 onConclude={handleConclude}
+                onClick={() => handleOpenDetail(item)}
               />
             ))}
           </div>
         )}
+
+        {/* Detail modal */}
+        <TaskDetailModal
+          item={selectedTask}
+          partner={selectedTask ? getPartnerById(selectedTask.visit.partnerId) : undefined}
+          open={showDetail}
+          onOpenChange={(open) => {
+            setShowDetail(open);
+            if (!open) setSelectedTask(null);
+          }}
+          onConclude={handleConcludeFromModal}
+        />
       </SectionContainer>
     </PageTransition>
   );
@@ -432,10 +461,12 @@ function TaskCard({
   item,
   getPartnerById,
   onConclude,
+  onClick,
 }: {
   item: TaskItem;
   getPartnerById: (id: string) => ReturnType<ReturnType<typeof usePartners>['getPartnerById']>;
   onConclude: (visitId: string, commentId: string) => void;
+  onClick: () => void;
 }) {
   const partner = getPartnerById(item.visit.partnerId);
   const responsible = getUserById(item.task.userId);
@@ -453,6 +484,7 @@ function TaskCard({
 
   return (
     <Card
+      onClick={onClick}
       className={cn(
         'transition-all duration-200 cursor-pointer group',
         'hover:shadow-md hover:border-primary/20',
