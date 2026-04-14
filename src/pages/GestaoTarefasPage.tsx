@@ -461,10 +461,12 @@ function TaskCard({
   item,
   getPartnerById,
   onConclude,
+  onClick,
 }: {
   item: TaskItem;
   getPartnerById: (id: string) => ReturnType<ReturnType<typeof usePartners>['getPartnerById']>;
   onConclude: (visitId: string, commentId: string) => void;
+  onClick: () => void;
 }) {
   const partner = getPartnerById(item.visit.partnerId);
   const responsible = getUserById(item.task.userId);
