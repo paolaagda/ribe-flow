@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import {
   Calendar, User as UserIcon, Briefcase, FileText, Link2,
-  CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle, Clock,
+  CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle,
 } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -15,13 +15,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select';
 import { TaskItem } from '@/hooks/useTasks';
 import { TaskPermissions } from '@/hooks/useTaskPermissions';
 import { getUserById, Partner, User } from '@/data/mock-data';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const OVERDUE_DAYS = 10;
 
@@ -99,7 +97,7 @@ interface TaskDetailModalProps {
 export default function TaskDetailModal({
   item, partner, open, onOpenChange, onConclude, onCancel, permissions, validAssignees,
 }: TaskDetailModalProps) {
-  const [confirmAction, setConfirmAction] = useState<'conclude' | 'cancel' | null>(null);
+  const [confirmCancel, setConfirmCancel] = useState(false);
   const history = useMemo(() => item ? buildHistory(item) : [], [item]);
 
   if (!item) return null;
@@ -115,11 +113,15 @@ export default function TaskDetailModal({
     ? 'Documento' : item.task.taskCategory === 'data'
     ? 'Dado operacional' : 'Geral';
 
-  const handleConfirmAction = () => {
-    if (!confirmAction) return;
-    if (confirmAction === 'conclude') onConclude(item.visit.id, item.task.id);
-    if (confirmAction === 'cancel') onCancel(item.visit.id, item.task.id);
-    setConfirmAction(null);
+  const handleConclude = () => {
+    onConclude(item.visit.id, item.task.id);
+    toast.success('Tarefa concluída');
+    onOpenChange(false);
+  };
+
+  const handleConfirmCancel = () => {
+    onCancel(item.visit.id, item.task.id);
+    setConfirmCancel(false);
   };
 
   return (
@@ -250,7 +252,7 @@ export default function TaskDetailModal({
           <div className="border-t bg-muted/30 p-3 sm:p-4">
             <div className="flex items-center gap-2 flex-wrap">
               {permissions.canConclude && (
-                <Button size="sm" className="gap-1.5 text-xs" onClick={() => setConfirmAction('conclude')}>
+                <Button size="sm" className="gap-1.5 text-xs" onClick={handleConclude}>
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   Concluir
                 </Button>
@@ -271,7 +273,7 @@ export default function TaskDetailModal({
                 <Button
                   variant="outline" size="sm"
                   className="gap-1.5 text-xs text-destructive hover:text-destructive"
-                  onClick={() => setConfirmAction('cancel')}
+                  onClick={() => setConfirmCancel(true)}
                 >
                   <XCircle className="h-3.5 w-3.5" />
                   Cancelar
@@ -286,23 +288,19 @@ export default function TaskDetailModal({
         </DialogContent>
       </Dialog>
 
-      {/* Confirmation dialogs */}
-      <AlertDialog open={!!confirmAction} onOpenChange={(o) => { if (!o) setConfirmAction(null); }}>
+      {/* Cancel confirmation dialog only */}
+      <AlertDialog open={confirmCancel} onOpenChange={setConfirmCancel}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {confirmAction === 'conclude' ? 'Concluir tarefa?' : 'Cancelar tarefa?'}
-            </AlertDialogTitle>
+            <AlertDialogTitle>Cancelar tarefa?</AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmAction === 'conclude'
-                ? 'A tarefa será marcada como concluída para todos os envolvidos. Essa ação não pode ser facilmente desfeita.'
-                : 'A tarefa será cancelada e removida da lista ativa. Ela ficará acessível apenas pelo filtro de canceladas.'}
+              A tarefa será cancelada e removida da lista ativa. Ela ficará acessível apenas pelo filtro de canceladas.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Voltar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmAction}>
-              {confirmAction === 'conclude' ? 'Concluir' : 'Cancelar tarefa'}
+            <AlertDialogAction onClick={handleConfirmCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Cancelar tarefa
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
