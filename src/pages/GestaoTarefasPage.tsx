@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTasks, TaskItem } from '@/hooks/useTasks';
+import TaskDetailModal from '@/components/tarefas/TaskDetailModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePartners } from '@/hooks/usePartners';
 import { getUserById } from '@/data/mock-data';
@@ -140,6 +141,10 @@ export default function GestaoTarefasPage() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [advCommercial, setAdvCommercial] = useState('all');
   const [advPartner, setAdvPartner] = useState('all');
+
+  // Detail modal
+  const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
 
   const hasActiveFilters = !!(search || scope !== 'todas' || status !== 'tudo' || priority !== 'todas' || advCommercial !== 'all' || advPartner !== 'all');
 
