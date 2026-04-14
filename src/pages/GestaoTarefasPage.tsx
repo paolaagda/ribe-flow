@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTasks, TaskItem } from '@/hooks/useTasks';
 import TaskDetailModal from '@/components/tarefas/TaskDetailModal';
+import TaskCreateModal from '@/components/tarefas/TaskCreateModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePartners } from '@/hooks/usePartners';
 import { getUserById } from '@/data/mock-data';
@@ -146,6 +147,9 @@ export default function GestaoTarefasPage() {
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
   const [showDetail, setShowDetail] = useState(false);
 
+  // Create modal
+  const [showCreate, setShowCreate] = useState(false);
+
   const hasActiveFilters = !!(search || scope !== 'todas' || status !== 'tudo' || priority !== 'todas' || advCommercial !== 'all' || advPartner !== 'all');
 
   const clearFilters = useCallback(() => {
@@ -261,7 +265,7 @@ export default function GestaoTarefasPage() {
           title="Gestão de Tarefas"
           description="Acompanhe e gerencie tarefas operacionais e comerciais da equipe."
         >
-          <Button size="sm" className="gap-2">
+          <Button size="sm" className="gap-2" onClick={() => setShowCreate(true)}>
             <Plus className="h-4 w-4" />
             Nova tarefa
           </Button>
@@ -438,6 +442,9 @@ export default function GestaoTarefasPage() {
           </div>
         )}
 
+        {/* Create modal */}
+        <TaskCreateModal open={showCreate} onOpenChange={setShowCreate} />
+
         {/* Detail modal */}
         <TaskDetailModal
           item={selectedTask}
@@ -607,7 +614,7 @@ function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () 
             Limpar filtros
           </Button>
         )}
-        <Button size="sm" className="gap-1 text-xs">
+        <Button size="sm" className="gap-1 text-xs" onClick={() => {}}>
           <Plus className="h-3.5 w-3.5" />
           Nova tarefa
         </Button>
