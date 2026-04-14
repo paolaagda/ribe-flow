@@ -418,6 +418,7 @@ function TaskCard({
   const completed = !!item.task.taskCompleted;
   const cancelled = isCancelled(item);
   const overdue = !completed && !cancelled && isOverdue(item.task.createdAt);
+  const priority = !completed && !cancelled && isTaskPriority(item.task);
   const statusDisplay = getStatusDisplay(item);
   const deadline = getDeadlineLabel(item.task.createdAt, completed);
   const returnText = getReturnText(item);
@@ -434,6 +435,7 @@ function TaskCard({
         'transition-all duration-200 cursor-pointer group',
         'hover:shadow-md hover:border-primary/20',
         overdue && 'border-destructive/30',
+        priority && !overdue && 'border-amber-500/30 dark:border-amber-400/20',
         completed && 'opacity-75',
         cancelled && 'opacity-60',
       )}
@@ -474,6 +476,12 @@ function TaskCard({
                 )}>
                   {deadline.label}
                 </span>
+              )}
+              {priority && (
+                <Badge variant="outline" className="text-[10px] font-medium gap-0.5 border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/5">
+                  <Star className="h-2.5 w-2.5 fill-current" />
+                  Prioritária
+                </Badge>
               )}
               {item.task.taskCategory && (
                 <Badge variant="outline" className="text-[10px] font-normal capitalize border-dashed">
