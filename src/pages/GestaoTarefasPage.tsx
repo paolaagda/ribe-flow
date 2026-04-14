@@ -242,6 +242,17 @@ export default function GestaoTarefasPage() {
     toggleTask(visitId, commentId);
   }, [toggleTask]);
 
+  const handleOpenDetail = useCallback((item: TaskItem) => {
+    setSelectedTask(item);
+    setShowDetail(true);
+  }, []);
+
+  const handleConcludeFromModal = useCallback((visitId: string, commentId: string) => {
+    toggleTask(visitId, commentId);
+    setShowDetail(false);
+    setSelectedTask(null);
+  }, [toggleTask]);
+
   return (
     <PageTransition>
       <SectionContainer>
