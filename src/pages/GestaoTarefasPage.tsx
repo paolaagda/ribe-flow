@@ -299,7 +299,7 @@ export default function GestaoTarefasPage() {
             <span>tarefa{totalFiltered !== 1 ? 's' : ''} encontrada{totalFiltered !== 1 ? 's' : ''}</span>
           </div>
           {priorityCount > 0 && (
-            <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+            <div className="flex items-center gap-1.5 text-accent-foreground">
               <AlertTriangle className="h-4 w-4" />
               <span className="font-medium">{priorityCount}</span>
               <span>prioritária{priorityCount !== 1 ? 's' : ''}</span>
