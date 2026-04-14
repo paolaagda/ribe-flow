@@ -63,7 +63,7 @@ export default function GestaoTarefasPage() {
   const [advCommercial, setAdvCommercial] = useState('all');
   const [advPartner, setAdvPartner] = useState('all');
 
-  const hasActiveFilters = search || scope !== 'todas' || status !== 'tudo' || priority !== 'todas' || advCommercial !== 'all' || advPartner !== 'all';
+  const hasActiveFilters = !!(search || scope !== 'todas' || status !== 'tudo' || priority !== 'todas' || advCommercial !== 'all' || advPartner !== 'all');
 
   const clearFilters = () => {
     setSearch('');

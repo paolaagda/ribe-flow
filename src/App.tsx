@@ -18,6 +18,7 @@ import ColaboradorPerfilPage from "@/pages/ColaboradorPerfilPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import InformacoesUteisPage from "@/pages/InformacoesUteisPage";
 import LinksUteisPage from "@/pages/LinksUteisPage";
+import GestaoTarefasPage from "@/pages/GestaoTarefasPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
