@@ -484,6 +484,7 @@ function TaskCard({
 
   return (
     <Card
+      onClick={onClick}
       className={cn(
         'transition-all duration-200 cursor-pointer group',
         'hover:shadow-md hover:border-primary/20',
