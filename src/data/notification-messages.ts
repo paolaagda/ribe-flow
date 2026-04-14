@@ -75,6 +75,16 @@ const templates: Record<string, string[]> = {
     '⚠️ O cadastro de {parceiro} com {banco} foi devolvido para correção. Motivo: {motivo}',
     '⚠️ {parceiro}: cadastro {banco} rejeitado. Motivo: {motivo}',
   ],
+  task_completed: [
+    '✅ {nome} concluiu a tarefa "{documento}" de {parceiro}',
+    '✅ Tarefa concluída por {nome}: "{documento}" — {parceiro}',
+    '✅ {nome} finalizou "{documento}" vinculada a {parceiro}',
+  ],
+  task_completed_cadastro: [
+    '✅ Tarefa de cadastro concluída: "{documento}" de {parceiro} por {nome}',
+    '✅ {nome} concluiu a tarefa de cadastro "{documento}" — {parceiro}',
+    '✅ Cadastro: "{documento}" de {parceiro} finalizada por {nome}',
+  ],
 };
 
 const lastUsedIndex: Record<string, number> = {};
