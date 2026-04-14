@@ -115,6 +115,8 @@ interface TaskDetailModalProps {
 export default function TaskDetailModal({
   item, partner, open, onOpenChange, onConclude,
 }: TaskDetailModalProps) {
+  const history = useMemo(() => item ? buildHistory(item) : [], [item]);
+
   if (!item) return null;
 
   const responsible = getUserById(item.task.userId);
@@ -122,7 +124,6 @@ export default function TaskDetailModal({
   const overdue = !completed && isOverdue(item.task.createdAt);
   const statusInfo = getStatusInfo(item);
   const deadline = getDeadlineLabel(item.task.createdAt, completed);
-  const history = useMemo(() => buildHistory(item), [item]);
 
   const categoryLabel = item.task.taskCategory === 'document'
     ? 'Documento' : item.task.taskCategory === 'data'
