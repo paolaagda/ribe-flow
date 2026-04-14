@@ -43,6 +43,7 @@ function AppRoutes() {
       <Route path="/parceiros" element={<ProtectedRoute><ParceirosPage /></ProtectedRoute>} />
       <Route path="/informacoes" element={<ProtectedRoute><InformacoesUteisPage /></ProtectedRoute>} />
       <Route path="/links" element={<ProtectedRoute><LinksUteisPage /></ProtectedRoute>} />
+      <Route path="/tarefas" element={<ProtectedRoute><GestaoTarefasPage /></ProtectedRoute>} />
       <Route path="/configuracoes" element={<ProtectedRoute><ConfiguracoesPage /></ProtectedRoute>} />
       <Route path="/cadastro" element={<ProtectedRoute><CadastroPage /></ProtectedRoute>} />
       <Route path="/cadastro/:id" element={<ProtectedRoute><CadastroDetalhePage /></ProtectedRoute>} />
