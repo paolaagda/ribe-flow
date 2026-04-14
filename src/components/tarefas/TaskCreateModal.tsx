@@ -147,8 +147,8 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
     }
 
     const isDocOrData = registrationId && registrationId !== 'none';
-    const autoCategory = isDocOrData ? 'document' : 'general';
-    const isAutoPrio = autoCategory === 'document' || autoCategory === 'data';
+    const autoCategory: 'document' | 'data' | 'general' = isDocOrData ? 'document' : 'general';
+    const isAutoPrio = autoCategory === 'document';
     const effectivePriority = isPriority || isAutoPrio;
 
     const historyEvents: any[] = [
