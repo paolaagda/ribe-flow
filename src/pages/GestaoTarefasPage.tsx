@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import {
   Search, X, Filter, Plus, ListChecks, AlertTriangle, Clock,
-  ChevronDown, ChevronUp, CheckCircle2, User as UserIcon,
+  ChevronDown, ChevronUp, CheckCircle2, User as UserIcon, Star,
 } from 'lucide-react';
 import PageTransition from '@/components/PageTransition';
 import PageHeader from '@/components/shared/PageHeader';
@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useTasks, TaskItem } from '@/hooks/useTasks';
+import { useTasks, TaskItem, isTaskPriority } from '@/hooks/useTasks';
 import { useTaskPermissions } from '@/hooks/useTaskPermissions';
 import TaskDetailModal from '@/components/tarefas/TaskDetailModal';
 import TaskCreateModal from '@/components/tarefas/TaskCreateModal';
@@ -103,20 +103,26 @@ function getReturnText(item: TaskItem): string | null {
 /* ── Sort logic ── */
 function sortTasks(tasks: TaskItem[]): TaskItem[] {
   return [...tasks].sort((a, b) => {
+    // Terminal tasks go last
+    const terminalScore = (t: TaskItem) => (t.task.taskCompleted || isCancelled(t)) ? 100 : 0;
+    const ta = terminalScore(a), tb = terminalScore(b);
+    if (ta !== tb) return ta - tb;
+
+    // Priority hierarchy: document > data > manual priority > rest
     const priorityScore = (t: TaskItem) => {
-      if (t.task.taskCompleted || isCancelled(t)) return 100;
       if (t.task.taskCategory === 'document') return 0;
-      else if (t.task.taskCategory === 'data') return 1;
-      return 2;
-    };
-    const overdueScore = (t: TaskItem) => {
-      if (t.task.taskCompleted || isCancelled(t)) return 0;
-      return isOverdue(t.task.createdAt) ? -1 : 0;
+      if (t.task.taskCategory === 'data') return 1;
+      if (t.task.taskPriority) return 2;
+      return 3;
     };
     const pa = priorityScore(a), pb = priorityScore(b);
     if (pa !== pb) return pa - pb;
+
+    // Overdue first within same priority
+    const overdueScore = (t: TaskItem) => isOverdue(t.task.createdAt) ? -1 : 0;
     const oa = overdueScore(a), ob = overdueScore(b);
     if (oa !== ob) return oa - ob;
+
     return new Date(a.task.createdAt).getTime() - new Date(b.task.createdAt).getTime();
   });
 }
@@ -174,7 +180,7 @@ export default function GestaoTarefasPage() {
     else if (status === 'cancelada') tasks = tasks.filter(t => isCancelled(t));
 
     // Priority
-    if (priority === 'prioritarias') tasks = tasks.filter(t => !t.task.taskCompleted && !isCancelled(t) && isOverdue(t.task.createdAt));
+    if (priority === 'prioritarias') tasks = tasks.filter(t => !t.task.taskCompleted && !isCancelled(t) && isTaskPriority(t.task));
 
     // Search
     if (search.trim()) {
@@ -198,8 +204,8 @@ export default function GestaoTarefasPage() {
 
   // Summary
   const totalFiltered = filteredTasks.length;
-  const priorityCount = filteredTasks.filter(t => !t.task.taskCompleted && !isCancelled(t) && isOverdue(t.task.createdAt)).length;
-  const overdueCount = priorityCount;
+  const priorityCount = filteredTasks.filter(t => !t.task.taskCompleted && !isCancelled(t) && isTaskPriority(t.task)).length;
+  const overdueCount = filteredTasks.filter(t => !t.task.taskCompleted && !isCancelled(t) && isOverdue(t.task.createdAt)).length;
 
   // Unique partners and users for advanced filters
   const uniquePartners = useMemo(() => {
@@ -412,6 +418,7 @@ function TaskCard({
   const completed = !!item.task.taskCompleted;
   const cancelled = isCancelled(item);
   const overdue = !completed && !cancelled && isOverdue(item.task.createdAt);
+  const priority = !completed && !cancelled && isTaskPriority(item.task);
   const statusDisplay = getStatusDisplay(item);
   const deadline = getDeadlineLabel(item.task.createdAt, completed);
   const returnText = getReturnText(item);
@@ -428,6 +435,7 @@ function TaskCard({
         'transition-all duration-200 cursor-pointer group',
         'hover:shadow-md hover:border-primary/20',
         overdue && 'border-destructive/30',
+        priority && !overdue && 'border-amber-500/30 dark:border-amber-400/20',
         completed && 'opacity-75',
         cancelled && 'opacity-60',
       )}
@@ -468,6 +476,12 @@ function TaskCard({
                 )}>
                   {deadline.label}
                 </span>
+              )}
+              {priority && (
+                <Badge variant="outline" className="text-[10px] font-medium gap-0.5 border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/5">
+                  <Star className="h-2.5 w-2.5 fill-current" />
+                  Prioritária
+                </Badge>
               )}
               {item.task.taskCategory && (
                 <Badge variant="outline" className="text-[10px] font-normal capitalize border-dashed">

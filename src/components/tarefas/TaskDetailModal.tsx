@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
 import {
   Calendar, User as UserIcon, Briefcase, FileText, Link2,
-  CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle,
+  CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle, Star,
 } from 'lucide-react';
+import { isTaskPriority } from '@/hooks/useTasks';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog';
@@ -60,22 +61,38 @@ function getDeadlineLabel(createdAt: string, completed: boolean) {
   return { label: `${remaining}d restantes`, variant: 'default' as const };
 }
 
-/* ── History events (mock) ── */
+/* ── History events — use real taskHistory when available, else build mock ── */
 interface HistoryEvent { id: string; label: string; date: string; }
 
 function buildHistory(item: TaskItem): HistoryEvent[] {
+  // Prefer real history
+  if (item.task.taskHistory && item.task.taskHistory.length > 0) {
+    return item.task.taskHistory
+      .map(evt => ({ id: evt.id, label: evt.label, date: evt.date }))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  // Fallback: build from task state
   const events: HistoryEvent[] = [];
   const created = new Date(item.task.createdAt);
   events.push({ id: 'created', label: 'Tarefa criada', date: created.toISOString() });
 
+  if (isTaskPriority(item.task)) {
+    events.push({ id: 'priority', label: 'Prioridade automática aplicada', date: new Date(created.getTime() + 1000).toISOString() });
+  }
+
   if (item.task.taskDocStatus === 'submitted_for_validation')
     events.push({ id: 'submitted', label: 'Enviada para validação', date: new Date(created.getTime() + 2 * 86400000).toISOString() });
-  if (item.task.taskDocStatus === 'returned_for_correction')
-    events.push({ id: 'returned', label: 'Devolvida para correção', date: new Date(created.getTime() + 3 * 86400000).toISOString() });
+  if (item.task.taskDocStatus === 'returned_for_correction') {
+    const reason = item.task.taskReturnReason;
+    events.push({ id: 'returned', label: reason ? `Documento recusado: ${reason}` : 'Devolvida para correção', date: new Date(created.getTime() + 3 * 86400000).toISOString() });
+  }
   if (item.task.taskDocStatus === 'validated')
     events.push({ id: 'validated', label: 'Documento validado', date: new Date(created.getTime() + 4 * 86400000).toISOString() });
-  if (item.task.taskCompleted)
-    events.push({ id: 'completed', label: 'Tarefa concluída', date: new Date(created.getTime() + 5 * 86400000).toISOString() });
+  if (item.task.taskCompleted) {
+    const completedBy = item.task.taskCompletedBy ? getUserById(item.task.taskCompletedBy)?.name : undefined;
+    events.push({ id: 'completed', label: completedBy ? `Concluída por ${completedBy}` : 'Tarefa concluída', date: new Date(created.getTime() + 5 * 86400000).toISOString() });
+  }
   if (item.task.taskReturnReason?.startsWith('CANCELLED:'))
     events.push({ id: 'cancelled', label: 'Tarefa cancelada', date: new Date(created.getTime() + 5 * 86400000).toISOString() });
 
@@ -106,6 +123,7 @@ export default function TaskDetailModal({
   const completed = !!item.task.taskCompleted;
   const cancelled = item.task.taskReturnReason?.startsWith('CANCELLED:') ?? false;
   const overdue = !completed && !cancelled && isOverdue(item.task.createdAt);
+  const priority = !completed && !cancelled && isTaskPriority(item.task);
   const statusInfo = getStatusInfo(item);
   const deadline = getDeadlineLabel(item.task.createdAt, completed);
 
@@ -143,6 +161,12 @@ export default function TaskDetailModal({
                   {overdue && (
                     <Badge variant="destructive" className="text-[10px] gap-1">
                       <AlertTriangle className="h-3 w-3" />
+                      Atrasada
+                    </Badge>
+                  )}
+                  {priority && (
+                    <Badge variant="outline" className="text-[10px] gap-0.5 border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/5">
+                      <Star className="h-2.5 w-2.5 fill-current" />
                       Prioritária
                     </Badge>
                   )}

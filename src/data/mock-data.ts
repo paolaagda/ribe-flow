@@ -56,13 +56,24 @@ export interface VisitComment {
   text: string;
   type: 'observation' | 'task';
   taskCompleted?: boolean;
+  taskCompletedBy?: string; // who completed
   taskCategory?: TaskCategory;
   taskSourceId?: string; // doc id or field id for sync
   taskBankName?: string;
   taskDocStatus?: TaskDocStatus;
   taskReturnReason?: string;
+  taskPriority?: boolean; // manual or auto priority flag
+  taskHistory?: TaskHistoryEvent[];
   parentId?: string;
   createdAt: string;
+}
+
+export interface TaskHistoryEvent {
+  id: string;
+  type: 'created' | 'priority_auto' | 'completed' | 'cancelled' | 'submitted' | 'returned' | 'validated' | 'status_change' | 'assigned';
+  label: string;
+  date: string;
+  userId?: string;
 }
 
 export type VisitPeriod = 'manhã' | 'tarde';

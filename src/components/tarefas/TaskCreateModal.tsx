@@ -146,13 +146,32 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
       return;
     }
 
+    const isDocOrData = registrationId && registrationId !== 'none';
+    const autoCategory: 'document' | 'data' | 'general' = isDocOrData ? 'document' : 'general';
+    const isAutoPrio = autoCategory === 'document';
+    const effectivePriority = isPriority || isAutoPrio;
+
+    const historyEvents: any[] = [
+      { id: `evt-${Date.now()}`, type: 'created', label: 'Tarefa criada manualmente', date: new Date().toISOString(), userId: user?.id },
+    ];
+    if (effectivePriority) {
+      historyEvents.push({
+        id: `evt-${Date.now()}-p`,
+        type: isAutoPrio ? 'priority_auto' : 'created',
+        label: isAutoPrio ? 'Prioridade automática: pendência documental' : 'Marcada como prioritária',
+        date: new Date().toISOString(),
+      });
+    }
+
     const newTask: VisitComment = {
       id: `manual-${Date.now()}`,
       userId: responsibleId || user?.id || 'u1',
       text: title.trim(),
       type: 'task',
       taskCompleted: false,
-      taskCategory: registrationId ? 'document' : 'general',
+      taskCategory: autoCategory as any,
+      taskPriority: effectivePriority,
+      taskHistory: historyEvents,
       createdAt: new Date().toISOString(),
     };
 
