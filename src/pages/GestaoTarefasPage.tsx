@@ -129,7 +129,7 @@ function sortTasks(tasks: TaskItem[]): TaskItem[] {
 
 /* ══════════════════════════════════════════════════════════ */
 export default function GestaoTarefasPage() {
-  const { allTasks, toggleTask, reopenTask } = useTasks();
+  const { allTasks, toggleTask, reopenTask, updateTaskAdminNote } = useTasks();
   const { user } = useAuth();
   const { getPartnerById } = usePartners();
   const { setVisits } = useVisits();
