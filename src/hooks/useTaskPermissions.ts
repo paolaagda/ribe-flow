@@ -1,11 +1,9 @@
 import { useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePartners } from '@/hooks/usePartners';
+import { useTaskRules } from '@/hooks/useTaskRules';
 import { TaskItem } from '@/hooks/useTasks';
 import { mockUsers, User, CompanyCargo } from '@/data/mock-data';
-
-/** Roles with global cancel permission */
-const GLOBAL_CANCEL_ROLES: CompanyCargo[] = ['diretor', 'gerente', 'ascom'];
 
 export interface TaskPermissions {
   canConclude: boolean;
@@ -42,6 +40,7 @@ function isTaskCancelled(item: TaskItem): boolean {
 export function useTaskPermissions() {
   const { user } = useAuth();
   const { getPartnerById } = usePartners();
+  const { config: taskRules } = useTaskRules();
 
   const getPermissions = useCallback((item: TaskItem): TaskPermissions => {
     const none: TaskPermissions = {
@@ -104,7 +103,7 @@ export function useTaskPermissions() {
 
     // ── Cancel ──
     let canCancel = false;
-    if (GLOBAL_CANCEL_ROLES.includes(role)) {
+    if (taskRules.globalCancelRoles.includes(role)) {
       canCancel = true;
     } else if (!hasPartner && !hasCadastroContext && !isProspect) {
       canCancel = isCreator;
