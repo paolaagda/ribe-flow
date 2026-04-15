@@ -6,6 +6,7 @@ import { Registration } from '@/data/registrations';
 import { differenceInDays } from 'date-fns';
 import { AlertTriangle, UserCog, Users, Building2, ClipboardList } from 'lucide-react';
 import { SummaryCardData } from '@/components/cadastro/RegistrationOperationalSummary';
+import { getSlaRules } from '@/hooks/useSlaRules';
 
 export type RegistrationCriticality = 'alta' | 'média' | 'baixa';
 
@@ -32,6 +33,7 @@ const STAGE_OWNERS: Record<string, string> = {
 };
 
 function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastUpdate: number): string {
+  const sla = getSlaRules();
   if (reg.status === 'Concluído') return 'Cadastro finalizado';
   if (reg.status === 'Cancelado') return 'Processo encerrado';
   if (reg.status === 'Em pausa') return 'Reativar cadastro';
@@ -42,7 +44,7 @@ function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastU
     return 'Enviar documentação ao banco';
   }
   if (reg.status === 'Em análise') {
-    if (daysSinceLastUpdate > 7) return 'Cobrar retorno do banco';
+    if (daysSinceLastUpdate > sla.slaBanco) return 'Cobrar retorno do banco';
     return 'Aguardar retorno do banco';
   }
   if (reg.status === 'Colhendo assinaturas') return 'Obter assinaturas pendentes';
@@ -52,18 +54,24 @@ function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastU
 
 /** Checks if a registration qualifies for "Atenção Imediata" */
 function isImmediateAttention(reg: Registration, daysInProcess: number, pendingDocsCount: number): boolean {
-  // Condition 1: created 30+ days ago and not completed
-  if (daysInProcess >= 30) return true;
-  // Condition 2: has pending documents
-  if (pendingDocsCount > 0) return true;
-  // Condition 3: manual critical flag
-  if (reg.isCritical) return true;
+  const sla = getSlaRules();
+  if (daysInProcess >= sla.immediateAttentionDays) return true;
+  if (sla.immediateAttentionPendingDocs && pendingDocsCount > 0) return true;
+  if (sla.immediateAttentionManualCritical && reg.isCritical) return true;
   return false;
 }
 
-/** Checks if a registration is stalled (>7 days since last update) */
-function isStalledOver7(daysSinceLastUpdate: number): boolean {
-  return daysSinceLastUpdate > 7;
+/** Checks if a registration is stalled based on SLA context threshold */
+function isStalledByContext(daysSinceLastUpdate: number, context: string): boolean {
+  const sla = getSlaRules();
+  const contextMap: Record<string, number> = {
+    'Comercial': sla.slaComercial,
+    'Parceiro': sla.slaParceiro,
+    'Banco': sla.slaBanco,
+    'Cadastro': sla.slaCadastro,
+  };
+  const threshold = contextMap[context] ?? sla.slaComercial;
+  return daysSinceLastUpdate > threshold;
 }
 
 export function useRegistrationOperationalData(registrations: Registration[]) {
