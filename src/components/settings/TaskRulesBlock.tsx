@@ -11,6 +11,8 @@ import { CompanyCargo, cargoLabels, cargoColors, allCargos } from '@/data/mock-d
 import { ListChecks, Save, RefreshCw, Clock, Zap, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
+import { logRulesAuditEvent } from '@/lib/rules-audit';
+import { useAuth } from '@/contexts/AuthContext';
 
 const CATEGORY_LABELS: Record<TaskCategory, string> = {
   document: 'Documentos',
@@ -19,7 +21,9 @@ const CATEGORY_LABELS: Record<TaskCategory, string> = {
 
 export default function TaskRulesBlock() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const { config, updateConfig, resetToDefaults } = useTaskRules();
+  const [savedSnapshot, setSavedSnapshot] = useState(() => ({ ...config }));
   const [hasChanges, setHasChanges] = useState(false);
 
   const handleDeadlineChange = (value: string) => {
@@ -42,6 +46,16 @@ export default function TaskRulesBlock() {
       toast({ title: 'Perfis inválidos', description: 'A lista de perfis com cancelamento global contém valores inválidos.', variant: 'destructive' });
       return;
     }
+    logRulesAuditEvent({
+      userId: user?.id || 'u1',
+      userName: user?.name || 'Usuário',
+      module: 'task_rules',
+      action: 'update',
+      summary: 'Regras de tarefas atualizadas',
+      snapshotBefore: savedSnapshot,
+      snapshotAfter: { ...config },
+    });
+    setSavedSnapshot({ ...config });
     setHasChanges(false);
     toast({ title: 'Regras de tarefas salvas com sucesso!' });
   };
@@ -67,7 +81,18 @@ export default function TaskRulesBlock() {
   // handleSave replaced by handleSaveWithValidation above
 
   const handleReset = () => {
+    const before = { ...config };
     resetToDefaults();
+    logRulesAuditEvent({
+      userId: user?.id || 'u1',
+      userName: user?.name || 'Usuário',
+      module: 'task_rules',
+      action: 'restore_defaults',
+      summary: 'Regras de tarefas restauradas ao padrão',
+      snapshotBefore: before,
+      snapshotAfter: { ...DEFAULT_TASK_RULES },
+    });
+    setSavedSnapshot({ ...DEFAULT_TASK_RULES });
     setHasChanges(false);
     toast({ title: 'Regras de tarefas restauradas ao padrão' });
   };
