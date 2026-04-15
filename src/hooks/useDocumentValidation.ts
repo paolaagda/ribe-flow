@@ -5,6 +5,7 @@ import { useNotificationContextSafe } from '@/contexts/NotificationContext';
 import { mockUsers, mockPartners } from '@/data/mock-data';
 import { getRandomMessage } from '@/data/notification-messages';
 import { useInfoData } from '@/hooks/useInfoData';
+import { useNotificationRules } from '@/hooks/useNotificationRules';
 
 export type DocValidationStatus = 'pending' | 'in_validation' | 'validated' | 'rejected';
 
@@ -24,6 +25,7 @@ export function useDocumentValidation() {
   const { addNotification } = useNotificationContextSafe();
   const [store, setStore] = useLocalStorage<ValidationStore>('ribercred_partner_doc_validation_v1', {});
   const { getActiveDocuments } = useInfoData();
+  const { rules: notifRules } = useNotificationRules();
 
   // Migration: read old checkedDocs and merge as 'validated' on first use
   const [oldCheckedDocs] = useLocalStorage<Record<string, string[]>>('ribercred_partner_docs_v1', {});
@@ -127,8 +129,10 @@ export function useDocumentValidation() {
       },
     }));
     // Notify Cadastro users — single dispatch from domain hook
-    notifyCadastroUsers(partnerId, docId);
-  }, [setStore, user, notifyCadastroUsers]);
+    if (notifRules.docSubmittedNotifyCadastro) {
+      notifyCadastroUsers(partnerId, docId);
+    }
+  }, [setStore, user, notifyCadastroUsers, notifRules]);
 
   const validateDoc = useCallback((partnerId: string, docId: string) => {
     setStore(prev => ({
@@ -162,8 +166,10 @@ export function useDocumentValidation() {
       },
     }));
     // Notify the Comercial who submitted — single dispatch
-    notifySubmitterRejection(partnerId, docId, reason, entry?.submittedBy);
-  }, [setStore, user, resolvedStore, notifySubmitterRejection]);
+    if (notifRules.docRejectedNotifySender) {
+      notifySubmitterRejection(partnerId, docId, reason, entry?.submittedBy);
+    }
+  }, [setStore, user, resolvedStore, notifySubmitterRejection, notifRules]);
 
   const revokeValidation = useCallback((partnerId: string, docId: string, reason: string) => {
     const entry = resolvedStore[partnerId]?.[docId];
@@ -181,8 +187,10 @@ export function useDocumentValidation() {
       },
     }));
     // Notify the Comercial who submitted — single dispatch
-    notifySubmitterRejection(partnerId, docId, reason, entry?.submittedBy);
-  }, [setStore, user, resolvedStore, notifySubmitterRejection]);
+    if (notifRules.docRejectedNotifySender) {
+      notifySubmitterRejection(partnerId, docId, reason, entry?.submittedBy);
+    }
+  }, [setStore, user, resolvedStore, notifySubmitterRejection, notifRules]);
 
   const resetToPending = useCallback((partnerId: string, docId: string) => {
     setStore(prev => ({

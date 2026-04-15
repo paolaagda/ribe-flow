@@ -7,6 +7,7 @@ import { useDocumentValidation } from '@/hooks/useDocumentValidation';
 import { useNotificationContextSafe } from '@/contexts/NotificationContext';
 import { getRandomMessage } from '@/data/notification-messages';
 import { VisitComment, Visit, Partner, TaskHistoryEvent, mockUsers, mockPartners } from '@/data/mock-data';
+import { useNotificationRules } from '@/hooks/useNotificationRules';
 
 export interface TaskItem {
   task: VisitComment;
@@ -48,6 +49,7 @@ export function useTasks() {
   const { filterVisits } = useVisibility();
   const { submitForValidation, resetToPending } = useDocumentValidation();
   const { addNotification } = useNotificationContextSafe();
+  const { rules: notifRules } = useNotificationRules();
 
   const allTasks = useMemo<TaskItem[]>(() => {
     const tasks: TaskItem[] = [];
