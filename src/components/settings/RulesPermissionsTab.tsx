@@ -224,7 +224,10 @@ export default function RulesPermissionsTab() {
       {/* Bloco 4 — Notificações */}
       <NotificationsBlock />
 
-      {/* Bloco 5 — Documentação de regras protegidas */}
+      {/* Bloco 5 — Regras de Status e Bloqueios */}
+      <StatusRulesBlock />
+
+      {/* Bloco 6 — Documentação de regras protegidas */}
       <ProtectedRulesInfo />
 
       {/* Bloco 6 — Histórico de alterações */}
