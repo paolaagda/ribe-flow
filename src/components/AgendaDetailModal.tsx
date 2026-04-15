@@ -34,6 +34,7 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Team, initialTeams } from '@/data/teams';
 import { useToast } from '@/hooks/use-toast';
 import JustificationModal from '@/components/agenda/JustificationModal';
+import { getStatusRules } from '@/hooks/useStatusRules';
 
 interface AgendaDetailModalProps {
   visit: Visit | null;
@@ -234,8 +235,9 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
       setShowJustification(true);
       return;
     }
-    // Final status confirmation for Comercial
-    if (user?.role === 'comercial' && FINAL_STATUSES.includes(status)) {
+    // Final status confirmation for Comercial (configurable)
+    const statusRules = getStatusRules();
+    if (statusRules.requireAgendaFinalConfirmation && user?.role === 'comercial' && FINAL_STATUSES.includes(status)) {
       setPendingFinalStatus(status);
       setShowFinalConfirm(true);
       return;
@@ -255,8 +257,9 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
         [reasonField]: reason,
         statusChangedAt: new Date().toISOString(),
       };
-      // For Comercial + final status: confirm first
-      if (user?.role === 'comercial') {
+      // For Comercial + final status: confirm first (configurable)
+      const statusRulesInner = getStatusRules();
+      if (statusRulesInner.requireAgendaFinalConfirmation && user?.role === 'comercial') {
         updateVisit({ [reasonField]: reason });
         setPendingFinalStatus('Reagendada');
         setShowJustification(false);
@@ -273,8 +276,9 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
       return;
     }
 
-    // For Comercial + final status: confirm first
-    if (user?.role === 'comercial' && FINAL_STATUSES.includes(pendingStatus)) {
+    // For Comercial + final status: confirm first (configurable)
+    const statusRulesJ = getStatusRules();
+    if (statusRulesJ.requireAgendaFinalConfirmation && user?.role === 'comercial' && FINAL_STATUSES.includes(pendingStatus)) {
       setPendingFinalStatus(pendingStatus);
       updateVisit({ [reasonField]: reason });
       setShowJustification(false);
