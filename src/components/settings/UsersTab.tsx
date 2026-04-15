@@ -171,7 +171,7 @@ export default function UsersTab() {
         <TabsList className="w-full justify-center">
           <TabsTrigger value="equipe">Colaboradores</TabsTrigger>
           {canRead('teams.view') && <TabsTrigger value="equipes">Equipes</TabsTrigger>}
-          {canWrite('users.permissions') && <TabsTrigger value="permissoes">Permissões</TabsTrigger>}
+          {/* Permissões migradas para aba "Regras e Permissões" */}
         </TabsList>
 
         {/* Tab Equipe */}
@@ -276,104 +276,7 @@ export default function UsersTab() {
           </div>
         </TabsContent>
 
-        {/* Tab Permissões */}
-        {canWrite('users.permissions') && (
-          <TabsContent value="permissoes" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Configure o nível de acesso de cada cargo em cada funcionalidade do sistema.</p>
-              <Button onClick={handleSavePermissions} disabled={!hasChanges} size="sm">
-                <Save className="h-4 w-4 mr-1" /> Salvar permissões
-              </Button>
-            </div>
-
-            <Accordion type="single" collapsible defaultValue="diretor" className="space-y-2">
-              {allCargos.map(r => (
-                <AccordionItem key={r} value={r} className="border rounded-lg px-4">
-                  <AccordionTrigger className="hover:no-underline">
-                    <div className="flex items-center gap-3">
-                      <Badge className={cn('text-xs capitalize', cargoColors[r])} variant="secondary">
-                        {cargoLabels[r]}
-                      </Badge>
-                      <span className="text-sm font-medium">{cargoLabels[r]}</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-end">
-                        <Button variant="outline" size="sm" className="text-xs" onClick={() => handleResetPermissions(r)}>
-                          <RefreshCw className="h-3 w-3 mr-1" /> Restaurar padrão
-                        </Button>
-                      </div>
-                      <div className="rounded-md border overflow-hidden">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="bg-muted/50">
-                              <TableHead className="w-[160px] text-xs">Módulo</TableHead>
-                              <TableHead className="text-xs">Permissão</TableHead>
-                              <TableHead className="w-[200px] text-xs text-right">Nível de acesso</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {Object.entries(grouped).map(([module, items]) =>
-                              items.map((item, idx) => (
-                                <TableRow key={item.key}>
-                                  {idx === 0 && (
-                                    <TableCell rowSpan={items.length} className="text-xs font-semibold align-top border-r bg-muted/30">
-                                      {module}
-                                    </TableCell>
-                                  )}
-                                  <TableCell className="text-xs py-2">{item.action}</TableCell>
-                                  <TableCell className="py-2">
-                                    <Select
-                                      value={permissions[r]?.[item.key] || 'none'}
-                                      onValueChange={(v) => handlePermissionChange(r, item.key, v as PermissionLevel)}
-                                    >
-                                      <SelectTrigger className="h-8 w-[48px] ml-auto flex items-center justify-center">
-                                        {(() => {
-                                          const level = permissions[r]?.[item.key] || 'none';
-                                          const icons: Record<PermissionLevel, React.ReactNode> = {
-                                            none: <EyeOff className="h-3.5 w-3.5 text-destructive" />,
-                                            read: <Eye className="h-3.5 w-3.5 text-warning" />,
-                                            write: <Pencil className="h-3.5 w-3.5 text-success" />,
-                                          };
-                                          return <span>{icons[level]}</span>;
-                                        })()}
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="none">
-                                          <div className="flex items-center gap-2">
-                                            <EyeOff className="h-3.5 w-3.5 text-destructive" />
-                                            <span>Sem acesso</span>
-                                          </div>
-                                        </SelectItem>
-                                        <SelectItem value="read">
-                                          <div className="flex items-center gap-2">
-                                            <Eye className="h-3.5 w-3.5 text-warning" />
-                                            <span>Somente leitura</span>
-                                          </div>
-                                        </SelectItem>
-                                        <SelectItem value="write">
-                                          <div className="flex items-center gap-2">
-                                            <Pencil className="h-3.5 w-3.5 text-success" />
-                                            <span>Leitura e edição</span>
-                                          </div>
-                                        </SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </TabsContent>
-        )}
+        {/* Permissões RBAC migradas para RulesPermissionsTab */}
 
         {/* Tab Equipes */}
         {canRead('teams.view') && (
