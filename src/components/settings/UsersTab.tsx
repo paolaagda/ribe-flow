@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
@@ -20,7 +19,6 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { User, UserRole, CompanyCargo, cargoLabels, cargoColors, allCargos } from '@/data/mock-data';
 import { useUsersData } from '@/hooks/useUsersData';
-import { PermissionLevel, defaultPermissions, groupedPermissions } from '@/data/permissions';
 import { usePermission } from '@/hooks/usePermission';
 import { Team, initialTeams } from '@/data/teams';
 import { Edit, Lock, Trash2, RefreshCw, Search, Shield, Eye, EyeOff, Pencil, Save, Plus, Users2, ChevronRight, Camera } from 'lucide-react';
@@ -36,11 +34,6 @@ export default function UsersTab() {
   const { users, setUsers } = useUsersData();
   const [editUser, setEditUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState({ name: '', email: '', role: '' as UserRole, bio: '' });
-  const [permissions, setPermissions] = useLocalStorage<Record<CompanyCargo, Record<string, PermissionLevel>>>(
-    'ribercred_permissions_v7',
-    defaultPermissions
-  );
-  const [hasChanges, setHasChanges] = useState(false);
   const [teams, setTeams] = useLocalStorage<Team[]>('ribercred_teams', initialTeams);
   const [showTeamForm, setShowTeamForm] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
