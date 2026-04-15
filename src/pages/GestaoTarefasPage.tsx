@@ -129,7 +129,7 @@ function sortTasks(tasks: TaskItem[]): TaskItem[] {
 
 /* ══════════════════════════════════════════════════════════ */
 export default function GestaoTarefasPage() {
-  const { allTasks, toggleTask, reopenTask } = useTasks();
+  const { allTasks, toggleTask, reopenTask, updateTaskAdminNote } = useTasks();
   const { user } = useAuth();
   const { getPartnerById } = usePartners();
   const { setVisits } = useVisits();
@@ -255,7 +255,7 @@ export default function GestaoTarefasPage() {
 
   // Permissions for selected task
   const selectedPermissions = useMemo(
-    () => selectedTask ? getPermissions(selectedTask) : { canConclude: false, canEdit: false, canAssign: false, canCancel: false, canChangeStatus: false, canReopen: false },
+    () => selectedTask ? getPermissions(selectedTask) : { canConclude: false, canEdit: false, canAssign: false, canCancel: false, canChangeStatus: false, canReopen: false, canTerminalEdit: false },
     [selectedTask, getPermissions],
   );
   const selectedAssignees = useMemo(
@@ -394,6 +394,7 @@ export default function GestaoTarefasPage() {
           onConclude={handleConcludeFromModal}
           onCancel={handleCancel}
           onReopen={reopenTask}
+          onAdminNote={updateTaskAdminNote}
           permissions={selectedPermissions}
           validAssignees={selectedAssignees}
         />

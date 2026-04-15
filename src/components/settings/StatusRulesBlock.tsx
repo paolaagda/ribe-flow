@@ -12,10 +12,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useStatusRules, DEFAULT_STATUS_RULES, StatusRulesConfig } from '@/hooks/useStatusRules';
 import { logRulesAuditEvent } from '@/lib/rules-audit';
 import { buildAuditParams, isDeepEqual } from '@/lib/rules-persistence';
-import { allCargos, cargoLabels, CompanyCargo } from '@/data/mock-data';
+import { cargoLabels, CompanyCargo } from '@/data/mock-data';
 import ConfigurabilityBadge from './ConfigurabilityBadge';
 
-/** Items documented as protected — not editable in this phase */
 const PROTECTED_RULES = [
   {
     label: 'Transições de status da Agenda',
@@ -37,10 +36,14 @@ const PROTECTED_RULES = [
     label: 'Reversão de ações finais da Agenda',
     description: 'Ações finais da Agenda (Concluída, Cancelada, Inconclusa) não podem ser revertidas.',
   },
+  {
+    label: 'Edição de tarefas validadas',
+    description: 'Tarefas com documento validado não permitem edição administrativa. O fluxo documental permanece protegido.',
+  },
 ];
 
-/** Roles eligible for the reopen selector */
-const REOPEN_ELIGIBLE_ROLES: CompanyCargo[] = ['diretor', 'gerente', 'ascom'];
+/** Roles eligible for reopen / terminal edit selection */
+const ADMIN_ELIGIBLE_ROLES: CompanyCargo[] = ['diretor', 'gerente', 'ascom'];
 
 export default function StatusRulesBlock() {
   const { toast } = useToast();
@@ -51,13 +54,21 @@ export default function StatusRulesBlock() {
   const hasChanges = !isDeepEqual(config, savedSnapshot);
 
   const handleSave = () => {
-    // Normalize: if reopen is OFF, clear roles to avoid inconsistency
     const normalized = { ...config };
+    // Normalize reopen
     if (!normalized.allowTaskReopen) {
       normalized.taskReopenAllowedRoles = [];
     }
     if (normalized.allowTaskReopen && normalized.taskReopenAllowedRoles.length === 0) {
       toast({ title: 'Selecione ao menos um perfil autorizado para reabertura', variant: 'destructive' });
+      return;
+    }
+    // Normalize terminal edit
+    if (!normalized.allowTerminalLimitedEdit) {
+      normalized.terminalLimitedEditAllowedRoles = [];
+    }
+    if (normalized.allowTerminalLimitedEdit && normalized.terminalLimitedEditAllowedRoles.length === 0) {
+      toast({ title: 'Selecione ao menos um perfil autorizado para edição administrativa', variant: 'destructive' });
       return;
     }
     updateConfig(normalized);
@@ -91,12 +102,10 @@ export default function StatusRulesBlock() {
     toast({ title: 'Regras de status restauradas ao padrão' });
   };
 
-  const toggleReopenRole = (role: CompanyCargo) => {
-    const current = config.taskReopenAllowedRoles;
-    const next = current.includes(role)
-      ? current.filter(r => r !== role)
-      : [...current, role];
-    updateConfig({ taskReopenAllowedRoles: next });
+  const toggleRole = (field: 'taskReopenAllowedRoles' | 'terminalLimitedEditAllowedRoles', role: CompanyCargo) => {
+    const current = config[field];
+    const next = current.includes(role) ? current.filter(r => r !== role) : [...current, role];
+    updateConfig({ [field]: next });
   };
 
   return (
@@ -108,7 +117,7 @@ export default function StatusRulesBlock() {
             <div>
               <CardTitle className="text-base">Regras de Status e Bloqueios</CardTitle>
               <CardDescription className="text-xs mt-0.5">
-                Gerencie comportamentos de bloqueio por status e confirmações obrigatórias.
+                Gerencie bloqueios por status, confirmações obrigatórias e exceções administrativas.
               </CardDescription>
             </div>
           </div>
@@ -160,46 +169,30 @@ export default function StatusRulesBlock() {
           </div>
 
           {/* Task reopen */}
-          <div className="p-3 rounded-lg border bg-muted/30 space-y-3">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium">Permitir reabertura de tarefas concluídas</Label>
-                  <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/30">
-                    Operacional
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Quando ativado, tarefas concluídas (não validadas) podem ser reabertas pelos perfis selecionados abaixo. A ação exige confirmação e é registrada no histórico da tarefa.
-                </p>
-              </div>
-              <Switch
-                checked={config.allowTaskReopen}
-                onCheckedChange={(v) => updateConfig({ allowTaskReopen: v })}
-              />
-            </div>
+          <RoleGatedRule
+            label="Permitir reabertura de tarefas concluídas"
+            description="Tarefas concluídas (não validadas) podem ser reabertas pelos perfis selecionados. A ação exige confirmação e é registrada no histórico."
+            badge="Operacional"
+            enabled={config.allowTaskReopen}
+            onToggle={(v) => updateConfig({ allowTaskReopen: v })}
+            roles={config.taskReopenAllowedRoles}
+            eligibleRoles={ADMIN_ELIGIBLE_ROLES}
+            onToggleRole={(role) => toggleRole('taskReopenAllowedRoles', role)}
+            roleNote="Comercial e Cadastro não são elegíveis para reabertura nesta fase."
+          />
 
-            {/* Role selector — only visible when reopen is ON */}
-            {config.allowTaskReopen && (
-              <div className="pl-1 space-y-2">
-                <Label className="text-xs text-muted-foreground">Perfis autorizados para reabertura:</Label>
-                <div className="flex flex-wrap gap-3">
-                  {REOPEN_ELIGIBLE_ROLES.map(role => (
-                    <label key={role} className="flex items-center gap-1.5 cursor-pointer">
-                      <Checkbox
-                        checked={config.taskReopenAllowedRoles.includes(role)}
-                        onCheckedChange={() => toggleReopenRole(role)}
-                      />
-                      <span className="text-xs font-medium">{cargoLabels[role]}</span>
-                    </label>
-                  ))}
-                </div>
-                <p className="text-[11px] text-muted-foreground">
-                  Comercial e Cadastro não são elegíveis para reabertura nesta fase.
-                </p>
-              </div>
-            )}
-          </div>
+          {/* Terminal limited edit */}
+          <RoleGatedRule
+            label="Edição administrativa limitada em tarefas terminais"
+            description="Permite adicionar ou editar uma nota administrativa em tarefas concluídas ou canceladas (não validadas). Não altera status, contexto, vínculo ou categoria da tarefa."
+            badge="Exceção controlada"
+            enabled={config.allowTerminalLimitedEdit}
+            onToggle={(v) => updateConfig({ allowTerminalLimitedEdit: v })}
+            roles={config.terminalLimitedEditAllowedRoles}
+            eligibleRoles={ADMIN_ELIGIBLE_ROLES}
+            onToggleRole={(role) => toggleRole('terminalLimitedEditAllowedRoles', role)}
+            roleNote="Comercial e Cadastro não são elegíveis para edição administrativa nesta fase. Tarefas validadas permanecem protegidas."
+          />
         </div>
 
         <Separator />
@@ -230,6 +223,54 @@ export default function StatusRulesBlock() {
   );
 }
 
+/* ── Reusable role-gated rule component ── */
+function RoleGatedRule({ label, description, badge, enabled, onToggle, roles, eligibleRoles, onToggleRole, roleNote }: {
+  label: string;
+  description: string;
+  badge: string;
+  enabled: boolean;
+  onToggle: (v: boolean) => void;
+  roles: CompanyCargo[];
+  eligibleRoles: CompanyCargo[];
+  onToggleRole: (role: CompanyCargo) => void;
+  roleNote: string;
+}) {
+  return (
+    <div className="p-3 rounded-lg border bg-muted/30 space-y-3">
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium">{label}</Label>
+            <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/30">
+              {badge}
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground">{description}</p>
+        </div>
+        <Switch checked={enabled} onCheckedChange={onToggle} />
+      </div>
+
+      {enabled && (
+        <div className="pl-1 space-y-2">
+          <Label className="text-xs text-muted-foreground">Perfis autorizados:</Label>
+          <div className="flex flex-wrap gap-3">
+            {eligibleRoles.map(role => (
+              <label key={role} className="flex items-center gap-1.5 cursor-pointer">
+                <Checkbox
+                  checked={roles.includes(role)}
+                  onCheckedChange={() => onToggleRole(role)}
+                />
+                <span className="text-xs font-medium">{cargoLabels[role]}</span>
+              </label>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground">{roleNote}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function buildSummary(before: StatusRulesConfig, after: StatusRulesConfig): string {
   const changes: string[] = [];
   if (before.blockEditOnTerminalTask !== after.blockEditOnTerminalTask) {
@@ -239,12 +280,20 @@ function buildSummary(before: StatusRulesConfig, after: StatusRulesConfig): stri
     changes.push(`Confirmação agenda ${after.requireAgendaFinalConfirmation ? 'ativada' : 'desativada'}`);
   }
   if (before.allowTaskReopen !== after.allowTaskReopen) {
-    changes.push(`Reabertura de tarefas ${after.allowTaskReopen ? 'ativada' : 'desativada'}`);
+    changes.push(`Reabertura ${after.allowTaskReopen ? 'ativada' : 'desativada'}`);
   }
-  const rolesBefore = (before.taskReopenAllowedRoles || []).sort().join(',');
-  const rolesAfter = (after.taskReopenAllowedRoles || []).sort().join(',');
-  if (rolesBefore !== rolesAfter && after.allowTaskReopen) {
+  if (before.allowTerminalLimitedEdit !== after.allowTerminalLimitedEdit) {
+    changes.push(`Edição administrativa ${after.allowTerminalLimitedEdit ? 'ativada' : 'desativada'}`);
+  }
+  const rB = (before.taskReopenAllowedRoles || []).sort().join(',');
+  const rA = (after.taskReopenAllowedRoles || []).sort().join(',');
+  if (rB !== rA && after.allowTaskReopen) {
     changes.push(`Perfis de reabertura: ${after.taskReopenAllowedRoles.map(r => cargoLabels[r]).join(', ')}`);
+  }
+  const eB = (before.terminalLimitedEditAllowedRoles || []).sort().join(',');
+  const eA = (after.terminalLimitedEditAllowedRoles || []).sort().join(',');
+  if (eB !== eA && after.allowTerminalLimitedEdit) {
+    changes.push(`Perfis de edição admin.: ${after.terminalLimitedEditAllowedRoles.map(r => cargoLabels[r]).join(', ')}`);
   }
   return changes.length > 0 ? changes.join('; ') : 'Regras de status atualizadas';
 }

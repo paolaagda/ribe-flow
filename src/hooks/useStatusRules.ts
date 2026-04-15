@@ -9,42 +9,50 @@ import { readFromStorage } from '@/lib/rules-persistence';
 import { CompanyCargo } from '@/data/mock-data';
 
 export interface StatusRulesConfig {
-  /** Whether completed tasks can be reopened (OFF by default — structural risk) */
+  /** Whether completed tasks can be reopened (OFF by default) */
   allowTaskReopen: boolean;
-  /** Roles allowed to reopen completed tasks (only applies when allowTaskReopen is ON) */
+  /** Roles allowed to reopen completed tasks */
   taskReopenAllowedRoles: CompanyCargo[];
   /** Whether terminal task status blocks ALL editing (ON by default) */
   blockEditOnTerminalTask: boolean;
-  /** Whether agenda final actions (Concluída/Cancelada/Inconclusa) require confirmation dialog */
+  /** Whether agenda final actions require confirmation dialog */
   requireAgendaFinalConfirmation: boolean;
+  /** Whether limited admin edit (note only) is allowed on terminal tasks */
+  allowTerminalLimitedEdit: boolean;
+  /** Roles allowed to perform limited edit on terminal tasks */
+  terminalLimitedEditAllowedRoles: CompanyCargo[];
 }
+
+const VALID_ROLES: CompanyCargo[] = ['diretor', 'gerente', 'ascom', 'comercial', 'cadastro'];
 
 export const DEFAULT_STATUS_RULES: StatusRulesConfig = {
   allowTaskReopen: false,
   taskReopenAllowedRoles: ['diretor', 'gerente'],
   blockEditOnTerminalTask: true,
   requireAgendaFinalConfirmation: true,
+  allowTerminalLimitedEdit: false,
+  terminalLimitedEditAllowedRoles: ['diretor', 'gerente'],
 };
 
 const STORAGE_KEY = 'ribercred_status_rules_v1';
-
-const VALID_ROLES: CompanyCargo[] = ['diretor', 'gerente', 'ascom', 'comercial', 'cadastro'];
 
 /** Validates and normalizes status rules, returning safe defaults for invalid fields. */
 export function validateStatusRules(value: unknown): StatusRulesConfig {
   if (!value || typeof value !== 'object') return { ...DEFAULT_STATUS_RULES };
   const obj = value as Record<string, unknown>;
 
-  const rawRoles = Array.isArray(obj.taskReopenAllowedRoles) ? obj.taskReopenAllowedRoles : undefined;
-  const validatedRoles = rawRoles
-    ? rawRoles.filter((r): r is CompanyCargo => VALID_ROLES.includes(r as CompanyCargo))
-    : [...DEFAULT_STATUS_RULES.taskReopenAllowedRoles];
+  const parseRoles = (raw: unknown, fallback: CompanyCargo[]): CompanyCargo[] => {
+    if (!Array.isArray(raw)) return [...fallback];
+    return raw.filter((r): r is CompanyCargo => VALID_ROLES.includes(r as CompanyCargo));
+  };
 
   return {
     allowTaskReopen: typeof obj.allowTaskReopen === 'boolean' ? obj.allowTaskReopen : DEFAULT_STATUS_RULES.allowTaskReopen,
-    taskReopenAllowedRoles: validatedRoles,
+    taskReopenAllowedRoles: parseRoles(obj.taskReopenAllowedRoles, DEFAULT_STATUS_RULES.taskReopenAllowedRoles),
     blockEditOnTerminalTask: typeof obj.blockEditOnTerminalTask === 'boolean' ? obj.blockEditOnTerminalTask : DEFAULT_STATUS_RULES.blockEditOnTerminalTask,
     requireAgendaFinalConfirmation: typeof obj.requireAgendaFinalConfirmation === 'boolean' ? obj.requireAgendaFinalConfirmation : DEFAULT_STATUS_RULES.requireAgendaFinalConfirmation,
+    allowTerminalLimitedEdit: typeof obj.allowTerminalLimitedEdit === 'boolean' ? obj.allowTerminalLimitedEdit : DEFAULT_STATUS_RULES.allowTerminalLimitedEdit,
+    terminalLimitedEditAllowedRoles: parseRoles(obj.terminalLimitedEditAllowedRoles, DEFAULT_STATUS_RULES.terminalLimitedEditAllowedRoles),
   };
 }
 
