@@ -14,6 +14,7 @@ import { Eye, EyeOff, Pencil, Save, RefreshCw, Shield, Globe, Lock } from 'lucid
 import { cn } from '@/lib/utils';
 import TaskRulesBlock from '@/components/settings/TaskRulesBlock';
 import NotificationsBlock from '@/components/settings/NotificationsBlock';
+import StatusRulesBlock from '@/components/settings/StatusRulesBlock';
 import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
 import ProtectedRulesInfo from '@/components/settings/ProtectedRulesInfo';
 import RulesAuditLog from '@/components/settings/RulesAuditLog';
