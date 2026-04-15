@@ -37,6 +37,7 @@ const medalColors = ['', 'text-yellow-500', 'text-slate-400', 'text-amber-700'];
 
 export default function CampanhasPage() {
   const { user } = useAuth();
+  const { hasGlobalView } = useVisibility();
   const { canRead } = usePermission();
   const { toast } = useToast();
   const [campaigns] = useLocalStorage<Campaign[]>('ribercred_campaigns', initialCampaigns);
