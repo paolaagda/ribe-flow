@@ -1,23 +1,22 @@
 import { useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockUsers, Visit, Partner, User } from '@/data/mock-data';
+import { useVisibilityConfig, DEFAULT_VISIBILITY } from '@/hooks/useVisibilityConfig';
 
 /**
- * Perfis com visão global: veem todos os dados do sistema.
- * Perfis restritos (comercial, cadastro): veem apenas seus dados.
- *
  * Fonte única de verdade para regras de visibilidade do Canal Parceiro.
+ * Lê a configuração persistida em localStorage via useVisibilityConfig.
  */
-const GLOBAL_VIEW_ROLES = ['diretor', 'gerente', 'ascom'] as const;
-
 export function useVisibility() {
   const { user } = useAuth();
+  const { config } = useVisibilityConfig();
 
   /** Whether the current user has global (unrestricted) visibility */
   const hasGlobalView = useMemo(() => {
     if (!user) return false;
-    return (GLOBAL_VIEW_ROLES as readonly string[]).includes(user.role);
-  }, [user]);
+    const level = config[user.role] ?? DEFAULT_VISIBILITY[user.role] ?? 'restrita';
+    return level === 'global';
+  }, [user, config]);
 
   /** Whether the current user has restricted visibility */
   const isRestricted = !hasGlobalView && !!user;
