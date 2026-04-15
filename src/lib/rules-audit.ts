@@ -71,6 +71,7 @@ export const MODULE_LABELS: Record<RulesAuditModule, string> = {
   notifications: 'Notificações por Evento',
   status_rules: 'Regras de Status e Bloqueios',
   sla_rules: 'SLA, Alertas e Criticidade',
+  field_rules: 'Campos Obrigatórios e Validações',
 };
 
 export const ACTION_LABELS: Record<RulesAuditAction, string> = {
