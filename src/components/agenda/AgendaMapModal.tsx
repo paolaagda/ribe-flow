@@ -9,6 +9,7 @@ import { Visit, Partner, getUserById, mockUsers } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useVisits } from '@/hooks/useVisits';
 import { useAuth } from '@/contexts/AuthContext';
+import { useVisibility } from '@/hooks/useVisibility';
 import { cn } from '@/lib/utils';
 import { format, parseISO, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -97,26 +98,18 @@ export default function AgendaMapModal({
   const [mapView, setMapView] = useState<'day' | 'week' | 'month'>(viewProp ?? 'week');
   const [filterCommercial, setFilterCommercial] = useState<string>('all');
 
-  const GLOBAL_VIEW_ROLES = ['diretor', 'gerente', 'ascom'];
-  const hasGlobalView = user ? GLOBAL_VIEW_ROLES.includes(user.role) : false;
+  const { hasGlobalView, filterVisits: filterByVisibility } = useVisibility();
 
-  // Apply same visibility rules as Agenda
+  // Apply centralized visibility rules + optional commercial filter
   const visibleVisits = useMemo(() => {
     const base = visitsProp ?? allVisits;
-    if (!user) return base;
-    if (!hasGlobalView) {
-      // Comercial/Cadastro: own visits, created by them, or accepted invites
-      return base.filter(
-        v => v.userId === user.id || v.createdBy === user.id ||
-          v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted')
-      );
-    }
+    const visible = filterByVisibility(base);
     // Global view roles can optionally filter by commercial
-    if (filterCommercial !== 'all') {
-      return base.filter(v => v.userId === filterCommercial);
+    if (hasGlobalView && filterCommercial !== 'all') {
+      return visible.filter(v => v.userId === filterCommercial);
     }
-    return base;
-  }, [visitsProp, allVisits, user, hasGlobalView, filterCommercial]);
+    return visible;
+  }, [visitsProp, allVisits, filterByVisibility, hasGlobalView, filterCommercial]);
 
   const visits = visibleVisits;
   const [showSuggestions, setShowSuggestions] = useState(false);

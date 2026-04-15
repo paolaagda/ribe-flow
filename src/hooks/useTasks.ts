@@ -2,6 +2,7 @@ import { useMemo, useCallback } from 'react';
 import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
+import { useVisibility } from '@/hooks/useVisibility';
 import { useDocumentValidation } from '@/hooks/useDocumentValidation';
 import { useNotificationContextSafe } from '@/contexts/NotificationContext';
 import { getRandomMessage } from '@/data/notification-messages';
@@ -44,19 +45,13 @@ export function useTasks() {
   const { visits, setVisits } = useVisits();
   const { getPartnerById } = usePartners();
   const { user } = useAuth();
+  const { filterVisits } = useVisibility();
   const { submitForValidation, resetToPending } = useDocumentValidation();
   const { addNotification } = useNotificationContextSafe();
 
   const allTasks = useMemo<TaskItem[]>(() => {
     const tasks: TaskItem[] = [];
-    const isRestricted = user && ['comercial', 'cadastro'].includes(user.role);
-    const visibleVisits = isRestricted
-      ? visits.filter(v =>
-          v.userId === user.id ||
-          v.createdBy === user.id ||
-          v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted')
-        )
-      : visits;
+    const visibleVisits = filterVisits(visits);
 
     visibleVisits.forEach(visit => {
       visit.comments?.forEach(comment => {

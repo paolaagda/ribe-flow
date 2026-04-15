@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/contexts/AuthContext';
+import { useVisibility } from '@/hooks/useVisibility';
 import { usePermission } from '@/hooks/usePermission';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
@@ -36,6 +37,7 @@ const medalColors = ['', 'text-yellow-500', 'text-slate-400', 'text-amber-700'];
 
 export default function CampanhasPage() {
   const { user } = useAuth();
+  const { hasGlobalView } = useVisibility();
   const { canRead } = usePermission();
   const { toast } = useToast();
   const [campaigns] = useLocalStorage<Campaign[]>('ribercred_campaigns', initialCampaigns);
@@ -51,7 +53,7 @@ export default function CampanhasPage() {
   const config = useMemo(() => selectedCampaign ? getGamificationConfig(selectedCampaign) : null, [selectedCampaign]);
 
   const isComercial = user?.role === 'comercial';
-  const canFilterUsers = !isComercial && ['diretor', 'gerente', 'ascom', 'cadastro'].includes(user?.role || '');
+  const canFilterUsers = !isComercial && hasGlobalView;
   const [filterUserId, setFilterUserId] = useState<string>('all');
 
   const allCommercials = useMemo(() => mockUsers.filter(u => u.role === 'comercial' && u.active), []);

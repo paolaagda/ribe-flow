@@ -36,6 +36,7 @@ import { useInfoData } from "@/hooks/useInfoData";
 import { useVisits } from "@/hooks/useVisits";
 import { usePartners } from "@/hooks/usePartners";
 import { useAuth } from "@/contexts/AuthContext";
+import { useVisibility } from "@/hooks/useVisibility";
 import { useNotifications } from "@/hooks/useNotifications";
 import { getRandomMessage } from "@/data/notification-messages";
 import { useTasks } from "@/hooks/useTasks";
@@ -349,19 +350,9 @@ export default function AgendaPage() {
   }, [formData.partnerId, formData.date]);
 
 
-  const visibleVisits = useMemo(() => {
-    if (!user) return visits;
-    const isRestricted = ['comercial', 'cadastro'].includes(user.role);
-    if (isRestricted) {
-      return visits.filter(
-        (v) =>
-          v.userId === user.id ||
-          v.createdBy === user.id ||
-          v.invitedUsers?.some((iu) => iu.userId === user.id && iu.status === "accepted"),
-      );
-    }
-    return visits;
-  }, [visits, user]);
+  const { filterVisits, filterPartners, isRestricted: userIsRestricted } = useVisibility();
+
+  const visibleVisits = useMemo(() => filterVisits(visits), [visits, filterVisits]);
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
 
@@ -1786,10 +1777,7 @@ export default function AgendaPage() {
                         <SelectValue placeholder="Selecione o parceiro" />
                       </SelectTrigger>
                       <SelectContent>
-                        {(user && ['comercial', 'cadastro'].includes(user.role)
-                          ? partners.filter((p) => p.responsibleUserId === user.id)
-                          : partners
-                        ).map((p) => (
+                        {filterPartners(partners).map((p) => (
                           <SelectItem key={p.id} value={p.id}>
                             {p.name}
                           </SelectItem>

@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Handshake, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useVisibility } from '@/hooks/useVisibility';
 import { initialCampaigns, getCampaignStatus, getCompletedVisitsForUser, getCompletedProspectionsForUser } from '@/data/campaigns';
 import { useVisits } from '@/hooks/useVisits';
 import { cn } from '@/lib/utils';
@@ -53,12 +54,11 @@ export default function HeroSection() {
     };
   }, [user, allVisits]);
 
+  const { filterVisits } = useVisibility();
+
   const fallbackStats = useMemo(() => {
     if (campaignProgress) return null;
-    const isRestricted = user && ['comercial', 'cadastro'].includes(user.role);
-    const userVisits = isRestricted && user
-      ? allVisits.filter(v => v.userId === user.id || v.createdBy === user.id || v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted'))
-      : allVisits;
+    const userVisits = filterVisits(allVisits);
     return {
       visitasConcluidas: userVisits.filter(v => v.type === 'visita' && v.status === 'Concluída').length,
       prospecoesConcluidas: userVisits.filter(v => v.type === 'prospecção' && v.status === 'Concluída').length,
