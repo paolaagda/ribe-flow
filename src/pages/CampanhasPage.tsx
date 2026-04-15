@@ -51,7 +51,7 @@ export default function CampanhasPage() {
   const config = useMemo(() => selectedCampaign ? getGamificationConfig(selectedCampaign) : null, [selectedCampaign]);
 
   const isComercial = user?.role === 'comercial';
-  const canFilterUsers = !isComercial && ['diretor', 'gerente', 'ascom', 'cadastro'].includes(user?.role || '');
+  const canFilterUsers = !isComercial && hasGlobalView;
   const [filterUserId, setFilterUserId] = useState<string>('all');
 
   const allCommercials = useMemo(() => mockUsers.filter(u => u.role === 'comercial' && u.active), []);

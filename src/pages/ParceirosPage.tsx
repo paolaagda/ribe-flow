@@ -48,13 +48,10 @@ export default function ParceirosPage() {
   const isMobile = useIsMobile();
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Filter partners by role
-  const visiblePartners = useMemo(() => {
-    if (user && ['comercial', 'cadastro'].includes(user.role)) {
-      return partners.filter(p => p.responsibleUserId === user.id);
-    }
-    return partners;
-  }, [user, partners]);
+  const { filterPartners } = useVisibility();
+
+  // Filter partners by centralized visibility rules
+  const visiblePartners = useMemo(() => filterPartners(partners), [partners, filterPartners]);
 
   const { getPartnerData, summary } = usePartnerOperationalData(visiblePartners);
 

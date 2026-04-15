@@ -52,14 +52,13 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
   const { pendingTasks } = useTasks();
   const { user } = useAuth();
 
+  const { filterVisits, filterPartners } = useVisibility();
+
   // Use scoped partners when provided, otherwise filter by role
   const roleFilteredPartners = useMemo(() => {
     if (scopedPartners) return scopedPartners;
-    if (user && ['comercial', 'cadastro'].includes(user.role)) {
-      return allPartners.filter(p => p.responsibleUserId === user.id);
-    }
-    return allPartners;
-  }, [scopedPartners, allPartners, user]);
+    return filterPartners(allPartners);
+  }, [scopedPartners, allPartners, filterPartners]);
 
   const insights = useMemo((): Insight[] => {
     const result: Insight[] = [];
@@ -67,10 +66,7 @@ export default function SmartInsights({ page, activeFilter, onFilterClick, onIns
     const monthStart = startOfMonth(today);
     const monthEnd = endOfMonth(today);
 
-    const isRestricted = user && ['comercial', 'cadastro'].includes(user.role);
-    const visibleVisits = isRestricted
-      ? visits.filter(v => v.userId === user.id || v.createdBy === user.id)
-      : visits;
+    const visibleVisits = filterVisits(visits);
 
     // Apply page-level filters if provided (for agenda)
     let contextVisits = visibleVisits;

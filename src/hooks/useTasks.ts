@@ -49,14 +49,7 @@ export function useTasks() {
 
   const allTasks = useMemo<TaskItem[]>(() => {
     const tasks: TaskItem[] = [];
-    const isRestricted = user && ['comercial', 'cadastro'].includes(user.role);
-    const visibleVisits = isRestricted
-      ? visits.filter(v =>
-          v.userId === user.id ||
-          v.createdBy === user.id ||
-          v.invitedUsers?.some(iu => iu.userId === user.id && iu.status === 'accepted')
-        )
-      : visits;
+    const visibleVisits = filterVisits(visits);
 
     visibleVisits.forEach(visit => {
       visit.comments?.forEach(comment => {
