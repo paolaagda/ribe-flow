@@ -5,12 +5,14 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Save, RefreshCw, ShieldAlert, Lock, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStatusRules, DEFAULT_STATUS_RULES, StatusRulesConfig } from '@/hooks/useStatusRules';
 import { logRulesAuditEvent } from '@/lib/rules-audit';
 import { buildAuditParams, isDeepEqual } from '@/lib/rules-persistence';
+import { allCargos, cargoLabels, CompanyCargo } from '@/data/mock-data';
 import ConfigurabilityBadge from './ConfigurabilityBadge';
 
 /** Items documented as protected — not editable in this phase */
@@ -31,7 +33,14 @@ const PROTECTED_RULES = [
     label: 'Convenção CANCELLED: em tarefas',
     description: 'A marcação textual de cancelamento de tarefas permanece estrutural nesta fase.',
   },
+  {
+    label: 'Reversão de ações finais da Agenda',
+    description: 'Ações finais da Agenda (Concluída, Cancelada, Inconclusa) não podem ser revertidas.',
+  },
 ];
+
+/** Roles eligible for the reopen selector */
+const REOPEN_ELIGIBLE_ROLES: CompanyCargo[] = ['diretor', 'gerente', 'ascom'];
 
 export default function StatusRulesBlock() {
   const { toast } = useToast();
@@ -42,16 +51,27 @@ export default function StatusRulesBlock() {
   const hasChanges = !isDeepEqual(config, savedSnapshot);
 
   const handleSave = () => {
+    // Normalize: if reopen is OFF, clear roles to avoid inconsistency
+    const normalized = { ...config };
+    if (!normalized.allowTaskReopen) {
+      normalized.taskReopenAllowedRoles = [];
+    }
+    if (normalized.allowTaskReopen && normalized.taskReopenAllowedRoles.length === 0) {
+      toast({ title: 'Selecione ao menos um perfil autorizado para reabertura', variant: 'destructive' });
+      return;
+    }
+    updateConfig(normalized);
+
     const audit = buildAuditParams(user);
     logRulesAuditEvent({
       ...audit,
       module: 'status_rules',
       action: 'update',
-      summary: buildSummary(savedSnapshot, config),
+      summary: buildSummary(savedSnapshot, normalized),
       snapshotBefore: savedSnapshot,
-      snapshotAfter: { ...config },
+      snapshotAfter: { ...normalized },
     });
-    setSavedSnapshot({ ...config });
+    setSavedSnapshot({ ...normalized });
     toast({ title: 'Regras de status salvas com sucesso!' });
   };
 
@@ -69,6 +89,14 @@ export default function StatusRulesBlock() {
     });
     setSavedSnapshot({ ...DEFAULT_STATUS_RULES });
     toast({ title: 'Regras de status restauradas ao padrão' });
+  };
+
+  const toggleReopenRole = (role: CompanyCargo) => {
+    const current = config.taskReopenAllowedRoles;
+    const next = current.includes(role)
+      ? current.filter(r => r !== role)
+      : [...current, role];
+    updateConfig({ taskReopenAllowedRoles: next });
   };
 
   return (
@@ -131,23 +159,46 @@ export default function StatusRulesBlock() {
             />
           </div>
 
-          {/* Task reopen — prepared but documented as limited */}
-          <div className="flex items-start justify-between gap-4 p-3 rounded-lg border bg-muted/30">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Label className="text-sm font-medium">Permitir reabertura de tarefas concluídas</Label>
-                <Badge variant="outline" className="text-[10px] bg-warning/10 text-warning border-warning/30">
-                  Experimental
-                </Badge>
+          {/* Task reopen */}
+          <div className="p-3 rounded-lg border bg-muted/30 space-y-3">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm font-medium">Permitir reabertura de tarefas concluídas</Label>
+                  <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/30">
+                    Operacional
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Quando ativado, tarefas concluídas (não validadas) podem ser reabertas pelos perfis selecionados abaixo. A ação exige confirmação e é registrada no histórico da tarefa.
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Quando ativado, tarefas concluídas podem ter seu status reaberto pelo responsável. A ação operacional completa será validada em fase futura.
-              </p>
+              <Switch
+                checked={config.allowTaskReopen}
+                onCheckedChange={(v) => updateConfig({ allowTaskReopen: v })}
+              />
             </div>
-            <Switch
-              checked={config.allowTaskReopen}
-              onCheckedChange={(v) => updateConfig({ allowTaskReopen: v })}
-            />
+
+            {/* Role selector — only visible when reopen is ON */}
+            {config.allowTaskReopen && (
+              <div className="pl-1 space-y-2">
+                <Label className="text-xs text-muted-foreground">Perfis autorizados para reabertura:</Label>
+                <div className="flex flex-wrap gap-3">
+                  {REOPEN_ELIGIBLE_ROLES.map(role => (
+                    <label key={role} className="flex items-center gap-1.5 cursor-pointer">
+                      <Checkbox
+                        checked={config.taskReopenAllowedRoles.includes(role)}
+                        onCheckedChange={() => toggleReopenRole(role)}
+                      />
+                      <span className="text-xs font-medium">{cargoLabels[role]}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Comercial e Cadastro não são elegíveis para reabertura nesta fase.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -189,6 +240,11 @@ function buildSummary(before: StatusRulesConfig, after: StatusRulesConfig): stri
   }
   if (before.allowTaskReopen !== after.allowTaskReopen) {
     changes.push(`Reabertura de tarefas ${after.allowTaskReopen ? 'ativada' : 'desativada'}`);
+  }
+  const rolesBefore = (before.taskReopenAllowedRoles || []).sort().join(',');
+  const rolesAfter = (after.taskReopenAllowedRoles || []).sort().join(',');
+  if (rolesBefore !== rolesAfter && after.allowTaskReopen) {
+    changes.push(`Perfis de reabertura: ${after.taskReopenAllowedRoles.map(r => cargoLabels[r]).join(', ')}`);
   }
   return changes.length > 0 ? changes.join('; ') : 'Regras de status atualizadas';
 }

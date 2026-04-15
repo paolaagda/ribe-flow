@@ -258,6 +258,27 @@ export function useTasks() {
     }));
   }, [setVisits, user]);
 
+  /** Reopen a completed (non-validated) task — sets it back to pending with history entry */
+  const reopenTask = useCallback((visitId: string, commentId: string) => {
+    setVisits(prev => prev.map(v => {
+      if (v.id !== visitId) return v;
+      return {
+        ...v,
+        comments: v.comments.map(c => {
+          if (c.id !== commentId) return c;
+          if (!c.taskCompleted || c.taskDocStatus === 'validated') return c;
+          const evt = makeHistoryEvent('reopened', `Reaberta por ${user?.name || 'Usuário'}`, user?.id);
+          return {
+            ...c,
+            taskCompleted: false,
+            taskCompletedBy: undefined,
+            taskHistory: [...(c.taskHistory || []), evt],
+          };
+        }),
+      };
+    }));
+  }, [setVisits, user]);
+
   const getDaysPending = useCallback((createdAt: string) => {
     return Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
   }, []);
@@ -323,6 +344,7 @@ export function useTasks() {
     getTasksByPartnerId,
     getTasksByVisitId,
     toggleTask,
+    reopenTask,
     returnTaskForCorrection,
     markTaskValidated,
     createDocPendingTask,

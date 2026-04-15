@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import {
   Calendar, User as UserIcon, Briefcase, FileText, Link2,
-  CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle, Star,
+  CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle, Star, RotateCcw,
 } from 'lucide-react';
 import { isTaskPriority } from '@/hooks/useTasks';
 import {
@@ -107,14 +107,16 @@ interface TaskDetailModalProps {
   onOpenChange: (open: boolean) => void;
   onConclude: (visitId: string, commentId: string) => void;
   onCancel: (visitId: string, commentId: string) => void;
+  onReopen?: (visitId: string, commentId: string) => void;
   permissions: TaskPermissions;
   validAssignees: User[];
 }
 
 export default function TaskDetailModal({
-  item, partner, open, onOpenChange, onConclude, onCancel, permissions, validAssignees,
+  item, partner, open, onOpenChange, onConclude, onCancel, onReopen, permissions, validAssignees,
 }: TaskDetailModalProps) {
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [confirmReopen, setConfirmReopen] = useState(false);
   const history = useMemo(() => item ? buildHistory(item) : [], [item]);
 
   if (!item) return null;
@@ -140,6 +142,13 @@ export default function TaskDetailModal({
   const handleConfirmCancel = () => {
     onCancel(item.visit.id, item.task.id);
     setConfirmCancel(false);
+  };
+
+  const handleConfirmReopen = () => {
+    onReopen?.(item.visit.id, item.task.id);
+    setConfirmReopen(false);
+    toast.success('Tarefa reaberta');
+    onOpenChange(false);
   };
 
   return (
@@ -303,8 +312,18 @@ export default function TaskDetailModal({
                   Cancelar
                 </Button>
               )}
+              {permissions.canReopen && (
+                <Button
+                  variant="outline" size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={() => setConfirmReopen(true)}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reabrir
+                </Button>
+              )}
               {/* When no actions available */}
-              {!permissions.canConclude && !permissions.canEdit && !permissions.canAssign && !permissions.canCancel && (
+              {!permissions.canConclude && !permissions.canEdit && !permissions.canAssign && !permissions.canCancel && !permissions.canReopen && (
                 <p className="text-xs text-muted-foreground italic">Nenhuma ação disponível para esta tarefa.</p>
               )}
             </div>
@@ -312,7 +331,7 @@ export default function TaskDetailModal({
         </DialogContent>
       </Dialog>
 
-      {/* Cancel confirmation dialog only */}
+      {/* Cancel confirmation dialog */}
       <AlertDialog open={confirmCancel} onOpenChange={setConfirmCancel}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -325,6 +344,24 @@ export default function TaskDetailModal({
             <AlertDialogCancel>Voltar</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Cancelar tarefa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reopen confirmation dialog */}
+      <AlertDialog open={confirmReopen} onOpenChange={setConfirmReopen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reabrir tarefa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A tarefa voltará ao estado pendente e poderá ser trabalhada novamente. A ação ficará registrada no histórico.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmReopen}>
+              Reabrir tarefa
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

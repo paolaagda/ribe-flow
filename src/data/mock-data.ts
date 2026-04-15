@@ -70,7 +70,7 @@ export interface VisitComment {
 
 export interface TaskHistoryEvent {
   id: string;
-  type: 'created' | 'priority_auto' | 'completed' | 'cancelled' | 'submitted' | 'returned' | 'validated' | 'status_change' | 'assigned';
+  type: 'created' | 'priority_auto' | 'completed' | 'cancelled' | 'submitted' | 'returned' | 'validated' | 'status_change' | 'assigned' | 'reopened';
   label: string;
   date: string;
   userId?: string;
