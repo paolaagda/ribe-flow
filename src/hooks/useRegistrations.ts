@@ -86,7 +86,7 @@ export function useRegistrations() {
     }));
 
     // Notify Cadastro users — single dispatch
-    if (notifRules.regSubmittedNotifyCadastro) {
+    if (getNotificationRules().regSubmittedNotifyCadastro) {
       const partner = mockPartners.find(p => p.id === reg.partnerId);
       const cadastroUsers = mockUsers.filter(u => u.role === 'cadastro' && u.active);
       const today = new Date().toISOString().split('T')[0];
@@ -112,7 +112,7 @@ export function useRegistrations() {
         });
       });
     }
-  }, [registrations, setRegistrations, user, addNotification, notifRules]);
+  }, [registrations, setRegistrations, user, addNotification]);
 
   const validateRegistration = useCallback((id: string) => {
     setRegistrations(prev => prev.map(r => {
@@ -142,7 +142,7 @@ export function useRegistrations() {
     }));
 
     // Notify the Comercial who submitted — single dispatch
-    if (notifRules.regRejectedNotifySender) {
+    if (getNotificationRules().regRejectedNotifySender) {
       const submittedBy = reg.validationSubmittedBy || reg.commercialUserId;
       if (submittedBy) {
         const partner = mockPartners.find(p => p.id === reg.partnerId);
@@ -169,7 +169,7 @@ export function useRegistrations() {
         });
       }
     }
-  }, [registrations, setRegistrations, user, addNotification, notifRules]);
+  }, [registrations, setRegistrations, user, addNotification]);
 
   const revokeRegistrationValidation = useCallback((id: string, reason: string) => {
     rejectRegistration(id, reason);

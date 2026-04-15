@@ -128,10 +128,10 @@ export function useDocumentValidation() {
       },
     }));
     // Notify Cadastro users — single dispatch from domain hook
-    if (notifRules.docSubmittedNotifyCadastro) {
+    if (getNotificationRules().docSubmittedNotifyCadastro) {
       notifyCadastroUsers(partnerId, docId);
     }
-  }, [setStore, user, notifyCadastroUsers, notifRules]);
+  }, [setStore, user, notifyCadastroUsers]);
 
   const validateDoc = useCallback((partnerId: string, docId: string) => {
     setStore(prev => ({
@@ -165,10 +165,10 @@ export function useDocumentValidation() {
       },
     }));
     // Notify the Comercial who submitted — single dispatch
-    if (notifRules.docRejectedNotifySender) {
+    if (getNotificationRules().docRejectedNotifySender) {
       notifySubmitterRejection(partnerId, docId, reason, entry?.submittedBy);
     }
-  }, [setStore, user, resolvedStore, notifySubmitterRejection, notifRules]);
+  }, [setStore, user, resolvedStore, notifySubmitterRejection]);
 
   const revokeValidation = useCallback((partnerId: string, docId: string, reason: string) => {
     const entry = resolvedStore[partnerId]?.[docId];
@@ -186,10 +186,10 @@ export function useDocumentValidation() {
       },
     }));
     // Notify the Comercial who submitted — single dispatch
-    if (notifRules.docRejectedNotifySender) {
+    if (getNotificationRules().docRejectedNotifySender) {
       notifySubmitterRejection(partnerId, docId, reason, entry?.submittedBy);
     }
-  }, [setStore, user, resolvedStore, notifySubmitterRejection, notifRules]);
+  }, [setStore, user, resolvedStore, notifySubmitterRejection]);
 
   const resetToPending = useCallback((partnerId: string, docId: string) => {
     setStore(prev => ({
