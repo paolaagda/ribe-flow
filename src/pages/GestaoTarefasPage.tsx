@@ -255,7 +255,7 @@ export default function GestaoTarefasPage() {
 
   // Permissions for selected task
   const selectedPermissions = useMemo(
-    () => selectedTask ? getPermissions(selectedTask) : { canConclude: false, canEdit: false, canAssign: false, canCancel: false, canChangeStatus: false },
+    () => selectedTask ? getPermissions(selectedTask) : { canConclude: false, canEdit: false, canAssign: false, canCancel: false, canChangeStatus: false, canReopen: false },
     [selectedTask, getPermissions],
   );
   const selectedAssignees = useMemo(
