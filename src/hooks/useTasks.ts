@@ -45,6 +45,7 @@ export function useTasks() {
   const { visits, setVisits } = useVisits();
   const { getPartnerById } = usePartners();
   const { user } = useAuth();
+  const { filterVisits } = useVisibility();
   const { submitForValidation, resetToPending } = useDocumentValidation();
   const { addNotification } = useNotificationContextSafe();
 
