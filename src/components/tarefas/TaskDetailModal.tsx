@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import {
   Calendar, User as UserIcon, Briefcase, FileText, Link2,
-  CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle, Star, RotateCcw,
+  CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle, Star, RotateCcw, MessageSquarePlus,
 } from 'lucide-react';
 import { isTaskPriority } from '@/hooks/useTasks';
 import {
@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import { TaskItem } from '@/hooks/useTasks';
 import { TaskPermissions } from '@/hooks/useTaskPermissions';
 import { getUserById, Partner, User } from '@/data/mock-data';
@@ -61,18 +62,16 @@ function getDeadlineLabel(createdAt: string, completed: boolean) {
   return { label: `${remaining}d restantes`, variant: 'default' as const };
 }
 
-/* ── History events — use real taskHistory when available, else build mock ── */
+/* ── History events ── */
 interface HistoryEvent { id: string; label: string; date: string; }
 
 function buildHistory(item: TaskItem): HistoryEvent[] {
-  // Prefer real history
   if (item.task.taskHistory && item.task.taskHistory.length > 0) {
     return item.task.taskHistory
       .map(evt => ({ id: evt.id, label: evt.label, date: evt.date }))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
 
-  // Fallback: build from task state
   const events: HistoryEvent[] = [];
   const created = new Date(item.task.createdAt);
   events.push({ id: 'created', label: 'Tarefa criada', date: created.toISOString() });
@@ -108,15 +107,18 @@ interface TaskDetailModalProps {
   onConclude: (visitId: string, commentId: string) => void;
   onCancel: (visitId: string, commentId: string) => void;
   onReopen?: (visitId: string, commentId: string) => void;
+  onAdminNote?: (visitId: string, commentId: string, note: string) => void;
   permissions: TaskPermissions;
   validAssignees: User[];
 }
 
 export default function TaskDetailModal({
-  item, partner, open, onOpenChange, onConclude, onCancel, onReopen, permissions, validAssignees,
+  item, partner, open, onOpenChange, onConclude, onCancel, onReopen, onAdminNote, permissions, validAssignees,
 }: TaskDetailModalProps) {
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [confirmReopen, setConfirmReopen] = useState(false);
+  const [editingNote, setEditingNote] = useState(false);
+  const [noteText, setNoteText] = useState('');
   const history = useMemo(() => item ? buildHistory(item) : [], [item]);
 
   if (!item) return null;
@@ -150,6 +152,20 @@ export default function TaskDetailModal({
     toast.success('Tarefa reaberta');
     onOpenChange(false);
   };
+
+  const handleStartNoteEdit = () => {
+    setNoteText(item.task.taskAdminNote || '');
+    setEditingNote(true);
+  };
+
+  const handleSaveNote = () => {
+    onAdminNote?.(item.visit.id, item.task.id, noteText);
+    setEditingNote(false);
+    toast.success('Nota administrativa salva');
+  };
+
+  const hasAnyAction = permissions.canConclude || permissions.canEdit || permissions.canAssign
+    || permissions.canCancel || permissions.canReopen || permissions.canTerminalEdit;
 
   return (
     <>
@@ -241,7 +257,51 @@ export default function TaskDetailModal({
                 </>
               )}
 
-              {/* ── Assignees (when permission allows) ── */}
+              {/* ── Admin note block ── */}
+              {(item.task.taskAdminNote || permissions.canTerminalEdit) && (
+                <>
+                  <section className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Nota administrativa</h4>
+                      {permissions.canTerminalEdit && !editingNote && (
+                        <Button variant="ghost" size="sm" className="h-6 text-[11px] gap-1 px-2" onClick={handleStartNoteEdit}>
+                          <Edit3 className="h-3 w-3" />
+                          {item.task.taskAdminNote ? 'Editar' : 'Adicionar'}
+                        </Button>
+                      )}
+                    </div>
+                    {editingNote ? (
+                      <div className="space-y-2">
+                        <Textarea
+                          value={noteText}
+                          onChange={(e) => setNoteText(e.target.value)}
+                          placeholder="Adicione uma nota administrativa..."
+                          className="text-xs min-h-[60px] resize-none"
+                          maxLength={500}
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" className="text-xs h-7" onClick={handleSaveNote}>
+                            Salvar nota
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => setEditingNote(false)}>
+                            Cancelar
+                          </Button>
+                          <span className="text-[10px] text-muted-foreground ml-auto">{noteText.length}/500</span>
+                        </div>
+                      </div>
+                    ) : item.task.taskAdminNote ? (
+                      <div className="bg-muted/50 border border-border rounded-md p-3">
+                        <p className="text-xs text-foreground leading-relaxed whitespace-pre-wrap">{item.task.taskAdminNote}</p>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground italic">Nenhuma nota administrativa registrada.</p>
+                    )}
+                  </section>
+                  <Separator />
+                </>
+              )}
+
+              {/* ── Assignees ── */}
               {permissions.canAssign && validAssignees.length > 0 && (
                 <>
                   <section className="space-y-2">
@@ -322,8 +382,17 @@ export default function TaskDetailModal({
                   Reabrir
                 </Button>
               )}
-              {/* When no actions available */}
-              {!permissions.canConclude && !permissions.canEdit && !permissions.canAssign && !permissions.canCancel && !permissions.canReopen && (
+              {permissions.canTerminalEdit && !editingNote && (
+                <Button
+                  variant="outline" size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={handleStartNoteEdit}
+                >
+                  <MessageSquarePlus className="h-3.5 w-3.5" />
+                  Nota admin.
+                </Button>
+              )}
+              {!hasAnyAction && (
                 <p className="text-xs text-muted-foreground italic">Nenhuma ação disponível para esta tarefa.</p>
               )}
             </div>

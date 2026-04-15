@@ -364,6 +364,7 @@ export function useTasks() {
     getTasksByVisitId,
     toggleTask,
     reopenTask,
+    updateTaskAdminNote,
     returnTaskForCorrection,
     markTaskValidated,
     createDocPendingTask,
