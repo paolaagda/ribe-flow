@@ -5,7 +5,9 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Save, RefreshCw, ClipboardCheck, Handshake, UserPlus, FileText, RotateCcw, Shield } from 'lucide-react';
+import { Save, RefreshCw, ClipboardCheck, Handshake, UserPlus, FileText, RotateCcw, Shield, HelpCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import BlockImpactNote from '@/components/settings/BlockImpactNote';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFieldRules, DEFAULT_FIELD_RULES, FieldRulesConfig } from '@/hooks/useFieldRules';
@@ -80,10 +82,14 @@ export default function FieldRulesBlock() {
           <div className="flex items-center gap-2">
             <ClipboardCheck className="h-4.5 w-4.5 text-primary" />
             <div>
-              <CardTitle className="text-base">Campos Obrigatórios e Validações</CardTitle>
+              <div className="flex items-center gap-1.5">
+                <CardTitle className="text-base">Campos Obrigatórios e Validações</CardTitle>
+                <TooltipProvider><Tooltip><TooltipTrigger asChild><HelpCircle className="h-3.5 w-3.5 text-muted-foreground/50 cursor-help shrink-0" /></TooltipTrigger><TooltipContent side="bottom" className="max-w-[280px] text-xs leading-relaxed">Define quais campos são obrigatórios na conclusão de visitas, prospecções e ações administrativas. Justificativas de cancelamento/reagendamento permanecem protegidas.</TooltipContent></Tooltip></TooltipProvider>
+              </div>
               <CardDescription className="text-xs mt-0.5">
-                Configure quais campos são obrigatórios em cada contexto operacional do sistema.
+                Campos obrigatórios por contexto operacional do sistema.
               </CardDescription>
+              <BlockImpactNote items={['Agenda (conclusão)', 'Cadastro', 'Ações administrativas']} />
             </div>
           </div>
           <div className="flex items-center gap-2">

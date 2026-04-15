@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { useNotificationRules, NotificationRules, DEFAULT_NOTIFICATION_RULES } from '@/hooks/useNotificationRules';
-import { Bell, Save, RefreshCw } from 'lucide-react';
+import { Bell, Save, RefreshCw, HelpCircle } from 'lucide-react';
 import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
+import BlockImpactNote from '@/components/settings/BlockImpactNote';
 import { logRulesAuditEvent } from '@/lib/rules-audit';
 import { buildAuditParams } from '@/lib/rules-persistence';
 import { useAuth } from '@/contexts/AuthContext';
@@ -109,10 +111,14 @@ export default function NotificationsBlock() {
           <div className="flex items-center gap-2">
             <Bell className="h-4.5 w-4.5 text-primary" />
             <div>
-              <CardTitle className="text-base">Notificações por Evento</CardTitle>
+              <div className="flex items-center gap-1.5">
+                <CardTitle className="text-base">Notificações por Evento</CardTitle>
+                <TooltipProvider><Tooltip><TooltipTrigger asChild><HelpCircle className="h-3.5 w-3.5 text-muted-foreground/50 cursor-help shrink-0" /></TooltipTrigger><TooltipContent side="bottom" className="max-w-[280px] text-xs leading-relaxed">Ativa ou desativa disparos automáticos de notificação para eventos operacionais. Não altera canais, templates ou lógica de agrupamento — esses permanecem protegidos.</TooltipContent></Tooltip></TooltipProvider>
+              </div>
               <CardDescription className="text-xs mt-0.5">
-                Ative ou desative os disparos automáticos de notificação para cada evento do sistema.
+                Disparos automáticos de notificação para cada evento do sistema.
               </CardDescription>
+              <BlockImpactNote items={['Central de notificações', 'Alertas operacionais', 'Não altera templates']} />
             </div>
           </div>
           <div className="flex items-center gap-2">

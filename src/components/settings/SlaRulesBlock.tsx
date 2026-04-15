@@ -5,7 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Save, RefreshCw, Gauge, AlertTriangle, Clock, TrendingUp } from 'lucide-react';
+import { Save, RefreshCw, Gauge, AlertTriangle, Clock, TrendingUp, HelpCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import BlockImpactNote from '@/components/settings/BlockImpactNote';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSlaRules, DEFAULT_SLA_RULES, SlaRulesConfig } from '@/hooks/useSlaRules';
@@ -117,10 +119,14 @@ export default function SlaRulesBlock() {
           <div className="flex items-center gap-2">
             <Gauge className="h-4.5 w-4.5 text-primary" />
             <div>
-              <CardTitle className="text-base">SLA, Alertas e Criticidade</CardTitle>
+              <div className="flex items-center gap-1.5">
+                <CardTitle className="text-base">SLA, Alertas e Criticidade</CardTitle>
+                <TooltipProvider><Tooltip><TooltipTrigger asChild><HelpCircle className="h-3.5 w-3.5 text-muted-foreground/50 cursor-help shrink-0" /></TooltipTrigger><TooltipContent side="bottom" className="max-w-[280px] text-xs leading-relaxed">Define thresholds de tempo para alertas operacionais, atenção imediata e criticidade. Impacta cards e filtros de Cadastro e Parceiros. Não altera status ou fluxos documentais.</TooltipContent></Tooltip></TooltipProvider>
+              </div>
               <CardDescription className="text-xs mt-0.5">
-                Configure thresholds de atenção, prazos por contexto e critérios de criticidade operacional.
+                Thresholds de atenção, prazos por contexto e criticidade operacional.
               </CardDescription>
+              <BlockImpactNote items={['Cadastro e Parceiros', 'Cards operacionais', 'Criticidade e alertas']} />
             </div>
           </div>
           <div className="flex items-center gap-2">
