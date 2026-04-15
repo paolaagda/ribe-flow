@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { getRulesAuditLog, RulesAuditEvent, MODULE_LABELS, ACTION_LABELS } from '@/lib/rules-audit';
-import { History, ChevronDown, ChevronRight, User, Calendar, ArrowRight } from 'lucide-react';
+import { getRulesAuditLog, RulesAuditEvent, RulesAuditModule, MODULE_LABELS, ACTION_LABELS } from '@/lib/rules-audit';
+import { History, ChevronDown, ChevronRight, User, Calendar, ArrowRight, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const MODULE_COLORS: Record<string, string> = {
@@ -12,6 +13,9 @@ const MODULE_COLORS: Record<string, string> = {
   visibility: 'bg-success/15 text-success border-success/30',
   task_rules: 'bg-warning/15 text-warning border-warning/30',
   notifications: 'bg-accent/15 text-accent-foreground border-accent/30',
+  status_rules: 'bg-destructive/15 text-destructive border-destructive/30',
+  sla_rules: 'bg-primary/10 text-primary border-primary/20',
+  field_rules: 'bg-warning/10 text-warning border-warning/20',
 };
 
 function formatDate(iso: string) {
@@ -24,20 +28,27 @@ function formatDate(iso: string) {
 export default function RulesAuditLog() {
   const [events, setEvents] = useState<RulesAuditEvent[]>([]);
   const [showAll, setShowAll] = useState(false);
+  const [moduleFilter, setModuleFilter] = useState<string>('all');
 
-  // Refresh on mount and whenever the component regains focus
   useEffect(() => {
     setEvents(getRulesAuditLog());
-
     const handler = () => setEvents(getRulesAuditLog());
     window.addEventListener('local-storage-sync', handler);
     return () => window.removeEventListener('local-storage-sync', handler);
   }, []);
 
-  // Expose a way for parent to trigger refresh
-  const refresh = () => setEvents(getRulesAuditLog());
+  const filtered = useMemo(() => {
+    if (moduleFilter === 'all') return events;
+    return events.filter(e => e.module === moduleFilter);
+  }, [events, moduleFilter]);
 
-  const visible = showAll ? events : events.slice(0, 10);
+  const visible = showAll ? filtered : filtered.slice(0, 10);
+
+  // Unique modules present in logs for filter
+  const presentModules = useMemo(() => {
+    const set = new Set(events.map(e => e.module));
+    return Array.from(set) as RulesAuditModule[];
+  }, [events]);
 
   if (events.length === 0) {
     return (
@@ -46,7 +57,7 @@ export default function RulesAuditLog() {
           <History className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">Nenhuma alteração registrada ainda.</p>
           <p className="text-xs text-muted-foreground/70 mt-1">
-            As alterações feitas nos blocos acima serão registradas aqui automaticamente.
+            Alterações nos blocos acima serão registradas aqui automaticamente.
           </p>
         </CardContent>
       </Card>
@@ -56,35 +67,53 @@ export default function RulesAuditLog() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <History className="h-4.5 w-4.5 text-primary" />
             <div>
               <CardTitle className="text-base">Histórico de Alterações</CardTitle>
               <CardDescription className="text-xs mt-0.5">
-                Registro das alterações realizadas nos blocos de Regras e Permissões.
+                Registro cronológico de todas as mudanças em Regras e Permissões.
               </CardDescription>
             </div>
           </div>
-          <Badge variant="secondary" className="text-[10px]">
-            {events.length} {events.length === 1 ? 'evento' : 'eventos'}
-          </Badge>
+          <div className="flex items-center gap-2">
+            {presentModules.length > 1 && (
+              <Select value={moduleFilter} onValueChange={setModuleFilter}>
+                <SelectTrigger className="h-7 w-[180px] text-[11px]">
+                  <div className="flex items-center gap-1.5">
+                    <Filter className="h-3 w-3" />
+                    <SelectValue />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="text-xs">Todos os blocos</SelectItem>
+                  {presentModules.map(m => (
+                    <SelectItem key={m} value={m} className="text-xs">{MODULE_LABELS[m]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Badge variant="secondary" className="text-[10px]">
+              {filtered.length} {filtered.length === 1 ? 'evento' : 'eventos'}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           {visible.map(evt => (
             <AuditEventItem key={evt.id} event={evt} />
           ))}
         </div>
-        {events.length > 10 && (
+        {filtered.length > 10 && (
           <Button
             variant="ghost"
             size="sm"
             className="w-full mt-2 text-xs"
             onClick={() => setShowAll(!showAll)}
           >
-            {showAll ? 'Mostrar menos' : `Ver todos (${events.length})`}
+            {showAll ? 'Mostrar menos' : `Ver todos (${filtered.length})`}
           </Button>
         )}
       </CardContent>
@@ -99,14 +128,14 @@ function AuditEventItem({ event }: { event: RulesAuditEvent }) {
     <Collapsible open={open} onOpenChange={setOpen}>
       <CollapsibleTrigger asChild>
         <button className="w-full flex items-start gap-3 rounded-md px-3 py-2.5 text-left hover:bg-muted/50 transition-colors group">
-          <div className="mt-0.5">
+          <div className="mt-1">
             {open ? (
               <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
             ) : (
               <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
             )}
           </div>
-          <div className="flex-1 min-w-0 space-y-1">
+          <div className="flex-1 min-w-0 space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge
                 variant="outline"
@@ -118,8 +147,8 @@ function AuditEventItem({ event }: { event: RulesAuditEvent }) {
                 {ACTION_LABELS[event.action]}
               </Badge>
             </div>
-            <p className="text-xs font-medium text-foreground">{event.summary}</p>
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+            <p className="text-xs font-medium text-foreground leading-snug">{event.summary}</p>
+            <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
                 {formatDate(event.timestamp)}
@@ -135,9 +164,9 @@ function AuditEventItem({ event }: { event: RulesAuditEvent }) {
       <CollapsibleContent>
         <div className="ml-7 mr-3 mb-2 rounded-md border bg-muted/30 p-3 space-y-2">
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-medium">
-            <span>Antes</span>
+            <span>Estado anterior</span>
             <ArrowRight className="h-3 w-3" />
-            <span>Depois</span>
+            <span>Estado posterior</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <pre className="text-[10px] bg-background rounded p-2 overflow-auto max-h-40 border">

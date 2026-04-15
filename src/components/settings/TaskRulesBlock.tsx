@@ -5,12 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { useTaskRules, DEFAULT_TASK_RULES, TaskCategory, MIN_DEADLINE_DAYS, MAX_DEADLINE_DAYS } from '@/hooks/useTaskRules';
 import { CompanyCargo, cargoLabels, cargoColors, allCargos } from '@/data/mock-data';
-import { ListChecks, Save, RefreshCw, Clock, Zap, XCircle } from 'lucide-react';
+import { ListChecks, Save, RefreshCw, Clock, Zap, XCircle, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
+import BlockImpactNote from '@/components/settings/BlockImpactNote';
 import { logRulesAuditEvent } from '@/lib/rules-audit';
 import { buildAuditParams } from '@/lib/rules-persistence';
 import { useAuth } from '@/contexts/AuthContext';
@@ -97,10 +99,14 @@ export default function TaskRulesBlock() {
           <div className="flex items-center gap-2">
             <ListChecks className="h-4.5 w-4.5 text-primary" />
             <div>
-              <CardTitle className="text-base">Regras de Tarefas</CardTitle>
+              <div className="flex items-center gap-1.5">
+                <CardTitle className="text-base">Regras de Tarefas</CardTitle>
+                <TooltipProvider><Tooltip><TooltipTrigger asChild><HelpCircle className="h-3.5 w-3.5 text-muted-foreground/50 cursor-help shrink-0" /></TooltipTrigger><TooltipContent side="bottom" className="max-w-[280px] text-xs leading-relaxed">Controla prazo padrão, prioridade automática por categoria e quais perfis podem cancelar tarefas globalmente. Não altera regras de criação contextual ou fluxo documental.</TooltipContent></Tooltip></TooltipProvider>
+              </div>
               <CardDescription className="text-xs mt-0.5">
-                Configure prazo padrão, prioridade automática e permissões de cancelamento global.
+                Prazo padrão, prioridade automática e cancelamento global de tarefas.
               </CardDescription>
+              <BlockImpactNote items={['Gestão de Tarefas', 'Tarefas de parceiros', 'Não altera fluxo documental']} />
             </div>
           </div>
           <div className="flex items-center gap-2">

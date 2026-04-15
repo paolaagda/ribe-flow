@@ -6,7 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Save, RefreshCw, ShieldAlert, Lock, Info } from 'lucide-react';
+import { Save, RefreshCw, ShieldAlert, Lock, Info, HelpCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import BlockImpactNote from '@/components/settings/BlockImpactNote';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStatusRules, DEFAULT_STATUS_RULES, StatusRulesConfig } from '@/hooks/useStatusRules';
@@ -115,10 +117,14 @@ export default function StatusRulesBlock() {
           <div className="flex items-center gap-2">
             <ShieldAlert className="h-4.5 w-4.5 text-primary" />
             <div>
-              <CardTitle className="text-base">Regras de Status e Bloqueios</CardTitle>
+              <div className="flex items-center gap-1.5">
+                <CardTitle className="text-base">Regras de Status e Bloqueios</CardTitle>
+                <TooltipProvider><Tooltip><TooltipTrigger asChild><HelpCircle className="h-3.5 w-3.5 text-muted-foreground/50 cursor-help shrink-0" /></TooltipTrigger><TooltipContent side="bottom" className="max-w-[280px] text-xs leading-relaxed">Controla bloqueios em tarefas terminais, reabertura e exceções administrativas. Transições de Agenda e validação documental permanecem protegidas.</TooltipContent></Tooltip></TooltipProvider>
+              </div>
               <CardDescription className="text-xs mt-0.5">
-                Gerencie bloqueios por status, confirmações obrigatórias e exceções administrativas.
+                Bloqueios por status, confirmações obrigatórias e exceções administrativas.
               </CardDescription>
+              <BlockImpactNote items={['Gestão de Tarefas', 'Exceções administrativas', 'Agenda e docs protegidos']} />
             </div>
           </div>
           <div className="flex items-center gap-2">

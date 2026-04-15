@@ -10,8 +10,9 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useVisibilityConfig, DEFAULT_VISIBILITY, VisibilityLevel } from '@/hooks/useVisibilityConfig';
 import { CompanyCargo, cargoLabels, cargoColors, allCargos } from '@/data/mock-data';
 import { PermissionLevel, defaultPermissions, groupedPermissions } from '@/data/permissions';
-import { Eye, EyeOff, Pencil, Save, RefreshCw, Shield, Globe, Lock } from 'lucide-react';
+import { Eye, EyeOff, Pencil, Save, RefreshCw, Shield, Globe, Lock, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import TaskRulesBlock from '@/components/settings/TaskRulesBlock';
 import NotificationsBlock from '@/components/settings/NotificationsBlock';
 import StatusRulesBlock from '@/components/settings/StatusRulesBlock';
@@ -20,6 +21,9 @@ import FieldRulesBlock from '@/components/settings/FieldRulesBlock';
 import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
 import ProtectedRulesInfo from '@/components/settings/ProtectedRulesInfo';
 import RulesAuditLog from '@/components/settings/RulesAuditLog';
+import RulesExecutiveSummary from '@/components/settings/RulesExecutiveSummary';
+import BlockSectionHeader from '@/components/settings/BlockSectionHeader';
+import BlockImpactNote from '@/components/settings/BlockImpactNote';
 import { logRulesAuditEvent } from '@/lib/rules-audit';
 import { buildAuditParams } from '@/lib/rules-persistence';
 import { useAuth } from '@/contexts/AuthContext';
@@ -40,6 +44,21 @@ function validatePermissionsSafety(
     return 'Pelo menos um perfil precisa manter acesso a Configurações para administrar o sistema.';
   }
   return null;
+}
+
+function BlockHelp({ text }: { text: string }) {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/50 cursor-help shrink-0" />
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="max-w-[280px] text-xs leading-relaxed">
+          {text}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 }
 
 export default function RulesPermissionsTab() {
@@ -101,11 +120,10 @@ export default function RulesPermissionsTab() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-sm text-muted-foreground">
-          Gerencie as permissões de acesso e as regras de visibilidade de dados por perfil do sistema.
-        </p>
-      </div>
+      {/* Resumo executivo */}
+      <RulesExecutiveSummary />
+
+      <BlockSectionHeader title="Acesso e Visibilidade" description="Controle quem pode ver e editar cada área do sistema" />
 
       {/* Bloco 1 — Permissões por Perfil */}
       <Card>
@@ -114,10 +132,14 @@ export default function RulesPermissionsTab() {
             <div className="flex items-center gap-2">
               <Shield className="h-4.5 w-4.5 text-primary" />
               <div>
-                <CardTitle className="text-base">Permissões por Perfil</CardTitle>
+                <div className="flex items-center gap-1.5">
+                  <CardTitle className="text-base">Permissões por Perfil</CardTitle>
+                  <BlockHelp text="Define o nível de acesso (sem acesso, leitura ou edição) de cada cargo em cada funcionalidade. Impacta navegação, botões e ações em todo o sistema. Não altera fluxos documentais ou regras de status." />
+                </div>
                 <CardDescription className="text-xs mt-0.5">
-                  Defina o nível de acesso de cada cargo em cada funcionalidade do sistema.
+                  Nível de acesso de cada cargo em cada funcionalidade do sistema.
                 </CardDescription>
+                <BlockImpactNote items={['Impacta todo o sistema', 'Navegação e ações', 'Não altera fluxos documentais']} />
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -221,6 +243,8 @@ export default function RulesPermissionsTab() {
       {/* Bloco 2 — Visibilidade Editável */}
       <VisibilityBlock />
 
+      <BlockSectionHeader title="Regras Operacionais" description="Comportamento de tarefas, notificações, status e campos" />
+
       {/* Bloco 3 — Regras de Tarefas */}
       <TaskRulesBlock />
 
@@ -230,13 +254,17 @@ export default function RulesPermissionsTab() {
       {/* Bloco 5 — Regras de Status e Bloqueios */}
       <StatusRulesBlock />
 
+      <BlockSectionHeader title="Parâmetros e Validações" description="Thresholds, SLA e exigências de preenchimento" />
+
       {/* Bloco 6 — SLA, Alertas e Criticidade */}
       <SlaRulesBlock />
 
       {/* Bloco 7 — Campos Obrigatórios e Validações */}
       <FieldRulesBlock />
 
-      {/* Bloco 8 — Documentação de regras protegidas */}
+      <BlockSectionHeader title="Governança e Auditoria" />
+
+      {/* Bloco 8 — Regras protegidas */}
       <ProtectedRulesInfo />
 
       {/* Bloco 9 — Histórico de alterações */}
@@ -316,10 +344,14 @@ function VisibilityBlock() {
           <div className="flex items-center gap-2">
             <Globe className="h-4.5 w-4.5 text-primary" />
             <div>
-              <CardTitle className="text-base">Visibilidade de Dados</CardTitle>
+              <div className="flex items-center gap-1.5">
+                <CardTitle className="text-base">Visibilidade de Dados</CardTitle>
+                <BlockHelp text="Controla o escopo de dados que cada perfil enxerga. Visibilidade Global dá acesso a tudo; Restrita limita ao contexto do usuário. Afeta Agenda, Parceiros, Cadastro e indicadores." />
+              </div>
               <CardDescription className="text-xs mt-0.5">
-                Defina quais dados cada perfil pode acessar no sistema. Alterações são refletidas em todos os módulos.
+                Escopo de dados acessíveis por perfil em todos os módulos.
               </CardDescription>
+              <BlockImpactNote items={['Agenda, Parceiros, Cadastro', 'Indicadores e listagens', 'Efeito em tempo real']} />
             </div>
           </div>
           <div className="flex items-center gap-2">
