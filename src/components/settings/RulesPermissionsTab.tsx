@@ -12,6 +12,7 @@ import { CompanyCargo, cargoLabels, cargoColors, allCargos } from '@/data/mock-d
 import { PermissionLevel, defaultPermissions, groupedPermissions } from '@/data/permissions';
 import { Eye, EyeOff, Pencil, Save, RefreshCw, Shield, Globe, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import TaskRulesBlock from '@/components/settings/TaskRulesBlock';
 
 export default function RulesPermissionsTab() {
   const { toast } = useToast();
@@ -162,6 +163,9 @@ export default function RulesPermissionsTab() {
 
       {/* Bloco 2 — Visibilidade Editável */}
       <VisibilityBlock />
+
+      {/* Bloco 3 — Regras de Tarefas */}
+      <TaskRulesBlock />
     </div>
   );
 }

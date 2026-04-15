@@ -16,14 +16,14 @@ export interface TaskItem {
 
 const OVERDUE_DAYS = 10;
 
-/** Compute automatic priority: document and data tasks are always priority */
-function isAutoPriority(task: VisitComment): boolean {
-  return task.taskCategory === 'document' || task.taskCategory === 'data';
+/** Compute automatic priority based on config */
+function isAutoPriority(task: VisitComment, autoPriorityCategories: string[]): boolean {
+  return !!task.taskCategory && autoPriorityCategories.includes(task.taskCategory);
 }
 
 /** Check if task is effectively priority (auto or manual) */
-export function isTaskPriority(task: VisitComment): boolean {
-  return !!task.taskPriority || isAutoPriority(task);
+export function isTaskPriority(task: VisitComment, autoPriorityCategories: string[] = ['document', 'data']): boolean {
+  return !!task.taskPriority || isAutoPriority(task, autoPriorityCategories);
 }
 
 /** Create a history event */
