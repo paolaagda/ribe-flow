@@ -1,6 +1,8 @@
 import { useLocalStorage } from './useLocalStorage';
 import { useCallback } from 'react';
 
+const STORAGE_KEY = 'ribercred_notification_rules_v1';
+
 export interface NotificationRules {
   taskCompletedNotifyResponsible: boolean;
   taskCadastroCompletedNotifyCadastro: boolean;
@@ -33,9 +35,22 @@ function validateRules(raw: unknown): NotificationRules {
   return result;
 }
 
+/**
+ * Read notification rules directly from localStorage (no hooks).
+ * Safe to call inside callbacks without affecting hook ordering.
+ */
+export function getNotificationRules(): NotificationRules {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? validateRules(JSON.parse(raw)) : { ...DEFAULT_NOTIFICATION_RULES };
+  } catch {
+    return { ...DEFAULT_NOTIFICATION_RULES };
+  }
+}
+
 export function useNotificationRules() {
   const [raw, setRaw] = useLocalStorage<NotificationRules>(
-    'ribercred_notification_rules_v1',
+    STORAGE_KEY,
     DEFAULT_NOTIFICATION_RULES,
   );
 

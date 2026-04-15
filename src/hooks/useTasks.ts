@@ -7,7 +7,7 @@ import { useDocumentValidation } from '@/hooks/useDocumentValidation';
 import { useNotificationContextSafe } from '@/contexts/NotificationContext';
 import { getRandomMessage } from '@/data/notification-messages';
 import { VisitComment, Visit, Partner, TaskHistoryEvent, mockUsers, mockPartners } from '@/data/mock-data';
-import { useNotificationRules } from '@/hooks/useNotificationRules';
+import { getNotificationRules } from '@/hooks/useNotificationRules';
 
 export interface TaskItem {
   task: VisitComment;
@@ -49,7 +49,6 @@ export function useTasks() {
   const { filterVisits } = useVisibility();
   const { submitForValidation, resetToPending } = useDocumentValidation();
   const { addNotification } = useNotificationContextSafe();
-  const { rules: notifRules } = useNotificationRules();
 
   const allTasks = useMemo<TaskItem[]>(() => {
     const tasks: TaskItem[] = [];
@@ -99,7 +98,7 @@ export function useTasks() {
     const today = new Date().toISOString().split('T')[0];
 
     // Notify responsible principal if completer is not the responsible
-    if (notifRules.taskCompletedNotifyResponsible && user.id !== responsibleId) {
+    if (getNotificationRules().taskCompletedNotifyResponsible && user.id !== responsibleId) {
       addNotification({
         type: 'task_completed',
         visitId: visit.id,
@@ -120,7 +119,7 @@ export function useTasks() {
 
     // For cadastro tasks, also notify all cadastro-role users
     const hasCadastroContext = task.taskCategory === 'document' || task.taskCategory === 'data';
-    if (notifRules.taskCadastroCompletedNotifyCadastro && hasCadastroContext) {
+    if (getNotificationRules().taskCadastroCompletedNotifyCadastro && hasCadastroContext) {
       const cadastroUsers = mockUsers.filter(u => u.role === 'cadastro' && u.active && u.id !== user.id);
       cadastroUsers.forEach(cu => {
         addNotification({
@@ -141,7 +140,7 @@ export function useTasks() {
         });
       });
     }
-  }, [user, addNotification, notifRules]);
+  }, [user, addNotification]);
 
   const toggleTask = useCallback((visitId: string, commentId: string) => {
     setVisits(prev => {
