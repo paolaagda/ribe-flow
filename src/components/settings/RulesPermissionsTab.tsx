@@ -13,6 +13,7 @@ import { PermissionLevel, defaultPermissions, groupedPermissions } from '@/data/
 import { Eye, EyeOff, Pencil, Save, RefreshCw, Shield, Globe, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import TaskRulesBlock from '@/components/settings/TaskRulesBlock';
+import NotificationsBlock from '@/components/settings/NotificationsBlock';
 
 export default function RulesPermissionsTab() {
   const { toast } = useToast();
@@ -166,6 +167,9 @@ export default function RulesPermissionsTab() {
 
       {/* Bloco 3 — Regras de Tarefas */}
       <TaskRulesBlock />
+
+      {/* Bloco 4 — Notificações */}
+      <NotificationsBlock />
     </div>
   );
 }
