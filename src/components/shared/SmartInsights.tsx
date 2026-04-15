@@ -6,6 +6,7 @@ import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
 import { useTasks } from '@/hooks/useTasks';
 import { useAuth } from '@/contexts/AuthContext';
+import { useVisibility } from '@/hooks/useVisibility';
 import { formatCentavos } from '@/lib/currency';
 import { format, startOfMonth, endOfMonth, parseISO, isWithinInterval, differenceInDays } from 'date-fns';
 import { motion } from 'framer-motion';

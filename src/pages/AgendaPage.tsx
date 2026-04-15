@@ -36,6 +36,7 @@ import { useInfoData } from "@/hooks/useInfoData";
 import { useVisits } from "@/hooks/useVisits";
 import { usePartners } from "@/hooks/usePartners";
 import { useAuth } from "@/contexts/AuthContext";
+import { useVisibility } from "@/hooks/useVisibility";
 import { useNotifications } from "@/hooks/useNotifications";
 import { getRandomMessage } from "@/data/notification-messages";
 import { useTasks } from "@/hooks/useTasks";

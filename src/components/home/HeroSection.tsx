@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Handshake, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useVisibility } from '@/hooks/useVisibility';
 import { initialCampaigns, getCampaignStatus, getCompletedVisitsForUser, getCompletedProspectionsForUser } from '@/data/campaigns';
 import { useVisits } from '@/hooks/useVisits';
 import { cn } from '@/lib/utils';

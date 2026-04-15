@@ -2,6 +2,7 @@ import { useMemo, useCallback } from 'react';
 import { useVisits } from '@/hooks/useVisits';
 import { usePartners } from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
+import { useVisibility } from '@/hooks/useVisibility';
 import { useDocumentValidation } from '@/hooks/useDocumentValidation';
 import { useNotificationContextSafe } from '@/contexts/NotificationContext';
 import { getRandomMessage } from '@/data/notification-messages';

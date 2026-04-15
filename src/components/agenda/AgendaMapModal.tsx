@@ -9,6 +9,7 @@ import { Visit, Partner, getUserById, mockUsers } from '@/data/mock-data';
 import { usePartners } from '@/hooks/usePartners';
 import { useVisits } from '@/hooks/useVisits';
 import { useAuth } from '@/contexts/AuthContext';
+import { useVisibility } from '@/hooks/useVisibility';
 import { cn } from '@/lib/utils';
 import { format, parseISO, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

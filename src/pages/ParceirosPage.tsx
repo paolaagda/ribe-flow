@@ -10,6 +10,7 @@ import { Building2, MapPin, ShieldOff, Phone, Store as StoreIcon, ChevronDown, C
 import { cn } from '@/lib/utils';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/contexts/AuthContext';
+import { useVisibility } from '@/hooks/useVisibility';
 import PartnerDetailView from '@/components/partners/PartnerDetailView';
 import SmartInsights from '@/components/shared/SmartInsights';
 import { Button } from '@/components/ui/button';
