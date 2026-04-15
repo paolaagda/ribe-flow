@@ -5,7 +5,7 @@ import { useNotificationContextSafe } from '@/contexts/NotificationContext';
 import { mockUsers, mockPartners } from '@/data/mock-data';
 import { getRandomMessage } from '@/data/notification-messages';
 import { useInfoData } from '@/hooks/useInfoData';
-import { useNotificationRules } from '@/hooks/useNotificationRules';
+import { getNotificationRules } from '@/hooks/useNotificationRules';
 
 export type DocValidationStatus = 'pending' | 'in_validation' | 'validated' | 'rejected';
 
@@ -25,7 +25,6 @@ export function useDocumentValidation() {
   const { addNotification } = useNotificationContextSafe();
   const [store, setStore] = useLocalStorage<ValidationStore>('ribercred_partner_doc_validation_v1', {});
   const { getActiveDocuments } = useInfoData();
-  const { rules: notifRules } = useNotificationRules();
 
   // Migration: read old checkedDocs and merge as 'validated' on first use
   const [oldCheckedDocs] = useLocalStorage<Record<string, string[]>>('ribercred_partner_docs_v1', {});

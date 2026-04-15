@@ -5,13 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNotificationContextSafe } from '@/contexts/NotificationContext';
 import { mockUsers, mockPartners } from '@/data/mock-data';
 import { getRandomMessage } from '@/data/notification-messages';
-import { useNotificationRules } from '@/hooks/useNotificationRules';
+import { getNotificationRules } from '@/hooks/useNotificationRules';
 
 export function useRegistrations() {
   const [registrations, setRegistrations] = useLocalStorage<Registration[]>('ribercred_registrations', mockRegistrations);
   const { user } = useAuth();
   const { addNotification } = useNotificationContextSafe();
-  const { rules: notifRules } = useNotificationRules();
 
   const addRegistration = useCallback((reg: Omit<Registration, 'id' | 'requestedAt' | 'completedAt' | 'updates'>) => {
     const newReg: Registration = {
