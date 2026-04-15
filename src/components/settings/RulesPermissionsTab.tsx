@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { useVisibilityConfig, DEFAULT_VISIBILITY, VisibilityLevel, validateVisibilityConfig } from '@/hooks/useVisibilityConfig';
+import { useVisibilityConfig, DEFAULT_VISIBILITY, VisibilityLevel } from '@/hooks/useVisibilityConfig';
 import { CompanyCargo, cargoLabels, cargoColors, allCargos } from '@/data/mock-data';
 import { PermissionLevel, defaultPermissions, groupedPermissions } from '@/data/permissions';
 import { Eye, EyeOff, Pencil, Save, RefreshCw, Shield, Globe, Lock } from 'lucide-react';
