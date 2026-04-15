@@ -35,6 +35,7 @@ import { Team, initialTeams } from '@/data/teams';
 import { useToast } from '@/hooks/use-toast';
 import JustificationModal from '@/components/agenda/JustificationModal';
 import { getStatusRules } from '@/hooks/useStatusRules';
+import { getFieldRules } from '@/hooks/useFieldRules';
 
 interface AgendaDetailModalProps {
   visit: Visit | null;
@@ -234,6 +235,26 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
       setPendingStatus(status as 'Reagendada' | 'Cancelada' | 'Inconclusa');
       setShowJustification(true);
       return;
+    }
+    // Field validation for conclusion
+    if (status === 'Concluída') {
+      const fieldRules = getFieldRules();
+      const missing: string[] = [];
+      if (visit.type === 'visita') {
+        if (fieldRules.visitRequirePotential && !visit.potentialValue) missing.push('Potencial de produção');
+        if (fieldRules.visitRequireSummary && !visit.summary?.trim()) missing.push('Resumo / observação');
+      } else {
+        if (fieldRules.prospectRequireSummary && !visit.summary?.trim()) missing.push('Resumo / observação');
+        if (fieldRules.prospectRequireContact && !visit.prospectContact?.trim()) missing.push('Contato do prospect');
+      }
+      if (missing.length > 0) {
+        toast({
+          title: 'Campos obrigatórios',
+          description: `Preencha antes de concluir: ${missing.join(', ')}`,
+          variant: 'destructive',
+        });
+        return;
+      }
     }
     // Final status confirmation for Comercial (configurable)
     const statusRules = getStatusRules();
