@@ -253,7 +253,9 @@ const VISIBILITY_DESCRIPTIONS: Record<VisibilityLevel, Record<CompanyCargo, stri
 
 function VisibilityBlock() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const { config, updateCargo, resetToDefaults } = useVisibilityConfig();
+  const [savedSnapshot, setSavedSnapshot] = useState(() => ({ ...config }));
   const [hasChanges, setHasChanges] = useState(false);
 
   const handleChange = (cargo: CompanyCargo, level: VisibilityLevel) => {
@@ -262,12 +264,34 @@ function VisibilityBlock() {
   };
 
   const handleSave = () => {
+    const changedCount = allCargos.filter(c => config[c] !== savedSnapshot[c]).length;
+    logRulesAuditEvent({
+      userId: user?.id || 'u1',
+      userName: user?.name || 'Usuário',
+      module: 'visibility',
+      action: 'update',
+      summary: changedCount > 0 ? `Visibilidade alterada para ${changedCount} ${changedCount === 1 ? 'perfil' : 'perfis'}` : 'Visibilidade salva sem alterações',
+      snapshotBefore: savedSnapshot,
+      snapshotAfter: { ...config },
+    });
+    setSavedSnapshot({ ...config });
     setHasChanges(false);
     toast({ title: 'Regras de visibilidade salvas com sucesso!' });
   };
 
   const handleReset = () => {
+    const before = { ...config };
     resetToDefaults();
+    logRulesAuditEvent({
+      userId: user?.id || 'u1',
+      userName: user?.name || 'Usuário',
+      module: 'visibility',
+      action: 'restore_defaults',
+      summary: 'Visibilidade restaurada ao padrão',
+      snapshotBefore: before,
+      snapshotAfter: DEFAULT_VISIBILITY,
+    });
+    setSavedSnapshot({ ...DEFAULT_VISIBILITY });
     setHasChanges(false);
     toast({ title: 'Visibilidade restaurada ao padrão' });
   };
