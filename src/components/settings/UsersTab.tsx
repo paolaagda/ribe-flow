@@ -48,7 +48,7 @@ export default function UsersTab() {
 
   const canManage = authUser && ['diretor', 'gerente'].includes(authUser.role);
   const { canRead, canWrite } = usePermission();
-  const grouped = groupedPermissions();
+  
 
   const filtered = search
     ? users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()))
@@ -87,27 +87,6 @@ export default function UsersTab() {
     toast({ title: `Senha de ${name} resetada (simulado)` });
   };
 
-  const handlePermissionChange = (cargo: CompanyCargo, key: string, level: PermissionLevel) => {
-    setPermissions(prev => ({
-      ...prev,
-      [cargo]: { ...prev[cargo], [key]: level },
-    }));
-    setHasChanges(true);
-  };
-
-  const handleSavePermissions = () => {
-    setHasChanges(false);
-    toast({ title: 'Permissões salvas com sucesso!' });
-  };
-
-  const handleResetPermissions = (cargo: CompanyCargo) => {
-    setPermissions(prev => ({
-      ...prev,
-      [cargo]: { ...defaultPermissions[cargo] },
-    }));
-    setHasChanges(true);
-    toast({ title: `Permissões de ${cargoLabels[cargo]} restauradas ao padrão` });
-  };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
