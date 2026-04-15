@@ -6,12 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { useTaskRules, DEFAULT_TASK_RULES, TaskCategory } from '@/hooks/useTaskRules';
+import { useTaskRules, DEFAULT_TASK_RULES, TaskCategory, MIN_DEADLINE_DAYS, MAX_DEADLINE_DAYS } from '@/hooks/useTaskRules';
 import { CompanyCargo, cargoLabels, cargoColors, allCargos } from '@/data/mock-data';
 import { ListChecks, Save, RefreshCw, Clock, Zap, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
 import { logRulesAuditEvent } from '@/lib/rules-audit';
+import { buildAuditParams } from '@/lib/rules-persistence';
 import { useAuth } from '@/contexts/AuthContext';
 
 const CATEGORY_LABELS: Record<TaskCategory, string> = {
@@ -28,27 +29,25 @@ export default function TaskRulesBlock() {
 
   const handleDeadlineChange = (value: string) => {
     const num = parseInt(value, 10);
-    if (!isNaN(num) && num >= 1 && num <= 30) {
+    if (!isNaN(num) && num >= MIN_DEADLINE_DAYS && num <= MAX_DEADLINE_DAYS) {
       updateConfig({ cadastroDeadlineDays: num });
       setHasChanges(true);
     }
   };
 
-  const handleSaveWithValidation = () => {
-    // Guard: deadline must be 1-30
-    if (config.cadastroDeadlineDays < 1 || config.cadastroDeadlineDays > 30) {
-      toast({ title: 'Prazo inválido', description: 'O prazo deve estar entre 1 e 30 dias úteis.', variant: 'destructive' });
+  const handleSave = () => {
+    if (config.cadastroDeadlineDays < MIN_DEADLINE_DAYS || config.cadastroDeadlineDays > MAX_DEADLINE_DAYS) {
+      toast({ title: 'Prazo inválido', description: `O prazo deve estar entre ${MIN_DEADLINE_DAYS} e ${MAX_DEADLINE_DAYS} dias úteis.`, variant: 'destructive' });
       return;
     }
-    // Guard: globalCancelRoles must only contain valid cargos
     const invalidRoles = config.globalCancelRoles.filter(r => !allCargos.includes(r));
     if (invalidRoles.length > 0) {
       toast({ title: 'Perfis inválidos', description: 'A lista de perfis com cancelamento global contém valores inválidos.', variant: 'destructive' });
       return;
     }
+    const audit = buildAuditParams(user);
     logRulesAuditEvent({
-      userId: user?.id || 'u1',
-      userName: user?.name || 'Usuário',
+      ...audit,
       module: 'task_rules',
       action: 'update',
       summary: 'Regras de tarefas atualizadas',
@@ -62,30 +61,24 @@ export default function TaskRulesBlock() {
 
   const toggleCategory = (cat: TaskCategory) => {
     const current = config.autoPriorityCategories;
-    const next = current.includes(cat)
-      ? current.filter(c => c !== cat)
-      : [...current, cat];
+    const next = current.includes(cat) ? current.filter(c => c !== cat) : [...current, cat];
     updateConfig({ autoPriorityCategories: next });
     setHasChanges(true);
   };
 
   const toggleCancelRole = (cargo: CompanyCargo) => {
     const current = config.globalCancelRoles;
-    const next = current.includes(cargo)
-      ? current.filter(r => r !== cargo)
-      : [...current, cargo];
+    const next = current.includes(cargo) ? current.filter(r => r !== cargo) : [...current, cargo];
     updateConfig({ globalCancelRoles: next });
     setHasChanges(true);
   };
 
-  // handleSave replaced by handleSaveWithValidation above
-
   const handleReset = () => {
     const before = { ...config };
     resetToDefaults();
+    const audit = buildAuditParams(user);
     logRulesAuditEvent({
-      userId: user?.id || 'u1',
-      userName: user?.name || 'Usuário',
+      ...audit,
       module: 'task_rules',
       action: 'restore_defaults',
       summary: 'Regras de tarefas restauradas ao padrão',
@@ -115,7 +108,7 @@ export default function TaskRulesBlock() {
             <Button variant="outline" size="sm" className="text-xs" onClick={handleReset}>
               <RefreshCw className="h-3 w-3 mr-1" /> Restaurar padrão
             </Button>
-            <Button onClick={handleSaveWithValidation} disabled={!hasChanges} size="sm">
+            <Button onClick={handleSave} disabled={!hasChanges} size="sm">
               <Save className="h-4 w-4 mr-1" /> Salvar
             </Button>
           </div>
@@ -129,13 +122,13 @@ export default function TaskRulesBlock() {
             <span className="text-sm font-medium">Prazo padrão de tarefas de cadastro</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            Tarefas vinculadas a cadastro recebem automaticamente este prazo em dias úteis.
+            Tarefas vinculadas a cadastro recebem automaticamente este prazo em dias úteis ({MIN_DEADLINE_DAYS}–{MAX_DEADLINE_DAYS}).
           </p>
           <div className="flex items-center gap-2">
             <Input
               type="number"
-              min={1}
-              max={30}
+              min={MIN_DEADLINE_DAYS}
+              max={MAX_DEADLINE_DAYS}
               value={config.cadastroDeadlineDays}
               onChange={e => handleDeadlineChange(e.target.value)}
               className="w-20 h-8 text-sm"

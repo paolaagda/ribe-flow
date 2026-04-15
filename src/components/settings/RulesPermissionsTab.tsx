@@ -18,6 +18,7 @@ import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
 import ProtectedRulesInfo from '@/components/settings/ProtectedRulesInfo';
 import RulesAuditLog from '@/components/settings/RulesAuditLog';
 import { logRulesAuditEvent } from '@/lib/rules-audit';
+import { buildAuditParams } from '@/lib/rules-persistence';
 import { useAuth } from '@/contexts/AuthContext';
 
 /** Keys that Diretor MUST keep at least 'read' to avoid admin lockout */
@@ -26,13 +27,11 @@ const PROTECTED_DIRETOR_KEYS = ['settings.view'];
 function validatePermissionsSafety(
   perms: Record<CompanyCargo, Record<string, PermissionLevel>>,
 ): string | null {
-  // Diretor must keep settings.view
   for (const key of PROTECTED_DIRETOR_KEYS) {
     if (perms.diretor[key] === 'none') {
       return `O perfil Diretor não pode perder acesso a "${key.replace('.', ' > ')}". Isso bloquearia o acesso administrativo ao sistema.`;
     }
   }
-  // At least one role must have settings.view
   const hasAdmin = allCargos.some(c => perms[c]?.['settings.view'] !== 'none');
   if (!hasAdmin) {
     return 'Pelo menos um perfil precisa manter acesso a Configurações para administrar o sistema.';
@@ -65,9 +64,9 @@ export default function RulesPermissionsTab() {
       toast({ title: 'Configuração bloqueada', description: error, variant: 'destructive' });
       return;
     }
+    const audit = buildAuditParams(user);
     logRulesAuditEvent({
-      userId: user?.id || 'u1',
-      userName: user?.name || 'Usuário',
+      ...audit,
       module: 'permissions',
       action: 'update',
       summary: 'Permissões por perfil atualizadas',
@@ -83,9 +82,9 @@ export default function RulesPermissionsTab() {
     const before = JSON.parse(JSON.stringify(permissions));
     const next = { ...permissions, [cargo]: { ...defaultPermissions[cargo] } };
     setPermissions(next);
+    const audit = buildAuditParams(user);
     logRulesAuditEvent({
-      userId: user?.id || 'u1',
-      userName: user?.name || 'Usuário',
+      ...audit,
       module: 'permissions',
       action: 'restore_defaults',
       summary: `Permissões de ${cargoLabels[cargo]} restauradas ao padrão`,
@@ -265,12 +264,14 @@ function VisibilityBlock() {
 
   const handleSave = () => {
     const changedCount = allCargos.filter(c => config[c] !== savedSnapshot[c]).length;
+    const audit = buildAuditParams(user);
     logRulesAuditEvent({
-      userId: user?.id || 'u1',
-      userName: user?.name || 'Usuário',
+      ...audit,
       module: 'visibility',
       action: 'update',
-      summary: changedCount > 0 ? `Visibilidade alterada para ${changedCount} ${changedCount === 1 ? 'perfil' : 'perfis'}` : 'Visibilidade salva sem alterações',
+      summary: changedCount > 0
+        ? `Visibilidade alterada para ${changedCount} ${changedCount === 1 ? 'perfil' : 'perfis'}`
+        : 'Visibilidade salva sem alterações',
       snapshotBefore: savedSnapshot,
       snapshotAfter: { ...config },
     });
@@ -282,9 +283,9 @@ function VisibilityBlock() {
   const handleReset = () => {
     const before = { ...config };
     resetToDefaults();
+    const audit = buildAuditParams(user);
     logRulesAuditEvent({
-      userId: user?.id || 'u1',
-      userName: user?.name || 'Usuário',
+      ...audit,
       module: 'visibility',
       action: 'restore_defaults',
       summary: 'Visibilidade restaurada ao padrão',

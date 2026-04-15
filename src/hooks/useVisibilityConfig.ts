@@ -1,5 +1,6 @@
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { CompanyCargo, allCargos } from '@/data/mock-data';
+import { readFromStorage } from '@/lib/rules-persistence';
 
 export type VisibilityLevel = 'global' | 'restrita';
 
@@ -14,13 +15,26 @@ export const DEFAULT_VISIBILITY: VisibilityConfig = {
 };
 
 const STORAGE_KEY = 'ribercred_visibility_rules_v1';
+const VALID_LEVELS: VisibilityLevel[] = ['global', 'restrita'];
 
-function isValidConfig(value: unknown): value is VisibilityConfig {
-  if (!value || typeof value !== 'object') return false;
+export function validateVisibilityConfig(value: unknown): VisibilityConfig {
+  if (!value || typeof value !== 'object') return { ...DEFAULT_VISIBILITY };
   const obj = value as Record<string, unknown>;
-  return allCargos.every(
-    cargo => obj[cargo] === 'global' || obj[cargo] === 'restrita',
-  );
+  const result = { ...DEFAULT_VISIBILITY };
+  for (const cargo of allCargos) {
+    if (VALID_LEVELS.includes(obj[cargo] as VisibilityLevel)) {
+      result[cargo] = obj[cargo] as VisibilityLevel;
+    }
+  }
+  return result;
+}
+
+/**
+ * Read visibility config directly from localStorage (no hooks).
+ * Safe to call inside callbacks without affecting hook ordering.
+ */
+export function getVisibilityConfig(): VisibilityConfig {
+  return validateVisibilityConfig(readFromStorage(STORAGE_KEY, DEFAULT_VISIBILITY));
 }
 
 /**
@@ -30,18 +44,17 @@ function isValidConfig(value: unknown): value is VisibilityConfig {
 export function useVisibilityConfig() {
   const [raw, setRaw] = useLocalStorage<VisibilityConfig>(STORAGE_KEY, DEFAULT_VISIBILITY);
 
-  // Validate on read — fallback to defaults if corrupted
-  const config: VisibilityConfig = isValidConfig(raw) ? raw : DEFAULT_VISIBILITY;
+  const config = validateVisibilityConfig(raw);
 
   const updateCargo = (cargo: CompanyCargo, level: VisibilityLevel) => {
     setRaw(prev => {
-      const safe = isValidConfig(prev) ? prev : DEFAULT_VISIBILITY;
+      const safe = validateVisibilityConfig(prev);
       return { ...safe, [cargo]: level };
     });
   };
 
   const resetToDefaults = () => {
-    setRaw(DEFAULT_VISIBILITY);
+    setRaw({ ...DEFAULT_VISIBILITY });
   };
 
   return { config, updateCargo, resetToDefaults };
