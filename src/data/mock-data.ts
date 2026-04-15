@@ -64,13 +64,14 @@ export interface VisitComment {
   taskReturnReason?: string;
   taskPriority?: boolean; // manual or auto priority flag
   taskHistory?: TaskHistoryEvent[];
+  taskAdminNote?: string; // administrative note — safe field editable on terminal tasks
   parentId?: string;
   createdAt: string;
 }
 
 export interface TaskHistoryEvent {
   id: string;
-  type: 'created' | 'priority_auto' | 'completed' | 'cancelled' | 'submitted' | 'returned' | 'validated' | 'status_change' | 'assigned' | 'reopened';
+  type: 'created' | 'priority_auto' | 'completed' | 'cancelled' | 'submitted' | 'returned' | 'validated' | 'status_change' | 'assigned' | 'reopened' | 'terminal_edit';
   label: string;
   date: string;
   userId?: string;

@@ -13,6 +13,8 @@ export interface TaskPermissions {
   canCancel: boolean;
   canChangeStatus: boolean;
   canReopen: boolean;
+  /** Can add/edit administrative note on a terminal task */
+  canTerminalEdit: boolean;
 }
 
 /**
@@ -47,6 +49,7 @@ export function useTaskPermissions() {
       canCancel: false,
       canChangeStatus: false,
       canReopen: false,
+      canTerminalEdit: false,
     };
 
     if (!user) return none;
@@ -66,8 +69,18 @@ export function useTaskPermissions() {
       }
     }
 
+    // ── Terminal limited edit: completed or cancelled, NOT validated ──
+    let canTerminalEdit = false;
+    if ((completed || cancelled) && !validated) {
+      const statusRules = getStatusRules();
+      if (statusRules.allowTerminalLimitedEdit) {
+        const userRole = user.role as CompanyCargo;
+        canTerminalEdit = statusRules.terminalLimitedEditAllowedRoles.includes(userRole);
+      }
+    }
+
     if (terminal || cancelled) {
-      return { ...none, canReopen };
+      return { ...none, canReopen, canTerminalEdit };
     }
 
     const role = user.role;
@@ -81,10 +94,8 @@ export function useTaskPermissions() {
     const hasPartner = !!item.partner;
     const isProspect = item.visit.type === 'prospecção';
 
-    // ── Conclude ──
     const canConclude = isResponsible || isCreator;
 
-    // ── Edit ──
     let canEdit = false;
     if (!hasPartner && !hasCadastroContext && !isProspect) {
       canEdit = isCreator;
@@ -96,7 +107,6 @@ export function useTaskPermissions() {
       canEdit = isResponsible;
     }
 
-    // ── Assign ──
     let canAssign = false;
     if (!hasPartner && !hasCadastroContext && !isProspect) {
       canAssign = isCreator;
@@ -107,7 +117,6 @@ export function useTaskPermissions() {
       if (!isResponsible && isCreator) canAssign = true;
     }
 
-    // ── Cancel ──
     let canCancel = false;
     if (taskRules.globalCancelRoles.includes(role)) {
       canCancel = true;
@@ -119,10 +128,9 @@ export function useTaskPermissions() {
       canCancel = isResponsible;
     }
 
-    // ── Change status ──
     const canChangeStatus = canEdit || isResponsible || isCreator;
 
-    return { canConclude, canEdit, canAssign, canCancel, canChangeStatus, canReopen };
+    return { canConclude, canEdit, canAssign, canCancel, canChangeStatus, canReopen, canTerminalEdit };
   }, [user]);
 
   const getValidAssignees = useCallback((item: TaskItem): User[] => {
