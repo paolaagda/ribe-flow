@@ -16,6 +16,7 @@ import TaskRulesBlock from '@/components/settings/TaskRulesBlock';
 import NotificationsBlock from '@/components/settings/NotificationsBlock';
 import StatusRulesBlock from '@/components/settings/StatusRulesBlock';
 import SlaRulesBlock from '@/components/settings/SlaRulesBlock';
+import FieldRulesBlock from '@/components/settings/FieldRulesBlock';
 import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
 import ProtectedRulesInfo from '@/components/settings/ProtectedRulesInfo';
 import RulesAuditLog from '@/components/settings/RulesAuditLog';
@@ -232,10 +233,13 @@ export default function RulesPermissionsTab() {
       {/* Bloco 6 — SLA, Alertas e Criticidade */}
       <SlaRulesBlock />
 
-      {/* Bloco 7 — Documentação de regras protegidas */}
+      {/* Bloco 7 — Campos Obrigatórios e Validações */}
+      <FieldRulesBlock />
+
+      {/* Bloco 8 — Documentação de regras protegidas */}
       <ProtectedRulesInfo />
 
-      {/* Bloco 8 — Histórico de alterações */}
+      {/* Bloco 9 — Histórico de alterações */}
       <RulesAuditLog />
     </div>
   );
