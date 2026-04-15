@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import {
   Calendar, User as UserIcon, Briefcase, FileText, Link2,
-  CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle, Star,
+  CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle, Star, RotateCcw,
 } from 'lucide-react';
 import { isTaskPriority } from '@/hooks/useTasks';
 import {
@@ -107,14 +107,16 @@ interface TaskDetailModalProps {
   onOpenChange: (open: boolean) => void;
   onConclude: (visitId: string, commentId: string) => void;
   onCancel: (visitId: string, commentId: string) => void;
+  onReopen?: (visitId: string, commentId: string) => void;
   permissions: TaskPermissions;
   validAssignees: User[];
 }
 
 export default function TaskDetailModal({
-  item, partner, open, onOpenChange, onConclude, onCancel, permissions, validAssignees,
+  item, partner, open, onOpenChange, onConclude, onCancel, onReopen, permissions, validAssignees,
 }: TaskDetailModalProps) {
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [confirmReopen, setConfirmReopen] = useState(false);
   const history = useMemo(() => item ? buildHistory(item) : [], [item]);
 
   if (!item) return null;
@@ -140,6 +142,13 @@ export default function TaskDetailModal({
   const handleConfirmCancel = () => {
     onCancel(item.visit.id, item.task.id);
     setConfirmCancel(false);
+  };
+
+  const handleConfirmReopen = () => {
+    onReopen?.(item.visit.id, item.task.id);
+    setConfirmReopen(false);
+    toast.success('Tarefa reaberta');
+    onOpenChange(false);
   };
 
   return (
