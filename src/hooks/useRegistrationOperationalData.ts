@@ -94,17 +94,19 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
 
     const pendingDocsCount = getDocPendingCount(reg.partnerId, activeDocIds);
 
+    const slaConfig = getSlaRules();
     let criticality: RegistrationCriticality = 'baixa';
     const isTerminal = ['Concluído', 'Cancelado'].includes(reg.status);
     if (!isTerminal) {
-      if (reg.status === 'Em pausa' || daysSinceLastUpdate > 15) {
+      const stalledThreshold = slaConfig.immediateAttentionDays / 2; // half of attention threshold for high
+      if (reg.status === 'Em pausa' || (slaConfig.criticalityByStalledTime && daysSinceLastUpdate > stalledThreshold)) {
         criticality = 'alta';
-      } else if (daysSinceLastUpdate > 7) {
+      } else if (isStalledByContext(daysSinceLastUpdate, reg.handlingWith)) {
         criticality = 'média';
       }
     }
 
-    const isBlocked = !isTerminal && daysSinceLastUpdate > 15;
+    const isBlocked = !isTerminal && daysSinceLastUpdate > slaConfig.immediateAttentionDays / 2;
     const nextAction = deriveNextAction(reg, pendingDocsCount, daysSinceLastUpdate);
     const partner = getPartnerById(reg.partnerId);
     const currentResponsible = STAGE_OWNERS[reg.status] || reg.handlingWith;
