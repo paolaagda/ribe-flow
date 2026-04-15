@@ -6,7 +6,7 @@
 
 import { readFromStorage, writeToStorage, isDeepEqual, generateId } from './rules-persistence';
 
-export type RulesAuditModule = 'permissions' | 'visibility' | 'task_rules' | 'notifications' | 'status_rules';
+export type RulesAuditModule = 'permissions' | 'visibility' | 'task_rules' | 'notifications' | 'status_rules' | 'sla_rules';
 export type RulesAuditAction = 'update' | 'restore_defaults';
 
 export interface RulesAuditEvent {
@@ -70,6 +70,7 @@ export const MODULE_LABELS: Record<RulesAuditModule, string> = {
   task_rules: 'Regras de Tarefas',
   notifications: 'Notificações por Evento',
   status_rules: 'Regras de Status e Bloqueios',
+  sla_rules: 'SLA, Alertas e Criticidade',
 };
 
 export const ACTION_LABELS: Record<RulesAuditAction, string> = {

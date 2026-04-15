@@ -6,6 +6,7 @@ import { Registration } from '@/data/registrations';
 import { differenceInDays } from 'date-fns';
 import { AlertTriangle, UserCog, Users, Building2, ClipboardList } from 'lucide-react';
 import { SummaryCardData } from '@/components/cadastro/RegistrationOperationalSummary';
+import { getSlaRules } from '@/hooks/useSlaRules';
 
 export type RegistrationCriticality = 'alta' | 'média' | 'baixa';
 
@@ -32,6 +33,7 @@ const STAGE_OWNERS: Record<string, string> = {
 };
 
 function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastUpdate: number): string {
+  const sla = getSlaRules();
   if (reg.status === 'Concluído') return 'Cadastro finalizado';
   if (reg.status === 'Cancelado') return 'Processo encerrado';
   if (reg.status === 'Em pausa') return 'Reativar cadastro';
@@ -42,7 +44,7 @@ function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastU
     return 'Enviar documentação ao banco';
   }
   if (reg.status === 'Em análise') {
-    if (daysSinceLastUpdate > 7) return 'Cobrar retorno do banco';
+    if (daysSinceLastUpdate > sla.slaBanco) return 'Cobrar retorno do banco';
     return 'Aguardar retorno do banco';
   }
   if (reg.status === 'Colhendo assinaturas') return 'Obter assinaturas pendentes';
@@ -52,18 +54,24 @@ function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastU
 
 /** Checks if a registration qualifies for "Atenção Imediata" */
 function isImmediateAttention(reg: Registration, daysInProcess: number, pendingDocsCount: number): boolean {
-  // Condition 1: created 30+ days ago and not completed
-  if (daysInProcess >= 30) return true;
-  // Condition 2: has pending documents
-  if (pendingDocsCount > 0) return true;
-  // Condition 3: manual critical flag
-  if (reg.isCritical) return true;
+  const sla = getSlaRules();
+  if (daysInProcess >= sla.immediateAttentionDays) return true;
+  if (sla.immediateAttentionPendingDocs && pendingDocsCount > 0) return true;
+  if (sla.immediateAttentionManualCritical && reg.isCritical) return true;
   return false;
 }
 
-/** Checks if a registration is stalled (>7 days since last update) */
-function isStalledOver7(daysSinceLastUpdate: number): boolean {
-  return daysSinceLastUpdate > 7;
+/** Checks if a registration is stalled based on SLA context threshold */
+function isStalledByContext(daysSinceLastUpdate: number, context: string): boolean {
+  const sla = getSlaRules();
+  const contextMap: Record<string, number> = {
+    'Comercial': sla.slaComercial,
+    'Parceiro': sla.slaParceiro,
+    'Banco': sla.slaBanco,
+    'Cadastro': sla.slaCadastro,
+  };
+  const threshold = contextMap[context] ?? sla.slaComercial;
+  return daysSinceLastUpdate > threshold;
 }
 
 export function useRegistrationOperationalData(registrations: Registration[]) {
@@ -86,17 +94,19 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
 
     const pendingDocsCount = getDocPendingCount(reg.partnerId, activeDocIds);
 
+    const slaConfig = getSlaRules();
     let criticality: RegistrationCriticality = 'baixa';
     const isTerminal = ['Concluído', 'Cancelado'].includes(reg.status);
     if (!isTerminal) {
-      if (reg.status === 'Em pausa' || daysSinceLastUpdate > 15) {
+      const stalledThreshold = slaConfig.immediateAttentionDays / 2; // half of attention threshold for high
+      if (reg.status === 'Em pausa' || (slaConfig.criticalityByStalledTime && daysSinceLastUpdate > stalledThreshold)) {
         criticality = 'alta';
-      } else if (daysSinceLastUpdate > 7) {
+      } else if (isStalledByContext(daysSinceLastUpdate, reg.handlingWith)) {
         criticality = 'média';
       }
     }
 
-    const isBlocked = !isTerminal && daysSinceLastUpdate > 15;
+    const isBlocked = !isTerminal && daysSinceLastUpdate > slaConfig.immediateAttentionDays / 2;
     const nextAction = deriveNextAction(reg, pendingDocsCount, daysSinceLastUpdate);
     const partner = getPartnerById(reg.partnerId);
     const currentResponsible = STAGE_OWNERS[reg.status] || reg.handlingWith;
@@ -132,20 +142,19 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
         immediateAttention++;
       }
 
-      if (isStalledOver7(data.daysSinceLastUpdate)) {
-        if (reg.handlingWith === 'Comercial') comercialStalled++;
-        if (reg.handlingWith === 'Parceiro') parceiroStalled++;
-        if (reg.handlingWith === 'Banco') bancoStalled++;
-        if (reg.handlingWith === 'Cadastro') cadastroStalled++;
-      }
+      if (reg.handlingWith === 'Comercial' && isStalledByContext(data.daysSinceLastUpdate, 'Comercial')) comercialStalled++;
+      if (reg.handlingWith === 'Parceiro' && isStalledByContext(data.daysSinceLastUpdate, 'Parceiro')) parceiroStalled++;
+      if (reg.handlingWith === 'Banco' && isStalledByContext(data.daysSinceLastUpdate, 'Banco')) bancoStalled++;
+      if (reg.handlingWith === 'Cadastro' && isStalledByContext(data.daysSinceLastUpdate, 'Cadastro')) cadastroStalled++;
     });
 
+    const sla = getSlaRules();
     return [
       {
         key: 'immediate',
         label: 'Atenção Imediata',
         subtitle: 'Prazo, documentos ou alerta crítico',
-        tooltip: 'Cadastros com prazo acima de 30 dias sem conclusão, documentos pendentes ou sinalização crítica manual.',
+        tooltip: `Cadastros sem movimentação há ${sla.immediateAttentionDays}+ dias, documentos pendentes ou sinalização crítica.`,
         value: immediateAttention,
         icon: AlertTriangle,
         color: 'text-destructive',
@@ -153,36 +162,36 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
       },
       {
         key: 'comercial_stalled',
-        label: 'Comercial > 7 dias',
+        label: `Comercial > ${sla.slaComercial} dias`,
         subtitle: 'Tratando com Comercial',
-        tooltip: 'Contratos parados há mais de 7 dias com responsabilidade do Comercial.',
+        tooltip: `Contratos parados há mais de ${sla.slaComercial} dias com responsabilidade do Comercial.`,
         value: comercialStalled,
         icon: UserCog,
         color: 'text-warning',
       },
       {
         key: 'parceiro_stalled',
-        label: 'Parceiro > 7 dias',
+        label: `Parceiro > ${sla.slaParceiro} dias`,
         subtitle: 'Aguardando Parceiro',
-        tooltip: 'Contratos parados há mais de 7 dias aguardando ação do Parceiro.',
+        tooltip: `Contratos parados há mais de ${sla.slaParceiro} dias aguardando ação do Parceiro.`,
         value: parceiroStalled,
         icon: Users,
         color: 'text-info',
       },
       {
         key: 'banco_stalled',
-        label: 'Banco > 7 dias',
+        label: `Banco > ${sla.slaBanco} dias`,
         subtitle: 'Aguardando Banco',
-        tooltip: 'Contratos parados há mais de 7 dias aguardando tratativa com o Banco.',
+        tooltip: `Contratos parados há mais de ${sla.slaBanco} dias aguardando tratativa com o Banco.`,
         value: bancoStalled,
         icon: Building2,
         color: 'text-primary',
       },
       {
         key: 'cadastro_stalled',
-        label: 'Cadastro > 7 dias',
+        label: `Cadastro > ${sla.slaCadastro} dias`,
         subtitle: 'Tratando com Cadastro',
-        tooltip: 'Contratos parados há mais de 7 dias com pendência no time de Cadastro.',
+        tooltip: `Contratos parados há mais de ${sla.slaCadastro} dias com pendência no time de Cadastro.`,
         value: cadastroStalled,
         icon: ClipboardList,
         color: 'text-violet-500',
@@ -201,13 +210,13 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
         case 'immediate':
           return isImmediateAttention(reg, data.daysInProcess, data.pendingDocsCount);
         case 'comercial_stalled':
-          return reg.handlingWith === 'Comercial' && isStalledOver7(data.daysSinceLastUpdate);
+          return reg.handlingWith === 'Comercial' && isStalledByContext(data.daysSinceLastUpdate, 'Comercial');
         case 'parceiro_stalled':
-          return reg.handlingWith === 'Parceiro' && isStalledOver7(data.daysSinceLastUpdate);
+          return reg.handlingWith === 'Parceiro' && isStalledByContext(data.daysSinceLastUpdate, 'Parceiro');
         case 'banco_stalled':
-          return reg.handlingWith === 'Banco' && isStalledOver7(data.daysSinceLastUpdate);
+          return reg.handlingWith === 'Banco' && isStalledByContext(data.daysSinceLastUpdate, 'Banco');
         case 'cadastro_stalled':
-          return reg.handlingWith === 'Cadastro' && isStalledOver7(data.daysSinceLastUpdate);
+          return reg.handlingWith === 'Cadastro' && isStalledByContext(data.daysSinceLastUpdate, 'Cadastro');
         default:
           return true;
       }

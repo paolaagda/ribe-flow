@@ -6,6 +6,7 @@ import { useInfoData } from '@/hooks/useInfoData';
 import { useDocumentValidation } from '@/hooks/useDocumentValidation';
 import { Partner } from '@/data/mock-data';
 import { differenceInDays, parseISO } from 'date-fns';
+import { getSlaRules } from '@/hooks/useSlaRules';
 
 export type Criticality = 'alta' | 'média' | 'baixa';
 
@@ -57,9 +58,12 @@ export function usePartnerOperationalData(visiblePartners: Partner[]) {
     const lastVisitDate = partnerVisits[0]?.date || null;
     const daysSinceLastVisit = lastVisitDate ? differenceInDays(today, parseISO(lastVisitDate)) : null;
 
-    // Criticality
+    // Criticality — driven by SLA rules config
+    const sla = getSlaRules();
     let criticality: Criticality = 'baixa';
-    if (overdueTasks.length > 0 || (daysSinceLastVisit !== null && daysSinceLastVisit > 30) || (totalDocsCount > 0 && pendingDocs > totalDocsCount * 0.5)) {
+    const hasHighDocRatio = sla.criticalityByPendingDoc && totalDocsCount > 0 && pendingDocs > totalDocsCount * 0.5;
+    const hasStalledTime = sla.criticalityByStalledTime && daysSinceLastVisit !== null && daysSinceLastVisit > sla.immediateAttentionDays;
+    if (overdueTasks.length > 0 || hasStalledTime || hasHighDocRatio) {
       criticality = 'alta';
     } else if (pendingTasks.length > 0 || (daysSinceLastVisit !== null && daysSinceLastVisit > 15) || activeRegs.length > 0) {
       criticality = 'média';
