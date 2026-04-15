@@ -21,7 +21,7 @@ import { User, UserRole, CompanyCargo, cargoLabels, cargoColors, allCargos } fro
 import { useUsersData } from '@/hooks/useUsersData';
 import { usePermission } from '@/hooks/usePermission';
 import { Team, initialTeams } from '@/data/teams';
-import { Edit, Lock, Trash2, RefreshCw, Search, Shield, Eye, EyeOff, Pencil, Save, Plus, Users2, ChevronRight, Camera } from 'lucide-react';
+import { Edit, Lock, Trash2, RefreshCw, Search, Shield, Plus, Users2, ChevronRight, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 
