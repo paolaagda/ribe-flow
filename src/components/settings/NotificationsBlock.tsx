@@ -5,6 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useNotificationRules, NotificationRules, DEFAULT_NOTIFICATION_RULES } from '@/hooks/useNotificationRules';
 import { Bell, Save, RefreshCw } from 'lucide-react';
+import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
 
 interface EventToggle {
   key: keyof NotificationRules;
@@ -87,6 +88,7 @@ export default function NotificationsBlock() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <ConfigurabilityBadge level="configurable" />
             <Button variant="outline" size="sm" className="text-xs" onClick={handleReset}>
               <RefreshCw className="h-3 w-3 mr-1" /> Restaurar padrão
             </Button>

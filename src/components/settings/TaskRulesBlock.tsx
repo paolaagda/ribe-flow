@@ -10,6 +10,7 @@ import { useTaskRules, DEFAULT_TASK_RULES, TaskCategory } from '@/hooks/useTaskR
 import { CompanyCargo, cargoLabels, cargoColors, allCargos } from '@/data/mock-data';
 import { ListChecks, Save, RefreshCw, Clock, Zap, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
 
 const CATEGORY_LABELS: Record<TaskCategory, string> = {
   document: 'Documentos',
@@ -27,6 +28,22 @@ export default function TaskRulesBlock() {
       updateConfig({ cadastroDeadlineDays: num });
       setHasChanges(true);
     }
+  };
+
+  const handleSaveWithValidation = () => {
+    // Guard: deadline must be 1-30
+    if (config.cadastroDeadlineDays < 1 || config.cadastroDeadlineDays > 30) {
+      toast({ title: 'Prazo inválido', description: 'O prazo deve estar entre 1 e 30 dias úteis.', variant: 'destructive' });
+      return;
+    }
+    // Guard: globalCancelRoles must only contain valid cargos
+    const invalidRoles = config.globalCancelRoles.filter(r => !allCargos.includes(r));
+    if (invalidRoles.length > 0) {
+      toast({ title: 'Perfis inválidos', description: 'A lista de perfis com cancelamento global contém valores inválidos.', variant: 'destructive' });
+      return;
+    }
+    setHasChanges(false);
+    toast({ title: 'Regras de tarefas salvas com sucesso!' });
   };
 
   const toggleCategory = (cat: TaskCategory) => {
@@ -47,10 +64,7 @@ export default function TaskRulesBlock() {
     setHasChanges(true);
   };
 
-  const handleSave = () => {
-    setHasChanges(false);
-    toast({ title: 'Regras de tarefas salvas com sucesso!' });
-  };
+  // handleSave replaced by handleSaveWithValidation above
 
   const handleReset = () => {
     resetToDefaults();
@@ -72,10 +86,11 @@ export default function TaskRulesBlock() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <ConfigurabilityBadge level="partial" />
             <Button variant="outline" size="sm" className="text-xs" onClick={handleReset}>
               <RefreshCw className="h-3 w-3 mr-1" /> Restaurar padrão
             </Button>
-            <Button onClick={handleSave} disabled={!hasChanges} size="sm">
+            <Button onClick={handleSaveWithValidation} disabled={!hasChanges} size="sm">
               <Save className="h-4 w-4 mr-1" /> Salvar
             </Button>
           </div>

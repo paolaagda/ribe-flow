@@ -14,6 +14,28 @@ import { Eye, EyeOff, Pencil, Save, RefreshCw, Shield, Globe, Lock } from 'lucid
 import { cn } from '@/lib/utils';
 import TaskRulesBlock from '@/components/settings/TaskRulesBlock';
 import NotificationsBlock from '@/components/settings/NotificationsBlock';
+import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
+import ProtectedRulesInfo from '@/components/settings/ProtectedRulesInfo';
+
+/** Keys that Diretor MUST keep at least 'read' to avoid admin lockout */
+const PROTECTED_DIRETOR_KEYS = ['settings.view'];
+
+function validatePermissionsSafety(
+  perms: Record<CompanyCargo, Record<string, PermissionLevel>>,
+): string | null {
+  // Diretor must keep settings.view
+  for (const key of PROTECTED_DIRETOR_KEYS) {
+    if (perms.diretor[key] === 'none') {
+      return `O perfil Diretor não pode perder acesso a "${key.replace('.', ' > ')}". Isso bloquearia o acesso administrativo ao sistema.`;
+    }
+  }
+  // At least one role must have settings.view
+  const hasAdmin = allCargos.some(c => perms[c]?.['settings.view'] !== 'none');
+  if (!hasAdmin) {
+    return 'Pelo menos um perfil precisa manter acesso a Configurações para administrar o sistema.';
+  }
+  return null;
+}
 
 export default function RulesPermissionsTab() {
   const { toast } = useToast();
@@ -33,6 +55,11 @@ export default function RulesPermissionsTab() {
   };
 
   const handleSavePermissions = () => {
+    const error = validatePermissionsSafety(permissions);
+    if (error) {
+      toast({ title: 'Configuração bloqueada', description: error, variant: 'destructive' });
+      return;
+    }
     setHasChanges(false);
     toast({ title: 'Permissões salvas com sucesso!' });
   };
@@ -67,9 +94,12 @@ export default function RulesPermissionsTab() {
                 </CardDescription>
               </div>
             </div>
-            <Button onClick={handleSavePermissions} disabled={!hasChanges} size="sm">
-              <Save className="h-4 w-4 mr-1" /> Salvar
-            </Button>
+            <div className="flex items-center gap-2">
+              <ConfigurabilityBadge level="partial" />
+              <Button onClick={handleSavePermissions} disabled={!hasChanges} size="sm">
+                <Save className="h-4 w-4 mr-1" /> Salvar
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="pt-0">
@@ -170,6 +200,9 @@ export default function RulesPermissionsTab() {
 
       {/* Bloco 4 — Notificações */}
       <NotificationsBlock />
+
+      {/* Bloco 5 — Documentação de regras protegidas */}
+      <ProtectedRulesInfo />
     </div>
   );
 }
@@ -226,6 +259,7 @@ function VisibilityBlock() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <ConfigurabilityBadge level="configurable" />
             <Button variant="outline" size="sm" className="text-xs" onClick={handleReset}>
               <RefreshCw className="h-3 w-3 mr-1" /> Restaurar padrão
             </Button>
