@@ -312,8 +312,18 @@ export default function TaskDetailModal({
                   Cancelar
                 </Button>
               )}
+              {permissions.canReopen && (
+                <Button
+                  variant="outline" size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={() => setConfirmReopen(true)}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reabrir
+                </Button>
+              )}
               {/* When no actions available */}
-              {!permissions.canConclude && !permissions.canEdit && !permissions.canAssign && !permissions.canCancel && (
+              {!permissions.canConclude && !permissions.canEdit && !permissions.canAssign && !permissions.canCancel && !permissions.canReopen && (
                 <p className="text-xs text-muted-foreground italic">Nenhuma ação disponível para esta tarefa.</p>
               )}
             </div>
@@ -321,7 +331,7 @@ export default function TaskDetailModal({
         </DialogContent>
       </Dialog>
 
-      {/* Cancel confirmation dialog only */}
+      {/* Cancel confirmation dialog */}
       <AlertDialog open={confirmCancel} onOpenChange={setConfirmCancel}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -334,6 +344,24 @@ export default function TaskDetailModal({
             <AlertDialogCancel>Voltar</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Cancelar tarefa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reopen confirmation dialog */}
+      <AlertDialog open={confirmReopen} onOpenChange={setConfirmReopen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reabrir tarefa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A tarefa voltará ao estado pendente e poderá ser trabalhada novamente. A ação ficará registrada no histórico.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmReopen}>
+              Reabrir tarefa
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
