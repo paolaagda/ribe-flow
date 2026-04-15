@@ -6,7 +6,7 @@
 
 import { readFromStorage, writeToStorage, isDeepEqual, generateId } from './rules-persistence';
 
-export type RulesAuditModule = 'permissions' | 'visibility' | 'task_rules' | 'notifications';
+export type RulesAuditModule = 'permissions' | 'visibility' | 'task_rules' | 'notifications' | 'status_rules';
 export type RulesAuditAction = 'update' | 'restore_defaults';
 
 export interface RulesAuditEvent {
