@@ -69,6 +69,7 @@ export const MODULE_LABELS: Record<RulesAuditModule, string> = {
   visibility: 'Visibilidade de Dados',
   task_rules: 'Regras de Tarefas',
   notifications: 'Notificações por Evento',
+  status_rules: 'Regras de Status e Bloqueios',
 };
 
 export const ACTION_LABELS: Record<RulesAuditAction, string> = {
