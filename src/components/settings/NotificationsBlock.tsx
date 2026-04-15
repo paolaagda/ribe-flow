@@ -6,6 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useNotificationRules, NotificationRules, DEFAULT_NOTIFICATION_RULES } from '@/hooks/useNotificationRules';
 import { Bell, Save, RefreshCw } from 'lucide-react';
 import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
+import { logRulesAuditEvent } from '@/lib/rules-audit';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface EventToggle {
   key: keyof NotificationRules;
@@ -48,8 +50,10 @@ const EVENTS: EventToggle[] = [
 
 export default function NotificationsBlock() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const { rules, updateRule, resetToDefaults } = useNotificationRules();
   const [local, setLocal] = useState<NotificationRules>({ ...rules });
+  const [savedSnapshot, setSavedSnapshot] = useState<NotificationRules>({ ...rules });
   const [hasChanges, setHasChanges] = useState(false);
 
   const handleToggle = (key: keyof NotificationRules) => {
@@ -58,18 +62,40 @@ export default function NotificationsBlock() {
   };
 
   const handleSave = () => {
+    const changedKeys = Object.keys(local).filter(k => local[k as keyof NotificationRules] !== savedSnapshot[k as keyof NotificationRules]);
     Object.entries(local).forEach(([key, value]) => {
       updateRule(key as keyof NotificationRules, value);
     });
+    logRulesAuditEvent({
+      userId: user?.id || 'u1',
+      userName: user?.name || 'Usuário',
+      module: 'notifications',
+      action: 'update',
+      summary: changedKeys.length > 0 ? `Notificações por evento atualizadas (${changedKeys.length} ${changedKeys.length === 1 ? 'evento' : 'eventos'})` : 'Notificações salvas sem alterações',
+      snapshotBefore: savedSnapshot,
+      snapshotAfter: { ...local },
+    });
+    setSavedSnapshot({ ...local });
     setHasChanges(false);
     toast({ title: 'Regras de notificação salvas com sucesso!' });
   };
 
   const handleReset = () => {
+    const before = { ...local };
     setLocal({ ...DEFAULT_NOTIFICATION_RULES });
     Object.entries(DEFAULT_NOTIFICATION_RULES).forEach(([key, value]) => {
       updateRule(key as keyof NotificationRules, value);
     });
+    logRulesAuditEvent({
+      userId: user?.id || 'u1',
+      userName: user?.name || 'Usuário',
+      module: 'notifications',
+      action: 'restore_defaults',
+      summary: 'Notificações restauradas ao padrão',
+      snapshotBefore: before,
+      snapshotAfter: { ...DEFAULT_NOTIFICATION_RULES },
+    });
+    setSavedSnapshot({ ...DEFAULT_NOTIFICATION_RULES });
     setHasChanges(false);
     toast({ title: 'Notificações restauradas ao padrão' });
   };
