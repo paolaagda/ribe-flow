@@ -279,6 +279,25 @@ export function useTasks() {
     }));
   }, [setVisits, user]);
 
+  /** Update the administrative note on a terminal task (limited edit) */
+  const updateTaskAdminNote = useCallback((visitId: string, commentId: string, note: string) => {
+    setVisits(prev => prev.map(v => {
+      if (v.id !== visitId) return v;
+      return {
+        ...v,
+        comments: v.comments.map(c => {
+          if (c.id !== commentId) return c;
+          const evt = makeHistoryEvent('terminal_edit', `Nota administrativa ${c.taskAdminNote ? 'editada' : 'adicionada'} por ${user?.name || 'Usuário'}`, user?.id);
+          return {
+            ...c,
+            taskAdminNote: note.trim() || undefined,
+            taskHistory: [...(c.taskHistory || []), evt],
+          };
+        }),
+      };
+    }));
+  }, [setVisits, user]);
+
   const getDaysPending = useCallback((createdAt: string) => {
     return Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
   }, []);
