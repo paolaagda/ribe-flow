@@ -394,6 +394,7 @@ export default function GestaoTarefasPage() {
           onConclude={handleConcludeFromModal}
           onCancel={handleCancel}
           onReopen={reopenTask}
+          onAdminNote={updateTaskAdminNote}
           permissions={selectedPermissions}
           validAssignees={selectedAssignees}
         />
