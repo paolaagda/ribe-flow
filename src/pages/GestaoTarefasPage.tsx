@@ -129,7 +129,7 @@ function sortTasks(tasks: TaskItem[]): TaskItem[] {
 
 /* ══════════════════════════════════════════════════════════ */
 export default function GestaoTarefasPage() {
-  const { allTasks, toggleTask } = useTasks();
+  const { allTasks, toggleTask, reopenTask } = useTasks();
   const { user } = useAuth();
   const { getPartnerById } = usePartners();
   const { setVisits } = useVisits();
@@ -393,6 +393,7 @@ export default function GestaoTarefasPage() {
           onOpenChange={(open) => { setShowDetail(open); if (!open) setSelectedTask(null); }}
           onConclude={handleConcludeFromModal}
           onCancel={handleCancel}
+          onReopen={reopenTask}
           permissions={selectedPermissions}
           validAssignees={selectedAssignees}
         />
