@@ -4,6 +4,7 @@ import { usePartners } from '@/hooks/usePartners';
 import { useTaskRules } from '@/hooks/useTaskRules';
 import { TaskItem } from '@/hooks/useTasks';
 import { mockUsers, User, CompanyCargo } from '@/data/mock-data';
+import { getStatusRules } from '@/hooks/useStatusRules';
 
 export interface TaskPermissions {
   canConclude: boolean;
@@ -27,6 +28,8 @@ function getContextResponsible(item: TaskItem): string {
 }
 
 function isTaskTerminal(item: TaskItem): boolean {
+  const statusRules = getStatusRules();
+  if (!statusRules.blockEditOnTerminalTask) return false;
   return !!item.task.taskCompleted || item.task.taskDocStatus === 'validated';
 }
 
