@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageTransition from '@/components/PageTransition';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePermission } from '@/hooks/usePermission';
-import { ShieldOff, Users, Trophy, Building2, Database, Store, ScrollText, Gauge } from 'lucide-react';
+import { ShieldOff, Users, Trophy, Building2, Database, Store, ScrollText, Gauge, ShieldCheck } from 'lucide-react';
 import UsersTab from '@/components/settings/UsersTab';
 import CampaignsTab from '@/components/settings/CampaignsTab';
 import PartnersTab from '@/components/settings/PartnersTab';
@@ -10,10 +10,11 @@ import SystemDataTab from '@/components/settings/SystemDataTab';
 import StoresTab from '@/components/settings/StoresTab';
 import LogsTab from '@/components/settings/LogsTab';
 import ClassificationTab from '@/components/settings/ClassificationTab';
+import RulesPermissionsTab from '@/components/settings/RulesPermissionsTab';
 import PageHeader from '@/components/shared/PageHeader';
 
 export default function ConfiguracoesPage() {
-  const { canRead } = usePermission();
+  const { canRead, canWrite } = usePermission();
 
   if (!canRead('settings.view')) {
     return (
@@ -30,10 +31,15 @@ export default function ConfiguracoesPage() {
       <PageHeader title="Configurações" description="Centro administrativo do sistema" />
 
       <Tabs defaultValue="usuarios">
-        <TabsList className="w-full justify-center">
+        <TabsList className="w-full justify-center flex-wrap">
           <TabsTrigger value="usuarios" className="gap-1.5">
             <Users className="h-3.5 w-3.5" /> Usuários
           </TabsTrigger>
+          {canWrite('users.permissions') && (
+            <TabsTrigger value="regras" className="gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5" /> Regras e Permissões
+            </TabsTrigger>
+          )}
           <TabsTrigger value="campanhas" className="gap-1.5">
             <Trophy className="h-3.5 w-3.5" /> Campanhas
           </TabsTrigger>
@@ -59,9 +65,18 @@ export default function ConfiguracoesPage() {
             <CardContent className="p-5 md:p-7">
               <UsersTab />
             </CardContent>
-
           </Card>
         </TabsContent>
+
+        {canWrite('users.permissions') && (
+          <TabsContent value="regras">
+            <Card>
+              <CardContent className="p-5 md:p-7">
+                <RulesPermissionsTab />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
         <TabsContent value="campanhas">
           <Card>
@@ -78,7 +93,6 @@ export default function ConfiguracoesPage() {
             </CardContent>
           </Card>
         </TabsContent>
-
 
         <TabsContent value="lojas">
           <Card>

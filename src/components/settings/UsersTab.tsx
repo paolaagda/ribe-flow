@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
@@ -20,10 +19,9 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useUserAvatars } from '@/hooks/useUserAvatars';
 import { User, UserRole, CompanyCargo, cargoLabels, cargoColors, allCargos } from '@/data/mock-data';
 import { useUsersData } from '@/hooks/useUsersData';
-import { PermissionLevel, defaultPermissions, groupedPermissions } from '@/data/permissions';
 import { usePermission } from '@/hooks/usePermission';
 import { Team, initialTeams } from '@/data/teams';
-import { Edit, Lock, Trash2, RefreshCw, Search, Shield, Eye, EyeOff, Pencil, Save, Plus, Users2, ChevronRight, Camera } from 'lucide-react';
+import { Edit, Lock, Trash2, RefreshCw, Search, Shield, Plus, Users2, ChevronRight, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 
@@ -36,11 +34,6 @@ export default function UsersTab() {
   const { users, setUsers } = useUsersData();
   const [editUser, setEditUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState({ name: '', email: '', role: '' as UserRole, bio: '' });
-  const [permissions, setPermissions] = useLocalStorage<Record<CompanyCargo, Record<string, PermissionLevel>>>(
-    'ribercred_permissions_v7',
-    defaultPermissions
-  );
-  const [hasChanges, setHasChanges] = useState(false);
   const [teams, setTeams] = useLocalStorage<Team[]>('ribercred_teams', initialTeams);
   const [showTeamForm, setShowTeamForm] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
@@ -55,7 +48,7 @@ export default function UsersTab() {
 
   const canManage = authUser && ['diretor', 'gerente'].includes(authUser.role);
   const { canRead, canWrite } = usePermission();
-  const grouped = groupedPermissions();
+  
 
   const filtered = search
     ? users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()))
@@ -94,27 +87,6 @@ export default function UsersTab() {
     toast({ title: `Senha de ${name} resetada (simulado)` });
   };
 
-  const handlePermissionChange = (cargo: CompanyCargo, key: string, level: PermissionLevel) => {
-    setPermissions(prev => ({
-      ...prev,
-      [cargo]: { ...prev[cargo], [key]: level },
-    }));
-    setHasChanges(true);
-  };
-
-  const handleSavePermissions = () => {
-    setHasChanges(false);
-    toast({ title: 'Permissões salvas com sucesso!' });
-  };
-
-  const handleResetPermissions = (cargo: CompanyCargo) => {
-    setPermissions(prev => ({
-      ...prev,
-      [cargo]: { ...defaultPermissions[cargo] },
-    }));
-    setHasChanges(true);
-    toast({ title: `Permissões de ${cargoLabels[cargo]} restauradas ao padrão` });
-  };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -171,7 +143,7 @@ export default function UsersTab() {
         <TabsList className="w-full justify-center">
           <TabsTrigger value="equipe">Colaboradores</TabsTrigger>
           {canRead('teams.view') && <TabsTrigger value="equipes">Equipes</TabsTrigger>}
-          {canWrite('users.permissions') && <TabsTrigger value="permissoes">Permissões</TabsTrigger>}
+          {/* Permissões migradas para aba "Regras e Permissões" */}
         </TabsList>
 
         {/* Tab Equipe */}
@@ -276,104 +248,7 @@ export default function UsersTab() {
           </div>
         </TabsContent>
 
-        {/* Tab Permissões */}
-        {canWrite('users.permissions') && (
-          <TabsContent value="permissoes" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Configure o nível de acesso de cada cargo em cada funcionalidade do sistema.</p>
-              <Button onClick={handleSavePermissions} disabled={!hasChanges} size="sm">
-                <Save className="h-4 w-4 mr-1" /> Salvar permissões
-              </Button>
-            </div>
-
-            <Accordion type="single" collapsible defaultValue="diretor" className="space-y-2">
-              {allCargos.map(r => (
-                <AccordionItem key={r} value={r} className="border rounded-lg px-4">
-                  <AccordionTrigger className="hover:no-underline">
-                    <div className="flex items-center gap-3">
-                      <Badge className={cn('text-xs capitalize', cargoColors[r])} variant="secondary">
-                        {cargoLabels[r]}
-                      </Badge>
-                      <span className="text-sm font-medium">{cargoLabels[r]}</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-end">
-                        <Button variant="outline" size="sm" className="text-xs" onClick={() => handleResetPermissions(r)}>
-                          <RefreshCw className="h-3 w-3 mr-1" /> Restaurar padrão
-                        </Button>
-                      </div>
-                      <div className="rounded-md border overflow-hidden">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="bg-muted/50">
-                              <TableHead className="w-[160px] text-xs">Módulo</TableHead>
-                              <TableHead className="text-xs">Permissão</TableHead>
-                              <TableHead className="w-[200px] text-xs text-right">Nível de acesso</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {Object.entries(grouped).map(([module, items]) =>
-                              items.map((item, idx) => (
-                                <TableRow key={item.key}>
-                                  {idx === 0 && (
-                                    <TableCell rowSpan={items.length} className="text-xs font-semibold align-top border-r bg-muted/30">
-                                      {module}
-                                    </TableCell>
-                                  )}
-                                  <TableCell className="text-xs py-2">{item.action}</TableCell>
-                                  <TableCell className="py-2">
-                                    <Select
-                                      value={permissions[r]?.[item.key] || 'none'}
-                                      onValueChange={(v) => handlePermissionChange(r, item.key, v as PermissionLevel)}
-                                    >
-                                      <SelectTrigger className="h-8 w-[48px] ml-auto flex items-center justify-center">
-                                        {(() => {
-                                          const level = permissions[r]?.[item.key] || 'none';
-                                          const icons: Record<PermissionLevel, React.ReactNode> = {
-                                            none: <EyeOff className="h-3.5 w-3.5 text-destructive" />,
-                                            read: <Eye className="h-3.5 w-3.5 text-warning" />,
-                                            write: <Pencil className="h-3.5 w-3.5 text-success" />,
-                                          };
-                                          return <span>{icons[level]}</span>;
-                                        })()}
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="none">
-                                          <div className="flex items-center gap-2">
-                                            <EyeOff className="h-3.5 w-3.5 text-destructive" />
-                                            <span>Sem acesso</span>
-                                          </div>
-                                        </SelectItem>
-                                        <SelectItem value="read">
-                                          <div className="flex items-center gap-2">
-                                            <Eye className="h-3.5 w-3.5 text-warning" />
-                                            <span>Somente leitura</span>
-                                          </div>
-                                        </SelectItem>
-                                        <SelectItem value="write">
-                                          <div className="flex items-center gap-2">
-                                            <Pencil className="h-3.5 w-3.5 text-success" />
-                                            <span>Leitura e edição</span>
-                                          </div>
-                                        </SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </TabsContent>
-        )}
+        {/* Permissões RBAC migradas para RulesPermissionsTab */}
 
         {/* Tab Equipes */}
         {canRead('teams.view') && (
