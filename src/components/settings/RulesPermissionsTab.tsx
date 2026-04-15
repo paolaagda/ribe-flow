@@ -231,7 +231,7 @@ export default function RulesPermissionsTab() {
       {/* Bloco 6 — Documentação de regras protegidas */}
       <ProtectedRulesInfo />
 
-      {/* Bloco 6 — Histórico de alterações */}
+      {/* Bloco 7 — Histórico de alterações */}
       <RulesAuditLog />
     </div>
   );
