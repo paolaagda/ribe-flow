@@ -16,6 +16,9 @@ import TaskRulesBlock from '@/components/settings/TaskRulesBlock';
 import NotificationsBlock from '@/components/settings/NotificationsBlock';
 import ConfigurabilityBadge from '@/components/settings/ConfigurabilityBadge';
 import ProtectedRulesInfo from '@/components/settings/ProtectedRulesInfo';
+import RulesAuditLog from '@/components/settings/RulesAuditLog';
+import { logRulesAuditEvent } from '@/lib/rules-audit';
+import { useAuth } from '@/contexts/AuthContext';
 
 /** Keys that Diretor MUST keep at least 'read' to avoid admin lockout */
 const PROTECTED_DIRETOR_KEYS = ['settings.view'];
@@ -39,10 +42,12 @@ function validatePermissionsSafety(
 
 export default function RulesPermissionsTab() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [permissions, setPermissions] = useLocalStorage<Record<CompanyCargo, Record<string, PermissionLevel>>>(
     'ribercred_permissions_v7',
     defaultPermissions
   );
+  const [savedSnapshot, setSavedSnapshot] = useState(() => JSON.parse(JSON.stringify(permissions)));
   const [hasChanges, setHasChanges] = useState(false);
   const grouped = groupedPermissions();
 
@@ -60,15 +65,34 @@ export default function RulesPermissionsTab() {
       toast({ title: 'Configuração bloqueada', description: error, variant: 'destructive' });
       return;
     }
+    logRulesAuditEvent({
+      userId: user?.id || 'u1',
+      userName: user?.name || 'Usuário',
+      module: 'permissions',
+      action: 'update',
+      summary: 'Permissões por perfil atualizadas',
+      snapshotBefore: savedSnapshot,
+      snapshotAfter: permissions,
+    });
+    setSavedSnapshot(JSON.parse(JSON.stringify(permissions)));
     setHasChanges(false);
     toast({ title: 'Permissões salvas com sucesso!' });
   };
 
   const handleResetPermissions = (cargo: CompanyCargo) => {
-    setPermissions(prev => ({
-      ...prev,
-      [cargo]: { ...defaultPermissions[cargo] },
-    }));
+    const before = JSON.parse(JSON.stringify(permissions));
+    const next = { ...permissions, [cargo]: { ...defaultPermissions[cargo] } };
+    setPermissions(next);
+    logRulesAuditEvent({
+      userId: user?.id || 'u1',
+      userName: user?.name || 'Usuário',
+      module: 'permissions',
+      action: 'restore_defaults',
+      summary: `Permissões de ${cargoLabels[cargo]} restauradas ao padrão`,
+      snapshotBefore: before,
+      snapshotAfter: next,
+    });
+    setSavedSnapshot(JSON.parse(JSON.stringify(next)));
     setHasChanges(true);
     toast({ title: `Permissões de ${cargoLabels[cargo]} restauradas ao padrão` });
   };
@@ -203,6 +227,9 @@ export default function RulesPermissionsTab() {
 
       {/* Bloco 5 — Documentação de regras protegidas */}
       <ProtectedRulesInfo />
+
+      {/* Bloco 6 — Histórico de alterações */}
+      <RulesAuditLog />
     </div>
   );
 }
