@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -104,14 +104,15 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
   const canEditFields = canWrite('agenda.edit') && isOwnerOrManager && !isStatusFinal;
   const canEditVisit = canWrite('agenda.edit') && isOwnerOrManager && !isStatusLocked;
 
-  const lastVisitInfo = partner && visit.type === 'visita' ? (() => {
+  const lastVisitInfo = useMemo(() => {
+    if (!partner || visit.type !== 'visita') return null;
     const lastConcluded = visits
       .filter(v => v.partnerId === visit.partnerId && v.status === 'Concluída' && v.id !== visit.id)
       .sort((a, b) => b.date.localeCompare(a.date))[0];
     if (!lastConcluded) return 'Primeira visita';
     const days = Math.floor((Date.now() - new Date(lastConcluded.date).getTime()) / 86400000);
     return `Última visita: ${days}d atrás`;
-  })() : null;
+  }, [partner, visit.type, visit.partnerId, visit.id, visits]);
 
   const statusBadgeMap: Record<string, { label: string; className: string }> = {
     pending: { label: 'Pendente', className: 'bg-warning/10 text-warning border-warning/20' },

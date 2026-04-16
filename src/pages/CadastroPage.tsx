@@ -39,7 +39,9 @@ import { ptBR } from 'date-fns/locale';
 import { usePagination } from '@/hooks/usePagination';
 import PaginationControls from '@/components/shared/PaginationControls';
 
-const statusKpiConfig: Record<string, { icon: any; color: string }> = {
+import { type LucideIcon } from 'lucide-react';
+
+const statusKpiConfig: Record<string, { icon: LucideIcon; color: string }> = {
   'Não iniciado': { icon: FileText, color: 'text-muted-foreground' },
   'Colhendo documentação': { icon: Clock, color: 'text-info' },
   'Em análise': { icon: AlertCircle, color: 'text-warning' },

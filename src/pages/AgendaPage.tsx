@@ -7,21 +7,18 @@ import PageTransition from "@/components/PageTransition";
 import HeroSection from "@/components/home/HeroSection";
 import AnimatedKpiCard from "@/components/shared/AnimatedKpiCard";
 import { CalendarDays, CheckCircle, ListTodo } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import {
-  mockUsers,
   getUserById,
   Visit,
   VisitStatus,
   VisitPeriod,
   VisitComment,
   statusBgClasses,
-  getPartnerById as getPartnerByIdGlobal,
-  allCargos,
   cargoLabels,
 } from "@/data/mock-data";
 import { useSystemData } from "@/hooks/useSystemData";
@@ -37,16 +34,11 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
-  CalendarIcon,
-  Check,
   X,
-  DollarSign,
-  Clock as ClockIcon,
   Handshake,
   UserPlus,
   CalendarRange,
   Filter,
-  Crown,
 } from "lucide-react";
 import {
   format,
@@ -276,7 +268,7 @@ export default function AgendaPage() {
 
   const visibleVisits = useMemo(() => filterVisits(visits), [visits, filterVisits]);
 
-  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const todayStr = useMemo(() => format(new Date(), "yyyy-MM-dd"), []);
 
   const filteredVisits = useMemo(() => {
     return visibleVisits.filter((v) => {
