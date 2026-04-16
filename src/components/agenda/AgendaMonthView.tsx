@@ -1,6 +1,5 @@
 import { format, isSameDay, isSameMonth } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { statusBgClasses } from "@/data/mock-data";
