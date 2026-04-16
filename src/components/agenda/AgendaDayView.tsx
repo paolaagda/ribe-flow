@@ -2,12 +2,11 @@ import { format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { statusBgClasses, getUserById } from "@/data/mock-data";
-import { Handshake, UserPlus, Clock as ClockIcon, Crown, FileText, ListTodo } from "lucide-react";
+import { Handshake, UserPlus, Clock as ClockIcon, FileText, ListTodo } from "lucide-react";
 import { formatCentavos } from "@/lib/currency";
+import VisitParticipants from "./VisitParticipants";
 import type { DayViewProps } from "./AgendaCalendarTypes";
 
 export default function AgendaDayView({
@@ -83,35 +82,12 @@ export default function AgendaDayView({
                           })()}
                         </div>
                       </div>
-                      {(() => {
-                        const participants = getParticipants(v);
-                        return (
-                          <TooltipProvider delayDuration={200}>
-                            <div className="flex -space-x-1.5 shrink-0">
-                              {participants.slice(0, 4).map((p) => (
-                                <Tooltip key={p.id}>
-                                  <TooltipTrigger asChild>
-                                    <div className="relative">
-                                      {p.id === rankingLeaderId && (
-                                        <Crown className="h-3 w-3 text-yellow-500 fill-yellow-500 absolute -top-2 left-1/2 -translate-x-1/2 z-10" />
-                                      )}
-                                      <Avatar className="h-6 w-6 border-2 border-background">
-                                        <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">{p.name.charAt(0)}</AvatarFallback>
-                                      </Avatar>
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
-                                </Tooltip>
-                              ))}
-                              {participants.length > 4 && (
-                                <Avatar className="h-6 w-6 border-2 border-background">
-                                  <AvatarFallback className="text-[9px] bg-muted text-muted-foreground">+{participants.length - 4}</AvatarFallback>
-                                </Avatar>
-                              )}
-                            </div>
-                          </TooltipProvider>
-                        );
-                      })()}
+                      <VisitParticipants
+                        participants={getParticipants(v)}
+                        variant="full"
+                        maxVisible={4}
+                        rankingLeaderId={rankingLeaderId}
+                      />
                       <div className="flex items-center gap-1.5">
                         {hasActiveRegistration(v.partnerId) && (
                           <Badge variant="outline" className="text-[9px] bg-info/10 text-info border-info/20 gap-0.5">

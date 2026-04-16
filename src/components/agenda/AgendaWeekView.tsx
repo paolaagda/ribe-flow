@@ -2,11 +2,12 @@ import { format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { statusBgClasses } from "@/data/mock-data";
-import { Plus, Handshake, UserPlus, Check, X } from "lucide-react";
+import { Plus, Handshake, UserPlus } from "lucide-react";
 import { formatCentavos } from "@/lib/currency";
+import VisitParticipants from "./VisitParticipants";
+import VisitInviteActions from "./VisitInviteActions";
 import type { CalendarViewProps } from "./AgendaCalendarTypes";
 
 export default function AgendaWeekView({
@@ -88,39 +89,13 @@ export default function AgendaWeekView({
                           )}
                         </div>
                         <div className="flex items-center justify-between">
-                          {(() => {
-                            const participants = getParticipants(v);
-                            return (
-                              <TooltipProvider delayDuration={200}>
-                                <div className="flex -space-x-1 shrink-0">
-                                  {participants.slice(0, 2).map((p) => (
-                                    <Tooltip key={p.id}>
-                                      <TooltipTrigger asChild>
-                                        <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">
-                                          {p.name.charAt(0)}
-                                        </div>
-                                      </TooltipTrigger>
-                                      <TooltipContent side="top" className="text-xs">{p.name} • {p.cargo}</TooltipContent>
-                                    </Tooltip>
-                                  ))}
-                                  {participants.length > 2 && (
-                                    <div className="h-3.5 w-3.5 rounded-full bg-muted border border-background flex items-center justify-center text-[7px] font-medium text-muted-foreground">
-                                      +{participants.length - 2}
-                                    </div>
-                                  )}
-                                </div>
-                              </TooltipProvider>
-                            );
-                          })()}
+                          <VisitParticipants participants={getParticipants(v)} />
                           {myInvite && (
-                            <span className="flex gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
-                              <button aria-label="Aceitar convite" className="h-3.5 w-3.5 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90" onClick={() => handleAcceptVisitInvite(v.id)}>
-                                <Check className="h-2 w-2" />
-                              </button>
-                              <button aria-label="Recusar convite" className="h-3.5 w-3.5 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleRejectVisitInvite(v.id)}>
-                                <X className="h-2 w-2" />
-                              </button>
-                            </span>
+                            <VisitInviteActions
+                              visitId={v.id}
+                              onAccept={handleAcceptVisitInvite}
+                              onReject={handleRejectVisitInvite}
+                            />
                           )}
                           {v.potentialValue && v.potentialValue > 0 && (
                             <span className="text-[9px] text-muted-foreground font-medium">{formatCentavos(v.potentialValue)}</span>
