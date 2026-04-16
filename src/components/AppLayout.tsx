@@ -268,10 +268,9 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
           </button>
           <span className="font-bold text-sm flex-1">Canal Parceiro</span>
           <MapButton />
+          <QuickTasksPopover />
           <ThemeToggleButton />
           <NotificationInbox />
-        </header>
-        <main className="px-6 py-6 pb-24" {...pageSwipe}>{children}</main>
         <MobileNav />
         <MobileMenuDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
       </div>
