@@ -256,7 +256,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
         return;
       }
     }
-    // Final status confirmation for Comercial (configurable)
+    // Final status confirmation for Comercial (configurable) — single read
     const statusRules = getStatusRules();
     if (statusRules.requireAgendaFinalConfirmation && user?.role === 'comercial' && FINAL_STATUSES.includes(status)) {
       setPendingFinalStatus(status);
