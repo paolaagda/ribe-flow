@@ -11,9 +11,8 @@ export function useVisits() {
     const hasTodayVisits = visits.some(v => v.date === todayStr);
     
     if (!hasTodayVisits) {
-      // Update fixed demo visit IDs to today's date
       const demoIds = ['vt1', 'vt2', 'vt3', 'vt4', 'vt5', 'vt6', 'vt7'];
-      const freshMock = mockVisits; // regenerated with current date
+      const freshMock = mockVisits;
       const updatedVisits = visits.map(v => {
         if (demoIds.includes(v.id)) {
           const fresh = freshMock.find(m => m.id === v.id);
@@ -23,7 +22,7 @@ export function useVisits() {
       });
       setVisits(updatedVisits);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [visits, setVisits]);
 
   return { visits, setVisits };
 }
