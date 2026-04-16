@@ -27,44 +27,11 @@ import { getUserById, Partner, User } from '@/data/mock-data';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-const OVERDUE_DAYS = 10;
-
-function daysSince(dateStr: string) {
-  return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
-}
-
-function isOverdue(createdAt: string) {
-  return daysSince(createdAt) >= OVERDUE_DAYS;
-}
-
-/* ── Status ── */
-function getStatusInfo(item: TaskItem) {
-  if (item.task.taskReturnReason?.startsWith('CANCELLED:'))
-    return { label: 'Cancelada', className: 'bg-muted text-muted-foreground border-border' };
-  if (item.task.taskCompleted) {
-    if (item.task.taskDocStatus === 'validated') return { label: 'Validada', className: 'bg-primary/10 text-primary border-primary/20' };
-    return { label: 'Concluída', className: 'bg-primary/10 text-primary border-primary/20' };
-  }
-  if (item.task.taskDocStatus === 'submitted_for_validation') return { label: 'Aguardando terceiro', className: 'bg-accent text-accent-foreground border-accent' };
-  if (item.task.taskDocStatus === 'returned_for_correction') return { label: 'Devolvida', className: 'bg-destructive/10 text-destructive border-destructive/20' };
-  return { label: 'Pendente', className: 'bg-muted text-muted-foreground border-border' };
-}
-
-/* ── Deadline ── */
-function getDeadlineLabel(createdAt: string, completed: boolean) {
-  if (completed) return { label: 'Concluída', variant: 'default' as const };
-  const days = daysSince(createdAt);
-  if (days >= OVERDUE_DAYS) {
-    const over = days - OVERDUE_DAYS;
-    if (over === 0) return { label: 'Vence hoje', variant: 'warning' as const };
-    return { label: `Atrasada há ${over}d`, variant: 'overdue' as const };
-  }
-  const remaining = OVERDUE_DAYS - days;
-  if (remaining === 0) return { label: 'Vence hoje', variant: 'warning' as const };
-  if (remaining === 1) return { label: 'Vence amanhã', variant: 'warning' as const };
-  if (remaining <= 3) return { label: `Vence em ${remaining} dias`, variant: 'warning' as const };
-  return { label: `${remaining}d restantes`, variant: 'default' as const };
-}
+// Helpers imported from @/lib/task-helpers:
+// isTaskCancelled, daysSinceDate, isTaskOverdue, getTaskStatusDisplay, getTaskDeadlineLabel, TASK_CANCELLED_PREFIX
+const isOverdue = isTaskOverdue;
+const getStatusInfo = getTaskStatusDisplay;
+const getDeadlineLabel = getTaskDeadlineLabel;
 
 /* ── History events ── */
 interface HistoryEvent { id: string; label: string; date: string; }
@@ -96,7 +63,7 @@ function buildHistory(item: TaskItem): HistoryEvent[] {
     const completedBy = item.task.taskCompletedBy ? getUserById(item.task.taskCompletedBy)?.name : undefined;
     events.push({ id: 'completed', label: completedBy ? `Concluída por ${completedBy}` : 'Tarefa concluída', date: new Date(created.getTime() + 5 * 86400000).toISOString() });
   }
-  if (item.task.taskReturnReason?.startsWith('CANCELLED:'))
+  if (item.task.taskReturnReason?.startsWith(TASK_CANCELLED_PREFIX))
     events.push({ id: 'cancelled', label: 'Tarefa cancelada', date: new Date(created.getTime() + 5 * 86400000).toISOString() });
 
   return events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -129,7 +96,7 @@ export default function TaskDetailModal({
 
   const responsible = getUserById(item.task.userId);
   const completed = !!item.task.taskCompleted;
-  const cancelled = item.task.taskReturnReason?.startsWith('CANCELLED:') ?? false;
+  const cancelled = isTaskCancelled(item);
   const overdue = !completed && !cancelled && isOverdue(item.task.createdAt);
   const priority = !completed && !cancelled && isTaskPriority(item.task);
   const statusInfo = getStatusInfo(item);
