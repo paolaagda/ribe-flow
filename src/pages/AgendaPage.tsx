@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Team, initialTeams } from "@/data/teams";
 import { initialCampaigns, getCampaignStatus, calculateUserScore } from "@/data/campaigns";
 import PageTransition from "@/components/PageTransition";
 import HeroSection from "@/components/home/HeroSection";
@@ -73,12 +72,8 @@ export default function AgendaPage() {
   const { partners, getPartnerById } = usePartners();
   const { addNotification } = useNotifications();
   const { visits, setVisits } = useVisits();
-  const { getActiveItems } = useSystemData();
-  const { getActiveBanks } = useInfoData();
   const { registrations } = useRegistrations();
   const { addLog } = useAuditLog();
-
-  const [teams] = useLocalStorage<Team[]>("ribercred_teams", initialTeams);
 
   const rankingLeaderId = useMemo(() => {
     const activeCampaign = initialCampaigns.find((c) => getCampaignStatus(c) === "Ativa");
@@ -118,7 +113,7 @@ export default function AgendaPage() {
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [editingVisit, setEditingVisit] = useState<Visit | null>(null);
-  const [pendingFormStatus, setPendingFormStatus] = useState<"Reagendada" | "Cancelada" | "Inconclusa" | null>(null);
+  
 
   const [showDragJustificationModal, setShowDragJustificationModal] = useState(false);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
@@ -239,7 +234,7 @@ export default function AgendaPage() {
     }
   };
 
-  const { filterVisits, filterPartners, isRestricted: userIsRestricted } = useVisibility();
+  const { filterVisits } = useVisibility();
 
   const visibleVisits = useMemo(() => filterVisits(visits), [visits, filterVisits]);
 
