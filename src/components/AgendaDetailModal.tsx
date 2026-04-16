@@ -269,6 +269,8 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
   const handleJustificationConfirm = (reason: string) => {
     if (!pendingStatus) return;
     const reasonField = pendingStatus === 'Reagendada' ? 'rescheduleReason' : pendingStatus === 'Inconclusa' ? 'inconclusiveReason' : 'cancelReason';
+    const cachedStatusRules = getStatusRules();
+    const needsFinalConfirm = cachedStatusRules.requireAgendaFinalConfirmation && user?.role === 'comercial';
 
     // If this was triggered by a date change, apply date + reason but keep status as Reagendada
     if (pendingDate) {
@@ -278,9 +280,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
         [reasonField]: reason,
         statusChangedAt: new Date().toISOString(),
       };
-      // For Comercial + final status: confirm first (configurable)
-      const statusRulesInner = getStatusRules();
-      if (statusRulesInner.requireAgendaFinalConfirmation && user?.role === 'comercial') {
+      if (needsFinalConfirm) {
         updateVisit({ [reasonField]: reason });
         setPendingFinalStatus('Reagendada');
         setShowJustification(false);
@@ -298,8 +298,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
     }
 
     // For Comercial + final status: confirm first (configurable)
-    const statusRulesJ = getStatusRules();
-    if (statusRulesJ.requireAgendaFinalConfirmation && user?.role === 'comercial' && FINAL_STATUSES.includes(pendingStatus)) {
+    if (needsFinalConfirm && FINAL_STATUSES.includes(pendingStatus)) {
       setPendingFinalStatus(pendingStatus);
       updateVisit({ [reasonField]: reason });
       setShowJustification(false);

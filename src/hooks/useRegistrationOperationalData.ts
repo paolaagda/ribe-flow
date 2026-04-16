@@ -32,8 +32,7 @@ const STAGE_OWNERS: Record<string, string> = {
   'Cancelado': '—',
 };
 
-function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastUpdate: number): string {
-  const sla = getSlaRules();
+function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastUpdate: number, sla: ReturnType<typeof getSlaRules>): string {
   if (reg.status === 'Concluído') return 'Cadastro finalizado';
   if (reg.status === 'Cancelado') return 'Processo encerrado';
   if (reg.status === 'Em pausa') return 'Reativar cadastro';
@@ -53,8 +52,7 @@ function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastU
 }
 
 /** Checks if a registration qualifies for "Atenção Imediata" */
-function isImmediateAttention(reg: Registration, daysInProcess: number, pendingDocsCount: number): boolean {
-  const sla = getSlaRules();
+function isImmediateAttention(reg: Registration, daysInProcess: number, pendingDocsCount: number, sla: ReturnType<typeof getSlaRules>): boolean {
   if (daysInProcess >= sla.immediateAttentionDays) return true;
   if (sla.immediateAttentionPendingDocs && pendingDocsCount > 0) return true;
   if (sla.immediateAttentionManualCritical && reg.isCritical) return true;
@@ -62,8 +60,7 @@ function isImmediateAttention(reg: Registration, daysInProcess: number, pendingD
 }
 
 /** Checks if a registration is stalled based on SLA context threshold */
-function isStalledByContext(daysSinceLastUpdate: number, context: string): boolean {
-  const sla = getSlaRules();
+function isStalledByContext(daysSinceLastUpdate: number, context: string, sla: ReturnType<typeof getSlaRules>): boolean {
   const contextMap: Record<string, number> = {
     'Comercial': sla.slaComercial,
     'Parceiro': sla.slaParceiro,
