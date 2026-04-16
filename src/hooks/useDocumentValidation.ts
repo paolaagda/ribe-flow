@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotificationContextSafe } from '@/contexts/NotificationContext';
@@ -26,24 +26,40 @@ export function useDocumentValidation() {
   const [store, setStore] = useLocalStorage<ValidationStore>('ribercred_partner_doc_validation_v1', {});
   const { getActiveDocuments } = useInfoData();
 
-  // Migration: read old checkedDocs and merge as 'validated' on first use
-  const [oldCheckedDocs] = useLocalStorage<Record<string, string[]>>('ribercred_partner_docs_v1', {});
-
-  const resolvedStore = useMemo(() => {
-    const merged: ValidationStore = { ...store };
-    Object.entries(oldCheckedDocs).forEach(([partnerId, docIds]) => {
-      if (!merged[partnerId]) merged[partnerId] = {};
-      docIds.forEach(docId => {
-        if (!merged[partnerId][docId]) {
-          merged[partnerId][docId] = {
-            status: 'validated',
-            updatedAt: new Date().toISOString(),
-          };
-        }
+  // One-time migration: merge old checkedDocs into validation store and clear legacy key
+  useEffect(() => {
+    const OLD_KEY = 'ribercred_partner_docs_v1';
+    try {
+      const raw = localStorage.getItem(OLD_KEY);
+      if (!raw) return;
+      const oldCheckedDocs: Record<string, string[]> = JSON.parse(raw);
+      if (!oldCheckedDocs || Object.keys(oldCheckedDocs).length === 0) {
+        localStorage.removeItem(OLD_KEY);
+        return;
+      }
+      setStore(prev => {
+        const merged: ValidationStore = { ...prev };
+        let changed = false;
+        Object.entries(oldCheckedDocs).forEach(([partnerId, docIds]) => {
+          if (!merged[partnerId]) merged[partnerId] = {};
+          docIds.forEach(docId => {
+            if (!merged[partnerId][docId]) {
+              merged[partnerId][docId] = {
+                status: 'validated',
+                updatedAt: new Date().toISOString(),
+              };
+              changed = true;
+            }
+          });
+        });
+        if (!changed) return prev;
+        return merged;
       });
-    });
-    return merged;
-  }, [store, oldCheckedDocs]);
+      localStorage.removeItem(OLD_KEY);
+    } catch { /* ignore corrupt data */ }
+  }, [setStore]);
+
+  const resolvedStore = store;
 
   const getDocStatus = useCallback((partnerId: string, docId: string): DocValidationEntry => {
     return resolvedStore[partnerId]?.[docId] || { status: 'pending', updatedAt: '' };
