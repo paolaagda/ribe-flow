@@ -5,20 +5,12 @@ import { Team, initialTeams } from "@/data/teams";
 import { initialCampaigns, getCampaignStatus, calculateUserScore } from "@/data/campaigns";
 import PageTransition from "@/components/PageTransition";
 import HeroSection from "@/components/home/HeroSection";
-import AnimatedKpiCard from "@/components/shared/AnimatedKpiCard";
-import { CalendarDays, CheckCircle, ListTodo } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
 import {
   getUserById,
   Visit,
   VisitStatus,
   VisitPeriod,
   VisitComment,
-  statusBgClasses,
   cargoLabels,
 } from "@/data/mock-data";
 import { useSystemData } from "@/hooks/useSystemData";
@@ -30,16 +22,7 @@ import { useVisibility } from "@/hooks/useVisibility";
 import { useNotifications } from "@/hooks/useNotifications";
 import { getRandomMessage } from "@/data/notification-messages";
 import { useTasks } from "@/hooks/useTasks";
-import {
-  Plus,
-  ChevronLeft,
-  ChevronRight,
-  X,
-  Handshake,
-  UserPlus,
-  CalendarRange,
-  Filter,
-} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   format,
   startOfWeek,
@@ -52,16 +35,12 @@ import {
   addWeeks,
   subWeeks,
   isSameDay,
-  isSameMonth,
   parseISO,
   isValid,
   isWithinInterval,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
 import AgendaDetailModal from "@/components/AgendaDetailModal";
-import TodayAgenda from "@/components/home/TodayAgenda";
-import VisitMap from "@/components/home/VisitMap";
 import JustificationModal from "@/components/agenda/JustificationModal";
 import InviteRejectionModal from "@/components/agenda/InviteRejectionModal";
 import AgendaFormDialog, { AgendaFormData } from "@/components/agenda/AgendaFormDialog";
@@ -69,18 +48,15 @@ import { useAgendaDragDrop } from "@/hooks/useAgendaDragDrop";
 import AgendaMonthView from "@/components/agenda/AgendaMonthView";
 import AgendaWeekView from "@/components/agenda/AgendaWeekView";
 import AgendaDayView from "@/components/agenda/AgendaDayView";
-
-import InlineTasksPanel from "@/components/agenda/InlineTasksPanel";
+import AgendaFiltersBar from "@/components/agenda/AgendaFiltersBar";
+import AgendaKpiGrid from "@/components/agenda/AgendaKpiGrid";
 import SmartInsights from "@/components/shared/SmartInsights";
 import AnimatedFilterContent from "@/components/shared/AnimatedFilterContent";
 import { usePermission } from "@/hooks/usePermission";
-import { ShieldOff, FileText } from "lucide-react";
+import { ShieldOff } from "lucide-react";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useRegistrations } from "@/hooks/useRegistrations";
 import { parseCurrencyToNumber, formatCentavos } from "@/lib/currency";
-import { AnimatePresence, motion } from "framer-motion";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import {
   AGENDA_MAP_CREATE_VISIT_EVENT,
   AGENDA_MAP_OPEN_VISIT_DETAIL_EVENT,
