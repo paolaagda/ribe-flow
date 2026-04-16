@@ -27,6 +27,7 @@ export default function ProtectedRulesInfo() {
           <ProtectedItem text="Lógica de criação e atribuição contextual de tarefas" />
           <ProtectedItem text="Motor de notificações: canais, templates e agrupamento" />
           <ProtectedItem text="Permissões estruturais de acesso ao sistema" />
+          <ProtectedItem text="Caixa rápida de tarefas: mostra apenas tarefas próprias do usuário (responsável principal ou atribuído) e não herda visões globais de perfil" />
         </ul>
         <p className="text-[11px] text-muted-foreground/60 italic mt-3">
           Regras protegidas poderão ser gradualmente abertas em fases futuras, com proteções adequadas.
