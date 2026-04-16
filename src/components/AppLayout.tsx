@@ -19,6 +19,7 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import MobileMenuDrawer from '@/components/MobileMenuDrawer';
 import NotificationInbox from '@/components/notifications/NotificationInbox';
 import AgendaMapModal from '@/components/agenda/AgendaMapModal';
+import QuickTasksPopover from '@/components/tarefas/QuickTasksPopover';
 import { usePermission } from '@/hooks/usePermission';
 import { useTheme } from '@/hooks/useTheme';
 import { Moon, Sun } from 'lucide-react';
@@ -267,6 +268,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
           </button>
           <span className="font-bold text-sm flex-1">Canal Parceiro</span>
           <MapButton />
+          <QuickTasksPopover />
           <ThemeToggleButton />
           <NotificationInbox />
         </header>
@@ -286,6 +288,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
             <SidebarTrigger className="mr-4" />
             <div className="ml-auto flex items-center gap-1">
               <MapButton />
+              <QuickTasksPopover />
               <ThemeToggleButton />
               <NotificationInbox />
             </div>
