@@ -5,6 +5,10 @@ import {
 } from 'lucide-react';
 import { isTaskPriority } from '@/hooks/useTasks';
 import {
+  isTaskCancelled, daysSinceDate, isTaskOverdue, getTaskStatusDisplay,
+  getTaskDeadlineLabel, TASK_CANCELLED_PREFIX,
+} from '@/lib/task-helpers';
+import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog';
 import {

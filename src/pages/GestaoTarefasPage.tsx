@@ -13,6 +13,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTasks, TaskItem, isTaskPriority } from '@/hooks/useTasks';
+import {
+  isTaskCancelled, daysSinceDate, isTaskOverdue, getTaskStatusDisplay,
+  getTaskDeadlineLabel, getTaskReturnText, buildCancelReason, TASK_OVERDUE_DAYS,
+} from '@/lib/task-helpers';
 import { useTaskPermissions } from '@/hooks/useTaskPermissions';
 import TaskDetailModal from '@/components/tarefas/TaskDetailModal';
 import TaskCreateModal from '@/components/tarefas/TaskCreateModal';
@@ -50,55 +54,17 @@ const priorityOptions: { value: PriorityFilter; label: string }[] = [
   { value: 'prioritarias', label: 'Prioritárias' },
 ];
 
-const OVERDUE_DAYS = 10;
+// Helpers imported from @/lib/task-helpers:
+// isTaskCancelled, daysSinceDate, isTaskOverdue, getTaskStatusDisplay,
+// getTaskDeadlineLabel, getTaskReturnText, TASK_OVERDUE_DAYS
 
-function daysSince(dateStr: string) {
-  return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
-}
-
-function isOverdue(createdAt: string) {
-  return daysSince(createdAt) >= OVERDUE_DAYS;
-}
-
-function isCancelled(item: TaskItem) {
-  return item.task.taskReturnReason?.startsWith('CANCELLED:') ?? false;
-}
-
-/* ── Deadline display helper ── */
-function getDeadlineLabel(createdAt: string, completed: boolean): { label: string; variant: 'default' | 'warning' | 'overdue' } {
-  if (completed) return { label: 'Concluída', variant: 'default' };
-  const days = daysSince(createdAt);
-  if (days >= OVERDUE_DAYS) {
-    const overdueDays = days - OVERDUE_DAYS;
-    if (overdueDays === 0) return { label: 'Vence hoje', variant: 'warning' };
-    return { label: `Atrasada há ${overdueDays}d`, variant: 'overdue' };
-  }
-  const remaining = OVERDUE_DAYS - days;
-  if (remaining === 0) return { label: 'Vence hoje', variant: 'warning' };
-  if (remaining === 1) return { label: 'Vence amanhã', variant: 'warning' };
-  if (remaining <= 3) return { label: `Vence em ${remaining} dias`, variant: 'warning' };
-  return { label: `${remaining}d restantes`, variant: 'default' };
-}
-
-/* ── Status display helper ── */
-function getStatusDisplay(item: TaskItem): { label: string; className: string } {
-  if (isCancelled(item)) return { label: 'Cancelada', className: 'bg-muted text-muted-foreground border-border' };
-  if (item.task.taskCompleted) {
-    if (item.task.taskDocStatus === 'validated') return { label: 'Validada', className: 'bg-primary/10 text-primary border-primary/20' };
-    return { label: 'Concluída', className: 'bg-primary/10 text-primary border-primary/20' };
-  }
-  if (item.task.taskDocStatus === 'submitted_for_validation') return { label: 'Aguardando terceiro', className: 'bg-accent text-accent-foreground border-accent' };
-  if (item.task.taskDocStatus === 'returned_for_correction') return { label: 'Devolvida', className: 'bg-destructive/10 text-destructive border-destructive/20' };
-  return { label: 'Pendente', className: 'bg-muted text-muted-foreground border-border' };
-}
-
-/* ── Return reason helper ── */
-function getReturnText(item: TaskItem): string | null {
-  if (item.task.taskReturnReason && !item.task.taskReturnReason.startsWith('CANCELLED:')) return item.task.taskReturnReason;
-  if (item.task.taskDocStatus === 'submitted_for_validation') return 'Aguardando validação do cadastro';
-  if (item.task.taskDocStatus === 'returned_for_correction') return 'Devolvida para ajuste';
-  return null;
-}
+// Local aliases for brevity
+const isCancelled = isTaskCancelled;
+const daysSince = daysSinceDate;
+const isOverdue = isTaskOverdue;
+const getDeadlineLabel = getTaskDeadlineLabel;
+const getStatusDisplay = getTaskStatusDisplay;
+const getReturnText = getTaskReturnText;
 
 /* ── Sort logic ── */
 function sortTasks(tasks: TaskItem[]): TaskItem[] {
@@ -232,7 +198,7 @@ export default function GestaoTarefasPage() {
         ...v,
         comments: v.comments.map(c => {
           if (c.id !== commentId) return c;
-          return { ...c, taskReturnReason: `CANCELLED:${user?.name || 'Sistema'}` };
+          return { ...c, taskReturnReason: buildCancelReason(user?.name || 'Sistema') };
         }),
       };
     }));
