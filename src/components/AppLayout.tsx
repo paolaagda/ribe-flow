@@ -271,6 +271,8 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
           <QuickTasksPopover />
           <ThemeToggleButton />
           <NotificationInbox />
+        </header>
+        <main className="px-6 py-6 pb-24" {...pageSwipe}>{children}</main>
         <MobileNav />
         <MobileMenuDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
       </div>
@@ -286,6 +288,7 @@ const AppLayout = React.forwardRef<HTMLDivElement, { children: React.ReactNode }
             <SidebarTrigger className="mr-4" />
             <div className="ml-auto flex items-center gap-1">
               <MapButton />
+              <QuickTasksPopover />
               <ThemeToggleButton />
               <NotificationInbox />
             </div>
