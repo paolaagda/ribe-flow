@@ -74,6 +74,9 @@ import JustificationModal from "@/components/agenda/JustificationModal";
 import InviteRejectionModal from "@/components/agenda/InviteRejectionModal";
 import AgendaFormDialog, { AgendaFormData } from "@/components/agenda/AgendaFormDialog";
 import { useAgendaDragDrop } from "@/hooks/useAgendaDragDrop";
+import AgendaMonthView from "@/components/agenda/AgendaMonthView";
+import AgendaWeekView from "@/components/agenda/AgendaWeekView";
+import AgendaDayView from "@/components/agenda/AgendaDayView";
 
 import InlineTasksPanel from "@/components/agenda/InlineTasksPanel";
 import SmartInsights from "@/components/shared/SmartInsights";
@@ -84,8 +87,6 @@ import { useAuditLog } from "@/hooks/useAuditLog";
 import { useRegistrations } from "@/hooks/useRegistrations";
 import { parseCurrencyToNumber, formatCentavos } from "@/lib/currency";
 import { AnimatePresence, motion } from "framer-motion";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import {
