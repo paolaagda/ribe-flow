@@ -453,8 +453,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
           <div className="flex items-center justify-between px-5 pb-4 pt-1">
             {myInvite?.status === 'accepted' && !isResponsibleCommercial && onLeaveVisit && (
               <Button variant="ghost" size="sm" className="gap-1 text-destructive hover:text-destructive h-7 text-xs" onClick={() => { onLeaveVisit(visit.id); onOpenChange(false); }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                Sair
+                <LogOut className="h-3.5 w-3.5" /> Sair
               </Button>
             )}
             <div className="flex-1" />
