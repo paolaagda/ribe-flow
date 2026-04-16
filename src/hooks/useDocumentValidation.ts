@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotificationContextSafe } from '@/contexts/NotificationContext';
