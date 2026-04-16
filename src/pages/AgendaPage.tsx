@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { initialCampaigns, getCampaignStatus, calculateUserScore } from "@/data/campaigns";
 import PageTransition from "@/components/PageTransition";
 import HeroSection from "@/components/home/HeroSection";
@@ -12,8 +11,6 @@ import {
   VisitComment,
   cargoLabels,
 } from "@/data/mock-data";
-import { useSystemData } from "@/hooks/useSystemData";
-import { useInfoData } from "@/hooks/useInfoData";
 import { useVisits } from "@/hooks/useVisits";
 import { usePartners } from "@/hooks/usePartners";
 import { useAuth } from "@/contexts/AuthContext";
