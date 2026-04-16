@@ -130,7 +130,7 @@ export function useTaskPermissions() {
     const canChangeStatus = canEdit || isResponsible || isCreator;
 
     return { canConclude, canEdit, canAssign, canCancel, canChangeStatus, canReopen, canTerminalEdit };
-  }, [user]);
+  }, [user, taskRules]);
 
   const getValidAssignees = useCallback((item: TaskItem): User[] => {
     if (!user) return [];
