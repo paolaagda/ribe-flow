@@ -32,8 +32,7 @@ const STAGE_OWNERS: Record<string, string> = {
   'Cancelado': '—',
 };
 
-function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastUpdate: number): string {
-  const sla = getSlaRules();
+function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastUpdate: number, sla: ReturnType<typeof getSlaRules>): string {
   if (reg.status === 'Concluído') return 'Cadastro finalizado';
   if (reg.status === 'Cancelado') return 'Processo encerrado';
   if (reg.status === 'Em pausa') return 'Reativar cadastro';
@@ -53,8 +52,7 @@ function deriveNextAction(reg: Registration, pendingDocs: number, daysSinceLastU
 }
 
 /** Checks if a registration qualifies for "Atenção Imediata" */
-function isImmediateAttention(reg: Registration, daysInProcess: number, pendingDocsCount: number): boolean {
-  const sla = getSlaRules();
+function isImmediateAttention(reg: Registration, daysInProcess: number, pendingDocsCount: number, sla: ReturnType<typeof getSlaRules>): boolean {
   if (daysInProcess >= sla.immediateAttentionDays) return true;
   if (sla.immediateAttentionPendingDocs && pendingDocsCount > 0) return true;
   if (sla.immediateAttentionManualCritical && reg.isCritical) return true;
@@ -62,8 +60,7 @@ function isImmediateAttention(reg: Registration, daysInProcess: number, pendingD
 }
 
 /** Checks if a registration is stalled based on SLA context threshold */
-function isStalledByContext(daysSinceLastUpdate: number, context: string): boolean {
-  const sla = getSlaRules();
+function isStalledByContext(daysSinceLastUpdate: number, context: string, sla: ReturnType<typeof getSlaRules>): boolean {
   const contextMap: Record<string, number> = {
     'Comercial': sla.slaComercial,
     'Parceiro': sla.slaParceiro,
@@ -98,16 +95,16 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
     let criticality: RegistrationCriticality = 'baixa';
     const isTerminal = ['Concluído', 'Cancelado'].includes(reg.status);
     if (!isTerminal) {
-      const stalledThreshold = slaConfig.immediateAttentionDays / 2; // half of attention threshold for high
+      const stalledThreshold = slaConfig.immediateAttentionDays / 2;
       if (reg.status === 'Em pausa' || (slaConfig.criticalityByStalledTime && daysSinceLastUpdate > stalledThreshold)) {
         criticality = 'alta';
-      } else if (isStalledByContext(daysSinceLastUpdate, reg.handlingWith)) {
+      } else if (isStalledByContext(daysSinceLastUpdate, reg.handlingWith, slaConfig)) {
         criticality = 'média';
       }
     }
 
     const isBlocked = !isTerminal && daysSinceLastUpdate > slaConfig.immediateAttentionDays / 2;
-    const nextAction = deriveNextAction(reg, pendingDocsCount, daysSinceLastUpdate);
+    const nextAction = deriveNextAction(reg, pendingDocsCount, daysSinceLastUpdate, slaConfig);
     const partner = getPartnerById(reg.partnerId);
     const currentResponsible = STAGE_OWNERS[reg.status] || reg.handlingWith;
 
@@ -126,6 +123,7 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
 
   // Build the 5 summary cards
   const summaryCards = useMemo((): SummaryCardData[] => {
+    const sla = getSlaRules();
     let immediateAttention = 0;
     let comercialStalled = 0;
     let parceiroStalled = 0;
@@ -138,17 +136,15 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
 
       const data = getRegData(reg);
 
-      if (isImmediateAttention(reg, data.daysInProcess, data.pendingDocsCount)) {
+      if (isImmediateAttention(reg, data.daysInProcess, data.pendingDocsCount, sla)) {
         immediateAttention++;
       }
 
-      if (reg.handlingWith === 'Comercial' && isStalledByContext(data.daysSinceLastUpdate, 'Comercial')) comercialStalled++;
-      if (reg.handlingWith === 'Parceiro' && isStalledByContext(data.daysSinceLastUpdate, 'Parceiro')) parceiroStalled++;
-      if (reg.handlingWith === 'Banco' && isStalledByContext(data.daysSinceLastUpdate, 'Banco')) bancoStalled++;
-      if (reg.handlingWith === 'Cadastro' && isStalledByContext(data.daysSinceLastUpdate, 'Cadastro')) cadastroStalled++;
+      if (reg.handlingWith === 'Comercial' && isStalledByContext(data.daysSinceLastUpdate, 'Comercial', sla)) comercialStalled++;
+      if (reg.handlingWith === 'Parceiro' && isStalledByContext(data.daysSinceLastUpdate, 'Parceiro', sla)) parceiroStalled++;
+      if (reg.handlingWith === 'Banco' && isStalledByContext(data.daysSinceLastUpdate, 'Banco', sla)) bancoStalled++;
+      if (reg.handlingWith === 'Cadastro' && isStalledByContext(data.daysSinceLastUpdate, 'Cadastro', sla)) cadastroStalled++;
     });
-
-    const sla = getSlaRules();
     return [
       {
         key: 'immediate',
@@ -201,6 +197,7 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
 
   /** Filter function: given a card key, returns a predicate for registrations */
   const getSummaryFilter = useCallback((cardKey: string) => {
+    const sla = getSlaRules();
     return (reg: Registration): boolean => {
       const isTerminal = ['Concluído', 'Cancelado'].includes(reg.status);
       if (isTerminal) return false;
@@ -208,15 +205,15 @@ export function useRegistrationOperationalData(registrations: Registration[]) {
 
       switch (cardKey) {
         case 'immediate':
-          return isImmediateAttention(reg, data.daysInProcess, data.pendingDocsCount);
+          return isImmediateAttention(reg, data.daysInProcess, data.pendingDocsCount, sla);
         case 'comercial_stalled':
-          return reg.handlingWith === 'Comercial' && isStalledByContext(data.daysSinceLastUpdate, 'Comercial');
+          return reg.handlingWith === 'Comercial' && isStalledByContext(data.daysSinceLastUpdate, 'Comercial', sla);
         case 'parceiro_stalled':
-          return reg.handlingWith === 'Parceiro' && isStalledByContext(data.daysSinceLastUpdate, 'Parceiro');
+          return reg.handlingWith === 'Parceiro' && isStalledByContext(data.daysSinceLastUpdate, 'Parceiro', sla);
         case 'banco_stalled':
-          return reg.handlingWith === 'Banco' && isStalledByContext(data.daysSinceLastUpdate, 'Banco');
+          return reg.handlingWith === 'Banco' && isStalledByContext(data.daysSinceLastUpdate, 'Banco', sla);
         case 'cadastro_stalled':
-          return reg.handlingWith === 'Cadastro' && isStalledByContext(data.daysSinceLastUpdate, 'Cadastro');
+          return reg.handlingWith === 'Cadastro' && isStalledByContext(data.daysSinceLastUpdate, 'Cadastro', sla);
         default:
           return true;
       }

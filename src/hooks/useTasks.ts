@@ -69,7 +69,7 @@ export function useTasks() {
     return tasks.sort((a, b) =>
       new Date(a.task.createdAt).getTime() - new Date(b.task.createdAt).getTime()
     );
-  }, [visits, getPartnerById, user]);
+  }, [visits, getPartnerById, user, filterVisits]);
 
   const pendingTasks = useMemo(() => allTasks.filter(t => !t.task.taskCompleted), [allTasks]);
   const completedTasks = useMemo(() => allTasks.filter(t => t.task.taskCompleted), [allTasks]);

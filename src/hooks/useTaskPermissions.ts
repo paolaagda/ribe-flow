@@ -5,6 +5,7 @@ import { useTaskRules } from '@/hooks/useTaskRules';
 import { TaskItem } from '@/hooks/useTasks';
 import { mockUsers, User, CompanyCargo } from '@/data/mock-data';
 import { getStatusRules } from '@/hooks/useStatusRules';
+import { isTaskCancelled } from '@/lib/task-helpers';
 
 export interface TaskPermissions {
   canConclude: boolean;
@@ -32,9 +33,7 @@ function isTaskTerminal(item: TaskItem): boolean {
   return !!item.task.taskCompleted || item.task.taskDocStatus === 'validated';
 }
 
-function isTaskCancelled(item: TaskItem): boolean {
-  return item.task.taskReturnReason?.startsWith('CANCELLED:') ?? false;
-}
+// isTaskCancelled imported from @/lib/task-helpers
 
 export function useTaskPermissions() {
   const { user } = useAuth();
@@ -131,7 +130,7 @@ export function useTaskPermissions() {
     const canChangeStatus = canEdit || isResponsible || isCreator;
 
     return { canConclude, canEdit, canAssign, canCancel, canChangeStatus, canReopen, canTerminalEdit };
-  }, [user]);
+  }, [user, taskRules]);
 
   const getValidAssignees = useCallback((item: TaskItem): User[] => {
     if (!user) return [];
