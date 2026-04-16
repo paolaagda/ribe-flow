@@ -8,7 +8,8 @@ import { AlertTriangle, UserCog, Users, Building2, ClipboardList } from 'lucide-
 import { SummaryCardData } from '@/components/cadastro/RegistrationOperationalSummary';
 import { getSlaRules } from '@/hooks/useSlaRules';
 
-export type RegistrationCriticality = 'alta' | 'média' | 'baixa';
+import type { Criticality } from '@/hooks/usePartnerOperationalData';
+export type RegistrationCriticality = Criticality;
 
 export interface RegistrationOperationalData {
   daysInProcess: number;
