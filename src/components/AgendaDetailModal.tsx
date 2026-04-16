@@ -86,11 +86,22 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
   const [pendingFinalStatus, setPendingFinalStatus] = useState<VisitStatus | null>(null);
   const [pendingDate, setPendingDate] = useState<string | null>(null);
 
-  if (!initialVisit) return null;
+  const visit = initialVisit ? (visits.find((currentVisit) => currentVisit.id === initialVisit.id) ?? initialVisit) : null;
 
-  const visit = visits.find((currentVisit) => currentVisit.id === initialVisit.id) ?? initialVisit;
+  const partner = visit ? getPartnerById(visit.partnerId) : null;
 
-  const partner = getPartnerById(visit.partnerId);
+  const lastVisitInfo = useMemo(() => {
+    if (!partner || !visit || visit.type !== 'visita') return null;
+    const lastConcluded = visits
+      .filter(v => v.partnerId === visit.partnerId && v.status === 'Concluída' && v.id !== visit.id)
+      .sort((a, b) => b.date.localeCompare(a.date))[0];
+    if (!lastConcluded) return 'Primeira visita';
+    const days = Math.floor((Date.now() - new Date(lastConcluded.date).getTime()) / 86400000);
+    return `Última visita: ${days}d atrás`;
+  }, [partner, visit, visits]);
+
+  if (!visit) return null;
+
   const visitUser = getUserById(visit.userId);
   const typeLabel = visit.type === 'visita' ? 'Visita' : 'Prospecção';
   const TypeIcon = visit.type === 'visita' ? Handshake : UserPlus;
@@ -103,16 +114,6 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
   const isOwnerOrManager = isResponsibleCommercial || user?.id === visit.createdBy || !['comercial', 'cadastro'].includes(user?.role || '');
   const canEditFields = canWrite('agenda.edit') && isOwnerOrManager && !isStatusFinal;
   const canEditVisit = canWrite('agenda.edit') && isOwnerOrManager && !isStatusLocked;
-
-  const lastVisitInfo = useMemo(() => {
-    if (!partner || visit.type !== 'visita') return null;
-    const lastConcluded = visits
-      .filter(v => v.partnerId === visit.partnerId && v.status === 'Concluída' && v.id !== visit.id)
-      .sort((a, b) => b.date.localeCompare(a.date))[0];
-    if (!lastConcluded) return 'Primeira visita';
-    const days = Math.floor((Date.now() - new Date(lastConcluded.date).getTime()) / 86400000);
-    return `Última visita: ${days}d atrás`;
-  }, [partner, visit.type, visit.partnerId, visit.id, visits]);
 
   const statusBadgeMap: Record<string, { label: string; className: string }> = {
     pending: { label: 'Pendente', className: 'bg-warning/10 text-warning border-warning/20' },
