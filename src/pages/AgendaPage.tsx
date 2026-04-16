@@ -34,7 +34,6 @@ import {
   subMonths,
   addWeeks,
   subWeeks,
-  isSameDay,
   parseISO,
   isValid,
   isWithinInterval,
