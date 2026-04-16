@@ -457,7 +457,7 @@ export default function AgendaPage() {
     };
   }, [todayVisits]);
 
-  const { pendingTasks, completedTasks } = useTasks();
+  const { pendingTasks, completedTasks, toggleTask } = useTasks();
 
   const handleDragStart = (e: React.DragEvent, visitId: string) => {
     setDraggedVisitId(visitId);
@@ -868,29 +868,18 @@ export default function AgendaPage() {
   );
 
   const handleToggleTask = useCallback((visitId: string, commentId: string) => {
-    setVisits((prev) =>
-      prev.map((v) =>
-        v.id === visitId
-          ? {
-              ...v,
-              comments: (v.comments || []).map((c) =>
-                c.id === commentId ? { ...c, taskCompleted: !c.taskCompleted } : c,
-              ),
-            }
-          : v,
-      ),
-    );
-    setSelectedVisit((prev) =>
-      prev?.id === visitId
-        ? {
-            ...prev,
-            comments: (prev.comments || []).map((c) =>
-              c.id === commentId ? { ...c, taskCompleted: !c.taskCompleted } : c,
-            ),
-          }
-        : prev,
-    );
-  }, []);
+    toggleTask(visitId, commentId);
+    // Sync selectedVisit state after toggle
+    setSelectedVisit((prev) => {
+      if (!prev || prev.id !== visitId) return prev;
+      return {
+        ...prev,
+        comments: (prev.comments || []).map((c) =>
+          c.id === commentId ? { ...c, taskCompleted: !c.taskCompleted } : c,
+        ),
+      };
+    });
+  }, [toggleTask]);
 
   const toggleArray = (arr: string[], item: string) =>
     arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
