@@ -374,6 +374,7 @@ export function useTasks() {
     toggleTask,
     reopenTask,
     updateTaskAdminNote,
+    updateTaskAssignees,
     returnTaskForCorrection,
     markTaskValidated,
     createDocPendingTask,
