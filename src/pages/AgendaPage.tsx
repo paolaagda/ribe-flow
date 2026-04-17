@@ -674,7 +674,6 @@ export default function AgendaPage() {
 
       <AgendaFiltersBar
         view={view}
-        setView={setView}
         currentDate={currentDate}
         navigateCalendar={navigateCalendar}
         setCurrentDate={setCurrentDate}
@@ -682,28 +681,20 @@ export default function AgendaPage() {
         setFilterStatus={setFilterStatus}
         filterType={filterType}
         setFilterType={setFilterType}
-        dateRange={dateRange}
-        setDateRange={setDateRange}
         showFilters={showFilters}
         setShowFilters={setShowFilters}
       />
 
       <AnimatedFilterContent filterKey={activeInsight} className="space-y-ds-lg">
         <AgendaKpiGrid
+          view={view}
+          setView={setView}
           todayIndicators={todayIndicators}
-          indicators={indicators}
-          pendingTasks={pendingTasks}
-          completedTasks={completedTasks}
+          weekIndicators={weekIndicators}
+          monthIndicators={monthIndicators}
           canCreate={canWrite("agenda.create")}
-          showTodayPanel={showTodayPanel}
-          showTasksPanel={showTasksPanel}
-          togglePanel={togglePanel}
           todayVisits={todayVisits}
           onCreateClick={() => { setEditingVisit(null); setFormOverrides(undefined); setShowForm(true); }}
-          onOpenVisit={(visitId) => {
-            const visit = visits.find((v) => v.id === visitId);
-            if (visit) { setSelectedVisit(visit); setShowDetail(true); }
-          }}
         />
         {view === "month" ? (
           <AgendaMonthView
