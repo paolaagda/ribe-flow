@@ -16,6 +16,7 @@ import { useVisits } from '@/hooks/useVisits';
 import { mockUsers, getPartnerById, statusColors, VisitStatus } from '@/data/mock-data';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 import { cn } from '@/lib/utils';
+import { agendaTypeBranding } from '@/lib/agenda-type-branding';
 import SmartInsights from '@/components/shared/SmartInsights';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import PageHeader from '@/components/shared/PageHeader';
