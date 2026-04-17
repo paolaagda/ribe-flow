@@ -375,8 +375,10 @@ export default function TaskDetailModal({
                   Editar
                 </Button>
               )}
-              {permissions.canAssign && (
-                <Button variant="outline" size="sm" className="gap-1.5 text-xs" disabled>
+              {permissions.canAssign && onUpdateAssignees && !editingAssignees && (
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs"
+                  onClick={() => setEditingAssignees(true)}
+                >
                   <UserPlus className="h-3.5 w-3.5" />
                   Atribuir
                 </Button>
