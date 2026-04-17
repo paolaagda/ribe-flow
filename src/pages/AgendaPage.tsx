@@ -723,6 +723,10 @@ export default function AgendaPage() {
           todayIndicators={todayIndicators}
           weekIndicators={weekIndicators}
           monthIndicators={monthIndicators}
+          visitIndicators={visitIndicators}
+          prospectIndicators={prospectIndicators}
+          filterType={filterType}
+          setFilterType={setFilterType}
           canCreate={canWrite("agenda.create")}
           todayVisits={todayVisits}
           onCreateClick={() => { setEditingVisit(null); setFormOverrides(undefined); setShowForm(true); }}
