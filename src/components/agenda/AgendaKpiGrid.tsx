@@ -29,9 +29,17 @@ interface AgendaKpiGridProps {
 }
 
 export default function AgendaKpiGrid({
-  todayIndicators, indicators, pendingTasks, completedTasks,
-  canCreate, showTodayPanel, showTasksPanel, togglePanel,
-  todayVisits, onCreateClick, onOpenVisit,
+  todayIndicators,
+  indicators,
+  pendingTasks,
+  completedTasks,
+  canCreate,
+  showTodayPanel,
+  showTasksPanel,
+  togglePanel,
+  todayVisits,
+  onCreateClick,
+  onOpenVisit,
 }: AgendaKpiGridProps) {
   return (
     <>
@@ -99,7 +107,7 @@ export default function AgendaKpiGrid({
                   <Plus className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-ds-sm font-semibold text-primary">Novo compromisso</p>
+                  <p className="text-ds-sm font-semibold text-primary">Novo</p>
                 </div>
               </CardContent>
             </Card>
