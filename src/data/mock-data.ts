@@ -65,13 +65,15 @@ export interface VisitComment {
   taskPriority?: boolean; // manual or auto priority flag
   taskHistory?: TaskHistoryEvent[];
   taskAdminNote?: string; // administrative note — safe field editable on terminal tasks
+  /** Multi-assignee real persisted list. Principal continues being `userId`. */
+  taskAssignedUserIds?: string[];
   parentId?: string;
   createdAt: string;
 }
 
 export interface TaskHistoryEvent {
   id: string;
-  type: 'created' | 'priority_auto' | 'completed' | 'cancelled' | 'submitted' | 'returned' | 'validated' | 'status_change' | 'assigned' | 'reopened' | 'terminal_edit';
+  type: 'created' | 'priority_auto' | 'completed' | 'cancelled' | 'submitted' | 'returned' | 'validated' | 'status_change' | 'assigned' | 'unassigned' | 'reopened' | 'terminal_edit';
   label: string;
   date: string;
   userId?: string;

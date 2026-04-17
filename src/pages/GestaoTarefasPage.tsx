@@ -95,7 +95,7 @@ function sortTasks(tasks: TaskItem[]): TaskItem[] {
 
 /* ══════════════════════════════════════════════════════════ */
 export default function GestaoTarefasPage() {
-  const { allTasks, toggleTask, reopenTask, updateTaskAdminNote } = useTasks();
+  const { allTasks, toggleTask, reopenTask, updateTaskAdminNote, updateTaskAssignees } = useTasks();
   const { user } = useAuth();
   const { getPartnerById } = usePartners();
   const { setVisits } = useVisits();
@@ -361,6 +361,7 @@ export default function GestaoTarefasPage() {
           onCancel={handleCancel}
           onReopen={reopenTask}
           onAdminNote={updateTaskAdminNote}
+          onUpdateAssignees={updateTaskAssignees}
           permissions={selectedPermissions}
           validAssignees={selectedAssignees}
         />
@@ -468,6 +469,16 @@ function TaskCard({
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <UserIcon className="h-3 w-3" />
                 <span>{responsible?.name || 'Sem responsável'}</span>
+                {(item.task.taskAssignedUserIds?.length ?? 0) > 0 && (
+                  <Badge variant="outline" className="text-[10px] h-4 px-1 ml-0.5" title={
+                    item.task.taskAssignedUserIds!
+                      .map(id => getUserById(id)?.name)
+                      .filter(Boolean)
+                      .join(', ')
+                  }>
+                    +{item.task.taskAssignedUserIds!.length}
+                  </Badge>
+                )}
               </div>
               <span className="text-[10px] text-muted-foreground">
                 {new Date(item.task.createdAt).toLocaleDateString('pt-BR')}

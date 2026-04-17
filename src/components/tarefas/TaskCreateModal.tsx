@@ -163,14 +163,33 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
       });
     }
 
+    const principalId = responsibleId || user?.id || 'u1';
+    // Ensure principal isn't duplicated in assignees
+    const cleanAssignees = assignedIds.filter(id => id && id !== principalId);
+
+    if (cleanAssignees.length > 0) {
+      const names = cleanAssignees
+        .map(id => mockUsers.find(u => u.id === id)?.name)
+        .filter(Boolean)
+        .join(', ');
+      historyEvents.push({
+        id: `evt-${Date.now()}-a`,
+        type: 'assigned',
+        label: `Atribuída a: ${names}`,
+        date: new Date().toISOString(),
+        userId: user?.id,
+      });
+    }
+
     const newTask: VisitComment = {
       id: `manual-${Date.now()}`,
-      userId: responsibleId || user?.id || 'u1',
+      userId: principalId,
       text: title.trim(),
       type: 'task',
       taskCompleted: false,
       taskCategory: autoCategory as any,
       taskPriority: effectivePriority,
+      taskAssignedUserIds: cleanAssignees.length > 0 ? cleanAssignees : undefined,
       taskHistory: historyEvents,
       createdAt: new Date().toISOString(),
     };
