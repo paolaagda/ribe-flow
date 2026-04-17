@@ -307,6 +307,40 @@ export function useTasks() {
     }));
   }, [setVisits, user]);
 
+  /** Update the assignee list (multi-assignee). Records history events for additions/removals. */
+  const updateTaskAssignees = useCallback((visitId: string, commentId: string, nextAssigneeIds: string[]) => {
+    setVisits(prev => prev.map(v => {
+      if (v.id !== visitId) return v;
+      return {
+        ...v,
+        comments: v.comments.map(c => {
+          if (c.id !== commentId) return c;
+          const cleaned = Array.from(new Set(nextAssigneeIds.filter(id => id && id !== c.userId)));
+          const prevList = c.taskAssignedUserIds || [];
+          const added = cleaned.filter(id => !prevList.includes(id));
+          const removed = prevList.filter(id => !cleaned.includes(id));
+          if (added.length === 0 && removed.length === 0) return c;
+
+          const events: TaskHistoryEvent[] = [];
+          if (added.length > 0) {
+            const names = added.map(id => mockUsers.find(u => u.id === id)?.name).filter(Boolean).join(', ');
+            events.push(makeHistoryEvent('assigned', `${names} ${added.length > 1 ? 'foram atribuídos' : 'foi atribuído'} à tarefa`, user?.id));
+          }
+          if (removed.length > 0) {
+            const names = removed.map(id => mockUsers.find(u => u.id === id)?.name).filter(Boolean).join(', ');
+            events.push(makeHistoryEvent('unassigned', `${names} ${removed.length > 1 ? 'foram removidos' : 'foi removido'} da tarefa`, user?.id));
+          }
+
+          return {
+            ...c,
+            taskAssignedUserIds: cleaned.length > 0 ? cleaned : undefined,
+            taskHistory: [...(c.taskHistory || []), ...events],
+          };
+        }),
+      };
+    }));
+  }, [setVisits, user]);
+
   const getDaysPending = useCallback((createdAt: string) => {
     return Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
   }, []);
