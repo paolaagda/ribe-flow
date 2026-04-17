@@ -16,6 +16,7 @@ import { useVisits } from '@/hooks/useVisits';
 import { mockUsers, getPartnerById, statusColors, VisitStatus } from '@/data/mock-data';
 import AnimatedKpiCard from '@/components/shared/AnimatedKpiCard';
 import { cn } from '@/lib/utils';
+import { agendaTypeBranding } from '@/lib/agenda-type-branding';
 import SmartInsights from '@/components/shared/SmartInsights';
 import AnimatedFilterContent from '@/components/shared/AnimatedFilterContent';
 import PageHeader from '@/components/shared/PageHeader';
@@ -197,8 +198,8 @@ export default function AnalisesPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-ds-sm">
         <AnimatedKpiCard icon={BarChart3} label="Total" value={kpis.total} color="text-foreground" delay={0} />
         <AnimatedKpiCard icon={CheckCircle} label="Concluídas" value={kpis.completed} color="text-success" delay={0.1} />
-        <AnimatedKpiCard icon={Eye} label="Visitas" value={kpis.visitas} color="text-info" delay={0.2} />
-        <AnimatedKpiCard icon={Search} label="Prospecções" value={kpis.prospections} color="text-warning" delay={0.3} />
+        <AnimatedKpiCard icon={agendaTypeBranding.visita.icon} label="Visitas" value={kpis.visitas} color={agendaTypeBranding.visita.text} delay={0.2} />
+        <AnimatedKpiCard icon={agendaTypeBranding["prospecção"].icon} label="Prospecções" value={kpis.prospections} color={agendaTypeBranding["prospecção"].text} delay={0.3} />
       </div>
 
       {/* Conversion badge */}

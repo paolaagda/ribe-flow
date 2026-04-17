@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Visit, statusColors } from '@/data/mock-data';
 import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { BarChart3 } from 'lucide-react';
+import { agendaTypeBranding } from '@/lib/agenda-type-branding';
 
 interface Props {
   visits: Visit[];
@@ -31,7 +32,7 @@ export default function PartnerCharts({ visits }: Props) {
     visits.forEach(v => { typeMap[v.type] = (typeMap[v.type] || 0) + 1; });
     const byType = Object.entries(typeMap).map(([name, value]) => ({
       name: name === 'visita' ? 'Visita' : 'Prospecção', value,
-      fill: name === 'visita' ? 'hsl(199 89% 48%)' : 'hsl(262 83% 58%)'
+      fill: name === 'visita' ? agendaTypeBranding.visita.hsl : agendaTypeBranding['prospecção'].hsl
     }));
 
     // Frequency over time (cumulative visits by date)
@@ -61,7 +62,7 @@ export default function PartnerCharts({ visits }: Props) {
                 <XAxis dataKey="month" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="count" fill="hsl(199 89% 48%)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill={agendaTypeBranding.visita.hsl} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

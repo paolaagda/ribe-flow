@@ -2,7 +2,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Visit, VisitStatus, statusBgClasses } from '@/data/mock-data';
 import { cn } from '@/lib/utils';
-import { Handshake, UserPlus, User } from 'lucide-react';
+import { User } from 'lucide-react';
+import { getAgendaTypeBrand } from '@/lib/agenda-type-branding';
 
 interface DetailHeaderProps {
   visit: Visit;
@@ -23,16 +24,17 @@ export default function DetailHeader({
   lastVisitInfo, isStatusLocked, canEditVisit, allStatuses,
   onStatusChange, onPartnerClick,
 }: DetailHeaderProps) {
-  const TypeIcon = visit.type === 'visita' ? Handshake : UserPlus;
+  const brand = getAgendaTypeBrand(visit.type);
+  const TypeIcon = brand.icon;
 
   return (
     <div className="px-5 pt-5 pb-3 pr-12">
       <div className="flex items-start gap-2.5">
         <div className={cn(
           'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
-          visit.type === 'visita' ? 'bg-info/10' : 'bg-warning/10'
+          brand.bgSoft
         )}>
-          <TypeIcon className={cn('h-4 w-4', visit.type === 'visita' ? 'text-info' : 'text-warning')} />
+          <TypeIcon className={cn('h-4 w-4', brand.text)} />
         </div>
         <div className="flex-1 min-w-0 space-y-1">
           {partner ? (

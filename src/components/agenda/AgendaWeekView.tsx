@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { statusBgClasses } from "@/data/mock-data";
-import { Plus, Handshake, UserPlus } from "lucide-react";
+import { Plus } from "lucide-react";
+import { getAgendaTypeBrand } from "@/lib/agenda-type-branding";
 import { formatCentavos } from "@/lib/currency";
 import VisitParticipants from "./VisitParticipants";
 import VisitInviteActions from "./VisitInviteActions";
@@ -74,7 +75,7 @@ export default function AgendaWeekView({
                         )}
                       >
                         <div className="flex items-center gap-1">
-                          {v.type === "visita" ? <Handshake className="h-2.5 w-2.5 shrink-0 text-info" /> : <UserPlus className="h-2.5 w-2.5 shrink-0 text-warning" />}
+                          {(() => { const brand = getAgendaTypeBrand(v.type); const Icon = brand.icon; return <Icon className={cn("h-2.5 w-2.5 shrink-0", brand.text)} />; })()}
                           <span className="text-[10px] font-medium truncate leading-tight">{partner?.name || v.prospectPartner || ""}</span>
                         </div>
                         <div className="flex items-center gap-1 flex-wrap">
