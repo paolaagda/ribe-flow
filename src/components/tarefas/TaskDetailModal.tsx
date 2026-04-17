@@ -472,3 +472,60 @@ function ContextRow({ icon, label, value, valueClassName }: {
     </div>
   );
 }
+
+/* ── Assignees inline editor ── */
+function AssigneesEditor({
+  validAssignees, principalId, currentIds, onSave, onCancel,
+}: {
+  validAssignees: User[];
+  principalId: string;
+  currentIds: string[];
+  onSave: (ids: string[]) => void;
+  onCancel: () => void;
+}) {
+  const [selected, setSelected] = useState<string[]>(currentIds);
+  const candidates = useMemo(
+    () => validAssignees.filter(u => u.id !== principalId),
+    [validAssignees, principalId],
+  );
+  const toggle = (id: string) => {
+    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+  return (
+    <div className="space-y-2 rounded-md border border-border bg-muted/30 p-2.5">
+      {candidates.length === 0 ? (
+        <p className="text-[11px] text-muted-foreground italic">
+          Nenhum usuário válido para atribuição neste contexto.
+        </p>
+      ) : (
+        <div className="flex flex-wrap gap-1.5">
+          {candidates.map(u => {
+            const sel = selected.includes(u.id);
+            return (
+              <Badge
+                key={u.id}
+                variant={sel ? 'default' : 'outline'}
+                className={cn(
+                  'cursor-pointer text-[10px] transition-colors',
+                  sel ? 'bg-primary text-primary-foreground' : 'hover:bg-accent',
+                )}
+                onClick={() => toggle(u.id)}
+              >
+                {u.name}
+                <span className="text-muted-foreground ml-1 capitalize">({u.role})</span>
+              </Badge>
+            );
+          })}
+        </div>
+      )}
+      <div className="flex items-center gap-2 pt-1">
+        <Button size="sm" className="text-xs h-7" onClick={() => onSave(selected)}>
+          Salvar
+        </Button>
+        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={onCancel}>
+          <X className="h-3 w-3 mr-1" /> Cancelar
+        </Button>
+      </div>
+    </div>
+  );
+}
