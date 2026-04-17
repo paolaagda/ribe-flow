@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { statusBgClasses, getUserById } from "@/data/mock-data";
-import { Handshake, UserPlus, Clock as ClockIcon, FileText, ListTodo } from "lucide-react";
+import { Clock as ClockIcon, FileText, ListTodo } from "lucide-react";
+import { getAgendaTypeBrand } from "@/lib/agenda-type-branding";
 import { formatCentavos } from "@/lib/currency";
 import VisitParticipants from "./VisitParticipants";
 import type { DayViewProps } from "./AgendaCalendarTypes";
@@ -46,9 +47,11 @@ export default function AgendaDayView({
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{partner?.name || v.prospectPartner || "Sem nome"}</p>
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Badge variant="outline" className={cn("text-[9px] px-1 py-0 gap-0.5", v.type === "visita" ? "bg-info/10 text-info border-info/20" : "bg-warning/10 text-warning border-warning/20")}>
-                            {v.type === "visita" ? (<><Handshake className="h-2.5 w-2.5" />Visita</>) : (<><UserPlus className="h-2.5 w-2.5" />Prospecção</>)}
-                          </Badge>
+                          {(() => { const brand = getAgendaTypeBrand(v.type); const Icon = brand.icon; return (
+                            <Badge variant="outline" className={cn("text-[9px] px-1 py-0 gap-0.5", brand.badge)}>
+                              <Icon className="h-2.5 w-2.5" />{brand.label}
+                            </Badge>
+                          ); })()}
                           {v.time ? <span>{v.time}</span> : <span className="flex items-center gap-0.5"><ClockIcon className="h-3 w-3" /> Sem horário</span>}
                           <span>• {vUser?.name}</span>
                         </div>

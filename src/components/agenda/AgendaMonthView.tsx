@@ -2,7 +2,8 @@ import { format, isSameDay, isSameMonth } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { statusBgClasses } from "@/data/mock-data";
-import { Plus, Handshake, UserPlus } from "lucide-react";
+import { Plus } from "lucide-react";
+import { getAgendaTypeBrand } from "@/lib/agenda-type-branding";
 import VisitParticipants from "./VisitParticipants";
 import VisitInviteActions from "./VisitInviteActions";
 import type { CalendarViewProps } from "./AgendaCalendarTypes";
@@ -71,7 +72,7 @@ export default function AgendaMonthView({
                           v.type === "prospecção" && "opacity-50 border-muted",
                         )}
                       >
-                        {v.type === "visita" ? <Handshake className="h-2.5 w-2.5 shrink-0 text-info" /> : <UserPlus className="h-2.5 w-2.5 shrink-0 text-warning" />}
+                        {(() => { const brand = getAgendaTypeBrand(v.type); const Icon = brand.icon; return <Icon className={cn("h-2.5 w-2.5 shrink-0", brand.text)} />; })()}
                         <span className="text-[9px] truncate max-w-[60px]">{partner?.name || v.prospectPartner || ""}</span>
                         <VisitParticipants participants={getParticipants(v)} />
                         {myInvite && (

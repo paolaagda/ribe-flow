@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarCheck, Check, Clock, MapPin, CalendarX, Handshake, UserPlus } from 'lucide-react';
+import { CalendarCheck, Check, Clock, MapPin, CalendarX } from 'lucide-react';
+import { getAgendaTypeBrand } from '@/lib/agenda-type-branding';
 import { mockUsers, statusBgClasses, Visit } from '@/data/mock-data';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePartners } from '@/hooks/usePartners';
@@ -96,7 +97,7 @@ export default function TodayAgenda({ viewMode, todayVisits: rawTodayVisits }: T
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    {v.type === 'visita' ? <Handshake className="h-3 w-3 text-info shrink-0" /> : <UserPlus className="h-3 w-3 text-warning shrink-0" />}
+                    {(() => { const brand = getAgendaTypeBrand(v.type); const Icon = brand.icon; return <Icon className={cn('h-3 w-3 shrink-0', brand.text)} />; })()}
                     <p className="text-sm font-medium truncate">{partner?.name || v.prospectPartner || 'Parceiro'}</p>
                     {viewMode === 'team' && (
                       <Badge variant="secondary" className="text-[10px]">
