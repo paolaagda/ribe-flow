@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import {
   Calendar, User as UserIcon, Briefcase, FileText, Link2,
-  CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle, Star, RotateCcw, MessageSquarePlus,
+  CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle, Star, RotateCcw, MessageSquarePlus, Users, X,
 } from 'lucide-react';
 import { isTaskPriority } from '@/hooks/useTasks';
 import {
@@ -79,17 +79,20 @@ interface TaskDetailModalProps {
   onCancel: (visitId: string, commentId: string) => void;
   onReopen?: (visitId: string, commentId: string) => void;
   onAdminNote?: (visitId: string, commentId: string, note: string) => void;
+  onUpdateAssignees?: (visitId: string, commentId: string, ids: string[]) => void;
   permissions: TaskPermissions;
   validAssignees: User[];
 }
 
 export default function TaskDetailModal({
-  item, partner, open, onOpenChange, onConclude, onCancel, onReopen, onAdminNote, permissions, validAssignees,
+  item, partner, open, onOpenChange, onConclude, onCancel, onReopen, onAdminNote, onUpdateAssignees,
+  permissions, validAssignees,
 }: TaskDetailModalProps) {
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [confirmReopen, setConfirmReopen] = useState(false);
   const [editingNote, setEditingNote] = useState(false);
   const [noteText, setNoteText] = useState('');
+  const [editingAssignees, setEditingAssignees] = useState(false);
   const history = useMemo(() => item ? buildHistory(item) : [], [item]);
 
   if (!item) return null;
@@ -272,22 +275,67 @@ export default function TaskDetailModal({
                 </>
               )}
 
-              {/* ── Assignees ── */}
-              {permissions.canAssign && validAssignees.length > 0 && (
-                <>
-                  <section className="space-y-2">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Usuários válidos para atribuição</h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {validAssignees.map(u => (
-                        <Badge key={u.id} variant="outline" className="text-[10px]">
-                          {u.name} <span className="text-muted-foreground ml-1 capitalize">({u.role})</span>
-                        </Badge>
-                      ))}
-                    </div>
-                  </section>
-                  <Separator />
-                </>
-              )}
+              {/* ── Assignees (real persisted) ── */}
+              <>
+                <section className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                      <Users className="h-3 w-3" />
+                      Atribuídos
+                    </h4>
+                    {permissions.canAssign && onUpdateAssignees && !editingAssignees && (
+                      <Button variant="ghost" size="sm" className="h-6 text-[11px] gap-1 px-2"
+                        onClick={() => setEditingAssignees(true)}
+                      >
+                        <Edit3 className="h-3 w-3" />
+                        {(item.task.taskAssignedUserIds?.length ?? 0) > 0 ? 'Editar' : 'Adicionar'}
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Principal */}
+                  <div className="flex items-center gap-2 text-xs">
+                    <Badge variant="secondary" className="text-[10px]">Principal</Badge>
+                    <span className="font-medium text-foreground">{responsible?.name || 'Sem responsável'}</span>
+                  </div>
+
+                  {/* Assigned list (read mode) */}
+                  {!editingAssignees && (
+                    (item.task.taskAssignedUserIds?.length ?? 0) > 0 ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.task.taskAssignedUserIds!.map(uid => {
+                          const u = getUserById(uid);
+                          return (
+                            <Badge key={uid} variant="outline" className="text-[10px]">
+                              {u?.name || uid}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground italic">
+                        Nenhum usuário atribuído além do responsável principal.
+                      </p>
+                    )
+                  )}
+
+                  {/* Edit mode */}
+                  {editingAssignees && onUpdateAssignees && (
+                    <AssigneesEditor
+                      validAssignees={validAssignees}
+                      principalId={item.task.userId}
+                      currentIds={item.task.taskAssignedUserIds || []}
+                      onSave={(ids) => {
+                        onUpdateAssignees(item.visit.id, item.task.id, ids);
+                        setEditingAssignees(false);
+                        toast.success('Atribuídos atualizados');
+                      }}
+                      onCancel={() => setEditingAssignees(false)}
+                    />
+                  )}
+                </section>
+                <Separator />
+              </>
 
               {/* ── C. History block ── */}
               <section className="space-y-2.5">
