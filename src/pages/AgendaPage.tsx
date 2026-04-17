@@ -728,7 +728,7 @@ export default function AgendaPage() {
           filterType={filterType}
           setFilterType={setFilterType}
           canCreate={canWrite("agenda.create")}
-          todayVisits={todayVisits}
+          onCreateClick={() => { setEditingVisit(null); setFormOverrides(undefined); setShowForm(true); }}
           onCreateClick={() => { setEditingVisit(null); setFormOverrides(undefined); setShowForm(true); }}
         />
         {view === "month" ? (
