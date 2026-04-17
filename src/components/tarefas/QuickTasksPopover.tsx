@@ -18,13 +18,10 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 /**
- * Caixa rápida pessoal de tarefas — sempre mostra apenas tarefas em que o
- * usuário logado é o responsável principal (task.userId).
- *
- * Limitação atual do modelo: tarefas hoje têm apenas um responsável (userId),
- * não existe ainda um campo de "atribuídos múltiplos". Quando esse campo for
- * adicionado ao VisitComment (ex.: taskAssignedUserIds: string[]), basta
- * incluir aqui no filtro: `|| t.task.taskAssignedUserIds?.includes(user.id)`.
+ * Caixa rápida pessoal de tarefas — mostra apenas tarefas em que o usuário
+ * logado seja:
+ *   - responsável principal (task.userId), OU
+ *   - usuário atribuído (task.taskAssignedUserIds)
  *
  * NÃO usar "responsável de carteira" nem visões globais de perfil — esta caixa
  * é estritamente pessoal, independente do cargo do usuário.
@@ -40,11 +37,13 @@ export default function QuickTasksPopover() {
   const [open, setOpen] = React.useState(false);
   const [showCreate, setShowCreate] = React.useState(false);
 
-  // Recorte estritamente pessoal: somente tarefas em que o usuário é o
-  // responsável principal. Ignora cargo/visão global e responsável de carteira.
+  // Recorte estritamente pessoal: principal OU atribuído real persistido.
   const personalTasks = React.useMemo<TaskItem[]>(() => {
     if (!user) return [];
-    return allTasks.filter(t => t.task.userId === user.id);
+    return allTasks.filter(t =>
+      t.task.userId === user.id ||
+      !!t.task.taskAssignedUserIds?.includes(user.id),
+    );
   }, [allTasks, user]);
 
   // Apenas status ativos (não concluída, não cancelada)

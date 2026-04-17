@@ -88,12 +88,14 @@ export function useTaskPermissions() {
     const responsibleId = getContextResponsible(item);
     const isResponsible = userId === responsibleId;
     const isCreator = userId === creatorId;
+    const isAssigned = !!item.task.taskAssignedUserIds?.includes(userId);
     const isCadastroRole = role === 'cadastro';
     const hasCadastroContext = item.task.taskCategory === 'document' || item.task.taskCategory === 'data';
     const hasPartner = !!item.partner;
     const isProspect = item.visit.type === 'prospecção';
 
-    const canConclude = isResponsible || isCreator;
+    // Conclude: principal, creator OR any assigned user
+    const canConclude = isResponsible || isCreator || isAssigned;
 
     let canEdit = false;
     if (!hasPartner && !hasCadastroContext && !isProspect) {
@@ -127,7 +129,7 @@ export function useTaskPermissions() {
       canCancel = isResponsible;
     }
 
-    const canChangeStatus = canEdit || isResponsible || isCreator;
+    const canChangeStatus = canEdit || isResponsible || isCreator || isAssigned;
 
     return { canConclude, canEdit, canAssign, canCancel, canChangeStatus, canReopen, canTerminalEdit };
   }, [user, taskRules]);
