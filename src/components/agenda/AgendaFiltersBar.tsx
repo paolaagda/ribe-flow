@@ -2,17 +2,13 @@ import { format, startOfWeek, endOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { ChevronLeft, ChevronRight, Filter, CalendarRange, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 type ViewMode = "day" | "week" | "month";
 
 interface AgendaFiltersBarProps {
   view: ViewMode;
-  setView: (v: ViewMode) => void;
   currentDate: Date;
   navigateCalendar: (dir: "prev" | "next") => void;
   setCurrentDate: (d: Date) => void;
@@ -20,18 +16,23 @@ interface AgendaFiltersBarProps {
   setFilterStatus: (s: string) => void;
   filterType: string;
   setFilterType: (t: string) => void;
-  dateRange: { from?: Date; to?: Date };
-  setDateRange: (r: { from?: Date; to?: Date }) => void;
   showFilters: boolean;
   setShowFilters: (s: boolean) => void;
 }
 
 export default function AgendaFiltersBar({
-  view, setView, currentDate, navigateCalendar, setCurrentDate,
+  view, currentDate, navigateCalendar, setCurrentDate,
   filterStatus, setFilterStatus, filterType, setFilterType,
-  dateRange, setDateRange, showFilters, setShowFilters,
+  showFilters, setShowFilters,
 }: AgendaFiltersBarProps) {
-  const hasActiveFilters = filterStatus !== "all" || filterType !== "all" || !!dateRange.from || !!dateRange.to;
+  const hasActiveFilters = filterStatus !== "all" || filterType !== "all";
+
+  const rangeLabel =
+    view === "day"
+      ? format(currentDate, "dd 'de' MMMM, yyyy", { locale: ptBR })
+      : view === "week"
+        ? `${format(startOfWeek(currentDate, { locale: ptBR }), "dd/MM")} — ${format(endOfWeek(currentDate, { locale: ptBR }), "dd/MM/yyyy")}`
+        : format(currentDate, "MMMM 'de' yyyy", { locale: ptBR });
 
   return (
     <div className="flex flex-col gap-2">
@@ -42,12 +43,8 @@ export default function AgendaFiltersBar({
             <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar("prev")}>
               <ChevronLeft className="h-3.5 w-3.5" />
             </Button>
-            <span className="text-ds-xs font-medium min-w-[100px] text-center capitalize">
-              {view === "day"
-                ? format(currentDate, "dd 'de' MMMM, yyyy", { locale: ptBR })
-                : view === "week"
-                  ? `${format(startOfWeek(currentDate, { locale: ptBR }), "dd/MM")} — ${format(endOfWeek(currentDate, { locale: ptBR }), "dd/MM/yyyy")}`
-                  : format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
+            <span className="text-ds-xs font-medium min-w-[140px] text-center capitalize">
+              {rangeLabel}
             </span>
             <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => navigateCalendar("next")}>
               <ChevronRight className="h-3.5 w-3.5" />
@@ -84,14 +81,6 @@ export default function AgendaFiltersBar({
             className="overflow-hidden"
           >
             <div className="flex items-center gap-2 flex-wrap py-2">
-              <Select value={view} onValueChange={(v) => setView(v as ViewMode)}>
-                <SelectTrigger className="w-24 h-7 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="day">Diário</SelectItem>
-                  <SelectItem value="week">Semanal</SelectItem>
-                  <SelectItem value="month">Mensal</SelectItem>
-                </SelectContent>
-              </Select>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="w-28 h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
                 <SelectContent>
@@ -111,56 +100,12 @@ export default function AgendaFiltersBar({
                   <SelectItem value="prospecção">Prospecção</SelectItem>
                 </SelectContent>
               </Select>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className={cn("h-7 text-xs gap-1", hasActiveFilters && "border-primary text-primary")}
-                  >
-                    <CalendarRange className="h-3 w-3" />
-                    {dateRange.from && dateRange.to
-                      ? `${format(dateRange.from, "dd/MM")} — ${format(dateRange.to, "dd/MM")}`
-                      : dateRange.from
-                        ? `A partir de ${format(dateRange.from, "dd/MM")}`
-                        : "Período"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-3" align="end">
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground">Data inicial</p>
-                      <Calendar
-                        mode="single"
-                        selected={dateRange.from}
-                        onSelect={(d) => setDateRange({ ...dateRange, from: d || undefined })}
-                        className="p-2 pointer-events-auto"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground">Data final</p>
-                      <Calendar
-                        mode="single"
-                        selected={dateRange.to}
-                        onSelect={(d) => setDateRange({ ...dateRange, to: d || undefined })}
-                        disabled={(d) => (dateRange.from ? d < dateRange.from : false)}
-                        className="p-2 pointer-events-auto"
-                      />
-                    </div>
-                    {(dateRange.from || dateRange.to) && (
-                      <Button variant="ghost" size="sm" className="w-full" onClick={() => setDateRange({})}>
-                        Limpar período
-                      </Button>
-                    )}
-                  </div>
-                </PopoverContent>
-              </Popover>
               {hasActiveFilters && (
                 <Button
                   variant="ghost"
                   size="sm"
                   className="h-7 text-xs gap-1 text-muted-foreground"
-                  onClick={() => { setFilterStatus("all"); setFilterType("all"); setDateRange({}); }}
+                  onClick={() => { setFilterStatus("all"); setFilterType("all"); }}
                 >
                   <X className="h-3 w-3" /> Limpar
                 </Button>

@@ -106,18 +106,13 @@ export default function AgendaPage() {
   const [showForm, setShowForm] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
-  const [filterUser, setFilterUser] = useState<string>("all");
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [editingVisit, setEditingVisit] = useState<Visit | null>(null);
-  
 
   const [showDragJustificationModal, setShowDragJustificationModal] = useState(false);
-  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
-  const [showTodayPanel, setShowTodayPanel] = useState(false);
   const [showInviteRejectionModal, setShowInviteRejectionModal] = useState(false);
   const [rejectingVisitId, setRejectingVisitId] = useState<string | null>(null);
-  const [showTasksPanel, setShowTasksPanel] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
 
@@ -223,14 +218,6 @@ export default function AgendaPage() {
     }
   }, [openCreateVisitFromMap, openVisitDetailFromMap, searchParams, setSearchParams]);
 
-  const togglePanel = (panel: "today" | "tasks") => {
-    if (panel === "today") {
-      setShowTodayPanel((prev) => !prev);
-    } else {
-      setShowTasksPanel((prev) => !prev);
-    }
-  };
-
   const { filterVisits } = useVisibility();
 
   const visibleVisits = useMemo(() => filterVisits(visits), [visits, filterVisits]);
@@ -241,14 +228,6 @@ export default function AgendaPage() {
     return visibleVisits.filter((v) => {
       if (filterStatus !== "all" && v.status !== filterStatus) return false;
       if (filterType !== "all" && v.type !== filterType) return false;
-      if (filterUser !== "all" && v.userId !== filterUser) return false;
-      if (dateRange.from && dateRange.to) {
-        const vDate = parseISO(v.date);
-        if (!isWithinInterval(vDate, { start: dateRange.from, end: dateRange.to })) return false;
-      } else if (dateRange.from) {
-        const vDate = parseISO(v.date);
-        if (vDate < dateRange.from) return false;
-      }
       if (activeInsight === "agenda_evolucao") {
         const d = parseISO(v.date);
         const ms = startOfMonth(new Date());
@@ -257,9 +236,6 @@ export default function AgendaPage() {
       }
       if (activeInsight === "agenda_valor_hoje") {
         if (!(v.status === "Planejada" && (v.potentialValue || 0) > 0)) return false;
-      }
-      if (activeInsight === "agenda_tarefas_atrasadas") {
-        // No direct visit filter for tasks insight
       }
       if (activeInsight === "agenda_taxa_conclusao") {
         if (v.status !== "Concluída") return false;
@@ -272,7 +248,7 @@ export default function AgendaPage() {
       }
       return true;
     });
-  }, [visibleVisits, filterStatus, filterType, filterUser, dateRange, activeInsight, todayStr]);
+  }, [visibleVisits, filterStatus, filterType, activeInsight]);
 
   const getParticipants = useCallback((v: Visit) => {
     const participants: { id: string; name: string; cargo: string }[] = [];
@@ -307,19 +283,6 @@ export default function AgendaPage() {
     });
   }, [filteredVisits, view, currentDate]);
 
-  const indicators = useMemo(() => {
-    const visitas = viewFilteredVisits.filter((v) => v.type === "visita");
-    const prospecoes = viewFilteredVisits.filter((v) => v.type === "prospecção");
-    return {
-      visitasCriadas: visitas.length,
-      visitasConcluidas: visitas.filter((v) => v.status === "Concluída").length,
-      prospecoesCriadas: prospecoes.length,
-      prospecoesConcluidas: prospecoes.filter((v) => v.status === "Concluída").length,
-      totalAgendas: viewFilteredVisits.length,
-      totalConcluidas: viewFilteredVisits.filter((v) => v.status === "Concluída").length,
-    };
-  }, [viewFilteredVisits]);
-
   const todayVisits = useMemo(() => {
     return visibleVisits.filter((v) => v.date === todayStr);
   }, [visibleVisits, todayStr]);
@@ -331,7 +294,33 @@ export default function AgendaPage() {
     };
   }, [todayVisits]);
 
-  const { pendingTasks, completedTasks, toggleTask } = useTasks();
+  const weekIndicators = useMemo(() => {
+    const start = startOfWeek(currentDate, { locale: ptBR });
+    const end = endOfWeek(currentDate, { locale: ptBR });
+    const inWeek = filteredVisits.filter((v) => {
+      const d = parseISO(v.date);
+      return isWithinInterval(d, { start, end });
+    });
+    return {
+      total: inWeek.length,
+      concluidas: inWeek.filter((v) => v.status === "Concluída").length,
+    };
+  }, [filteredVisits, currentDate]);
+
+  const monthIndicators = useMemo(() => {
+    const start = startOfMonth(currentDate);
+    const end = endOfMonth(currentDate);
+    const inMonth = filteredVisits.filter((v) => {
+      const d = parseISO(v.date);
+      return isWithinInterval(d, { start, end });
+    });
+    return {
+      total: inMonth.length,
+      concluidas: inMonth.filter((v) => v.status === "Concluída").length,
+    };
+  }, [filteredVisits, currentDate]);
+
+  const { toggleTask } = useTasks();
 
   // ── Drag-and-drop justification handler ─────────────────────────
   const handleDragJustificationConfirm = (reason: string) => {
@@ -685,7 +674,6 @@ export default function AgendaPage() {
 
       <AgendaFiltersBar
         view={view}
-        setView={setView}
         currentDate={currentDate}
         navigateCalendar={navigateCalendar}
         setCurrentDate={setCurrentDate}
@@ -693,28 +681,20 @@ export default function AgendaPage() {
         setFilterStatus={setFilterStatus}
         filterType={filterType}
         setFilterType={setFilterType}
-        dateRange={dateRange}
-        setDateRange={setDateRange}
         showFilters={showFilters}
         setShowFilters={setShowFilters}
       />
 
       <AnimatedFilterContent filterKey={activeInsight} className="space-y-ds-lg">
         <AgendaKpiGrid
+          view={view}
+          setView={setView}
           todayIndicators={todayIndicators}
-          indicators={indicators}
-          pendingTasks={pendingTasks}
-          completedTasks={completedTasks}
+          weekIndicators={weekIndicators}
+          monthIndicators={monthIndicators}
           canCreate={canWrite("agenda.create")}
-          showTodayPanel={showTodayPanel}
-          showTasksPanel={showTasksPanel}
-          togglePanel={togglePanel}
           todayVisits={todayVisits}
           onCreateClick={() => { setEditingVisit(null); setFormOverrides(undefined); setShowForm(true); }}
-          onOpenVisit={(visitId) => {
-            const visit = visits.find((v) => v.id === visitId);
-            if (visit) { setSelectedVisit(visit); setShowDetail(true); }
-          }}
         />
         {view === "month" ? (
           <AgendaMonthView
