@@ -95,7 +95,7 @@ function sortTasks(tasks: TaskItem[]): TaskItem[] {
 
 /* ══════════════════════════════════════════════════════════ */
 export default function GestaoTarefasPage() {
-  const { allTasks, toggleTask, reopenTask, updateTaskAdminNote } = useTasks();
+  const { allTasks, toggleTask, reopenTask, updateTaskAdminNote, updateTaskAssignees } = useTasks();
   const { user } = useAuth();
   const { getPartnerById } = usePartners();
   const { setVisits } = useVisits();
@@ -361,6 +361,7 @@ export default function GestaoTarefasPage() {
           onCancel={handleCancel}
           onReopen={reopenTask}
           onAdminNote={updateTaskAdminNote}
+          onUpdateAssignees={updateTaskAssignees}
           permissions={selectedPermissions}
           validAssignees={selectedAssignees}
         />
