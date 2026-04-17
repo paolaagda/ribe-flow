@@ -320,6 +320,37 @@ export default function AgendaPage() {
     };
   }, [filteredVisits, currentDate]);
 
+  // Visitas / Prospecções: contagem dentro do período ativo (Dia/Semana/Mês),
+  // ignorando o filtro de tipo para que os cards permaneçam estáveis ao alternar.
+  const typeAgnosticInPeriod = useMemo(() => {
+    let start: Date, end: Date;
+    if (view === "month") {
+      start = startOfMonth(currentDate);
+      end = endOfMonth(currentDate);
+    } else if (view === "week") {
+      start = startOfWeek(currentDate, { locale: ptBR });
+      end = endOfWeek(currentDate, { locale: ptBR });
+    } else {
+      start = new Date(currentDate); start.setHours(0, 0, 0, 0);
+      end = new Date(currentDate); end.setHours(23, 59, 59, 999);
+    }
+    return visibleVisits.filter((v) => {
+      if (filterStatus !== "all" && v.status !== filterStatus) return false;
+      const d = parseISO(v.date);
+      return isWithinInterval(d, { start, end });
+    });
+  }, [visibleVisits, filterStatus, view, currentDate]);
+
+  const visitIndicators = useMemo(() => {
+    const list = typeAgnosticInPeriod.filter((v) => v.type === "visita");
+    return { total: list.length, concluidas: list.filter((v) => v.status === "Concluída").length };
+  }, [typeAgnosticInPeriod]);
+
+  const prospectIndicators = useMemo(() => {
+    const list = typeAgnosticInPeriod.filter((v) => v.type === "prospecção");
+    return { total: list.length, concluidas: list.filter((v) => v.status === "Concluída").length };
+  }, [typeAgnosticInPeriod]);
+
   const { toggleTask } = useTasks();
 
   // ── Drag-and-drop justification handler ─────────────────────────
