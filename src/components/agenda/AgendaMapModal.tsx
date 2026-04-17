@@ -559,14 +559,14 @@ export default function AgendaMapModal({
                   <div className="relative">
                     <div className={cn(
                       'w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-background transition-shadow',
-                      isVisita ? 'bg-info text-info-foreground' : 'bg-warning text-warning-foreground',
+                      isVisita ? 'bg-info text-white' : 'bg-warning text-black',
                       isSelected && 'ring-2 ring-foreground/50 ring-offset-1 ring-offset-background shadow-lg',
                     )}>
                       {isVisita ? <Handshake className="h-3.5 w-3.5" /> : <UserPlus className="h-3.5 w-3.5" />}
                     </div>
                     <span className={cn(
                       'absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center border border-background shadow-sm',
-                      isVisita ? 'bg-info text-info-foreground' : 'bg-warning text-warning-foreground',
+                      isVisita ? 'bg-info text-white' : 'bg-warning text-black',
                     )}>
                       {i + 1}
                     </span>
@@ -601,13 +601,13 @@ export default function AgendaMapModal({
         <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
           <span className="flex items-center gap-1.5">
             <span className="w-4 h-4 rounded-full bg-info inline-flex items-center justify-center">
-              <Handshake className="h-2.5 w-2.5 text-info-foreground" />
+              <Handshake className="h-2.5 w-2.5 text-white" />
             </span>
             Visita
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-4 h-4 rounded-full bg-warning inline-flex items-center justify-center">
-              <UserPlus className="h-2.5 w-2.5 text-warning-foreground" />
+              <UserPlus className="h-2.5 w-2.5 text-black" />
             </span>
             Prospecção
           </span>
@@ -641,7 +641,7 @@ export default function AgendaMapModal({
                       <p className="font-semibold text-sm flex items-center gap-1.5">
                         <span className={cn(
                           'w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center',
-                          selectedPoint.visit.type === 'visita' ? 'bg-info text-info-foreground' : 'bg-warning text-warning-foreground',
+                          selectedPoint.visit.type === 'visita' ? 'bg-info text-white' : 'bg-warning text-black',
                         )}>
                           {selectedPoint.index + 1}
                         </span>
