@@ -93,33 +93,42 @@ export function useTasks() {
   /** Send completion notifications */
   const notifyCompletion = useCallback((task: VisitComment, visit: Visit, partner: Partner | undefined) => {
     if (!user) return;
-    const responsibleId = partner?.responsibleUserId || task.userId;
+    const principalId = task.userId;
     const partnerName = partner?.name || '—';
     const today = new Date().toISOString().split('T')[0];
+    const rules = getNotificationRules();
 
-    // Notify responsible principal if completer is not the responsible
-    if (getNotificationRules().taskCompletedNotifyResponsible && user.id !== responsibleId) {
-      addNotification({
-        type: 'task_completed',
-        visitId: visit.id,
-        fromUserId: user.id,
-        toUserId: responsibleId,
-        partnerId: visit.partnerId,
-        partnerName,
-        date: today,
-        time: '',
-        status: 'pending',
-        message: getRandomMessage('task_completed', {
-          nome: user.name,
-          parceiro: partnerName,
-          documento: task.text,
-        }),
+    // Build the unique set of stakeholders to notify (principal + assignees), excluding the actor
+    const stakeholderIds = new Set<string>();
+    if (principalId && principalId !== user.id) stakeholderIds.add(principalId);
+    (task.taskAssignedUserIds || []).forEach(uid => {
+      if (uid && uid !== user.id) stakeholderIds.add(uid);
+    });
+
+    if (rules.taskCompletedNotifyResponsible) {
+      stakeholderIds.forEach(toUserId => {
+        addNotification({
+          type: 'task_completed',
+          visitId: visit.id,
+          fromUserId: user.id,
+          toUserId,
+          partnerId: visit.partnerId,
+          partnerName,
+          date: today,
+          time: '',
+          status: 'pending',
+          message: getRandomMessage('task_completed', {
+            nome: user.name,
+            parceiro: partnerName,
+            documento: task.text,
+          }),
+        });
       });
     }
 
     // For cadastro tasks, also notify all cadastro-role users
     const hasCadastroContext = task.taskCategory === 'document' || task.taskCategory === 'data';
-    if (getNotificationRules().taskCadastroCompletedNotifyCadastro && hasCadastroContext) {
+    if (rules.taskCadastroCompletedNotifyCadastro && hasCadastroContext) {
       const cadastroUsers = mockUsers.filter(u => u.role === 'cadastro' && u.active && u.id !== user.id);
       cadastroUsers.forEach(cu => {
         addNotification({
