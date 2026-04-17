@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePartners } from '@/hooks/usePartners';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { cn } from '@/lib/utils';
 
 const potentialColors: Record<string, string> = {
   alto: 'bg-success/10 text-success border-success/20',
