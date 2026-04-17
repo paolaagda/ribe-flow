@@ -145,7 +145,7 @@ export default function QuickTasksPopover() {
               </p>
             </div>
           ) : (
-            <ScrollArea className="max-h-[420px]">
+            <ScrollArea className="h-[420px]">
               <div className="divide-y divide-border">
                 {sortedTasks.map(item => (
                   <QuickTaskRow
