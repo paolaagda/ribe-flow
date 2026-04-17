@@ -283,19 +283,6 @@ export default function AgendaPage() {
     });
   }, [filteredVisits, view, currentDate]);
 
-  const indicators = useMemo(() => {
-    const visitas = viewFilteredVisits.filter((v) => v.type === "visita");
-    const prospecoes = viewFilteredVisits.filter((v) => v.type === "prospecção");
-    return {
-      visitasCriadas: visitas.length,
-      visitasConcluidas: visitas.filter((v) => v.status === "Concluída").length,
-      prospecoesCriadas: prospecoes.length,
-      prospecoesConcluidas: prospecoes.filter((v) => v.status === "Concluída").length,
-      totalAgendas: viewFilteredVisits.length,
-      totalConcluidas: viewFilteredVisits.filter((v) => v.status === "Concluída").length,
-    };
-  }, [viewFilteredVisits]);
-
   const todayVisits = useMemo(() => {
     return visibleVisits.filter((v) => v.date === todayStr);
   }, [visibleVisits, todayStr]);
@@ -307,7 +294,33 @@ export default function AgendaPage() {
     };
   }, [todayVisits]);
 
-  const { pendingTasks, completedTasks, toggleTask } = useTasks();
+  const weekIndicators = useMemo(() => {
+    const start = startOfWeek(currentDate, { locale: ptBR });
+    const end = endOfWeek(currentDate, { locale: ptBR });
+    const inWeek = filteredVisits.filter((v) => {
+      const d = parseISO(v.date);
+      return isWithinInterval(d, { start, end });
+    });
+    return {
+      total: inWeek.length,
+      concluidas: inWeek.filter((v) => v.status === "Concluída").length,
+    };
+  }, [filteredVisits, currentDate]);
+
+  const monthIndicators = useMemo(() => {
+    const start = startOfMonth(currentDate);
+    const end = endOfMonth(currentDate);
+    const inMonth = filteredVisits.filter((v) => {
+      const d = parseISO(v.date);
+      return isWithinInterval(d, { start, end });
+    });
+    return {
+      total: inMonth.length,
+      concluidas: inMonth.filter((v) => v.status === "Concluída").length,
+    };
+  }, [filteredVisits, currentDate]);
+
+  const { toggleTask } = useTasks();
 
   // ── Drag-and-drop justification handler ─────────────────────────
   const handleDragJustificationConfirm = (reason: string) => {
