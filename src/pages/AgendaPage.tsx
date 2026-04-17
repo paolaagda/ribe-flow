@@ -729,7 +729,6 @@ export default function AgendaPage() {
           setFilterType={setFilterType}
           canCreate={canWrite("agenda.create")}
           onCreateClick={() => { setEditingVisit(null); setFormOverrides(undefined); setShowForm(true); }}
-          onCreateClick={() => { setEditingVisit(null); setFormOverrides(undefined); setShowForm(true); }}
         />
         {view === "month" ? (
           <AgendaMonthView
