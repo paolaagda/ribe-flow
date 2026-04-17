@@ -18,9 +18,16 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 /**
- * Caixa rápida pessoal de tarefas — sempre filtra por tarefas próprias do
- * usuário (responsável principal OU responsável de carteira do parceiro vinculado),
- * ignorando visões globais de perfil.
+ * Caixa rápida pessoal de tarefas — sempre mostra apenas tarefas em que o
+ * usuário logado é o responsável principal (task.userId).
+ *
+ * Limitação atual do modelo: tarefas hoje têm apenas um responsável (userId),
+ * não existe ainda um campo de "atribuídos múltiplos". Quando esse campo for
+ * adicionado ao VisitComment (ex.: taskAssignedUserIds: string[]), basta
+ * incluir aqui no filtro: `|| t.task.taskAssignedUserIds?.includes(user.id)`.
+ *
+ * NÃO usar "responsável de carteira" nem visões globais de perfil — esta caixa
+ * é estritamente pessoal, independente do cargo do usuário.
  *
  * Mostra apenas status ativos: Pendente, Em andamento, Aguardando terceiro.
  * Não exibe Concluídas nem Canceladas. Sem limite artificial — usa scroll.
@@ -33,17 +40,12 @@ export default function QuickTasksPopover() {
   const [open, setOpen] = React.useState(false);
   const [showCreate, setShowCreate] = React.useState(false);
 
-  // Recorte pessoal: somente tarefas em que o usuário é responsável principal
-  // OU responsável de carteira do parceiro vinculado. Ignora visão global.
+  // Recorte estritamente pessoal: somente tarefas em que o usuário é o
+  // responsável principal. Ignora cargo/visão global e responsável de carteira.
   const personalTasks = React.useMemo<TaskItem[]>(() => {
     if (!user) return [];
-    return allTasks.filter(t => {
-      const isOwner = t.task.userId === user.id;
-      const partner = getPartnerById(t.visit.partnerId);
-      const isPartnerResponsible = partner?.responsibleUserId === user.id;
-      return isOwner || isPartnerResponsible;
-    });
-  }, [allTasks, user, getPartnerById]);
+    return allTasks.filter(t => t.task.userId === user.id);
+  }, [allTasks, user]);
 
   // Apenas status ativos (não concluída, não cancelada)
   const activeTasks = React.useMemo<TaskItem[]>(
