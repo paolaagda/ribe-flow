@@ -197,8 +197,8 @@ export default function AnalisesPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-ds-sm">
         <AnimatedKpiCard icon={BarChart3} label="Total" value={kpis.total} color="text-foreground" delay={0} />
         <AnimatedKpiCard icon={CheckCircle} label="Concluídas" value={kpis.completed} color="text-success" delay={0.1} />
-        <AnimatedKpiCard icon={Eye} label="Visitas" value={kpis.visitas} color="text-info" delay={0.2} />
-        <AnimatedKpiCard icon={Search} label="Prospecções" value={kpis.prospections} color="text-warning" delay={0.3} />
+        <AnimatedKpiCard icon={agendaTypeBranding.visita.icon} label="Visitas" value={kpis.visitas} color={agendaTypeBranding.visita.text} delay={0.2} />
+        <AnimatedKpiCard icon={agendaTypeBranding["prospecção"].icon} label="Prospecções" value={kpis.prospections} color={agendaTypeBranding["prospecção"].text} delay={0.3} />
       </div>
 
       {/* Conversion badge */}

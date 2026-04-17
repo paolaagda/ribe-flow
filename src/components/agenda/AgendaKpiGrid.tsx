@@ -1,6 +1,7 @@
 import AnimatedKpiCard from "@/components/shared/AnimatedKpiCard";
 import { Card, CardContent } from "@/components/ui/card";
-import { CalendarDays, CalendarRange, CalendarClock, Plus, MapPin, Sparkles } from "lucide-react";
+import { CalendarDays, CalendarRange, CalendarClock, Plus } from "lucide-react";
+import { agendaTypeBranding } from "@/lib/agenda-type-branding";
 import { motion } from "framer-motion";
 
 type ViewMode = "day" | "week" | "month";
@@ -65,21 +66,21 @@ export default function AgendaKpiGrid({
         active={view === "month"}
       />
       <AnimatedKpiCard
-        icon={MapPin}
+        icon={agendaTypeBranding.visita.icon}
         label="Visitas"
         value={visitIndicators.concluidas}
         secondaryValue={visitIndicators.total}
-        color="text-primary"
+        color={agendaTypeBranding.visita.text}
         delay={0.2}
         onClick={() => setFilterType(filterType === "visita" ? "all" : "visita")}
         active={filterType === "visita"}
       />
       <AnimatedKpiCard
-        icon={Sparkles}
+        icon={agendaTypeBranding["prospecção"].icon}
         label="Prospecções"
         value={prospectIndicators.concluidas}
         secondaryValue={prospectIndicators.total}
-        color="text-accent-foreground"
+        color={agendaTypeBranding["prospecção"].text}
         delay={0.25}
         onClick={() => setFilterType(filterType === "prospecção" ? "all" : "prospecção")}
         active={filterType === "prospecção"}
