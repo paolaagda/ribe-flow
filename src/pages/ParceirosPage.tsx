@@ -283,28 +283,31 @@ export default function ParceirosPage() {
             {storesPagination.paginatedItems.map(store => {
               const partner = partners.find(p => p.id === store.partnerId);
               return (
-                <Card key={store.id} className="card-flat group overflow-hidden relative hover:shadow-[var(--shadow-md)] transition-all duration-300 hover:-translate-y-0.5">
-                  <CardContent className="p-ds-sm space-y-3.5">
-                    <div className="flex items-center gap-3">
-                      <div className="icon-container-sm">
+                <Card key={store.id} className="group relative overflow-hidden border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-muted-foreground/30 via-muted-foreground/50 to-muted-foreground/30" aria-hidden />
+                  <CardContent className="p-ds-sm pl-[calc(theme(spacing.ds-sm)+0.25rem)] space-y-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0 bg-muted ring-1 ring-border/60">
                         <StoreIcon className="h-4 w-4 text-muted-foreground" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-ds-sm font-semibold truncate">{store.name}</p>
-                        <p className="text-ds-xs text-muted-foreground">Centro de custo</p>
+                        <p className="text-[15px] font-semibold leading-tight truncate text-foreground">{store.name}</p>
+                        <p className="text-ds-xs text-muted-foreground mt-0.5">Centro de custo</p>
                       </div>
                     </div>
-                    <p className="text-ds-xs text-muted-foreground flex items-center gap-1 truncate">
-                      <MapPin className="h-3 w-3 shrink-0" /> {store.address}
-                    </p>
-                    <p className="text-ds-xs text-muted-foreground flex items-center gap-1">
-                      <Phone className="h-3 w-3 shrink-0" /> {store.phone} — {store.contact}
-                    </p>
-                    {partner && (
-                      <p className="text-ds-xs text-muted-foreground flex items-center gap-1">
-                        <Building2 className="h-3 w-3" /> Parceiro: <span className="font-medium text-foreground">{partner.name}</span>
+                    <div className="space-y-1.5 border-t border-border/50 pt-2">
+                      <p className="text-ds-xs text-muted-foreground flex items-center gap-1.5 truncate">
+                        <MapPin className="h-3 w-3 shrink-0" /> {store.address}
                       </p>
-                    )}
+                      <p className="text-ds-xs text-muted-foreground flex items-center gap-1.5">
+                        <Phone className="h-3 w-3 shrink-0" /> {store.phone} — {store.contact}
+                      </p>
+                      {partner && (
+                        <p className="text-ds-xs text-muted-foreground flex items-center gap-1.5">
+                          <Building2 className="h-3 w-3 shrink-0" /> Parceiro: <span className="font-medium text-foreground truncate">{partner.name}</span>
+                        </p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               );
