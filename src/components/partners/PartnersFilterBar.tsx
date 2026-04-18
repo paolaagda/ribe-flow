@@ -59,7 +59,7 @@ export default function PartnersFilterBar({ filters, onFiltersChange, viewMode, 
   const toggleFilter = (key: 'hasPendingDocs' | 'hasOpenTasks' | 'hasActiveRegistration') => update({ [key]: !filters[key] });
 
   return (
-    <div className="space-y-ds-xs">
+    <div className="space-y-ds-xs rounded-lg border border-border/60 bg-muted/30 p-ds-xs">
       <div className="flex items-center gap-ds-xs">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -67,14 +67,14 @@ export default function PartnersFilterBar({ filters, onFiltersChange, viewMode, 
             placeholder="Buscar por nome, CNPJ ou endereço..."
             value={filters.search}
             onChange={e => update({ search: e.target.value })}
-            className="pl-10"
+            className="pl-10 h-9 bg-background border-border/70 focus-visible:ring-1 focus-visible:ring-primary/40"
           />
         </div>
-        <div className="flex items-center gap-1 border border-border rounded-lg p-0.5">
+        <div className="flex items-center gap-0.5 border border-border/70 rounded-lg p-0.5 bg-background">
           <Button
             variant={viewMode === 'parceiros' ? 'default' : 'ghost'}
             size="sm"
-            className="h-8 text-xs gap-1.5"
+            className="h-7 text-xs gap-1.5 px-2.5"
             onClick={() => onViewModeChange('parceiros')}
           >
             <Building2 className="h-3.5 w-3.5" /> Parceiros
@@ -82,7 +82,7 @@ export default function PartnersFilterBar({ filters, onFiltersChange, viewMode, 
           <Button
             variant={viewMode === 'lojas' ? 'default' : 'ghost'}
             size="sm"
-            className="h-8 text-xs gap-1.5"
+            className="h-7 text-xs gap-1.5 px-2.5"
             onClick={() => onViewModeChange('lojas')}
           >
             <StoreIcon className="h-3.5 w-3.5" /> Lojas
