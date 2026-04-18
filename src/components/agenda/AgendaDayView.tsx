@@ -3,7 +3,7 @@ import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { statusBgClasses, getUserById } from "@/data/mock-data";
+import { getUserById } from "@/data/mock-data";
 import { Clock as ClockIcon, FileText, ListTodo } from "lucide-react";
 import { getAgendaTypeBrand } from "@/lib/agenda-type-branding";
 import { statusDotClasses } from "@/lib/agenda-status-dots";
