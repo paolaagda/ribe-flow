@@ -349,41 +349,35 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
             )}
           </div>
 
-          {/* Status reasons — refined with lateral bar pattern */}
+          {/* Status reasons — refined with shared ToneBlock */}
           {visit.status === 'Reagendada' && visit.rescheduleReason && (
-            <div className="mx-5 mb-3 relative overflow-hidden flex items-start gap-2.5 p-3 rounded-lg bg-warning/10 border border-warning/20 text-sm">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-warning/70 via-warning/40 to-warning/10" />
-              <div className="w-7 h-7 rounded-md bg-warning/15 flex items-center justify-center shrink-0 ml-1">
-                <AlertTriangle className="h-3.5 w-3.5 text-warning" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] uppercase tracking-wider font-semibold text-warning">Motivo do reagendamento</p>
-                <p className="text-sm leading-snug mt-0.5">{visit.rescheduleReason}</p>
-              </div>
+            <div className="mx-5 mb-3">
+              <ToneBlock
+                tone="warning"
+                icon={AlertTriangle}
+                eyebrow="Motivo do reagendamento"
+                description={visit.rescheduleReason}
+              />
             </div>
           )}
           {visit.status === 'Cancelada' && visit.cancelReason && (
-            <div className="mx-5 mb-3 relative overflow-hidden flex items-start gap-2.5 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-destructive/70 via-destructive/40 to-destructive/10" />
-              <div className="w-7 h-7 rounded-md bg-destructive/15 flex items-center justify-center shrink-0 ml-1">
-                <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] uppercase tracking-wider font-semibold text-destructive">Motivo do cancelamento</p>
-                <p className="text-sm leading-snug mt-0.5">{visit.cancelReason}</p>
-              </div>
+            <div className="mx-5 mb-3">
+              <ToneBlock
+                tone="destructive"
+                icon={AlertTriangle}
+                eyebrow="Motivo do cancelamento"
+                description={visit.cancelReason}
+              />
             </div>
           )}
           {visit.status === 'Inconclusa' && visit.inconclusiveReason && (
-            <div className="mx-5 mb-3 relative overflow-hidden flex items-start gap-2.5 p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500/70 via-purple-500/40 to-purple-500/10" />
-              <div className="w-7 h-7 rounded-md bg-purple-500/15 flex items-center justify-center shrink-0 ml-1">
-                <AlertTriangle className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] uppercase tracking-wider font-semibold text-purple-600 dark:text-purple-400">Motivo do compromisso inconcluso</p>
-                <p className="text-sm leading-snug mt-0.5">{visit.inconclusiveReason}</p>
-              </div>
+            <div className="mx-5 mb-3">
+              <ToneBlock
+                tone="primary"
+                icon={AlertTriangle}
+                eyebrow="Motivo do compromisso inconcluso"
+                description={visit.inconclusiveReason}
+              />
             </div>
           )}
 
