@@ -29,6 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import JustificationModal from '@/components/agenda/JustificationModal';
 import { getStatusRules } from '@/hooks/useStatusRules';
 import { getFieldRules } from '@/hooks/useFieldRules';
+import { ToneBlock } from '@/components/shared';
 
 import DetailHeader from '@/components/agenda/detail/DetailHeader';
 import DetailScheduleFields from '@/components/agenda/detail/DetailScheduleFields';
@@ -429,26 +430,21 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
               )
             )}
             {hasActive && (
-              <div className="relative overflow-hidden flex items-start gap-2.5 p-3 rounded-lg bg-info/5 border border-info/20">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-info/70 via-info/40 to-info/10" />
-                <div className="w-7 h-7 rounded-md bg-info/10 flex items-center justify-center shrink-0 ml-1">
-                  <FileText className="h-3.5 w-3.5 text-info" />
+              <ToneBlock
+                tone="info"
+                icon={FileText}
+                eyebrow={`Cadastro em andamento (${activeCount})`}
+              >
+                <div className="space-y-1 mt-1">
+                  {regs.map(r => (
+                    <div key={r.id} className="flex items-center gap-2 text-[11px] text-muted-foreground flex-wrap">
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-medium">{r.bank}</Badge>
+                      <span>{r.status}</span>
+                      <span className="text-muted-foreground/60">• {r.handlingWith}</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="space-y-1.5 min-w-0 flex-1">
-                  <p className="text-[10px] uppercase tracking-wider font-semibold text-info">
-                    Cadastro em andamento ({activeCount})
-                  </p>
-                  <div className="space-y-1">
-                    {regs.map(r => (
-                      <div key={r.id} className="flex items-center gap-2 text-[11px] text-muted-foreground flex-wrap">
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-medium">{r.bank}</Badge>
-                        <span>{r.status}</span>
-                        <span className="text-muted-foreground/60">• {r.handlingWith}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              </ToneBlock>
             )}
           </div>
 
