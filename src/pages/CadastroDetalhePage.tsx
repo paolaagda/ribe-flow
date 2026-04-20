@@ -321,33 +321,39 @@ export default function CadastroDetalhePage() {
               </CardContent>
             </Card>
 
-            {/* Documentos Pendentes */}
+            {/* Documentos */}
             {opData && opData.totalDocsCount > 0 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-primary" /> Documentos
+              <Card className="border-border/60 shadow-sm overflow-hidden">
+                <CardHeader className="bg-muted/30 border-b border-border/60 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2.5">
+                    <span className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <FileText className="h-3.5 w-3.5" />
+                    </span>
+                    Documentos
                     {opData.pendingDocsCount > 0 && (
-                      <Badge variant="outline" className="text-[10px] bg-warning/10 text-warning border-warning/20 ml-1">
+                      <Badge variant="outline" className="text-[10px] font-medium bg-warning/10 text-warning border-warning/20 ml-1">
                         {opData.pendingDocsCount} pendente{opData.pendingDocsCount > 1 ? 's' : ''}
                       </Badge>
                     )}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-0">
+                <CardContent className="pt-5">
                   <PartnerDocuments partnerId={reg.partnerId} />
                 </CardContent>
               </Card>
             )}
 
             {/* Observações */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" /> Observações
+            <Card className="border-border/60 shadow-sm overflow-hidden">
+              <CardHeader className="bg-muted/30 border-b border-border/60 py-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2.5">
+                  <span className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <FileText className="h-3.5 w-3.5" />
+                  </span>
+                  Observações
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-5">
                 {reg.updates.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-4">Nenhuma observação registrada.</p>
                 ) : (
@@ -355,7 +361,7 @@ export default function CadastroDetalhePage() {
                     {[...reg.updates].reverse().map((upd, i) => {
                       const updUser = mockUsers.find(u => u.id === upd.userId);
                       return (
-                        <div key={i} className={cn('flex gap-3', i === 0 && 'bg-accent/50 rounded-lg p-3 -mx-1')}>
+                        <div key={i} className={cn('flex gap-3 rounded-lg p-3 transition-colors', i === 0 ? 'bg-primary/5 border border-primary/15' : 'hover:bg-muted/30')}>
                           <Avatar className="h-7 w-7 shrink-0">
                             {getAvatar(upd.userId) && <AvatarImage src={getAvatar(upd.userId)} />}
                             <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
@@ -363,14 +369,14 @@ export default function CadastroDetalhePage() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium">{updUser?.name.split(' ')[0] || 'Usuário'}</span>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-medium text-foreground">{updUser?.name.split(' ')[0] || 'Usuário'}</span>
                               <span className="text-[10px] text-muted-foreground">
                                 {format(new Date(upd.date), "dd/MM/yy", { locale: ptBR })}{upd.time ? ` · ${upd.time}` : ''}
                               </span>
-                              {i === 0 && <Badge variant="secondary" className="text-[9px] px-1 py-0">Mais recente</Badge>}
+                              {i === 0 && <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-primary/10 text-primary border-primary/20 font-medium">Mais recente</Badge>}
                             </div>
-                            <p className="text-xs text-muted-foreground mt-0.5">{upd.text}</p>
+                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{upd.text}</p>
                           </div>
                         </div>
                       );
@@ -381,13 +387,16 @@ export default function CadastroDetalhePage() {
             </Card>
 
             {/* Histórico / Auditoria */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-primary" /> Histórico de Alterações
+            <Card className="border-border/60 shadow-sm overflow-hidden">
+              <CardHeader className="bg-muted/30 border-b border-border/60 py-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2.5">
+                  <span className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <Clock className="h-3.5 w-3.5" />
+                  </span>
+                  Histórico de alterações
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-5">
                 <AuditTimeline logs={auditLogs} emptyMessage="Nenhuma alteração registrada ainda." />
               </CardContent>
             </Card>
