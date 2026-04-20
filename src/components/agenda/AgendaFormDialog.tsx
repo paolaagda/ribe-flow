@@ -9,9 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AnimatePresence, motion } from "framer-motion";
-import { DollarSign } from "lucide-react";
+import { DollarSign, Users, Building2, CalendarDays, Landmark, Package, FileText, Info, RefreshCw, XCircle, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { getAgendaTypeBrand } from "@/lib/agenda-type-branding";
 import {
   Visit,
   VisitStatus,
