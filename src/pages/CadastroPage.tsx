@@ -801,23 +801,23 @@ export default function CadastroPage() {
             ))}
           </div>
         ) : (
-          <Card className="overflow-hidden border-border/50">
+          <Card className="overflow-hidden border-border/60 shadow-sm">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[220px]" onClick={() => toggleSort('partner')}>
+                  <TableRow className="hover:bg-transparent bg-muted/40 border-b border-border/60">
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[220px] text-xs font-semibold uppercase tracking-wider text-muted-foreground" onClick={() => toggleSort('partner')}>
                       <span className="flex items-center">Parceiro <SortIcon field="partner" /></span>
                     </TableHead>
-                    <TableHead className="cursor-pointer select-none whitespace-nowrap" onClick={() => toggleSort('status')}>
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap text-xs font-semibold uppercase tracking-wider text-muted-foreground" onClick={() => toggleSort('status')}>
                       <span className="flex items-center">Status <SortIcon field="status" /></span>
                     </TableHead>
-                    <TableHead className="whitespace-nowrap">Tratando com</TableHead>
-                    <TableHead className="min-w-[200px]">Observação</TableHead>
-                    <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[200px]" onClick={() => toggleSort('date')}>
+                    <TableHead className="whitespace-nowrap text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tratando com</TableHead>
+                    <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Observação</TableHead>
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[200px] text-xs font-semibold uppercase tracking-wider text-muted-foreground" onClick={() => toggleSort('date')}>
                       <span className="flex items-center">Atualização <SortIcon field="date" /></span>
                     </TableHead>
-                    <TableHead className="whitespace-nowrap text-center">Contrato</TableHead>
+                    <TableHead className="whitespace-nowrap text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contrato</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
