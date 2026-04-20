@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import {
   Calendar, User as UserIcon, Briefcase, FileText, Link2,
   CheckCircle2, Edit3, UserPlus, XCircle, AlertTriangle, Star, RotateCcw, MessageSquarePlus, Users, X,
+  ListChecks, ClipboardList, History, MessageSquare, Handshake,
 } from 'lucide-react';
 import { isTaskPriority } from '@/hooks/useTasks';
 import {
