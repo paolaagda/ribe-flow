@@ -611,16 +611,16 @@ export default function CadastroPage() {
 
         {/* Status / Tratando Com / Bancos - Tabs */}
         <Tabs value={kpiTab} onValueChange={setKpiTab} className="w-full">
-          <TabsList className="w-full justify-center">
-            <TabsTrigger value="status" className="gap-1.5">
+          <TabsList className="w-full justify-center bg-muted/40 p-1 h-auto">
+            <TabsTrigger value="status" className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <FileCheck className="h-3.5 w-3.5" /> Status
               <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(statusCounts).filter(k => statusCounts[k] > 0).length}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="handlers" className="gap-1.5">
+            <TabsTrigger value="handlers" className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <Users className="h-3.5 w-3.5" /> Tratando Com
               <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(handlerCounts).filter(k => handlerCounts[k] > 0).length}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="banks" className="gap-1.5">
+            <TabsTrigger value="banks" className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <Building2 className="h-3.5 w-3.5" /> Bancos
               <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(bankCounts).filter(k => bankCounts[k] > 0).length}</Badge>
             </TabsTrigger>
