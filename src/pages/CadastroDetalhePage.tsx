@@ -249,14 +249,17 @@ export default function CadastroDetalhePage() {
           {/* Left column */}
           <div className="lg:col-span-2 space-y-ds-md">
             {/* Status e Andamento */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-primary" /> Status e Andamento
+            <Card className="border-border/60 shadow-sm overflow-hidden">
+              <CardHeader className="bg-muted/30 border-b border-border/60 py-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2.5">
+                  <span className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <TrendingUp className="h-3.5 w-3.5" />
+                  </span>
+                  Status e andamento
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0 space-y-4">
-                <Progress value={progressPercent} className="h-2" />
+              <CardContent className="pt-5 space-y-5">
+                <Progress value={progressPercent} className="h-1.5" />
                 <div className="flex justify-between">
                   {STATUS_STEPS.map((step, i) => {
                     const isActive = i === currentStepIndex;
@@ -266,7 +269,7 @@ export default function CadastroDetalhePage() {
                     return (
                       <Tooltip key={step}>
                         <TooltipTrigger asChild>
-                          <div className="flex flex-col items-center gap-1 flex-1">
+                          <div className="flex flex-col items-center gap-1.5 flex-1">
                             <div className={cn(
                               'h-3 w-3 rounded-full border-2 transition-colors',
                               isDone || isCompleted ? 'bg-primary border-primary' :
