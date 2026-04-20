@@ -9,9 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AnimatePresence, motion } from "framer-motion";
-import { DollarSign } from "lucide-react";
+import { DollarSign, Users, Building2, CalendarDays, Landmark, Package, FileText, Info, RefreshCw, XCircle, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { getAgendaTypeBrand } from "@/lib/agenda-type-branding";
 import {
   Visit,
   VisitStatus,
@@ -196,21 +197,58 @@ export default function AgendaFormDialog({
   const toggleArray = (arr: string[], item: string) =>
     arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 
+  const typeBrand = getAgendaTypeBrand(formData.type);
+  const TypeIcon = typeBrand.icon;
+  const stepLabels = ["Identificação", "Contexto", "Resumo"];
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingVisit ? "Editar Compromisso" : "Novo Compromisso"} — Etapa {formStep + 1}/3
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-lg max-h-[88vh] overflow-hidden p-0 gap-0 flex flex-col border-border/60">
+          {/* Refined header with type tile + lateral gradient bar */}
+          <div className="relative shrink-0 border-b border-border/60">
+            <div className={cn("absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b", typeBrand.colorToken === "info" ? "from-info to-info/60" : "from-warning to-warning/60")} />
+            <DialogHeader className="px-5 py-4 pl-6 space-y-0">
+              <div className="flex items-start gap-3">
+                <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center shrink-0", typeBrand.bgSoft, typeBrand.text)}>
+                  <TypeIcon className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={cn("text-[10px] font-semibold uppercase tracking-wider", typeBrand.text)}>
+                    {typeBrand.label}
+                  </p>
+                  <DialogTitle className="text-base font-semibold leading-tight mt-0.5">
+                    {editingVisit ? "Editar compromisso" : "Novo compromisso"}
+                  </DialogTitle>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Etapa {formStep + 1} de 3 · <span className="font-medium text-foreground/80">{stepLabels[formStep]}</span>
+                  </p>
+                </div>
+              </div>
+              {/* Step indicator */}
+              <div className="flex items-center gap-1.5 mt-4">
+                {stepLabels.map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "h-1 flex-1 rounded-full transition-all",
+                      i < formStep ? typeBrand.bg : i === formStep ? typeBrand.bg : "bg-muted"
+                    )}
+                  />
+                ))}
+              </div>
+            </DialogHeader>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-5 py-5">
 
           {formStep === 0 && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Tipo</Label>
+            <div className="space-y-5">
+              {/* Identificação */}
+              <SectionHeader icon={Info} label="Identificação" />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground/80">Tipo</Label>
                   <Select
                     value={formData.type}
                     onValueChange={(v) =>
@@ -236,8 +274,8 @@ export default function AgendaFormDialog({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Meio</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground/80">Formato</Label>
                   <Select
                     value={formData.medio}
                     onValueChange={(v) => setFormData({ ...formData, medio: v as "presencial" | "remoto" })}
@@ -254,33 +292,20 @@ export default function AgendaFormDialog({
               </div>
 
               {formData.type === "prospecção" && (
-                <p className="text-xs text-muted-foreground bg-muted/50 rounded px-3 py-2">
-                  ⚠ Prospecções são oportunidades futuras e não fazem parte da base de parceiros.
-                </p>
+                <div className="relative overflow-hidden rounded-lg border border-warning/20 bg-warning/5">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-warning to-warning/60" />
+                  <div className="flex items-start gap-2.5 px-3 py-2.5 pl-4">
+                    <AlertTriangle className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
+                    <p className="text-xs text-warning leading-relaxed">
+                      Prospecções são oportunidades futuras e não fazem parte da base de parceiros.
+                    </p>
+                  </div>
+                </div>
               )}
 
-              <div className="space-y-2">
-                <Label>Período da agenda *</Label>
-                <Select
-                  value={formData.period}
-                  onValueChange={(v) => setFormData({ ...formData, period: v as VisitPeriod })}
-                >
-                  <SelectTrigger className={cn(!formData.period && "text-muted-foreground")}>
-                    <SelectValue placeholder="Selecione o período" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getActiveItems("periods").map((p) => (
-                      <SelectItem key={p} value={p.toLowerCase() as VisitPeriod}>
-                        {p}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               {formData.type === "visita" ? (
-                <div className="space-y-2">
-                  <Label>Parceiro</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground/80">Parceiro *</Label>
                   <Select
                     value={formData.partnerId}
                     onValueChange={(v) => {
@@ -300,11 +325,11 @@ export default function AgendaFormDialog({
                     </SelectContent>
                   </Select>
                   {formData.partnerId && (
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">{getPartnerById(formData.partnerId)?.address}</p>
+                    <div className="space-y-1.5 mt-2 p-2.5 rounded-md bg-muted/30 border border-border/60">
+                      <p className="text-[11px] text-muted-foreground">{getPartnerById(formData.partnerId)?.address}</p>
                       <div className="flex flex-wrap gap-1">
                         {getPartnerById(formData.partnerId)?.structures.map((s) => (
-                          <Badge key={s} variant="secondary" className="text-[10px]">
+                          <Badge key={s} variant="outline" className="text-[10px] font-medium bg-muted/40 text-muted-foreground border-border/60">
                             {s}
                           </Badge>
                         ))}
@@ -314,50 +339,52 @@ export default function AgendaFormDialog({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label>Parceiro</Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-foreground/80">Parceiro *</Label>
                     <Input
                       value={formData.prospectPartner}
                       onChange={(e) => setFormData({ ...formData, prospectPartner: e.target.value })}
                       placeholder="Nome do parceiro"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>CNPJ</Label>
-                    <Input
-                      value={formData.prospectCnpj}
-                      onChange={(e) => setFormData({ ...formData, prospectCnpj: e.target.value })}
-                      placeholder="00.000.000/0000-00"
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground/80">CNPJ</Label>
+                      <Input
+                        value={formData.prospectCnpj}
+                        onChange={(e) => setFormData({ ...formData, prospectCnpj: e.target.value })}
+                        placeholder="00.000.000/0000-00"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground/80">E-mail *</Label>
+                      <Input
+                        type="email"
+                        value={formData.prospectEmail}
+                        onChange={(e) => setFormData({ ...formData, prospectEmail: e.target.value })}
+                        placeholder="email@parceiro.com"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>E-mail *</Label>
-                    <Input
-                      type="email"
-                      value={formData.prospectEmail}
-                      onChange={(e) => setFormData({ ...formData, prospectEmail: e.target.value })}
-                      placeholder="email@parceiro.com"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Endereço</Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-foreground/80">Endereço</Label>
                     <Input
                       value={formData.prospectAddress}
                       onChange={(e) => setFormData({ ...formData, prospectAddress: e.target.value })}
                       placeholder="Endereço completo"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Telefone</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground/80">Telefone</Label>
                       <Input
                         value={formData.prospectPhone}
                         onChange={(e) => setFormData({ ...formData, prospectPhone: e.target.value })}
                         placeholder="(00) 0000-0000"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Contato</Label>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground/80">Contato</Label>
                       <Input
                         value={formData.prospectContact}
                         onChange={(e) => setFormData({ ...formData, prospectContact: e.target.value })}
@@ -368,18 +395,20 @@ export default function AgendaFormDialog({
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Data *</Label>
+              {/* Agendamento */}
+              <SectionHeader icon={CalendarDays} label="Agendamento" />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground/80">Data *</Label>
                   <Input
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>
-                    Hora <span className="text-muted-foreground text-xs">(opcional)</span>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground/80">
+                    Hora <span className="text-muted-foreground font-normal">(opcional)</span>
                   </Label>
                   <Input
                     type="time"
@@ -389,10 +418,29 @@ export default function AgendaFormDialog({
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="flex items-center gap-1.5">
-                  <DollarSign className="h-3.5 w-3.5" />
-                  Potencial de Produção
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80">Período da agenda *</Label>
+                <Select
+                  value={formData.period}
+                  onValueChange={(v) => setFormData({ ...formData, period: v as VisitPeriod })}
+                >
+                  <SelectTrigger className={cn(!formData.period && "text-muted-foreground")}>
+                    <SelectValue placeholder="Selecione o período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getActiveItems("periods").map((p) => (
+                      <SelectItem key={p} value={p.toLowerCase() as VisitPeriod}>
+                        {p}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80 flex items-center gap-1.5">
+                  <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+                  Potencial de produção
                 </Label>
                 <Input
                   value={formData.potentialValue}
@@ -403,23 +451,26 @@ export default function AgendaFormDialog({
                   placeholder="Ex: R$ 5.000,00"
                 />
                 {suggestedSourceDate && !userEditedPotential.current && (
-                  <p className="text-[11px] text-muted-foreground">Sugestão baseada na visita de {suggestedSourceDate}</p>
+                  <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <Info className="h-3 w-3" /> Sugestão baseada na visita de {suggestedSourceDate}
+                  </p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label>Convidados</Label>
-                <div className="space-y-1.5 max-h-40 overflow-y-auto border rounded-md p-2">
+              {/* Convidados */}
+              <SectionHeader icon={Users} label="Convidados" />
+              <div className="space-y-1.5">
+                <div className="space-y-1.5 max-h-44 overflow-y-auto rounded-md border border-border/60 bg-muted/20 p-2.5">
                   {allCargos.map((cargo) => {
                     const usersInCargo = invitableUsers.filter((u) => u.role === cargo);
                     if (usersInCargo.length === 0) return null;
                     return (
                       <div key={cargo} className="space-y-1">
-                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide pt-1">
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider pt-1">
                           {cargoLabels[cargo]}
                         </p>
                         {usersInCargo.map((c) => (
-                          <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                          <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-muted/50 transition-colors">
                             <Checkbox
                               checked={formData.invitedUserIds.includes(c.id)}
                               onCheckedChange={() =>
@@ -431,7 +482,7 @@ export default function AgendaFormDialog({
                                 })
                               }
                             />
-                            <span>{c.name}</span>
+                            <span className="text-foreground/90">{c.name}</span>
                           </label>
                         ))}
                       </div>
@@ -439,7 +490,9 @@ export default function AgendaFormDialog({
                   })}
                 </div>
                 {formData.invitedUserIds.length > 0 && (
-                  <p className="text-[11px] text-muted-foreground">{formData.invitedUserIds.length} convidado(s)</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {formData.invitedUserIds.length} convidado{formData.invitedUserIds.length > 1 ? "s" : ""} selecionado{formData.invitedUserIds.length > 1 ? "s" : ""}
+                  </p>
                 )}
               </div>
 
@@ -520,9 +573,9 @@ export default function AgendaFormDialog({
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm overflow-hidden"
+                        className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-sm overflow-hidden"
                       >
-                        <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Motivo da agenda inconclusa</p>
+                        <p className="text-xs font-medium text-primary">Motivo da agenda inconclusa</p>
                         <p className="text-sm">{formData.inconclusiveReason}</p>
                       </motion.div>
                     )}
@@ -533,31 +586,32 @@ export default function AgendaFormDialog({
           )}
 
           {formStep === 1 && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Bancos</Label>
+            <div className="space-y-5">
+              <SectionHeader icon={Landmark} label="Bancos" />
+              <div className="rounded-md border border-border/60 bg-muted/20 p-3">
                 <div className="grid grid-cols-2 gap-2">
                   {infoBankNames.map((b) => (
-                    <label key={b} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <label key={b} className="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-muted/50 transition-colors">
                       <Checkbox
                         checked={formData.banks.includes(b)}
                         onCheckedChange={() => setFormData({ ...formData, banks: toggleArray(formData.banks, b) })}
                       />
-                      {b}
+                      <span className="text-foreground/90">{b}</span>
                     </label>
                   ))}
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Produtos</Label>
+
+              <SectionHeader icon={Package} label="Produtos" />
+              <div className="rounded-md border border-border/60 bg-muted/20 p-3">
                 <div className="grid grid-cols-2 gap-2">
                   {getActiveItems("products").map((p) => (
-                    <label key={p} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <label key={p} className="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-muted/50 transition-colors">
                       <Checkbox
                         checked={formData.products.includes(p)}
                         onCheckedChange={() => setFormData({ ...formData, products: toggleArray(formData.products, p) })}
                       />
-                      {p}
+                      <span className="text-foreground/90">{p}</span>
                     </label>
                   ))}
                 </div>
@@ -568,28 +622,34 @@ export default function AgendaFormDialog({
           {formStep === 2 && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Resumo da visita</Label>
+                <Label className="text-xs font-semibold text-foreground/80 flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                  Resumo do compromisso
+                </Label>
                 <Textarea
                   value={formData.summary}
                   onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                  placeholder="Resumo geral da visita..."
+                  placeholder="Resumo geral do compromisso..."
+                  className="min-h-[120px] resize-none"
                 />
+                <p className="text-[11px] text-muted-foreground">Você poderá editar o resumo a qualquer momento no detalhe do compromisso.</p>
               </div>
             </div>
           )}
+          </div>
 
-          <DialogFooter className="flex gap-2">
+          <DialogFooter className="shrink-0 flex gap-2 px-5 py-3 border-t border-border/60 bg-muted/20">
             {formStep > 0 && (
-              <Button variant="outline" onClick={() => setFormStep(formStep - 1)}>
+              <Button variant="outline" size="sm" onClick={() => setFormStep(formStep - 1)}>
                 Voltar
               </Button>
             )}
             {formStep < 2 ? (
-              <Button onClick={() => setFormStep(formStep + 1)} disabled={formStep === 0 && !canProceedStep1}>
+              <Button size="sm" onClick={() => setFormStep(formStep + 1)} disabled={formStep === 0 && !canProceedStep1}>
                 Próximo
               </Button>
             ) : (
-              <Button onClick={handleSave}>Salvar agenda</Button>
+              <Button size="sm" onClick={handleSave}>{editingVisit ? "Salvar alterações" : "Criar compromisso"}</Button>
             )}
           </DialogFooter>
         </DialogContent>
@@ -634,5 +694,44 @@ export default function AgendaFormDialog({
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+function SectionHeader({ icon: Icon, label }: { icon: any; label: string }) {
+  return (
+    <div className="flex items-center gap-2 pt-1">
+      <span className="h-6 w-6 rounded-md bg-muted/50 text-muted-foreground flex items-center justify-center">
+        <Icon className="h-3 w-3" />
+      </span>
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <div className="flex-1 h-px bg-border/60" />
+    </div>
+  );
+}
+
+function ReasonBlock({ icon: Icon, tone, label, text }: { icon: any; tone: "warning" | "destructive" | "primary"; label: string; text: string }) {
+  const toneMap = {
+    warning: { bar: "from-warning to-warning/60", bg: "bg-warning/5", border: "border-warning/20", tile: "bg-warning/10 text-warning", textCls: "text-warning" },
+    destructive: { bar: "from-destructive to-destructive/60", bg: "bg-destructive/5", border: "border-destructive/20", tile: "bg-destructive/10 text-destructive", textCls: "text-destructive" },
+    primary: { bar: "from-primary to-primary/60", bg: "bg-primary/5", border: "border-primary/20", tile: "bg-primary/10 text-primary", textCls: "text-primary" },
+  }[tone];
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+      exit={{ opacity: 0, height: 0 }}
+      className={cn("relative overflow-hidden rounded-lg border", toneMap.border, toneMap.bg)}
+    >
+      <div className={cn("absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b", toneMap.bar)} />
+      <div className="flex items-start gap-2.5 px-3 py-2.5 pl-4">
+        <span className={cn("h-7 w-7 rounded-md flex items-center justify-center shrink-0", toneMap.tile)}>
+          <Icon className="h-3.5 w-3.5" />
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className={cn("text-[10px] font-semibold uppercase tracking-wider", toneMap.textCls)}>{label}</p>
+          <p className="text-sm text-foreground mt-0.5">{text}</p>
+        </div>
+      </div>
+    </motion.div>
   );
 }
