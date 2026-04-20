@@ -78,6 +78,7 @@ useVisibility é fonte única de visibilidade. Não duplicar checagens de cargo.
 - [Theme toggle](mem://style/theme-toggle) — Header icons light/dark
 - [Agenda type branding](mem://style/agenda-type-branding) — Visita=Handshake+info, Prospecção=UserPlus+warning, fonte única
 - [Project Knowledge governance](mem://style/project-knowledge-governance) — Diretriz oficial completa de marca, nomenclatura e padronização visual
+- [Shared visual primitives](mem://style/shared-visual-primitives) — Base oficial reutilizável em src/components/shared (IconTile, ToneBar, ToneBlock, ToneKpiCard, SurfaceCard, StatusPill, SectionHeader, ModalHeaderShell/FooterShell, ToneTabs)
 - [Partner stores](mem://entities/partner-stores) — 1:1 store-partner relation
 - [Auth flow](mem://auth/forgot-password-flow) — Simulated password recovery
 - [Informações layout](mem://features/informacoes-uteis/layout) — Doc/process cards
