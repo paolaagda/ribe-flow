@@ -397,22 +397,22 @@ export default function CadastroPage() {
         <PageHeader title="Cadastro" description="Gerencie o credenciamento de parceiros com bancos.">
           <div className="flex items-center gap-2">
             {/* View toggle */}
-            <div className="flex items-center border border-border rounded-md overflow-hidden">
+            <div className="flex items-center bg-muted/40 rounded-md p-0.5">
               <Button
                 variant={viewMode === 'cards' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('cards')}
-                className="rounded-none h-8 px-2.5"
+                className="h-7 px-2.5 shadow-none"
               >
-                <LayoutGrid className="h-4 w-4" />
+                <LayoutGrid className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant={viewMode === 'table' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('table')}
-                className="rounded-none h-8 px-2.5"
+                className="h-7 px-2.5 shadow-none"
               >
-                <TableIcon className="h-4 w-4" />
+                <TableIcon className="h-3.5 w-3.5" />
               </Button>
             </div>
             <Button
