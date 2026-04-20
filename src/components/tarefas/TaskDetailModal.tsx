@@ -31,7 +31,7 @@ import {
   IconTile,
   ToneBar,
   ToneBlock,
-  SectionHeader as SharedSectionHeader,
+  SectionHeader,
   type Tone,
 } from '@/components/shared';
 
@@ -175,19 +175,14 @@ export default function TaskDetailModal({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-lg sm:max-w-xl max-h-[92vh] p-0 gap-0 overflow-hidden">
-          {/* ── Branded header with lateral bar ── */}
+          {/* ── Branded header with lateral bar (shared primitives) ── */}
           <div className="relative">
-            <div
-              className="absolute left-0 top-0 bottom-0 w-1.5"
-              style={{ background: `linear-gradient(180deg, ${tone.bar} 0%, ${tone.barSoft} 100%)` }}
-            />
+            <ToneBar tone={tone} />
             <DialogHeader className="px-5 py-4 pl-6 space-y-2.5">
               <div className="flex items-start gap-3 pr-6">
-                <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ring-1', tone.tile)}>
-                  <ListChecks className="h-5 w-5" />
-                </div>
+                <IconTile icon={ListChecks} tone={tone} size="md" />
                 <div className="flex-1 min-w-0 space-y-1">
-                  <p className={cn('text-[10px] font-semibold uppercase tracking-wider', tone.label)}>
+                  <p className={cn('text-[10px] font-semibold uppercase tracking-wider', toneTextClass)}>
                     Tarefa · {categoryLabel}
                   </p>
                   <DialogTitle className="text-base font-semibold leading-snug">
@@ -254,10 +249,7 @@ export default function TaskDetailModal({
               {item.task.taskReturnReason && !completed && !cancelled && (
                 <section className="space-y-2.5">
                   <SectionHeader icon={MessageSquare} label="Devolutiva" />
-                  <div className="relative overflow-hidden rounded-md border border-warning/30 bg-warning/10 pl-3 pr-3 py-2.5">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-warning" />
-                    <p className="text-xs text-foreground leading-relaxed">{item.task.taskReturnReason}</p>
-                  </div>
+                  <ToneBlock tone="warning" description={item.task.taskReturnReason} />
                 </section>
               )}
 
