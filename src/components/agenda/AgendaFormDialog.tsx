@@ -696,3 +696,42 @@ export default function AgendaFormDialog({
     </>
   );
 }
+
+function SectionHeader({ icon: Icon, label }: { icon: any; label: string }) {
+  return (
+    <div className="flex items-center gap-2 pt-1">
+      <span className="h-6 w-6 rounded-md bg-muted/50 text-muted-foreground flex items-center justify-center">
+        <Icon className="h-3 w-3" />
+      </span>
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <div className="flex-1 h-px bg-border/60" />
+    </div>
+  );
+}
+
+function ReasonBlock({ icon: Icon, tone, label, text }: { icon: any; tone: "warning" | "destructive" | "primary"; label: string; text: string }) {
+  const toneMap = {
+    warning: { bar: "from-warning to-warning/60", bg: "bg-warning/5", border: "border-warning/20", tile: "bg-warning/10 text-warning", textCls: "text-warning" },
+    destructive: { bar: "from-destructive to-destructive/60", bg: "bg-destructive/5", border: "border-destructive/20", tile: "bg-destructive/10 text-destructive", textCls: "text-destructive" },
+    primary: { bar: "from-primary to-primary/60", bg: "bg-primary/5", border: "border-primary/20", tile: "bg-primary/10 text-primary", textCls: "text-primary" },
+  }[tone];
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+      exit={{ opacity: 0, height: 0 }}
+      className={cn("relative overflow-hidden rounded-lg border", toneMap.border, toneMap.bg)}
+    >
+      <div className={cn("absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b", toneMap.bar)} />
+      <div className="flex items-start gap-2.5 px-3 py-2.5 pl-4">
+        <span className={cn("h-7 w-7 rounded-md flex items-center justify-center shrink-0", toneMap.tile)}>
+          <Icon className="h-3.5 w-3.5" />
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className={cn("text-[10px] font-semibold uppercase tracking-wider", toneMap.textCls)}>{label}</p>
+          <p className="text-sm text-foreground mt-0.5">{text}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
