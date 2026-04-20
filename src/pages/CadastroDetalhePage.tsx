@@ -24,7 +24,7 @@ import { ptBR } from 'date-fns/locale';
 import {
   ArrowLeft, Building2, Calendar, Clock, Hash, FileText, Users,
   TrendingUp, AlertTriangle, CheckCircle2, Info, ShieldAlert, ExternalLink,
-  ArrowRight, Flag,
+  ArrowRight, Flag, Landmark,
 } from 'lucide-react';
 
 const STATUS_STEPS = [
@@ -35,10 +35,40 @@ const STATUS_STEPS = [
   'Concluído',
 ];
 
-const criticalityConfig: Record<RegistrationCriticality, { label: string; className: string; border: string }> = {
-  alta: { label: 'Crítico', className: 'bg-destructive/10 text-destructive border-destructive/20', border: 'border-destructive/30' },
-  média: { label: 'Atenção', className: 'bg-warning/10 text-warning border-warning/20', border: 'border-warning/30' },
-  baixa: { label: 'Regular', className: 'bg-success/10 text-success border-success/20', border: 'border-success/30' },
+type CritTone = {
+  label: string;
+  badge: string;
+  border: string;
+  bg: string;
+  bar: string;
+  tile: string;
+};
+
+const criticalityConfig: Record<RegistrationCriticality, CritTone> = {
+  alta: {
+    label: 'Crítico',
+    badge: 'bg-destructive/10 text-destructive border-destructive/20',
+    border: 'border-destructive/30',
+    bg: 'bg-destructive/5',
+    bar: 'bg-gradient-to-b from-destructive to-destructive/60',
+    tile: 'bg-destructive/10 text-destructive',
+  },
+  média: {
+    label: 'Atenção',
+    badge: 'bg-warning/10 text-warning border-warning/20',
+    border: 'border-warning/30',
+    bg: 'bg-warning/5',
+    bar: 'bg-gradient-to-b from-warning to-warning/60',
+    tile: 'bg-warning/10 text-warning',
+  },
+  baixa: {
+    label: 'Regular',
+    badge: 'bg-success/10 text-success border-success/20',
+    border: 'border-success/30',
+    bg: 'bg-success/5',
+    bar: 'bg-gradient-to-b from-success to-success/60',
+    tile: 'bg-success/10 text-success',
+  },
 };
 
 export default function CadastroDetalhePage() {
