@@ -134,94 +134,112 @@ export default function CadastroDetalhePage() {
     <PageTransition>
       <div className="space-y-ds-lg">
         {/* Back button */}
-        <Button variant="ghost" size="sm" onClick={() => navigate('/cadastro')} className="gap-2 -ml-2">
+        <Button variant="ghost" size="sm" onClick={() => navigate('/cadastro')} className="gap-2 -ml-2 text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Voltar ao Cadastro
         </Button>
 
-        {/* Header */}
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="text-ds-xl font-bold tracking-tight">{partner?.name || 'Parceiro removido'}</h1>
-                  <Badge variant="outline" className="text-xs">{reg.bank}</Badge>
-                  <Badge className={cn('text-xs border-0 font-semibold', statusColors[reg.status] || 'bg-muted text-muted-foreground')}>
-                    {reg.status}
-                  </Badge>
-                  {cc && <Badge variant="outline" className={cn('text-xs', cc.className)}>{cc.label}</Badge>}
-                  {reg.isCritical && (
-                    <Badge variant="outline" className="text-xs bg-destructive/10 text-destructive border-destructive/20 gap-1">
-                      <Flag className="h-3 w-3" /> Crítico
-                    </Badge>
-                  )}
+        {/* Identity Header — lateral gradient bar by criticality */}
+        <Card className="overflow-hidden border-border/60 shadow-sm">
+          <div className="relative">
+            <div className={cn('absolute left-0 top-0 bottom-0 w-1', cc?.bar || 'bg-gradient-to-b from-primary to-primary/60')} />
+            <CardContent className="p-5 pl-6">
+              <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                <div className={cn('h-11 w-11 rounded-xl flex items-center justify-center shrink-0', cc?.tile || 'bg-primary/10 text-primary')}>
+                  <Landmark className="h-5 w-5" />
                 </div>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                  <span>{reg.solicitation}</span>
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Cadastro</span>
+                    <span className="text-muted-foreground/40">·</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{reg.bank}</span>
+                  </div>
+                  <h1 className="text-ds-xl font-bold tracking-tight leading-tight">{partner?.name || 'Parceiro removido'}</h1>
+                  <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                    <Badge variant="outline" className={cn('text-[11px] font-medium border', statusColors[reg.status] || 'bg-muted text-muted-foreground border-border')}>
+                      {reg.status}
+                    </Badge>
+                    {cc && (
+                      <Badge variant="outline" className={cn('text-[11px] font-medium', cc.badge)}>
+                        {cc.label}
+                      </Badge>
+                    )}
+                    {reg.isCritical && (
+                      <Badge variant="outline" className="text-[11px] font-medium bg-destructive/10 text-destructive border-destructive/20 gap-1">
+                        <Flag className="h-3 w-3" /> Crítico
+                      </Badge>
+                    )}
+                    <Badge variant="outline" className="text-[11px] font-medium bg-muted/40 text-muted-foreground border-border/60">
+                      {reg.solicitation}
+                    </Badge>
+                  </div>
                   {commercial && (
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2 pt-1 text-xs text-muted-foreground">
                       <Avatar className="h-5 w-5">
                         {getAvatar(commercial.id) && <AvatarImage src={getAvatar(commercial.id)} />}
                         <AvatarFallback className="text-[8px] bg-primary/10 text-primary">
                           {commercial.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-xs">{commercial.name}</span>
+                      <span>Responsável comercial: <span className="text-foreground font-medium">{commercial.name}</span></span>
                     </div>
                   )}
                 </div>
+                {!isTerminal && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant={reg.isCritical ? 'destructive' : 'outline'}
+                        size="sm"
+                        className="gap-1.5 shrink-0"
+                        onClick={() => updateRegistration(reg.id, { isCritical: !reg.isCritical })}
+                      >
+                        <Flag className="h-3.5 w-3.5" />
+                        {reg.isCritical ? 'Remover alerta' : 'Marcar crítico'}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {reg.isCritical
+                        ? 'Remover sinalização crítica manual. O item pode permanecer em Atenção Imediata por outras condições.'
+                        : 'Marcar como crítico. O item entrará automaticamente em Atenção Imediata.'}
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
-              {/* Critical toggle button */}
-              {!isTerminal && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={reg.isCritical ? 'destructive' : 'outline'}
-                      size="sm"
-                      className="gap-1.5 shrink-0"
-                      onClick={() => updateRegistration(reg.id, { isCritical: !reg.isCritical })}
-                    >
-                      <Flag className="h-3.5 w-3.5" />
-                      {reg.isCritical ? 'Remover alerta' : 'Marcar crítico'}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {reg.isCritical
-                      ? 'Remover sinalização crítica manual. O item pode permanecer em Atenção Imediata por outras condições.'
-                      : 'Marcar como crítico. O item entrará automaticamente em Atenção Imediata.'}
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-          </CardContent>
+            </CardContent>
+          </div>
         </Card>
 
-        {/* Situação Atual Banner */}
+        {/* Próxima Ação Banner — lateral bar pattern */}
         {opData && !isTerminal && (
           <div className={cn(
-            'flex items-center gap-3 px-4 py-3 rounded-lg border',
+            'relative overflow-hidden rounded-lg border',
             cc?.border || 'border-border',
-            opData.criticality === 'alta' ? 'bg-destructive/5' :
-            opData.criticality === 'média' ? 'bg-warning/5' : 'bg-primary/5'
+            cc?.bg || 'bg-primary/5'
           )}>
-            <ArrowRight className="h-5 w-5 text-primary shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">{opData.nextAction}</p>
-              <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground flex-wrap">
-                <span className="flex items-center gap-1"><Users className="h-3 w-3" /> Responsável: {opData.currentResponsible}</span>
-                <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {opData.daysInProcess}d no processo</span>
-                {opData.daysSinceLastUpdate > 0 && (
-                  <Badge variant="outline" className={cn(
-                    'text-[10px]',
-                    opData.daysSinceLastUpdate > 15
-                      ? 'bg-destructive/10 text-destructive border-destructive/20'
-                      : opData.daysSinceLastUpdate > 7
-                        ? 'bg-warning/10 text-warning border-warning/20'
-                        : ''
-                  )}>
-                    {opData.daysSinceLastUpdate}d sem movimentação
-                  </Badge>
-                )}
+            <div className={cn('absolute left-0 top-0 bottom-0 w-1', cc?.bar || 'bg-gradient-to-b from-primary to-primary/60')} />
+            <div className="flex items-center gap-3 px-4 py-3 pl-5">
+              <div className={cn('h-9 w-9 rounded-lg flex items-center justify-center shrink-0', cc?.tile || 'bg-primary/10 text-primary')}>
+                <ArrowRight className="h-4 w-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Próxima ação</p>
+                <p className="text-sm font-medium text-foreground mt-0.5">{opData.nextAction}</p>
+                <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground flex-wrap">
+                  <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {opData.currentResponsible}</span>
+                  <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {opData.daysInProcess}d no processo</span>
+                  {opData.daysSinceLastUpdate > 0 && (
+                    <Badge variant="outline" className={cn(
+                      'text-[10px] font-medium',
+                      opData.daysSinceLastUpdate > 15
+                        ? 'bg-destructive/10 text-destructive border-destructive/20'
+                        : opData.daysSinceLastUpdate > 7
+                          ? 'bg-warning/10 text-warning border-warning/20'
+                          : 'bg-muted/40 text-muted-foreground border-border/60'
+                    )}>
+                      {opData.daysSinceLastUpdate}d sem movimentação
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
           </div>
