@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+  Dialog, DialogContent,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { mockUsers, Partner, Visit, VisitComment } from '@/data/mock-data';
 import { toast } from 'sonner';
+import { ModalHeaderShell, ModalFooterShell, SectionHeader, ToneBlock } from '@/components/shared';
 
 const TASK_TYPES = [
   'Pendência documental',
@@ -40,21 +41,6 @@ const TASK_TYPES = [
 interface TaskCreateModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-/* ── Section header (matches AgendaFormDialog pattern) ── */
-function SectionHeader({ icon: Icon, label }: { icon: React.ComponentType<{ className?: string }>; label: string }) {
-  return (
-    <div className="flex items-center gap-2 pb-1">
-      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
-        <Icon className="h-3.5 w-3.5" />
-      </div>
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {label}
-      </span>
-      <div className="flex-1 h-px bg-border/60" />
-    </div>
-  );
 }
 
 export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalProps) {
