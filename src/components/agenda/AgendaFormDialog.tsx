@@ -620,18 +620,18 @@ export default function AgendaFormDialog({
           )}
           </div>
 
-          <DialogFooter className="flex gap-2">
+          <DialogFooter className="shrink-0 flex gap-2 px-5 py-3 border-t border-border/60 bg-muted/20">
             {formStep > 0 && (
-              <Button variant="outline" onClick={() => setFormStep(formStep - 1)}>
+              <Button variant="outline" size="sm" onClick={() => setFormStep(formStep - 1)}>
                 Voltar
               </Button>
             )}
             {formStep < 2 ? (
-              <Button onClick={() => setFormStep(formStep + 1)} disabled={formStep === 0 && !canProceedStep1}>
+              <Button size="sm" onClick={() => setFormStep(formStep + 1)} disabled={formStep === 0 && !canProceedStep1}>
                 Próximo
               </Button>
             ) : (
-              <Button onClick={handleSave}>Salvar agenda</Button>
+              <Button size="sm" onClick={handleSave}>{editingVisit ? "Salvar alterações" : "Criar compromisso"}</Button>
             )}
           </DialogFooter>
         </DialogContent>
