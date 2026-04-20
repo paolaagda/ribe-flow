@@ -27,6 +27,13 @@ import { TaskPermissions } from '@/hooks/useTaskPermissions';
 import { getUserById, Partner, User } from '@/data/mock-data';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import {
+  IconTile,
+  ToneBar,
+  ToneBlock,
+  SectionHeader as SharedSectionHeader,
+  type Tone,
+} from '@/components/shared';
 
 // Helpers imported from @/lib/task-helpers:
 // isTaskCancelled, daysSinceDate, isTaskOverdue, getTaskStatusDisplay, getTaskDeadlineLabel, TASK_CANCELLED_PREFIX
