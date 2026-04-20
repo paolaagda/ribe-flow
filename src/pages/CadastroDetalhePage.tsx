@@ -531,17 +531,17 @@ export default function CadastroDetalhePage() {
 
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
-      <p className="text-sm font-medium text-foreground mt-0.5">{value}</p>
+    <div className="min-w-0">
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">{label}</p>
+      <p className="text-sm font-medium text-foreground mt-1 truncate">{value}</p>
     </div>
   );
 }
 
 const insightColors = {
-  info: 'text-info bg-info/10',
-  warning: 'text-warning bg-warning/10',
-  success: 'text-success bg-success/10',
+  info: 'text-info bg-info/5 border-info/15',
+  warning: 'text-warning bg-warning/5 border-warning/20',
+  success: 'text-success bg-success/5 border-success/20',
 };
 
 function InsightRow({ icon: Icon, text, type }: { icon: any; text: string; type: 'info' | 'warning' | 'success' }) {
