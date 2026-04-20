@@ -197,15 +197,50 @@ export default function AgendaFormDialog({
   const toggleArray = (arr: string[], item: string) =>
     arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 
+  const typeBrand = getAgendaTypeBrand(formData.type);
+  const TypeIcon = typeBrand.icon;
+  const stepLabels = ["Identificação", "Contexto", "Resumo"];
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingVisit ? "Editar Compromisso" : "Novo Compromisso"} — Etapa {formStep + 1}/3
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-lg max-h-[88vh] overflow-hidden p-0 gap-0 flex flex-col border-border/60">
+          {/* Refined header with type tile + lateral gradient bar */}
+          <div className="relative shrink-0 border-b border-border/60">
+            <div className={cn("absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b", typeBrand.colorToken === "info" ? "from-info to-info/60" : "from-warning to-warning/60")} />
+            <DialogHeader className="px-5 py-4 pl-6 space-y-0">
+              <div className="flex items-start gap-3">
+                <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center shrink-0", typeBrand.bgSoft, typeBrand.text)}>
+                  <TypeIcon className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={cn("text-[10px] font-semibold uppercase tracking-wider", typeBrand.text)}>
+                    {typeBrand.label}
+                  </p>
+                  <DialogTitle className="text-base font-semibold leading-tight mt-0.5">
+                    {editingVisit ? "Editar compromisso" : "Novo compromisso"}
+                  </DialogTitle>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Etapa {formStep + 1} de 3 · <span className="font-medium text-foreground/80">{stepLabels[formStep]}</span>
+                  </p>
+                </div>
+              </div>
+              {/* Step indicator */}
+              <div className="flex items-center gap-1.5 mt-4">
+                {stepLabels.map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "h-1 flex-1 rounded-full transition-all",
+                      i < formStep ? typeBrand.bg : i === formStep ? typeBrand.bg : "bg-muted"
+                    )}
+                  />
+                ))}
+              </div>
+            </DialogHeader>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-5 py-5">
 
           {formStep === 0 && (
             <div className="space-y-4">
