@@ -546,9 +546,9 @@ const insightColors = {
 
 function InsightRow({ icon: Icon, text, type }: { icon: any; text: string; type: 'info' | 'warning' | 'success' }) {
   return (
-    <div className={cn('flex items-start gap-2 rounded-lg p-2.5 text-xs', insightColors[type])}>
+    <div className={cn('flex items-start gap-2 rounded-lg border p-2.5 text-xs font-medium', insightColors[type])}>
       <Icon className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-      <span>{text}</span>
+      <span className="leading-relaxed">{text}</span>
     </div>
   );
 }
