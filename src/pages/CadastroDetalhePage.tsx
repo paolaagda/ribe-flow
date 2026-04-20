@@ -291,21 +291,27 @@ export default function CadastroDetalhePage() {
                   })}
                 </div>
                 {(reg.status === 'Em pausa' || reg.status === 'Cancelado') && (
-                  <p className="text-xs text-warning font-medium">
-                    ⚠ Este cadastro está com status "{reg.status}" e não se enquadra no fluxo padrão.
-                  </p>
+                  <div className="flex items-start gap-2 rounded-lg border border-warning/20 bg-warning/5 px-3 py-2">
+                    <AlertTriangle className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
+                    <p className="text-xs text-warning font-medium">
+                      Este cadastro está com status "{reg.status}" e não se enquadra no fluxo padrão.
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
 
             {/* Informações Gerais */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-primary" /> Informações Gerais
+            <Card className="border-border/60 shadow-sm overflow-hidden">
+              <CardHeader className="bg-muted/30 border-b border-border/60 py-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2.5">
+                  <span className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <Building2 className="h-3.5 w-3.5" />
+                  </span>
+                  Informações gerais
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-5">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <InfoItem label="CNPJ" value={reg.cnpj} />
                   <InfoItem label="Solicitado em" value={format(new Date(reg.requestedAt), "dd/MM/yyyy", { locale: ptBR })} />
