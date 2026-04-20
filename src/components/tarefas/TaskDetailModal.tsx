@@ -235,93 +235,84 @@ export default function TaskDetailModal({
               </section>
 
 
-              {/* ── B. Return / feedback block ── */}
+              {/* ── B. Devolutiva ── */}
               {item.task.taskReturnReason && !completed && !cancelled && (
-                <>
-                  <section className="space-y-2">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Devolutiva</h4>
-                    <div className="bg-muted/50 border border-border rounded-md p-3">
-                      <p className="text-xs text-foreground leading-relaxed">{item.task.taskReturnReason}</p>
-                    </div>
-                  </section>
-                  <Separator />
-                </>
+                <section className="space-y-2.5">
+                  <SectionHeader icon={MessageSquare} label="Devolutiva" />
+                  <div className="relative overflow-hidden rounded-md border border-warning/30 bg-warning/10 pl-3 pr-3 py-2.5">
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-warning" />
+                    <p className="text-xs text-foreground leading-relaxed">{item.task.taskReturnReason}</p>
+                  </div>
+                </section>
               )}
 
               {item.task.taskDocStatus === 'submitted_for_validation' && !completed && (
-                <>
-                  <section className="space-y-2">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Devolutiva</h4>
-                    <div className="bg-muted/50 border border-border rounded-md p-3">
-                      <p className="text-xs text-muted-foreground leading-relaxed italic">Aguardando validação do cadastro</p>
-                    </div>
-                  </section>
-                  <Separator />
-                </>
+                <section className="space-y-2.5">
+                  <SectionHeader icon={MessageSquare} label="Devolutiva" />
+                  <div className="rounded-md border border-border/60 bg-muted/30 p-3">
+                    <p className="text-xs text-muted-foreground leading-relaxed italic">
+                      Aguardando validação do Cadastro
+                    </p>
+                  </div>
+                </section>
               )}
 
-              {/* ── Admin note block ── */}
+              {/* ── Nota administrativa ── */}
               {(item.task.taskAdminNote || permissions.canTerminalEdit) && (
-                <>
-                  <section className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Nota administrativa</h4>
-                      {permissions.canTerminalEdit && !editingNote && (
-                        <Button variant="ghost" size="sm" className="h-6 text-[11px] gap-1 px-2" onClick={handleStartNoteEdit}>
-                          <Edit3 className="h-3 w-3" />
-                          {item.task.taskAdminNote ? 'Editar' : 'Adicionar'}
-                        </Button>
-                      )}
-                    </div>
-                    {editingNote ? (
-                      <div className="space-y-2">
-                        <Textarea
-                          value={noteText}
-                          onChange={(e) => setNoteText(e.target.value)}
-                          placeholder="Adicione uma nota administrativa..."
-                          className="text-xs min-h-[60px] resize-none"
-                          maxLength={500}
-                        />
-                        <div className="flex items-center gap-2">
-                          <Button size="sm" className="text-xs h-7" onClick={handleSaveNote}>
-                            Salvar nota
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => setEditingNote(false)}>
-                            Cancelar
-                          </Button>
-                          <span className="text-[10px] text-muted-foreground ml-auto">{noteText.length}/500</span>
-                        </div>
-                      </div>
-                    ) : item.task.taskAdminNote ? (
-                      <div className="bg-muted/50 border border-border rounded-md p-3">
-                        <p className="text-xs text-foreground leading-relaxed whitespace-pre-wrap">{item.task.taskAdminNote}</p>
-                      </div>
-                    ) : (
-                      <p className="text-[11px] text-muted-foreground italic">Nenhuma nota administrativa registrada.</p>
-                    )}
-                  </section>
-                  <Separator />
-                </>
-              )}
-
-              {/* ── Assignees (real persisted) ── */}
-              <>
-                <section className="space-y-2">
+                <section className="space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                      <Users className="h-3 w-3" />
-                      Atribuídos
-                    </h4>
-                    {permissions.canAssign && onUpdateAssignees && !editingAssignees && (
-                      <Button variant="ghost" size="sm" className="h-6 text-[11px] gap-1 px-2"
-                        onClick={() => setEditingAssignees(true)}
-                      >
+                    <SectionHeader icon={MessageSquarePlus} label="Nota administrativa" />
+                    {permissions.canTerminalEdit && !editingNote && (
+                      <Button variant="ghost" size="sm" className="h-6 text-[11px] gap-1 px-2 -mt-1" onClick={handleStartNoteEdit}>
                         <Edit3 className="h-3 w-3" />
-                        {(item.task.taskAssignedUserIds?.length ?? 0) > 0 ? 'Editar' : 'Adicionar'}
+                        {item.task.taskAdminNote ? 'Editar' : 'Adicionar'}
                       </Button>
                     )}
                   </div>
+                  {editingNote ? (
+                    <div className="space-y-2 rounded-md border border-border/60 bg-muted/20 p-2.5">
+                      <Textarea
+                        value={noteText}
+                        onChange={(e) => setNoteText(e.target.value)}
+                        placeholder="Adicione uma nota administrativa..."
+                        className="text-xs min-h-[64px] resize-none bg-background"
+                        maxLength={500}
+                      />
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" className="text-xs h-7" onClick={handleSaveNote}>
+                          Salvar nota
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => setEditingNote(false)}>
+                          Cancelar
+                        </Button>
+                        <span className="text-[10px] text-muted-foreground ml-auto">{noteText.length}/500</span>
+                      </div>
+                    </div>
+                  ) : item.task.taskAdminNote ? (
+                    <div className="rounded-md border border-border/60 bg-muted/20 p-3">
+                      <p className="text-xs text-foreground leading-relaxed whitespace-pre-wrap">{item.task.taskAdminNote}</p>
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground italic">Nenhuma nota administrativa registrada.</p>
+                  )}
+                </section>
+              )}
 
+              {/* ── Atribuídos ── */}
+              <section className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <SectionHeader icon={Users} label="Atribuídos" />
+                  {permissions.canAssign && onUpdateAssignees && !editingAssignees && (
+                    <Button variant="ghost" size="sm" className="h-6 text-[11px] gap-1 px-2 -mt-1"
+                      onClick={() => setEditingAssignees(true)}
+                    >
+                      <Edit3 className="h-3 w-3" />
+                      {(item.task.taskAssignedUserIds?.length ?? 0) > 0 ? 'Editar' : 'Adicionar'}
+                    </Button>
+                  )}
+                </div>
+
+                <div className="rounded-md border border-border/60 bg-muted/20 p-3 space-y-2">
                   {/* Principal */}
                   <div className="flex items-center gap-2 text-xs">
                     <Badge variant="secondary" className="text-[10px]">Principal</Badge>
@@ -331,11 +322,11 @@ export default function TaskDetailModal({
                   {/* Assigned list (read mode) */}
                   {!editingAssignees && (
                     (item.task.taskAssignedUserIds?.length ?? 0) > 0 ? (
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-1.5 pt-1">
                         {item.task.taskAssignedUserIds!.map(uid => {
                           const u = getUserById(uid);
                           return (
-                            <Badge key={uid} variant="outline" className="text-[10px]">
+                            <Badge key={uid} variant="outline" className="text-[10px] bg-background">
                               {u?.name || uid}
                             </Badge>
                           );
@@ -362,18 +353,17 @@ export default function TaskDetailModal({
                       onCancel={() => setEditingAssignees(false)}
                     />
                   )}
-                </section>
-                <Separator />
-              </>
+                </div>
+              </section>
 
-              {/* ── C. History block ── */}
+              {/* ── C. Histórico ── */}
               <section className="space-y-2.5">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Histórico</h4>
-                <div className="space-y-0">
+                <SectionHeader icon={History} label="Histórico" />
+                <div className="rounded-md border border-border/60 bg-muted/20 p-3 space-y-0">
                   {history.map((evt, idx) => (
                     <div key={evt.id} className="flex items-start gap-3 py-1.5">
                       <div className="flex flex-col items-center shrink-0">
-                        <div className={cn('h-2 w-2 rounded-full mt-1', idx === 0 ? 'bg-primary' : 'bg-muted-foreground/30')} />
+                        <div className={cn('h-2 w-2 rounded-full mt-1.5', idx === 0 ? 'bg-primary ring-2 ring-primary/20' : 'bg-muted-foreground/30')} />
                         {idx < history.length - 1 && <div className="w-px flex-1 bg-border mt-1 min-h-[12px]" />}
                       </div>
                       <div className="flex-1 min-w-0 flex items-baseline justify-between gap-2">
@@ -389,8 +379,8 @@ export default function TaskDetailModal({
             </div>
           </ScrollArea>
 
-          {/* ── D. Actions footer ── */}
-          <div className="border-t bg-muted/30 p-3 sm:p-4">
+          {/* ── D. Footer com ações ── */}
+          <div className="border-t border-border/60 bg-muted/20 px-5 py-3">
             <div className="flex items-center gap-2 flex-wrap">
               {permissions.canConclude && (
                 <Button size="sm" className="gap-1.5 text-xs" onClick={handleConclude}>
@@ -415,7 +405,7 @@ export default function TaskDetailModal({
               {permissions.canCancel && (
                 <Button
                   variant="outline" size="sm"
-                  className="gap-1.5 text-xs text-destructive hover:text-destructive"
+                  className="gap-1.5 text-xs text-destructive border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => setConfirmCancel(true)}
                 >
                   <XCircle className="h-3.5 w-3.5" />
