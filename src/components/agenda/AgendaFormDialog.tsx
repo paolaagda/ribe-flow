@@ -243,10 +243,12 @@ export default function AgendaFormDialog({
           <div className="flex-1 overflow-y-auto px-5 py-5">
 
           {formStep === 0 && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Tipo</Label>
+            <div className="space-y-5">
+              {/* Identificação */}
+              <SectionHeader icon={Info} label="Identificação" />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground/80">Tipo</Label>
                   <Select
                     value={formData.type}
                     onValueChange={(v) =>
@@ -272,8 +274,8 @@ export default function AgendaFormDialog({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Meio</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground/80">Formato</Label>
                   <Select
                     value={formData.medio}
                     onValueChange={(v) => setFormData({ ...formData, medio: v as "presencial" | "remoto" })}
@@ -290,33 +292,20 @@ export default function AgendaFormDialog({
               </div>
 
               {formData.type === "prospecção" && (
-                <p className="text-xs text-muted-foreground bg-muted/50 rounded px-3 py-2">
-                  ⚠ Prospecções são oportunidades futuras e não fazem parte da base de parceiros.
-                </p>
+                <div className="relative overflow-hidden rounded-lg border border-warning/20 bg-warning/5">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-warning to-warning/60" />
+                  <div className="flex items-start gap-2.5 px-3 py-2.5 pl-4">
+                    <AlertTriangle className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
+                    <p className="text-xs text-warning leading-relaxed">
+                      Prospecções são oportunidades futuras e não fazem parte da base de parceiros.
+                    </p>
+                  </div>
+                </div>
               )}
 
-              <div className="space-y-2">
-                <Label>Período da agenda *</Label>
-                <Select
-                  value={formData.period}
-                  onValueChange={(v) => setFormData({ ...formData, period: v as VisitPeriod })}
-                >
-                  <SelectTrigger className={cn(!formData.period && "text-muted-foreground")}>
-                    <SelectValue placeholder="Selecione o período" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getActiveItems("periods").map((p) => (
-                      <SelectItem key={p} value={p.toLowerCase() as VisitPeriod}>
-                        {p}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               {formData.type === "visita" ? (
-                <div className="space-y-2">
-                  <Label>Parceiro</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground/80">Parceiro *</Label>
                   <Select
                     value={formData.partnerId}
                     onValueChange={(v) => {
@@ -336,11 +325,11 @@ export default function AgendaFormDialog({
                     </SelectContent>
                   </Select>
                   {formData.partnerId && (
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">{getPartnerById(formData.partnerId)?.address}</p>
+                    <div className="space-y-1.5 mt-2 p-2.5 rounded-md bg-muted/30 border border-border/60">
+                      <p className="text-[11px] text-muted-foreground">{getPartnerById(formData.partnerId)?.address}</p>
                       <div className="flex flex-wrap gap-1">
                         {getPartnerById(formData.partnerId)?.structures.map((s) => (
-                          <Badge key={s} variant="secondary" className="text-[10px]">
+                          <Badge key={s} variant="outline" className="text-[10px] font-medium bg-muted/40 text-muted-foreground border-border/60">
                             {s}
                           </Badge>
                         ))}
@@ -350,50 +339,52 @@ export default function AgendaFormDialog({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label>Parceiro</Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-foreground/80">Parceiro *</Label>
                     <Input
                       value={formData.prospectPartner}
                       onChange={(e) => setFormData({ ...formData, prospectPartner: e.target.value })}
                       placeholder="Nome do parceiro"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>CNPJ</Label>
-                    <Input
-                      value={formData.prospectCnpj}
-                      onChange={(e) => setFormData({ ...formData, prospectCnpj: e.target.value })}
-                      placeholder="00.000.000/0000-00"
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground/80">CNPJ</Label>
+                      <Input
+                        value={formData.prospectCnpj}
+                        onChange={(e) => setFormData({ ...formData, prospectCnpj: e.target.value })}
+                        placeholder="00.000.000/0000-00"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground/80">E-mail *</Label>
+                      <Input
+                        type="email"
+                        value={formData.prospectEmail}
+                        onChange={(e) => setFormData({ ...formData, prospectEmail: e.target.value })}
+                        placeholder="email@parceiro.com"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>E-mail *</Label>
-                    <Input
-                      type="email"
-                      value={formData.prospectEmail}
-                      onChange={(e) => setFormData({ ...formData, prospectEmail: e.target.value })}
-                      placeholder="email@parceiro.com"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Endereço</Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-foreground/80">Endereço</Label>
                     <Input
                       value={formData.prospectAddress}
                       onChange={(e) => setFormData({ ...formData, prospectAddress: e.target.value })}
                       placeholder="Endereço completo"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Telefone</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground/80">Telefone</Label>
                       <Input
                         value={formData.prospectPhone}
                         onChange={(e) => setFormData({ ...formData, prospectPhone: e.target.value })}
                         placeholder="(00) 0000-0000"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Contato</Label>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground/80">Contato</Label>
                       <Input
                         value={formData.prospectContact}
                         onChange={(e) => setFormData({ ...formData, prospectContact: e.target.value })}
@@ -404,18 +395,20 @@ export default function AgendaFormDialog({
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Data *</Label>
+              {/* Agendamento */}
+              <SectionHeader icon={CalendarDays} label="Agendamento" />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground/80">Data *</Label>
                   <Input
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>
-                    Hora <span className="text-muted-foreground text-xs">(opcional)</span>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground/80">
+                    Hora <span className="text-muted-foreground font-normal">(opcional)</span>
                   </Label>
                   <Input
                     type="time"
@@ -425,10 +418,29 @@ export default function AgendaFormDialog({
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="flex items-center gap-1.5">
-                  <DollarSign className="h-3.5 w-3.5" />
-                  Potencial de Produção
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80">Período da agenda *</Label>
+                <Select
+                  value={formData.period}
+                  onValueChange={(v) => setFormData({ ...formData, period: v as VisitPeriod })}
+                >
+                  <SelectTrigger className={cn(!formData.period && "text-muted-foreground")}>
+                    <SelectValue placeholder="Selecione o período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getActiveItems("periods").map((p) => (
+                      <SelectItem key={p} value={p.toLowerCase() as VisitPeriod}>
+                        {p}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80 flex items-center gap-1.5">
+                  <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+                  Potencial de produção
                 </Label>
                 <Input
                   value={formData.potentialValue}
@@ -439,23 +451,26 @@ export default function AgendaFormDialog({
                   placeholder="Ex: R$ 5.000,00"
                 />
                 {suggestedSourceDate && !userEditedPotential.current && (
-                  <p className="text-[11px] text-muted-foreground">Sugestão baseada na visita de {suggestedSourceDate}</p>
+                  <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <Info className="h-3 w-3" /> Sugestão baseada na visita de {suggestedSourceDate}
+                  </p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label>Convidados</Label>
-                <div className="space-y-1.5 max-h-40 overflow-y-auto border rounded-md p-2">
+              {/* Convidados */}
+              <SectionHeader icon={Users} label="Convidados" />
+              <div className="space-y-1.5">
+                <div className="space-y-1.5 max-h-44 overflow-y-auto rounded-md border border-border/60 bg-muted/20 p-2.5">
                   {allCargos.map((cargo) => {
                     const usersInCargo = invitableUsers.filter((u) => u.role === cargo);
                     if (usersInCargo.length === 0) return null;
                     return (
                       <div key={cargo} className="space-y-1">
-                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide pt-1">
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider pt-1">
                           {cargoLabels[cargo]}
                         </p>
                         {usersInCargo.map((c) => (
-                          <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                          <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-muted/50 transition-colors">
                             <Checkbox
                               checked={formData.invitedUserIds.includes(c.id)}
                               onCheckedChange={() =>
@@ -467,7 +482,7 @@ export default function AgendaFormDialog({
                                 })
                               }
                             />
-                            <span>{c.name}</span>
+                            <span className="text-foreground/90">{c.name}</span>
                           </label>
                         ))}
                       </div>
@@ -475,7 +490,9 @@ export default function AgendaFormDialog({
                   })}
                 </div>
                 {formData.invitedUserIds.length > 0 && (
-                  <p className="text-[11px] text-muted-foreground">{formData.invitedUserIds.length} convidado(s)</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {formData.invitedUserIds.length} convidado{formData.invitedUserIds.length > 1 ? "s" : ""} selecionado{formData.invitedUserIds.length > 1 ? "s" : ""}
+                  </p>
                 )}
               </div>
 
