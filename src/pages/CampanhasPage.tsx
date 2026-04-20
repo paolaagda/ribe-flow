@@ -238,88 +238,58 @@ export default function CampanhasPage() {
 
       <AnimatedFilterContent filterKey={activeInsight} className="space-y-ds-lg">
 
-      {/* 4. KPI Cards */}
+      {/* 4. KPI Cards — refined with lateral tonal bar + tile */}
       {kpis && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-ds-sm">
-           <Card className="card-flat group overflow-hidden relative">
-            <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center min-h-[72px] sm:min-h-[80px] gap-1.5">
-              <div className="flex items-center gap-1.5">
-                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--info) / 0.15) 0%, hsl(var(--info) / 0.05) 100%)' }}>
-                  <Eye className="h-4 w-4 text-info" />
+          {[
+            { label: 'Visitas', icon: Eye, value: kpis.totalVisits, goal: kpis.totalVisitGoal, color: 'info' as const, progress: kpis.totalVisitGoal > 0 ? Math.min(100, (kpis.totalVisits / kpis.totalVisitGoal) * 100) : 0 },
+            { label: 'Prospecções', icon: Target, value: kpis.totalProsp, goal: kpis.totalProspGoal, color: 'warning' as const, progress: kpis.totalProspGoal > 0 ? Math.min(100, (kpis.totalProsp / kpis.totalProspGoal) * 100) : 0 },
+            { label: 'Pontuação', icon: Star, value: kpis.totalScore, color: 'primary' as const, sub: 'pts acumulados', highlight: true },
+            { label: 'Taxa', icon: CheckCircle2, value: kpis.rate, suffix: '%', color: 'success' as const, progress: kpis.rate },
+            { label: 'Cancelamentos', icon: Ban, value: kpis.totalCancel, color: 'destructive' as const, sub: kpis.totalCancel > 0 && config ? `${Math.abs(kpis.totalCancel * config.pointsPerCancellation)} pts perdidos` : undefined },
+          ].map((k) => (
+            <Card key={k.label} className="relative overflow-hidden group hover:shadow-md transition-shadow">
+              <div className={cn("absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b", `from-${k.color}/70 to-${k.color}/30`)} />
+              <CardContent className="p-3 sm:p-3.5 pl-4 flex flex-col gap-2 min-h-[88px]">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-muted-foreground tracking-wider uppercase">{k.label}</span>
+                  <div className={cn("h-7 w-7 rounded-md flex items-center justify-center border", `bg-${k.color}/10 border-${k.color}/20 text-${k.color}`)}>
+                    <k.icon className="h-3.5 w-3.5" />
+                  </div>
                 </div>
-                <p className="text-[11px] sm:text-xs font-semibold text-foreground tracking-wide uppercase leading-tight">Visitas</p>
-              </div>
-              <p className="text-lg sm:text-xl font-bold tabular-nums leading-none text-muted-foreground">
-                {kpis.totalVisits}<span className="text-xs font-normal text-muted-foreground/70 ml-0.5">/ {kpis.totalVisitGoal}</span>
-              </p>
-              <Progress value={kpis.totalVisitGoal > 0 ? Math.min(100, (kpis.totalVisits / kpis.totalVisitGoal) * 100) : 0} className="h-1.5 w-full" />
-            </CardContent>
-          </Card>
-           <Card className="card-flat group overflow-hidden relative">
-            <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center min-h-[72px] sm:min-h-[80px] gap-1.5">
-              <div className="flex items-center gap-1.5">
-                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--warning) / 0.15) 0%, hsl(var(--warning) / 0.05) 100%)' }}>
-                  <Target className="h-4 w-4 text-warning" />
+                <div className="flex items-baseline gap-1">
+                  <p className={cn("text-xl sm:text-2xl font-bold tabular-nums leading-none", k.highlight && "text-primary")}>{k.value}{k.suffix || ''}</p>
+                  {k.goal !== undefined && (
+                    <span className="text-[11px] font-medium text-muted-foreground/80">/ {k.goal}</span>
+                  )}
                 </div>
-                <p className="text-[11px] sm:text-xs font-semibold text-foreground tracking-wide uppercase leading-tight">Prospecções</p>
-              </div>
-              <p className="text-lg sm:text-xl font-bold tabular-nums leading-none text-muted-foreground">
-                {kpis.totalProsp}<span className="text-xs font-normal text-muted-foreground/70 ml-0.5">/ {kpis.totalProspGoal}</span>
-              </p>
-              <Progress value={kpis.totalProspGoal > 0 ? Math.min(100, (kpis.totalProsp / kpis.totalProspGoal) * 100) : 0} className="h-1.5 w-full" />
-            </CardContent>
-          </Card>
-           <Card className="card-flat group overflow-hidden relative">
-            <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center min-h-[72px] sm:min-h-[80px] gap-1.5">
-              <div className="flex items-center gap-1.5">
-                <div className="icon-container-sm icon-container-primary">
-                  <Star className="h-4 w-4 text-primary" />
-                </div>
-                <p className="text-[11px] sm:text-xs font-semibold text-foreground tracking-wide uppercase leading-tight">Pontuação</p>
-              </div>
-              <p className="text-lg sm:text-xl font-bold tabular-nums leading-none text-primary">{kpis.totalScore}</p>
-              <p className="text-[10px] text-muted-foreground/70">pts acumulados</p>
-            </CardContent>
-          </Card>
-           <Card className="card-flat group overflow-hidden relative">
-            <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center min-h-[72px] sm:min-h-[80px] gap-1.5">
-              <div className="flex items-center gap-1.5">
-                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--success) / 0.15) 0%, hsl(var(--success) / 0.05) 100%)' }}>
-                  <CheckCircle2 className="h-4 w-4 text-success" />
-                </div>
-                <p className="text-[11px] sm:text-xs font-semibold text-foreground tracking-wide uppercase leading-tight">Taxa de conclusão</p>
-              </div>
-              <p className="text-lg sm:text-xl font-bold tabular-nums leading-none text-muted-foreground">{kpis.rate}%</p>
-              <Progress value={kpis.rate} className="h-1.5 w-full" />
-            </CardContent>
-          </Card>
-          <Card className="card-flat group overflow-hidden relative">
-            <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center justify-center min-h-[72px] sm:min-h-[80px] gap-1.5">
-              <div className="flex items-center gap-1.5">
-                <div className="icon-container-sm" style={{ background: 'linear-gradient(135deg, hsl(var(--destructive) / 0.15) 0%, hsl(var(--destructive) / 0.05) 100%)' }}>
-                  <Ban className="h-4 w-4 text-destructive" />
-                </div>
-                <p className="text-[11px] sm:text-xs font-semibold text-foreground tracking-wide uppercase leading-tight">Cancelamentos</p>
-              </div>
-              <p className={cn("text-lg sm:text-xl font-bold tabular-nums leading-none text-muted-foreground", kpis.totalCancel > 0 && "text-destructive")}>{kpis.totalCancel}</p>
-              {kpis.totalCancel > 0 && config && (
-                <p className="text-[10px] text-destructive">{Math.abs(kpis.totalCancel * config.pointsPerCancellation)} pts perdidos</p>
-              )}
-            </CardContent>
-          </Card>
+                {k.progress !== undefined && (
+                  <Progress value={k.progress} className="h-1.5 w-full" />
+                )}
+                {k.sub && (
+                  <p className={cn("text-[10px] text-muted-foreground", k.color === 'destructive' && k.value > 0 && 'text-destructive font-medium')}>{k.sub}</p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
 
-      {/* 5. Streak */}
+      {/* 5. Streak — celebrative */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        <Card className="border-l-4 border-l-success">
-          <CardContent className="p-ds-md flex items-center gap-ds-sm">
-            <div className="w-12 h-12 rounded-full bg-success/10 text-success flex items-center justify-center">
+        <Card className="relative overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-success/70 to-success/30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-success/5 via-transparent to-transparent pointer-events-none" />
+          <CardContent className="p-ds-md pl-5 flex items-center gap-ds-md relative">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-success/20 to-success/5 border border-success/30 text-success flex items-center justify-center shadow-sm">
               <Flame className="h-6 w-6" />
             </div>
-            <div>
-              <p className="text-ds-xl font-bold">{streak} {streak === 1 ? 'dia' : 'dias'}</p>
-              <p className="text-xs text-muted-foreground">Streak de atividades consecutivas</p>
+            <div className="flex-1">
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-bold tabular-nums leading-none">{streak}</p>
+                <p className="text-sm font-medium text-muted-foreground">{streak === 1 ? 'dia consecutivo' : 'dias consecutivos'}</p>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Streak de atividades — continue assim!</p>
             </div>
           </CardContent>
         </Card>
@@ -328,8 +298,20 @@ export default function CampanhasPage() {
       {/* 5b. Podium — Animated & Fun */}
       {canRead('gamification.ranking') && podium.length >= 3 && (
         <Card className="overflow-hidden relative">
-          <CardContent className="p-ds-md pb-0">
-            <p className="text-ds-sm font-semibold mb-ds-sm flex items-center gap-2"><Trophy className="h-4 w-4 text-yellow-500" /> Pódio</p>
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-yellow-500/[0.06] via-primary/[0.03] to-transparent pointer-events-none" />
+          <CardContent className="p-ds-md pb-ds-sm relative">
+            <div className="flex items-center justify-between mb-ds-md">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-md bg-gradient-to-br from-yellow-400/25 to-yellow-600/10 border border-yellow-500/30 flex items-center justify-center">
+                  <Trophy className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold leading-none">Pódio da Campanha</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">Top 3 colocações por pontuação</p>
+                </div>
+              </div>
+              <Badge variant="secondary" className="text-[10px]">{ranking.length} participantes</Badge>
+            </div>
             <div className="flex items-end justify-center gap-ds-sm md:gap-ds-md relative">
 
               {podiumOrder.map((item, idx) => {
@@ -449,74 +431,116 @@ export default function CampanhasPage() {
       )}
 
       {/* 6. You vs Average */}
-      {myStats && ranking.length > 0 && (
-        <Card className="min-h-[100px] card-hover">
+      {myStats && ranking.length > 0 && (() => {
+        const avg = Math.round(ranking.reduce((s, r) => s + r.score, 0) / ranking.length);
+        const top = ranking[0]?.score || 0;
+        const diff = myStats.score - avg;
+        return (
+          <Card className="relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/70 to-primary/30" />
+            <CardContent className="p-ds-md pl-5">
+              <div className="flex items-center justify-between mb-ds-sm">
+                <p className="text-sm font-semibold flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-primary" /> Você vs Média
+                </p>
+                <Badge variant={diff >= 0 ? 'default' : 'secondary'} className="text-[10px]">
+                  {diff >= 0 ? '+' : ''}{diff} pts vs média
+                </Badge>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-md">
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs">
+                    <span className="font-medium">Você <span className="text-muted-foreground">({myPosition}º)</span></span>
+                    <span className="font-bold tabular-nums text-primary">{myStats.score} pts</span>
+                  </div>
+                  <Progress value={top > 0 ? (myStats.score / top) * 100 : 0} className="h-2.5" />
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Média do time</span>
+                    <span className="font-semibold tabular-nums">{avg} pts</span>
+                  </div>
+                  <Progress value={top > 0 ? (avg / top) * 100 : 0} className="h-2.5" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
+      {/* 7. Achievements — refined celebrative tiles */}
+      {achievements.length > 0 && (
+        <Card className="overflow-hidden">
           <CardContent className="p-ds-md">
-            <p className="card-section-title mb-ds-sm">Você vs Média</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-ds-sm">
-              <div>
-                <div className="flex justify-between text-ds-xs mb-1">
-                  <span>Você ({myPosition}º)</span>
-                  <span className="font-semibold">{myStats.score} pts</span>
+            <div className="flex items-center justify-between mb-ds-sm">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-md bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
+                  <Award className="h-4 w-4 text-primary" />
                 </div>
-                <Progress value={ranking[0]?.score > 0 ? (myStats.score / ranking[0].score) * 100 : 0} className="h-2" />
-              </div>
-              <div>
-                <div className="flex justify-between text-ds-xs mb-1">
-                  <span>Média</span>
-                  <span>{Math.round(ranking.reduce((s, r) => s + r.score, 0) / ranking.length)} pts</span>
+                <div>
+                  <p className="text-sm font-semibold leading-none">Conquistas</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">{achievements.filter(a => a.done).length} de {achievements.length} desbloqueadas</p>
                 </div>
-                <Progress value={ranking[0]?.score > 0 ? ((ranking.reduce((s, r) => s + r.score, 0) / ranking.length) / ranking[0].score) * 100 : 0} className="h-2" />
               </div>
+            </div>
+            <div className="grid grid-cols-3 md:grid-cols-7 gap-ds-xs">
+              {achievements.map((a, i) => (
+                <motion.div
+                  key={a.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.2, delay: i * 0.03 }}
+                >
+                  <div className={cn(
+                    "relative rounded-lg border text-center p-3 flex flex-col items-center gap-1.5 transition-all",
+                    a.done
+                      ? "border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                      : "border-dashed border-border/60 bg-muted/20 opacity-70"
+                  )}>
+                    <div className={cn(
+                      "h-9 w-9 rounded-md flex items-center justify-center border",
+                      a.done
+                        ? "bg-primary/15 border-primary/30 text-primary"
+                        : "bg-muted border-border/60 text-muted-foreground"
+                    )}>
+                      {a.icon}
+                    </div>
+                    <p className="text-[11px] font-semibold leading-tight">{a.name}</p>
+                    {a.done && (
+                      <CheckCircle2 className="absolute top-1.5 right-1.5 h-3 w-3 text-primary" />
+                    )}
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* 7. Achievements (compact single row) */}
-      {achievements.length > 0 && (
-        <div>
-          <h2 className="text-ds-sm font-semibold mb-ds-xs flex items-center gap-2"><Award className="h-4 w-4" /> Conquistas</h2>
-          <div className="grid grid-cols-3 md:grid-cols-7 gap-ds-xs">
-            {achievements.map((a, i) => (
-              <motion.div
-                key={a.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.2, delay: i * 0.03 }}
-              >
-                <Card className={cn("transition-all text-center card-hover", a.done ? "border-primary/30 bg-primary/5" : "opacity-60")}>
-                  <CardContent className="p-3 flex flex-col items-center gap-1.5">
-                    <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", a.done ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
-                      {a.icon}
-                    </div>
-                    <p className="text-ds-xs font-semibold leading-tight">{a.name}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* 8. Score History (detailed with date/time) */}
       {scoreHistory.length > 0 && (
-        <div>
-          <h2 className="text-ds-sm font-semibold mb-ds-xs">Histórico de Pontuação</h2>
-          <Accordion type="multiple" className="space-y-2">
-            {scoreHistory.map(entry => (
-              <AccordionItem key={entry.user?.id} value={entry.user?.id || ''} className="border rounded-lg px-4">
-                <AccordionTrigger className="hover:no-underline py-3">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-7 w-7">
-                      <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
-                        {entry.user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm font-medium">{entry.user?.name}</span>
-                    <Badge variant="secondary" className="text-xs">{entry.total} pts</Badge>
-                  </div>
-                </AccordionTrigger>
+        <Card className="overflow-hidden">
+          <CardContent className="p-ds-md">
+            <div className="flex items-center gap-2 mb-ds-sm">
+              <div className="h-8 w-8 rounded-md bg-muted/50 border border-border flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <p className="text-sm font-semibold">Histórico de Pontuação</p>
+            </div>
+            <Accordion type="multiple" className="space-y-2">
+              {scoreHistory.map(entry => (
+                <AccordionItem key={entry.user?.id} value={entry.user?.id || ''} className="border rounded-lg px-4 bg-muted/20">
+                  <AccordionTrigger className="hover:no-underline py-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-7 w-7">
+                        <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
+                          {entry.user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium">{entry.user?.name}</span>
+                      <Badge variant="secondary" className="text-xs">{entry.total} pts</Badge>
+                    </div>
+                  </AccordionTrigger>
                 <AccordionContent>
                   {entry.breakdown.length === 0 ? (
                     <p className="text-xs text-muted-foreground pb-2">Sem dados suficientes</p>
