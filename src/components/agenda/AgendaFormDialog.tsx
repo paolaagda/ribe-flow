@@ -544,10 +544,13 @@ export default function AgendaFormDialog({
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-sm overflow-hidden"
                       >
-                        <p className="text-xs font-medium text-warning">Motivo do reagendamento</p>
-                        <p className="text-sm">{formData.rescheduleReason}</p>
+                        <ToneBlock
+                          tone="warning"
+                          icon={AlertTriangle}
+                          eyebrow="Motivo do reagendamento"
+                          description={formData.rescheduleReason}
+                        />
                       </motion.div>
                     )}
                     {formData.status === "Cancelada" && formData.cancelReason && (
@@ -555,10 +558,13 @@ export default function AgendaFormDialog({
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-sm overflow-hidden"
                       >
-                        <p className="text-xs font-medium text-destructive">Motivo do cancelamento</p>
-                        <p className="text-sm">{formData.cancelReason}</p>
+                        <ToneBlock
+                          tone="destructive"
+                          icon={AlertTriangle}
+                          eyebrow="Motivo do cancelamento"
+                          description={formData.cancelReason}
+                        />
                       </motion.div>
                     )}
                     {formData.status === "Inconclusa" && formData.inconclusiveReason && (
@@ -566,10 +572,13 @@ export default function AgendaFormDialog({
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-sm overflow-hidden"
                       >
-                        <p className="text-xs font-medium text-primary">Motivo da agenda inconclusa</p>
-                        <p className="text-sm">{formData.inconclusiveReason}</p>
+                        <ToneBlock
+                          tone="primary"
+                          icon={AlertTriangle}
+                          eyebrow="Motivo da agenda inconclusa"
+                          description={formData.inconclusiveReason}
+                        />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -631,7 +640,7 @@ export default function AgendaFormDialog({
           )}
           </div>
 
-          <DialogFooter className="shrink-0 flex gap-2 px-5 py-3 border-t border-border/60 bg-muted/20">
+          <ModalFooterShell className="shrink-0 px-5 py-3">
             {formStep > 0 && (
               <Button variant="outline" size="sm" onClick={() => setFormStep(formStep - 1)}>
                 Voltar
@@ -644,7 +653,7 @@ export default function AgendaFormDialog({
             ) : (
               <Button size="sm" onClick={handleSave}>{editingVisit ? "Salvar alterações" : "Criar compromisso"}</Button>
             )}
-          </DialogFooter>
+          </ModalFooterShell>
         </DialogContent>
       </Dialog>
 
@@ -690,41 +699,3 @@ export default function AgendaFormDialog({
   );
 }
 
-function SectionHeader({ icon: Icon, label }: { icon: any; label: string }) {
-  return (
-    <div className="flex items-center gap-2 pt-1">
-      <span className="h-6 w-6 rounded-md bg-muted/50 text-muted-foreground flex items-center justify-center">
-        <Icon className="h-3 w-3" />
-      </span>
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
-      <div className="flex-1 h-px bg-border/60" />
-    </div>
-  );
-}
-
-function ReasonBlock({ icon: Icon, tone, label, text }: { icon: any; tone: "warning" | "destructive" | "primary"; label: string; text: string }) {
-  const toneMap = {
-    warning: { bar: "from-warning to-warning/60", bg: "bg-warning/5", border: "border-warning/20", tile: "bg-warning/10 text-warning", textCls: "text-warning" },
-    destructive: { bar: "from-destructive to-destructive/60", bg: "bg-destructive/5", border: "border-destructive/20", tile: "bg-destructive/10 text-destructive", textCls: "text-destructive" },
-    primary: { bar: "from-primary to-primary/60", bg: "bg-primary/5", border: "border-primary/20", tile: "bg-primary/10 text-primary", textCls: "text-primary" },
-  }[tone];
-  return (
-    <motion.div
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: "auto" }}
-      exit={{ opacity: 0, height: 0 }}
-      className={cn("relative overflow-hidden rounded-lg border", toneMap.border, toneMap.bg)}
-    >
-      <div className={cn("absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b", toneMap.bar)} />
-      <div className="flex items-start gap-2.5 px-3 py-2.5 pl-4">
-        <span className={cn("h-7 w-7 rounded-md flex items-center justify-center shrink-0", toneMap.tile)}>
-          <Icon className="h-3.5 w-3.5" />
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className={cn("text-[10px] font-semibold uppercase tracking-wider", toneMap.textCls)}>{label}</p>
-          <p className="text-sm text-foreground mt-0.5">{text}</p>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
