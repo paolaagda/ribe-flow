@@ -13,7 +13,10 @@ import {
 } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Star, AlertTriangle } from 'lucide-react';
+import {
+  CalendarIcon, Star, AlertTriangle, ListChecks, Link2, Users, ClipboardList,
+  Handshake, UserPlus,
+} from 'lucide-react';
 import { format, addBusinessDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -39,6 +42,21 @@ interface TaskCreateModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+/* ── Section header (matches AgendaFormDialog pattern) ── */
+function SectionHeader({ icon: Icon, label }: { icon: React.ComponentType<{ className?: string }>; label: string }) {
+  return (
+    <div className="flex items-center gap-2 pb-1">
+      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
+        <Icon className="h-3.5 w-3.5" />
+      </div>
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <div className="flex-1 h-px bg-border/60" />
+    </div>
+  );
+}
+
 export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalProps) {
   const { partners } = usePartners();
   const { visits, setVisits } = useVisits();
@@ -60,25 +78,21 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
 
   const activeUsers = useMemo(() => mockUsers.filter(u => u.active), []);
 
-  // Selected partner
   const selectedPartner = useMemo(
     () => (partnerId ? partners.find(p => p.id === partnerId) : undefined),
     [partnerId, partners],
   );
 
-  // Registrations filtered by partner
   const filteredRegistrations = useMemo(() => {
     if (!partnerId) return registrations;
     return registrations.filter(r => r.partnerId === partnerId);
   }, [partnerId, registrations]);
 
-  // Visits filtered by partner
   const filteredVisits = useMemo(() => {
     if (!partnerId) return visits.slice(0, 30);
     return visits.filter(v => v.partnerId === partnerId);
   }, [partnerId, visits]);
 
-  // Auto-suggest responsible based on context
   useEffect(() => {
     if (!open) return;
     if (selectedPartner) {
@@ -88,7 +102,6 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
     }
   }, [selectedPartner, user, open]);
 
-  // When registration is selected, lock deadline to 5 business days
   useEffect(() => {
     if (registrationId) {
       const autoDeadline = addBusinessDays(new Date(), 5);
@@ -99,13 +112,11 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
     }
   }, [registrationId]);
 
-  // Reset dependent fields when partner changes
   useEffect(() => {
     setRegistrationId('');
     setVisitId('');
   }, [partnerId]);
 
-  // Reset form
   const resetForm = () => {
     setTitle('');
     setDescription('');
@@ -129,12 +140,10 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
   const handleCreate = () => {
     if (!canSubmit) return;
 
-    // Find or create a visit to attach the task to
     const targetPartnerId = partnerId || partners[0]?.id || 'p1';
     let targetVisitId = visitId;
 
     if (!targetVisitId) {
-      // Find the most recent visit for this partner
       const partnerVisits = visits
         .filter(v => v.partnerId === targetPartnerId)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -164,7 +173,6 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
     }
 
     const principalId = responsibleId || user?.id || 'u1';
-    // Ensure principal isn't duplicated in assignees
     const cleanAssignees = assignedIds.filter(id => id && id !== principalId);
 
     if (cleanAssignees.length > 0) {
@@ -211,17 +219,42 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Nova tarefa</DialogTitle>
-          <DialogDescription>Crie uma tarefa manual com os campos essenciais.</DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-lg max-h-[92vh] p-0 gap-0 overflow-hidden">
+        {/* ── Branded header with lateral bar ── */}
+        <div className="relative">
+          <div
+            className="absolute left-0 top-0 bottom-0 w-1.5"
+            style={{
+              background: 'linear-gradient(180deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.6) 100%)',
+            }}
+          />
+          <DialogHeader className="px-5 py-4 pl-6 space-y-2.5">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
+                <ListChecks className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0 space-y-1">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  Nova tarefa
+                </p>
+                <DialogTitle className="text-base font-semibold leading-snug">
+                  Criar tarefa manual
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Defina identificação, vínculo e responsabilidade.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+        </div>
 
-        <div className="space-y-5 py-2">
-          {/* ── Group 1: Core ── */}
-          <div className="space-y-3">
+        <div className="overflow-y-auto max-h-[calc(92vh-180px)] px-5 py-4 space-y-5">
+          {/* ── Identificação ── */}
+          <section className="space-y-3">
+            <SectionHeader icon={ClipboardList} label="Identificação" />
+
             <div className="space-y-1.5">
-              <Label htmlFor="task-title" className="text-xs font-semibold">
+              <Label htmlFor="task-title" className="text-xs font-medium text-foreground">
                 Título <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -229,24 +262,26 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
                 placeholder="Ex: Enviar contrato atualizado"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                className="h-10"
+                className="h-9 text-sm"
                 autoFocus
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="task-desc" className="text-xs font-semibold">Descrição</Label>
+              <Label htmlFor="task-desc" className="text-xs font-medium text-foreground">
+                Descrição
+              </Label>
               <Textarea
                 id="task-desc"
                 placeholder="Detalhe adicional sobre a tarefa (opcional)"
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                className="min-h-[60px] resize-none"
+                className="min-h-[64px] text-sm resize-none"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Tipo da tarefa</Label>
+              <Label className="text-xs font-medium text-foreground">Tipo da tarefa</Label>
               <Select value={taskType} onValueChange={setTaskType}>
                 <SelectTrigger className="h-9 text-xs">
                   <SelectValue placeholder="Selecione o tipo" />
@@ -258,14 +293,14 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          </section>
 
-          {/* ── Group 2: Context ── */}
-          <div className="space-y-3 border-t pt-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Vínculo</p>
+          {/* ── Vínculo ── */}
+          <section className="space-y-3">
+            <SectionHeader icon={Link2} label="Vínculo" />
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Parceiro</Label>
+              <Label className="text-xs font-medium text-foreground">Parceiro</Label>
               <Select value={partnerId} onValueChange={setPartnerId}>
                 <SelectTrigger className="h-9 text-xs">
                   <SelectValue placeholder="Nenhum (tarefa avulsa)" />
@@ -280,7 +315,7 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Cadastro</Label>
+              <Label className="text-xs font-medium text-foreground">Cadastro</Label>
               <Select
                 value={registrationId}
                 onValueChange={setRegistrationId}
@@ -299,15 +334,18 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
                 </SelectContent>
               </Select>
               {registrationId && registrationId !== 'none' && (
-                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3 text-amber-500" />
-                  Prazo automático de 5 dias úteis aplicado
-                </p>
+                <div className="relative overflow-hidden rounded-md border border-warning/30 bg-warning/10 pl-3 pr-3 py-2">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-warning" />
+                  <p className="text-[11px] text-foreground flex items-center gap-1.5">
+                    <AlertTriangle className="h-3 w-3 text-warning shrink-0" />
+                    Prazo automático de 5 dias úteis aplicado pela regra de Cadastro
+                  </p>
+                </div>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Compromisso</Label>
+              <Label className="text-xs font-medium text-foreground">Compromisso</Label>
               <Select
                 value={visitId}
                 onValueChange={setVisitId}
@@ -318,22 +356,29 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Nenhum</SelectItem>
-                  {filteredVisits.map(v => (
-                    <SelectItem key={v.id} value={v.id}>
-                      {new Date(v.date).toLocaleDateString('pt-BR')} — {v.type === 'visita' ? 'Visita' : 'Prospecção'} ({v.status})
-                    </SelectItem>
-                  ))}
+                  {filteredVisits.map(v => {
+                    const isVisita = v.type === 'visita';
+                    const TypeIcon = isVisita ? Handshake : UserPlus;
+                    return (
+                      <SelectItem key={v.id} value={v.id}>
+                        <span className="inline-flex items-center gap-1.5">
+                          <TypeIcon className={cn('h-3 w-3', isVisita ? 'text-info' : 'text-warning')} />
+                          {new Date(v.date).toLocaleDateString('pt-BR')} — {isVisita ? 'Visita' : 'Prospecção'} ({v.status})
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          </section>
 
-          {/* ── Group 3: Assignment ── */}
-          <div className="space-y-3 border-t pt-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Responsabilidade</p>
+          {/* ── Responsabilidade ── */}
+          <section className="space-y-3">
+            <SectionHeader icon={Users} label="Responsabilidade" />
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Responsável principal</Label>
+              <Label className="text-xs font-medium text-foreground">Responsável principal</Label>
               <Select value={responsibleId} onValueChange={setResponsibleId}>
                 <SelectTrigger className="h-9 text-xs">
                   <SelectValue placeholder="Selecione" />
@@ -346,32 +391,38 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
               </Select>
               {selectedPartner && (
                 <p className="text-[10px] text-muted-foreground">
-                  Sugerido pelo parceiro: {activeUsers.find(u => u.id === selectedPartner.responsibleUserId)?.name}
+                  Sugerido pelo Parceiro: {activeUsers.find(u => u.id === selectedPartner.responsibleUserId)?.name}
                 </p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Atribuídos</Label>
-              <div className="flex flex-wrap gap-1.5">
-                {activeUsers.map(u => {
-                  const selected = assignedIds.includes(u.id);
-                  return (
-                    <Badge
-                      key={u.id}
-                      variant={selected ? 'default' : 'outline'}
-                      className={cn(
-                        'cursor-pointer text-[10px] transition-colors',
-                        selected
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-accent',
-                      )}
-                      onClick={() => toggleAssigned(u.id)}
-                    >
-                      {u.name}
-                    </Badge>
-                  );
-                })}
+              <Label className="text-xs font-medium text-foreground">Atribuídos</Label>
+              <div className="rounded-md border border-border/60 bg-muted/20 p-2.5">
+                {activeUsers.length === 0 ? (
+                  <p className="text-[11px] text-muted-foreground italic">Nenhum usuário disponível.</p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeUsers.map(u => {
+                      const selected = assignedIds.includes(u.id);
+                      return (
+                        <Badge
+                          key={u.id}
+                          variant={selected ? 'default' : 'outline'}
+                          className={cn(
+                            'cursor-pointer text-[10px] transition-colors',
+                            selected
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-background hover:bg-accent',
+                          )}
+                          onClick={() => toggleAssigned(u.id)}
+                        >
+                          {u.name}
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
               <p className="text-[10px] text-muted-foreground">
                 Clique para selecionar ou remover atribuídos
@@ -380,7 +431,7 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
 
             {/* Deadline */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Prazo</Label>
+              <Label className="text-xs font-medium text-foreground">Prazo</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -411,16 +462,16 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
               </Popover>
               {deadlineLocked && (
                 <p className="text-[10px] text-muted-foreground">
-                  Prazo definido automaticamente (5 dias úteis — regra de cadastro)
+                  Prazo definido automaticamente (5 dias úteis — regra de Cadastro)
                 </p>
               )}
             </div>
 
             {/* Priority */}
-            <div className="flex items-center justify-between py-1">
+            <div className="flex items-center justify-between rounded-md border border-border/60 bg-muted/20 px-3 py-2.5">
               <div className="flex items-center gap-2">
-                <Star className={cn('h-4 w-4', isPriority ? 'text-amber-500 fill-amber-500' : 'text-muted-foreground')} />
-                <Label className="text-xs font-semibold cursor-pointer" htmlFor="priority-switch">
+                <Star className={cn('h-4 w-4', isPriority ? 'text-warning fill-warning' : 'text-muted-foreground')} />
+                <Label className="text-xs font-medium cursor-pointer text-foreground" htmlFor="priority-switch">
                   Marcar como prioritária
                 </Label>
               </div>
@@ -430,14 +481,15 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
                 onCheckedChange={setIsPriority}
               />
             </div>
-          </div>
+          </section>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="text-xs">
+        <DialogFooter className="gap-2 sm:gap-2 px-5 py-3 border-t border-border/60 bg-muted/20">
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} className="text-xs">
             Cancelar
           </Button>
-          <Button onClick={handleCreate} disabled={!canSubmit} className="text-xs gap-1.5">
+          <Button size="sm" onClick={handleCreate} disabled={!canSubmit} className="text-xs gap-1.5">
+            <ListChecks className="h-3.5 w-3.5" />
             Criar tarefa
           </Button>
         </DialogFooter>
