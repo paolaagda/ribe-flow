@@ -142,61 +142,90 @@ export default function TaskDetailModal({
   const hasAnyAction = permissions.canConclude || permissions.canEdit || permissions.canAssign
     || permissions.canCancel || permissions.canReopen || permissions.canTerminalEdit;
 
+  // Determine accent tone (status drives lateral bar/tile)
+  const tone = cancelled
+    ? { bar: 'hsl(var(--destructive))', barSoft: 'hsl(var(--destructive) / 0.6)', tile: 'bg-destructive/10 text-destructive ring-destructive/20', label: 'text-destructive' }
+    : completed
+    ? { bar: 'hsl(var(--success))', barSoft: 'hsl(var(--success) / 0.6)', tile: 'bg-success/10 text-success ring-success/20', label: 'text-success' }
+    : overdue
+    ? { bar: 'hsl(var(--destructive))', barSoft: 'hsl(var(--destructive) / 0.6)', tile: 'bg-destructive/10 text-destructive ring-destructive/20', label: 'text-destructive' }
+    : priority
+    ? { bar: 'hsl(var(--warning))', barSoft: 'hsl(var(--warning) / 0.6)', tile: 'bg-warning/10 text-warning ring-warning/20', label: 'text-warning' }
+    : { bar: 'hsl(var(--primary))', barSoft: 'hsl(var(--primary) / 0.6)', tile: 'bg-primary/10 text-primary ring-primary/20', label: 'text-primary' };
+
+  const visitIsVisita = item.visit.type === 'visita';
+  const VisitIcon = visitIsVisita ? Handshake : UserPlus;
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg sm:max-w-xl max-h-[90vh] p-0 gap-0 overflow-hidden">
-          {/* ── Header ── */}
-          <DialogHeader className="p-4 sm:p-5 pb-0 space-y-2">
-            <div className="flex items-start gap-2 pr-6">
-              <div className="flex-1 min-w-0 space-y-1.5">
-                <DialogTitle className="text-base font-semibold leading-snug">
-                  {item.task.text}
-                </DialogTitle>
-                <DialogDescription className="sr-only">Detalhe da tarefa</DialogDescription>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="outline" className={cn('text-[11px] font-medium', statusInfo.className)}>
-                    {statusInfo.label}
-                  </Badge>
-                  {overdue && (
-                    <Badge variant="destructive" className="text-[10px] gap-1">
-                      <AlertTriangle className="h-3 w-3" />
-                      Atrasada
+        <DialogContent className="max-w-lg sm:max-w-xl max-h-[92vh] p-0 gap-0 overflow-hidden">
+          {/* ── Branded header with lateral bar ── */}
+          <div className="relative">
+            <div
+              className="absolute left-0 top-0 bottom-0 w-1.5"
+              style={{ background: `linear-gradient(180deg, ${tone.bar} 0%, ${tone.barSoft} 100%)` }}
+            />
+            <DialogHeader className="px-5 py-4 pl-6 space-y-2.5">
+              <div className="flex items-start gap-3 pr-6">
+                <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ring-1', tone.tile)}>
+                  <ListChecks className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <p className={cn('text-[10px] font-semibold uppercase tracking-wider', tone.label)}>
+                    Tarefa · {categoryLabel}
+                  </p>
+                  <DialogTitle className="text-base font-semibold leading-snug">
+                    {item.task.text}
+                  </DialogTitle>
+                  <DialogDescription className="sr-only">Detalhe da tarefa</DialogDescription>
+                  <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                    <Badge variant="outline" className={cn('text-[10px] font-medium', statusInfo.className)}>
+                      {statusInfo.label}
                     </Badge>
-                  )}
-                  {priority && (
-                    <Badge variant="outline" className="text-[10px] gap-0.5 border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/5">
-                      <Star className="h-2.5 w-2.5 fill-current" />
-                      Prioritária
-                    </Badge>
-                  )}
-                  <span className={cn(
-                    'text-[11px] font-medium',
-                    deadline.variant === 'overdue' && 'text-destructive',
-                    deadline.variant === 'warning' && 'text-amber-600 dark:text-amber-400',
-                    deadline.variant === 'default' && 'text-muted-foreground',
-                  )}>
-                    {deadline.label}
-                  </span>
+                    {overdue && (
+                      <Badge variant="destructive" className="text-[10px] gap-1">
+                        <AlertTriangle className="h-3 w-3" />
+                        Atrasada
+                      </Badge>
+                    )}
+                    {priority && (
+                      <Badge variant="outline" className="text-[10px] gap-0.5 border-warning/40 text-warning bg-warning/10">
+                        <Star className="h-2.5 w-2.5 fill-current" />
+                        Prioritária
+                      </Badge>
+                    )}
+                    <span className={cn(
+                      'text-[10px] font-medium',
+                      deadline.variant === 'overdue' && 'text-destructive',
+                      deadline.variant === 'warning' && 'text-warning',
+                      deadline.variant === 'default' && 'text-muted-foreground',
+                    )}>
+                      · {deadline.label}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </DialogHeader>
+            </DialogHeader>
+          </div>
 
-          <ScrollArea className="max-h-[calc(90vh-180px)]">
-            <div className="p-4 sm:p-5 pt-3 space-y-4">
-              {/* ── A. Context block ── */}
+          <ScrollArea className="max-h-[calc(92vh-200px)]">
+            <div className="p-5 pt-4 space-y-5">
+              {/* ── A. Contexto ── */}
               <section className="space-y-2.5">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Contexto</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <SectionHeader icon={ClipboardList} label="Contexto" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-md border border-border/60 bg-muted/20 p-3">
                   <ContextRow icon={<Briefcase className="h-3.5 w-3.5" />} label="Parceiro" value={partner?.name || '—'} />
                   <ContextRow icon={<FileText className="h-3.5 w-3.5" />} label="Tipo" value={categoryLabel} />
-                  <ContextRow icon={<Link2 className="h-3.5 w-3.5" />} label="Compromisso"
-                    value={item.visit.date ? `${new Date(item.visit.date).toLocaleDateString('pt-BR')} — ${item.visit.type}` : '—'} />
+                  <ContextRow
+                    icon={<VisitIcon className={cn('h-3.5 w-3.5', visitIsVisita ? 'text-info' : 'text-warning')} />}
+                    label="Compromisso"
+                    value={item.visit.date ? `${new Date(item.visit.date).toLocaleDateString('pt-BR')} — ${visitIsVisita ? 'Visita' : 'Prospecção'}` : '—'}
+                  />
                   <ContextRow icon={<Calendar className="h-3.5 w-3.5" />} label="Prazo" value={deadline.label}
                     valueClassName={cn(
                       deadline.variant === 'overdue' && 'text-destructive font-semibold',
-                      deadline.variant === 'warning' && 'text-amber-600 dark:text-amber-400 font-semibold',
+                      deadline.variant === 'warning' && 'text-warning font-semibold',
                     )} />
                   <ContextRow icon={<UserIcon className="h-3.5 w-3.5" />} label="Responsável" value={responsible?.name || 'Sem responsável'} />
                   {item.task.taskBankName && (
@@ -205,7 +234,6 @@ export default function TaskDetailModal({
                 </div>
               </section>
 
-              <Separator />
 
               {/* ── B. Return / feedback block ── */}
               {item.task.taskReturnReason && !completed && !cancelled && (
