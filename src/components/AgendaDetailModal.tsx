@@ -276,7 +276,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto p-0">
+        <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto p-0 border-border/60 shadow-lg">
           {/* ── Header ── */}
           <DetailHeader
             visit={visit}
@@ -292,7 +292,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
             onPartnerClick={() => { if (partner) { onOpenChange(false); navigate(`/parceiros?id=${partner.id}`); } }}
           />
 
-          <Separator className="opacity-40" />
+          <Separator className="opacity-50" />
 
           {/* ── Schedule fields (date/period/time/medio/potential) ── */}
           <DetailScheduleFields
@@ -306,56 +306,84 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
             onPotentialChange={(v) => updateVisit({ potentialValue: v })}
           />
 
-          <Separator className="opacity-40" />
+          <Separator className="opacity-50" />
 
           {/* ── Summary ── */}
-          <div className="px-5 py-3 space-y-1.5">
+          <div className="px-5 py-4 space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">Resumo</p>
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Resumo</p>
               {!editingSummary && (
-                <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full text-muted-foreground hover:text-foreground" onClick={handleStartEditSummary}>
+                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60" onClick={handleStartEditSummary}>
                   <Pencil className="h-3 w-3" />
                 </Button>
               )}
             </div>
             {editingSummary ? (
               <div className="space-y-2">
-                <Textarea value={summaryDraft} onChange={e => setSummaryDraft(e.target.value)} placeholder="Escreva o resumo..." className="min-h-[60px] text-sm" autoFocus />
+                <Textarea value={summaryDraft} onChange={e => setSummaryDraft(e.target.value)} placeholder="Escreva o resumo..." className="min-h-[64px] text-sm" autoFocus />
                 <div className="flex items-center gap-2 justify-end">
                   <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingSummary(false)}>Cancelar</Button>
-                  <Button size="sm" className="h-7 text-xs gap-1" onClick={handleSaveSummary}><Check className="h-3 w-3" /> Salvar</Button>
+                  <Button size="sm" className="h-7 text-xs gap-1 shadow-sm" onClick={handleSaveSummary}><Check className="h-3 w-3" /> Salvar</Button>
                 </div>
               </div>
             ) : visit.summary?.trim() ? (
-              <p className="text-sm bg-muted/30 rounded-lg p-3 cursor-pointer hover:bg-muted/50 transition-colors leading-relaxed" onClick={handleStartEditSummary}>{visit.summary}</p>
+              <p
+                className="text-sm bg-muted/30 border border-border/40 rounded-lg p-3 cursor-pointer hover:bg-muted/50 hover:border-border/60 transition-colors leading-relaxed"
+                onClick={handleStartEditSummary}
+              >
+                {visit.summary}
+              </p>
             ) : visit.status === 'Concluída' ? (
-              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/30 border border-border/30">
+              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/30 border border-border/40">
                 <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                 <p className="text-xs text-muted-foreground flex-1">Resumo ainda não preenchido</p>
                 <Button variant="ghost" size="sm" className="h-6 text-xs px-2" onClick={handleStartEditSummary}>Preencher</Button>
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors" onClick={handleStartEditSummary}>Clique para adicionar um resumo</p>
+              <p
+                className="text-xs text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors px-1"
+                onClick={handleStartEditSummary}
+              >
+                Clique para adicionar um resumo
+              </p>
             )}
           </div>
 
-          {/* Status reasons */}
+          {/* Status reasons — refined with lateral bar pattern */}
           {visit.status === 'Reagendada' && visit.rescheduleReason && (
-            <div className="mx-5 mb-3 flex items-start gap-2 p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-sm">
-              <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-              <div><p className="text-xs font-medium text-warning">Motivo do reagendamento</p><p className="text-sm">{visit.rescheduleReason}</p></div>
+            <div className="mx-5 mb-3 relative overflow-hidden flex items-start gap-2.5 p-3 rounded-lg bg-warning/10 border border-warning/20 text-sm">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-warning/70 via-warning/40 to-warning/10" />
+              <div className="w-7 h-7 rounded-md bg-warning/15 flex items-center justify-center shrink-0 ml-1">
+                <AlertTriangle className="h-3.5 w-3.5 text-warning" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] uppercase tracking-wider font-semibold text-warning">Motivo do reagendamento</p>
+                <p className="text-sm leading-snug mt-0.5">{visit.rescheduleReason}</p>
+              </div>
             </div>
           )}
           {visit.status === 'Cancelada' && visit.cancelReason && (
-            <div className="mx-5 mb-3 flex items-start gap-2 p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-sm">
-              <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
-              <div><p className="text-xs font-medium text-destructive">Motivo do cancelamento</p><p className="text-sm">{visit.cancelReason}</p></div>
+            <div className="mx-5 mb-3 relative overflow-hidden flex items-start gap-2.5 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-destructive/70 via-destructive/40 to-destructive/10" />
+              <div className="w-7 h-7 rounded-md bg-destructive/15 flex items-center justify-center shrink-0 ml-1">
+                <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] uppercase tracking-wider font-semibold text-destructive">Motivo do cancelamento</p>
+                <p className="text-sm leading-snug mt-0.5">{visit.cancelReason}</p>
+              </div>
             </div>
           )}
           {visit.status === 'Inconclusa' && visit.inconclusiveReason && (
-            <div className="mx-5 mb-3 flex items-start gap-2 p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm">
-              <AlertTriangle className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
-              <div><p className="text-xs font-medium text-purple-600 dark:text-purple-400">Motivo do compromisso inconcluso</p><p className="text-sm">{visit.inconclusiveReason}</p></div>
+            <div className="mx-5 mb-3 relative overflow-hidden flex items-start gap-2.5 p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500/70 via-purple-500/40 to-purple-500/10" />
+              <div className="w-7 h-7 rounded-md bg-purple-500/15 flex items-center justify-center shrink-0 ml-1">
+                <AlertTriangle className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] uppercase tracking-wider font-semibold text-purple-600 dark:text-purple-400">Motivo do compromisso inconcluso</p>
+                <p className="text-sm leading-snug mt-0.5">{visit.inconclusiveReason}</p>
+              </div>
             </div>
           )}
 
@@ -395,29 +423,42 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
               />
             ) : (
               (visit.partnerId || visit.prospectPartner) && canWrite('agenda.create') && (
-                <Button type="button" variant="outline" size="sm" className="w-full gap-2 border-dashed border-primary/40 text-primary hover:bg-primary/5 text-xs" onClick={() => setShowBankRegistration(true)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2 border-dashed border-primary/40 text-primary hover:bg-primary/5 hover:border-primary/60 text-xs h-9 font-medium"
+                  onClick={() => setShowBankRegistration(true)}
+                >
                   <Landmark className="h-3.5 w-3.5" /> Cadastrar Banco
                 </Button>
               )
             )}
             {hasActive && (
-              <div className="flex items-start gap-2.5 p-2.5 rounded-lg bg-info/5 border border-info/15">
-                <FileText className="h-3.5 w-3.5 text-info shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-info">Cadastro em andamento ({activeCount})</p>
-                  {regs.map(r => (
-                    <div key={r.id} className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{r.bank}</Badge>
-                      <span>{r.status}</span>
-                      <span>• {r.handlingWith}</span>
-                    </div>
-                  ))}
+              <div className="relative overflow-hidden flex items-start gap-2.5 p-3 rounded-lg bg-info/5 border border-info/20">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-info/70 via-info/40 to-info/10" />
+                <div className="w-7 h-7 rounded-md bg-info/10 flex items-center justify-center shrink-0 ml-1">
+                  <FileText className="h-3.5 w-3.5 text-info" />
+                </div>
+                <div className="space-y-1.5 min-w-0 flex-1">
+                  <p className="text-[10px] uppercase tracking-wider font-semibold text-info">
+                    Cadastro em andamento ({activeCount})
+                  </p>
+                  <div className="space-y-1">
+                    {regs.map(r => (
+                      <div key={r.id} className="flex items-center gap-2 text-[11px] text-muted-foreground flex-wrap">
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-medium">{r.bank}</Badge>
+                        <span>{r.status}</span>
+                        <span className="text-muted-foreground/60">• {r.handlingWith}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
           </div>
 
-          <Separator className="opacity-40" />
+          <Separator className="opacity-50" />
 
           {/* ── Participants ── */}
           <DetailParticipants
@@ -434,10 +475,10 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
             visitId={visit.id}
           />
 
-          <Separator className="opacity-40" />
+          <Separator className="opacity-50" />
 
           {/* ── Comments ── */}
-          <div className="px-5 py-3">
+          <div className="px-5 py-4 bg-muted/15">
             <div ref={commentsRef}>
               {onAddComment && onToggleTask && (
                 <AgendaComments
@@ -450,9 +491,9 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
           </div>
 
           {/* ── Footer actions ── */}
-          <div className="flex items-center justify-between px-5 pb-4 pt-1">
+          <div className="flex items-center justify-between px-5 py-3 border-t border-border/60 bg-muted/20">
             {myInvite?.status === 'accepted' && !isResponsibleCommercial && onLeaveVisit && (
-              <Button variant="ghost" size="sm" className="gap-1 text-destructive hover:text-destructive h-7 text-xs" onClick={() => { onLeaveVisit(visit.id); onOpenChange(false); }}>
+              <Button variant="ghost" size="sm" className="gap-1 text-destructive hover:text-destructive hover:bg-destructive/10 h-8 text-xs" onClick={() => { onLeaveVisit(visit.id); onOpenChange(false); }}>
                 <LogOut className="h-3.5 w-3.5" /> Sair
               </Button>
             )}
@@ -461,7 +502,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
               {canEditVisit && onDelete && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive h-7 text-xs">
+                    <Button variant="outline" size="sm" className="gap-1 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive h-8 text-xs">
                       <Trash2 className="h-3.5 w-3.5" /> Excluir
                     </Button>
                   </AlertDialogTrigger>
@@ -480,7 +521,7 @@ export default function AgendaDetailModal({ visit: initialVisit, open, onOpenCha
                 </AlertDialog>
               )}
               {visit.status === 'Concluída' && canWrite('agenda.create') && onScheduleFollowUp && (
-                <Button variant="outline" size="sm" className="gap-1.5 text-xs h-7" onClick={() => onScheduleFollowUp(visit.partnerId)}>
+                <Button size="sm" className="gap-1.5 text-xs h-8 shadow-sm" onClick={() => onScheduleFollowUp(visit.partnerId)}>
                   <CalendarPlus className="h-3.5 w-3.5" /> Agendar follow-up
                 </Button>
               )}
