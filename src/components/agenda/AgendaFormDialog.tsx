@@ -604,15 +604,21 @@ export default function AgendaFormDialog({
           {formStep === 2 && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Resumo da visita</Label>
+                <Label className="text-xs font-semibold text-foreground/80 flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                  Resumo do compromisso
+                </Label>
                 <Textarea
                   value={formData.summary}
                   onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                  placeholder="Resumo geral da visita..."
+                  placeholder="Resumo geral do compromisso..."
+                  className="min-h-[120px] resize-none"
                 />
+                <p className="text-[11px] text-muted-foreground">Você poderá editar o resumo a qualquer momento no detalhe do compromisso.</p>
               </div>
             </div>
           )}
+          </div>
 
           <DialogFooter className="flex gap-2">
             {formStep > 0 && (
