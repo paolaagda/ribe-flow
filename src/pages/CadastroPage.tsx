@@ -397,22 +397,22 @@ export default function CadastroPage() {
         <PageHeader title="Cadastro" description="Gerencie o credenciamento de parceiros com bancos.">
           <div className="flex items-center gap-2">
             {/* View toggle */}
-            <div className="flex items-center border border-border rounded-md overflow-hidden">
+            <div className="flex items-center bg-muted/40 rounded-md p-0.5">
               <Button
                 variant={viewMode === 'cards' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('cards')}
-                className="rounded-none h-8 px-2.5"
+                className="h-7 px-2.5 shadow-none"
               >
-                <LayoutGrid className="h-4 w-4" />
+                <LayoutGrid className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant={viewMode === 'table' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('table')}
-                className="rounded-none h-8 px-2.5"
+                className="h-7 px-2.5 shadow-none"
               >
-                <TableIcon className="h-4 w-4" />
+                <TableIcon className="h-3.5 w-3.5" />
               </Button>
             </div>
             <Button
@@ -445,13 +445,13 @@ export default function CadastroPage() {
         />
 
         {/* Search always visible */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative rounded-lg bg-muted/30 p-2">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por parceiro, observação, banco, código..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="pl-9 h-9"
+            className="pl-9 h-9 bg-background border-border/60"
           />
         </div>
 
@@ -611,16 +611,16 @@ export default function CadastroPage() {
 
         {/* Status / Tratando Com / Bancos - Tabs */}
         <Tabs value={kpiTab} onValueChange={setKpiTab} className="w-full">
-          <TabsList className="w-full justify-center">
-            <TabsTrigger value="status" className="gap-1.5">
+          <TabsList className="w-full justify-center bg-muted/40 p-1 h-auto">
+            <TabsTrigger value="status" className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <FileCheck className="h-3.5 w-3.5" /> Status
               <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(statusCounts).filter(k => statusCounts[k] > 0).length}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="handlers" className="gap-1.5">
+            <TabsTrigger value="handlers" className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <Users className="h-3.5 w-3.5" /> Tratando Com
               <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(handlerCounts).filter(k => handlerCounts[k] > 0).length}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="banks" className="gap-1.5">
+            <TabsTrigger value="banks" className="gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <Building2 className="h-3.5 w-3.5" /> Bancos
               <Badge variant="secondary" className="text-[10px] ml-1 px-1.5 py-0">{Object.keys(bankCounts).filter(k => bankCounts[k] > 0).length}</Badge>
             </TabsTrigger>
@@ -801,23 +801,23 @@ export default function CadastroPage() {
             ))}
           </div>
         ) : (
-          <Card className="overflow-hidden border-border/50">
+          <Card className="overflow-hidden border-border/60 shadow-sm">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[220px]" onClick={() => toggleSort('partner')}>
+                  <TableRow className="hover:bg-transparent bg-muted/40 border-b border-border/60">
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[220px] text-xs font-semibold uppercase tracking-wider text-muted-foreground" onClick={() => toggleSort('partner')}>
                       <span className="flex items-center">Parceiro <SortIcon field="partner" /></span>
                     </TableHead>
-                    <TableHead className="cursor-pointer select-none whitespace-nowrap" onClick={() => toggleSort('status')}>
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap text-xs font-semibold uppercase tracking-wider text-muted-foreground" onClick={() => toggleSort('status')}>
                       <span className="flex items-center">Status <SortIcon field="status" /></span>
                     </TableHead>
-                    <TableHead className="whitespace-nowrap">Tratando com</TableHead>
-                    <TableHead className="min-w-[200px]">Observação</TableHead>
-                    <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[200px]" onClick={() => toggleSort('date')}>
+                    <TableHead className="whitespace-nowrap text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tratando com</TableHead>
+                    <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Observação</TableHead>
+                    <TableHead className="cursor-pointer select-none whitespace-nowrap min-w-[200px] text-xs font-semibold uppercase tracking-wider text-muted-foreground" onClick={() => toggleSort('date')}>
                       <span className="flex items-center">Atualização <SortIcon field="date" /></span>
                     </TableHead>
-                    <TableHead className="whitespace-nowrap text-center">Contrato</TableHead>
+                    <TableHead className="whitespace-nowrap text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contrato</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
