@@ -404,14 +404,17 @@ export default function CadastroDetalhePage() {
 
           {/* Right column */}
           <div className="space-y-ds-md">
-            {/* Análises e Insights */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-primary" /> Situação
+            {/* Situação */}
+            <Card className="border-border/60 shadow-sm overflow-hidden">
+              <CardHeader className="bg-muted/30 border-b border-border/60 py-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2.5">
+                  <span className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <TrendingUp className="h-3.5 w-3.5" />
+                  </span>
+                  Situação
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0 space-y-2">
+              <CardContent className="pt-4 space-y-2">
                 {opData && (
                   <>
                     <InsightRow
@@ -452,13 +455,16 @@ export default function CadastroDetalhePage() {
             </Card>
 
             {/* Agenda Vinculada */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-primary" /> Agenda Vinculada
+            <Card className="border-border/60 shadow-sm overflow-hidden">
+              <CardHeader className="bg-muted/30 border-b border-border/60 py-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2.5">
+                  <span className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <Calendar className="h-3.5 w-3.5" />
+                  </span>
+                  Agenda vinculada
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-4">
                 {linkedVisits.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-4">Nenhum compromisso vinculado.</p>
                 ) : (
@@ -468,13 +474,13 @@ export default function CadastroDetalhePage() {
                       return (
                         <div
                           key={v.id}
-                          className="flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-accent/50 cursor-pointer transition-colors"
+                          className="flex items-center gap-3 p-2.5 rounded-lg border border-border/60 hover:bg-muted/40 hover:border-border cursor-pointer transition-all"
                           onClick={() => navigate('/agenda')}
                         >
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium truncate">{vPartner?.name || 'Parceiro'}</p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <Badge variant="outline" className="text-[9px] px-1 py-0 capitalize">{v.type}</Badge>
+                            <p className="text-xs font-medium truncate text-foreground">{vPartner?.name || 'Parceiro'}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="outline" className="text-[9px] px-1.5 py-0 capitalize bg-muted/40 text-muted-foreground border-border/60 font-medium">{v.type}</Badge>
                               <span className="text-[10px] text-muted-foreground">
                                 {format(new Date(v.date), "dd/MM/yy", { locale: ptBR })}
                               </span>
@@ -491,13 +497,16 @@ export default function CadastroDetalhePage() {
 
             {/* Info do Parceiro */}
             {partner && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <Users className="h-4 w-4 text-primary" /> Parceiro
+              <Card className="border-border/60 shadow-sm overflow-hidden">
+                <CardHeader className="bg-muted/30 border-b border-border/60 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2.5">
+                    <span className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <Users className="h-3.5 w-3.5" />
+                    </span>
+                    Parceiro
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-0 space-y-2">
+                <CardContent className="pt-4 space-y-3">
                   <InfoItem label="Razão Social" value={partner.razaoSocial} />
                   <InfoItem label="CNPJ" value={partner.cnpj} />
                   <InfoItem label="Endereço" value={partner.address} />
@@ -505,10 +514,10 @@ export default function CadastroDetalhePage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full mt-2 text-xs"
+                    className="w-full mt-2 text-xs gap-1.5"
                     onClick={() => navigate('/parceiros')}
                   >
-                    Ver parceiro completo <ExternalLink className="h-3 w-3 ml-1" />
+                    Ver parceiro completo <ExternalLink className="h-3 w-3" />
                   </Button>
                 </CardContent>
               </Card>
