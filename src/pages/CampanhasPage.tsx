@@ -580,8 +580,9 @@ export default function CampanhasPage() {
                 </AccordionContent>
               </AccordionItem>
             ))}
-          </Accordion>
-        </div>
+            </Accordion>
+          </CardContent>
+        </Card>
       )}
 
       {/* 9. Campaign Comparison */}
