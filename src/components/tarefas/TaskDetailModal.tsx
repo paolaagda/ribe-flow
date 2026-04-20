@@ -150,15 +150,23 @@ export default function TaskDetailModal({
     || permissions.canCancel || permissions.canReopen || permissions.canTerminalEdit;
 
   // Determine accent tone (status drives lateral bar/tile)
-  const tone = cancelled
-    ? { bar: 'hsl(var(--destructive))', barSoft: 'hsl(var(--destructive) / 0.6)', tile: 'bg-destructive/10 text-destructive ring-destructive/20', label: 'text-destructive' }
+  const tone: Tone = cancelled
+    ? 'destructive'
     : completed
-    ? { bar: 'hsl(var(--success))', barSoft: 'hsl(var(--success) / 0.6)', tile: 'bg-success/10 text-success ring-success/20', label: 'text-success' }
+    ? 'success'
     : overdue
-    ? { bar: 'hsl(var(--destructive))', barSoft: 'hsl(var(--destructive) / 0.6)', tile: 'bg-destructive/10 text-destructive ring-destructive/20', label: 'text-destructive' }
+    ? 'destructive'
     : priority
-    ? { bar: 'hsl(var(--warning))', barSoft: 'hsl(var(--warning) / 0.6)', tile: 'bg-warning/10 text-warning ring-warning/20', label: 'text-warning' }
-    : { bar: 'hsl(var(--primary))', barSoft: 'hsl(var(--primary) / 0.6)', tile: 'bg-primary/10 text-primary ring-primary/20', label: 'text-primary' };
+    ? 'warning'
+    : 'primary';
+  const toneTextClass =
+    tone === 'destructive'
+      ? 'text-destructive'
+      : tone === 'success'
+        ? 'text-success'
+        : tone === 'warning'
+          ? 'text-warning'
+          : 'text-primary';
 
   const visitIsVisita = item.visit.type === 'visita';
   const VisitIcon = visitIsVisita ? Handshake : UserPlus;
