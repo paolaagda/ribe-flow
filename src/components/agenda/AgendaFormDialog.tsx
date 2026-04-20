@@ -212,39 +212,29 @@ export default function AgendaFormDialog({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-lg max-h-[88vh] overflow-hidden p-0 gap-0 flex flex-col border-border/60">
-          {/* Refined header with type tile + lateral gradient bar */}
+          {/* Refined header with type tile + lateral gradient bar (shared shell) */}
           <div className="relative shrink-0 border-b border-border/60">
-            <div className={cn("absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b", typeBrand.colorToken === "info" ? "from-info to-info/60" : "from-warning to-warning/60")} />
-            <DialogHeader className="px-5 py-4 pl-6 space-y-0">
-              <div className="flex items-start gap-3">
-                <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center shrink-0", typeBrand.bgSoft, typeBrand.text)}>
-                  <TypeIcon className="h-5 w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={cn("text-[10px] font-semibold uppercase tracking-wider", typeBrand.text)}>
-                    {typeBrand.label}
-                  </p>
-                  <DialogTitle className="text-base font-semibold leading-tight mt-0.5">
-                    {editingVisit ? "Editar compromisso" : "Novo compromisso"}
-                  </DialogTitle>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Etapa {formStep + 1} de 3 · <span className="font-medium text-foreground/80">{stepLabels[formStep]}</span>
-                  </p>
-                </div>
-              </div>
-              {/* Step indicator */}
-              <div className="flex items-center gap-1.5 mt-4">
+            <ModalHeaderShell
+              icon={TypeIcon}
+              tone={typeBrand.colorToken as Tone}
+              eyebrow={typeBrand.label}
+              title={editingVisit ? "Editar compromisso" : "Novo compromisso"}
+              subtitle={`Etapa ${formStep + 1} de 3 · ${stepLabels[formStep]}`}
+            />
+            {/* Step indicator */}
+            <div className="px-6 pb-4 pl-7">
+              <div className="flex items-center gap-1.5">
                 {stepLabels.map((_, i) => (
                   <div
                     key={i}
                     className={cn(
                       "h-1 flex-1 rounded-full transition-all",
-                      i < formStep ? typeBrand.bg : i === formStep ? typeBrand.bg : "bg-muted"
+                      i <= formStep ? typeBrand.bg : "bg-muted",
                     )}
                   />
                 ))}
               </div>
-            </DialogHeader>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto px-5 py-5">
@@ -299,15 +289,11 @@ export default function AgendaFormDialog({
               </div>
 
               {formData.type === "prospecção" && (
-                <div className="relative overflow-hidden rounded-lg border border-warning/20 bg-warning/5">
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-warning to-warning/60" />
-                  <div className="flex items-start gap-2.5 px-3 py-2.5 pl-4">
-                    <AlertTriangle className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
-                    <p className="text-xs text-warning leading-relaxed">
-                      Prospecções são oportunidades futuras e não fazem parte da base de parceiros.
-                    </p>
-                  </div>
-                </div>
+                <ToneBlock
+                  tone="warning"
+                  icon={AlertTriangle}
+                  description="Prospecções são oportunidades futuras e não fazem parte da base de parceiros."
+                />
               )}
 
               {formData.type === "visita" ? (
