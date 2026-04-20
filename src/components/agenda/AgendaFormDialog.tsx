@@ -586,31 +586,32 @@ export default function AgendaFormDialog({
           )}
 
           {formStep === 1 && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Bancos</Label>
+            <div className="space-y-5">
+              <SectionHeader icon={Landmark} label="Bancos" />
+              <div className="rounded-md border border-border/60 bg-muted/20 p-3">
                 <div className="grid grid-cols-2 gap-2">
                   {infoBankNames.map((b) => (
-                    <label key={b} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <label key={b} className="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-muted/50 transition-colors">
                       <Checkbox
                         checked={formData.banks.includes(b)}
                         onCheckedChange={() => setFormData({ ...formData, banks: toggleArray(formData.banks, b) })}
                       />
-                      {b}
+                      <span className="text-foreground/90">{b}</span>
                     </label>
                   ))}
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Produtos</Label>
+
+              <SectionHeader icon={Package} label="Produtos" />
+              <div className="rounded-md border border-border/60 bg-muted/20 p-3">
                 <div className="grid grid-cols-2 gap-2">
                   {getActiveItems("products").map((p) => (
-                    <label key={p} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <label key={p} className="flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 hover:bg-muted/50 transition-colors">
                       <Checkbox
                         checked={formData.products.includes(p)}
                         onCheckedChange={() => setFormData({ ...formData, products: toggleArray(formData.products, p) })}
                       />
-                      {p}
+                      <span className="text-foreground/90">{p}</span>
                     </label>
                   ))}
                 </div>
