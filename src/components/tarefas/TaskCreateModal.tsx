@@ -449,7 +449,7 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
           </section>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-2 px-5 py-3 border-t border-border/60 bg-muted/20">
+        <ModalFooterShell className="px-5 py-3">
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} className="text-xs">
             Cancelar
           </Button>
@@ -457,7 +457,7 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
             <ListChecks className="h-3.5 w-3.5" />
             Criar tarefa
           </Button>
-        </DialogFooter>
+        </ModalFooterShell>
       </DialogContent>
     </Dialog>
   );
