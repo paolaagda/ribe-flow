@@ -11,7 +11,6 @@ import StoresTab from '@/components/settings/StoresTab';
 import LogsTab from '@/components/settings/LogsTab';
 import ClassificationTab from '@/components/settings/ClassificationTab';
 import RulesPermissionsTab from '@/components/settings/RulesPermissionsTab';
-import PageTransition from '@/components/PageTransition';
 
 export default function ConfiguracoesPage() {
   const { canRead, canWrite } = usePermission();
