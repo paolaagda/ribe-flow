@@ -27,6 +27,13 @@ import { TaskPermissions } from '@/hooks/useTaskPermissions';
 import { getUserById, Partner, User } from '@/data/mock-data';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import {
+  IconTile,
+  ToneBar,
+  ToneBlock,
+  SectionHeader,
+  type Tone,
+} from '@/components/shared';
 
 // Helpers imported from @/lib/task-helpers:
 // isTaskCancelled, daysSinceDate, isTaskOverdue, getTaskStatusDisplay, getTaskDeadlineLabel, TASK_CANCELLED_PREFIX
@@ -143,15 +150,23 @@ export default function TaskDetailModal({
     || permissions.canCancel || permissions.canReopen || permissions.canTerminalEdit;
 
   // Determine accent tone (status drives lateral bar/tile)
-  const tone = cancelled
-    ? { bar: 'hsl(var(--destructive))', barSoft: 'hsl(var(--destructive) / 0.6)', tile: 'bg-destructive/10 text-destructive ring-destructive/20', label: 'text-destructive' }
+  const tone: Tone = cancelled
+    ? 'destructive'
     : completed
-    ? { bar: 'hsl(var(--success))', barSoft: 'hsl(var(--success) / 0.6)', tile: 'bg-success/10 text-success ring-success/20', label: 'text-success' }
+    ? 'success'
     : overdue
-    ? { bar: 'hsl(var(--destructive))', barSoft: 'hsl(var(--destructive) / 0.6)', tile: 'bg-destructive/10 text-destructive ring-destructive/20', label: 'text-destructive' }
+    ? 'destructive'
     : priority
-    ? { bar: 'hsl(var(--warning))', barSoft: 'hsl(var(--warning) / 0.6)', tile: 'bg-warning/10 text-warning ring-warning/20', label: 'text-warning' }
-    : { bar: 'hsl(var(--primary))', barSoft: 'hsl(var(--primary) / 0.6)', tile: 'bg-primary/10 text-primary ring-primary/20', label: 'text-primary' };
+    ? 'warning'
+    : 'primary';
+  const toneTextClass =
+    tone === 'destructive'
+      ? 'text-destructive'
+      : tone === 'success'
+        ? 'text-success'
+        : tone === 'warning'
+          ? 'text-warning'
+          : 'text-primary';
 
   const visitIsVisita = item.visit.type === 'visita';
   const VisitIcon = visitIsVisita ? Handshake : UserPlus;
@@ -160,19 +175,14 @@ export default function TaskDetailModal({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-lg sm:max-w-xl max-h-[92vh] p-0 gap-0 overflow-hidden">
-          {/* ── Branded header with lateral bar ── */}
+          {/* ── Branded header with lateral bar (shared primitives) ── */}
           <div className="relative">
-            <div
-              className="absolute left-0 top-0 bottom-0 w-1.5"
-              style={{ background: `linear-gradient(180deg, ${tone.bar} 0%, ${tone.barSoft} 100%)` }}
-            />
+            <ToneBar tone={tone} />
             <DialogHeader className="px-5 py-4 pl-6 space-y-2.5">
               <div className="flex items-start gap-3 pr-6">
-                <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ring-1', tone.tile)}>
-                  <ListChecks className="h-5 w-5" />
-                </div>
+                <IconTile icon={ListChecks} tone={tone} size="md" />
                 <div className="flex-1 min-w-0 space-y-1">
-                  <p className={cn('text-[10px] font-semibold uppercase tracking-wider', tone.label)}>
+                  <p className={cn('text-[10px] font-semibold uppercase tracking-wider', toneTextClass)}>
                     Tarefa · {categoryLabel}
                   </p>
                   <DialogTitle className="text-base font-semibold leading-snug">
@@ -239,10 +249,7 @@ export default function TaskDetailModal({
               {item.task.taskReturnReason && !completed && !cancelled && (
                 <section className="space-y-2.5">
                   <SectionHeader icon={MessageSquare} label="Devolutiva" />
-                  <div className="relative overflow-hidden rounded-md border border-warning/30 bg-warning/10 pl-3 pr-3 py-2.5">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-warning" />
-                    <p className="text-xs text-foreground leading-relaxed">{item.task.taskReturnReason}</p>
-                  </div>
+                  <ToneBlock tone="warning" description={item.task.taskReturnReason} />
                 </section>
               )}
 
@@ -492,20 +499,6 @@ function ContextRow({ icon, label, value, valueClassName }: {
   );
 }
 
-/* ── Section header (matches AgendaFormDialog/TaskCreateModal pattern) ── */
-function SectionHeader({ icon: Icon, label }: { icon: React.ComponentType<{ className?: string }>; label: string }) {
-  return (
-    <div className="flex items-center gap-2 pb-1 flex-1">
-      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
-        <Icon className="h-3.5 w-3.5" />
-      </div>
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {label}
-      </span>
-      <div className="flex-1 h-px bg-border/60" />
-    </div>
-  );
-}
 
 /* ── Assignees inline editor ── */
 function AssigneesEditor({

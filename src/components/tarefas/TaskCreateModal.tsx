@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+  Dialog, DialogContent,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRegistrations } from '@/hooks/useRegistrations';
 import { mockUsers, Partner, Visit, VisitComment } from '@/data/mock-data';
 import { toast } from 'sonner';
+import { ModalHeaderShell, ModalFooterShell, SectionHeader, ToneBlock } from '@/components/shared';
 
 const TASK_TYPES = [
   'Pendência documental',
@@ -40,21 +41,6 @@ const TASK_TYPES = [
 interface TaskCreateModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-/* ── Section header (matches AgendaFormDialog pattern) ── */
-function SectionHeader({ icon: Icon, label }: { icon: React.ComponentType<{ className?: string }>; label: string }) {
-  return (
-    <div className="flex items-center gap-2 pb-1">
-      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
-        <Icon className="h-3.5 w-3.5" />
-      </div>
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {label}
-      </span>
-      <div className="flex-1 h-px bg-border/60" />
-    </div>
-  );
 }
 
 export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalProps) {
@@ -220,33 +206,14 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[92vh] p-0 gap-0 overflow-hidden">
-        {/* ── Branded header with lateral bar ── */}
-        <div className="relative">
-          <div
-            className="absolute left-0 top-0 bottom-0 w-1.5"
-            style={{
-              background: 'linear-gradient(180deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.6) 100%)',
-            }}
-          />
-          <DialogHeader className="px-5 py-4 pl-6 space-y-2.5">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
-                <ListChecks className="h-5 w-5" />
-              </div>
-              <div className="flex-1 min-w-0 space-y-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
-                  Nova tarefa
-                </p>
-                <DialogTitle className="text-base font-semibold leading-snug">
-                  Criar tarefa manual
-                </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground">
-                  Defina identificação, vínculo e responsabilidade.
-                </DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
-        </div>
+        {/* ── Branded header with lateral bar (shared shell) ── */}
+        <ModalHeaderShell
+          icon={ListChecks}
+          tone="primary"
+          eyebrow="Nova tarefa"
+          title="Criar tarefa manual"
+          subtitle="Defina identificação, vínculo e responsabilidade."
+        />
 
         <div className="overflow-y-auto max-h-[calc(92vh-180px)] px-5 py-4 space-y-5">
           {/* ── Identificação ── */}
@@ -334,13 +301,11 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
                 </SelectContent>
               </Select>
               {registrationId && registrationId !== 'none' && (
-                <div className="relative overflow-hidden rounded-md border border-warning/30 bg-warning/10 pl-3 pr-3 py-2">
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-warning" />
-                  <p className="text-[11px] text-foreground flex items-center gap-1.5">
-                    <AlertTriangle className="h-3 w-3 text-warning shrink-0" />
-                    Prazo automático de 5 dias úteis aplicado pela regra de Cadastro
-                  </p>
-                </div>
+                <ToneBlock
+                  tone="warning"
+                  icon={AlertTriangle}
+                  description="Prazo automático de 5 dias úteis aplicado pela regra de Cadastro"
+                />
               )}
             </div>
 
@@ -484,7 +449,7 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
           </section>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-2 px-5 py-3 border-t border-border/60 bg-muted/20">
+        <ModalFooterShell className="px-5 py-3">
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} className="text-xs">
             Cancelar
           </Button>
@@ -492,7 +457,7 @@ export default function TaskCreateModal({ open, onOpenChange }: TaskCreateModalP
             <ListChecks className="h-3.5 w-3.5" />
             Criar tarefa
           </Button>
-        </DialogFooter>
+        </ModalFooterShell>
       </DialogContent>
     </Dialog>
   );

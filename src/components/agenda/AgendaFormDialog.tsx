@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AnimatePresence, motion } from "framer-motion";
-import { DollarSign, Users, Building2, CalendarDays, Landmark, Package, FileText, Info, RefreshCw, XCircle, AlertTriangle } from "lucide-react";
+import { DollarSign, Users, CalendarDays, Landmark, Package, FileText, Info, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { getAgendaTypeBrand } from "@/lib/agenda-type-branding";
@@ -31,6 +31,13 @@ import { useVisibility } from "@/hooks/useVisibility";
 import { useLastVisitPotential } from "@/hooks/useLastVisitPotential";
 import { formatCurrencyInput, parseCurrencyToNumber, formatCentavos } from "@/lib/currency";
 import JustificationModal from "@/components/agenda/JustificationModal";
+import {
+  ModalHeaderShell,
+  ModalFooterShell,
+  SectionHeader,
+  ToneBlock,
+  type Tone,
+} from "@/components/shared";
 
 export interface AgendaFormData {
   partnerId: string;
@@ -205,39 +212,29 @@ export default function AgendaFormDialog({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-lg max-h-[88vh] overflow-hidden p-0 gap-0 flex flex-col border-border/60">
-          {/* Refined header with type tile + lateral gradient bar */}
+          {/* Refined header with type tile + lateral gradient bar (shared shell) */}
           <div className="relative shrink-0 border-b border-border/60">
-            <div className={cn("absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b", typeBrand.colorToken === "info" ? "from-info to-info/60" : "from-warning to-warning/60")} />
-            <DialogHeader className="px-5 py-4 pl-6 space-y-0">
-              <div className="flex items-start gap-3">
-                <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center shrink-0", typeBrand.bgSoft, typeBrand.text)}>
-                  <TypeIcon className="h-5 w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={cn("text-[10px] font-semibold uppercase tracking-wider", typeBrand.text)}>
-                    {typeBrand.label}
-                  </p>
-                  <DialogTitle className="text-base font-semibold leading-tight mt-0.5">
-                    {editingVisit ? "Editar compromisso" : "Novo compromisso"}
-                  </DialogTitle>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Etapa {formStep + 1} de 3 · <span className="font-medium text-foreground/80">{stepLabels[formStep]}</span>
-                  </p>
-                </div>
-              </div>
-              {/* Step indicator */}
-              <div className="flex items-center gap-1.5 mt-4">
+            <ModalHeaderShell
+              icon={TypeIcon}
+              tone={typeBrand.colorToken as Tone}
+              eyebrow={typeBrand.label}
+              title={editingVisit ? "Editar compromisso" : "Novo compromisso"}
+              subtitle={`Etapa ${formStep + 1} de 3 · ${stepLabels[formStep]}`}
+            />
+            {/* Step indicator */}
+            <div className="px-6 pb-4 pl-7">
+              <div className="flex items-center gap-1.5">
                 {stepLabels.map((_, i) => (
                   <div
                     key={i}
                     className={cn(
                       "h-1 flex-1 rounded-full transition-all",
-                      i < formStep ? typeBrand.bg : i === formStep ? typeBrand.bg : "bg-muted"
+                      i <= formStep ? typeBrand.bg : "bg-muted",
                     )}
                   />
                 ))}
               </div>
-            </DialogHeader>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto px-5 py-5">
@@ -292,15 +289,11 @@ export default function AgendaFormDialog({
               </div>
 
               {formData.type === "prospecção" && (
-                <div className="relative overflow-hidden rounded-lg border border-warning/20 bg-warning/5">
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-warning to-warning/60" />
-                  <div className="flex items-start gap-2.5 px-3 py-2.5 pl-4">
-                    <AlertTriangle className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
-                    <p className="text-xs text-warning leading-relaxed">
-                      Prospecções são oportunidades futuras e não fazem parte da base de parceiros.
-                    </p>
-                  </div>
-                </div>
+                <ToneBlock
+                  tone="warning"
+                  icon={AlertTriangle}
+                  description="Prospecções são oportunidades futuras e não fazem parte da base de parceiros."
+                />
               )}
 
               {formData.type === "visita" ? (
@@ -551,10 +544,13 @@ export default function AgendaFormDialog({
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-sm overflow-hidden"
                       >
-                        <p className="text-xs font-medium text-warning">Motivo do reagendamento</p>
-                        <p className="text-sm">{formData.rescheduleReason}</p>
+                        <ToneBlock
+                          tone="warning"
+                          icon={AlertTriangle}
+                          eyebrow="Motivo do reagendamento"
+                          description={formData.rescheduleReason}
+                        />
                       </motion.div>
                     )}
                     {formData.status === "Cancelada" && formData.cancelReason && (
@@ -562,10 +558,13 @@ export default function AgendaFormDialog({
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-sm overflow-hidden"
                       >
-                        <p className="text-xs font-medium text-destructive">Motivo do cancelamento</p>
-                        <p className="text-sm">{formData.cancelReason}</p>
+                        <ToneBlock
+                          tone="destructive"
+                          icon={AlertTriangle}
+                          eyebrow="Motivo do cancelamento"
+                          description={formData.cancelReason}
+                        />
                       </motion.div>
                     )}
                     {formData.status === "Inconclusa" && formData.inconclusiveReason && (
@@ -573,10 +572,13 @@ export default function AgendaFormDialog({
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-sm overflow-hidden"
                       >
-                        <p className="text-xs font-medium text-primary">Motivo da agenda inconclusa</p>
-                        <p className="text-sm">{formData.inconclusiveReason}</p>
+                        <ToneBlock
+                          tone="primary"
+                          icon={AlertTriangle}
+                          eyebrow="Motivo da agenda inconclusa"
+                          description={formData.inconclusiveReason}
+                        />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -638,7 +640,7 @@ export default function AgendaFormDialog({
           )}
           </div>
 
-          <DialogFooter className="shrink-0 flex gap-2 px-5 py-3 border-t border-border/60 bg-muted/20">
+          <ModalFooterShell className="shrink-0 px-5 py-3">
             {formStep > 0 && (
               <Button variant="outline" size="sm" onClick={() => setFormStep(formStep - 1)}>
                 Voltar
@@ -651,7 +653,7 @@ export default function AgendaFormDialog({
             ) : (
               <Button size="sm" onClick={handleSave}>{editingVisit ? "Salvar alterações" : "Criar compromisso"}</Button>
             )}
-          </DialogFooter>
+          </ModalFooterShell>
         </DialogContent>
       </Dialog>
 
@@ -697,41 +699,3 @@ export default function AgendaFormDialog({
   );
 }
 
-function SectionHeader({ icon: Icon, label }: { icon: any; label: string }) {
-  return (
-    <div className="flex items-center gap-2 pt-1">
-      <span className="h-6 w-6 rounded-md bg-muted/50 text-muted-foreground flex items-center justify-center">
-        <Icon className="h-3 w-3" />
-      </span>
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
-      <div className="flex-1 h-px bg-border/60" />
-    </div>
-  );
-}
-
-function ReasonBlock({ icon: Icon, tone, label, text }: { icon: any; tone: "warning" | "destructive" | "primary"; label: string; text: string }) {
-  const toneMap = {
-    warning: { bar: "from-warning to-warning/60", bg: "bg-warning/5", border: "border-warning/20", tile: "bg-warning/10 text-warning", textCls: "text-warning" },
-    destructive: { bar: "from-destructive to-destructive/60", bg: "bg-destructive/5", border: "border-destructive/20", tile: "bg-destructive/10 text-destructive", textCls: "text-destructive" },
-    primary: { bar: "from-primary to-primary/60", bg: "bg-primary/5", border: "border-primary/20", tile: "bg-primary/10 text-primary", textCls: "text-primary" },
-  }[tone];
-  return (
-    <motion.div
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: "auto" }}
-      exit={{ opacity: 0, height: 0 }}
-      className={cn("relative overflow-hidden rounded-lg border", toneMap.border, toneMap.bg)}
-    >
-      <div className={cn("absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b", toneMap.bar)} />
-      <div className="flex items-start gap-2.5 px-3 py-2.5 pl-4">
-        <span className={cn("h-7 w-7 rounded-md flex items-center justify-center shrink-0", toneMap.tile)}>
-          <Icon className="h-3.5 w-3.5" />
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className={cn("text-[10px] font-semibold uppercase tracking-wider", toneMap.textCls)}>{label}</p>
-          <p className="text-sm text-foreground mt-0.5">{text}</p>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
